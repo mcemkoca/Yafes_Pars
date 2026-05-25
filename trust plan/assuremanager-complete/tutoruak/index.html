@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AssureManager Tutorial - Complete Installatie- & Gebruikersgids</title>
+<style>
+  /* ===== RESET & BASE ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0f1215;
+    color: #d1d5db;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+  a { color: #6ab06a; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  ::selection { background: #4a804a; color: #fff; }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: #0f1215; }
+  ::-webkit-scrollbar-thumb { background: #4a804a; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #5a9a5a; }
+
+  /* ===== LAYOUT ===== */
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+  section { padding: 60px 0; }
+  h1, h2, h3, h4 { color: #f0f2f5; font-weight: 600; }
+  h2 { font-size: 2rem; margin-bottom: 12px; position: relative; display: inline-block; }
+  h2::after {
+    content: '';
+    position: absolute; bottom: -6px; left: 0;
+    width: 60px; height: 3px;
+    background: linear-gradient(90deg, #4a804a, #6ab06a);
+    border-radius: 2px;
+  }
+  h3 { font-size: 1.3rem; margin: 24px 0 12px; color: #e5e7eb; }
+  p { margin-bottom: 12px; }
+
+  /* ===== NAVBAR ===== */
+  .navbar {
+    position: fixed; top: 0; left: 0; right: 0;
+    background: rgba(15,18,21,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid #2a3038;
+    z-index: 1000;
+    padding: 14px 0;
+  }
+  .navbar .container { display: flex; justify-content: space-between; align-items: center; }
+  .navbar-brand {
+    font-size: 1.25rem; font-weight: 700;
+    color: #fff;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .navbar-brand .logo-icon {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, #4a804a, #6ab06a);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+  }
+  .navbar-links { display: flex; gap: 28px; list-style: none; }
+  .navbar-links a {
+    color: #9ca3af; font-size: 0.875rem; font-weight: 500;
+    transition: color 0.2s;
+  }
+  .navbar-links a:hover { color: #6ab06a; text-decoration: none; }
+  .navbar-toggle { display: none; background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; }
+
+  /* ===== HERO ===== */
+  .hero {
+    padding: 140px 0 80px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 600px 400px at 20% 50%, rgba(74,128,74,0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 500px 300px at 80% 20%, rgba(74,128,74,0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(74,128,74,0.15);
+    border: 1px solid rgba(74,128,74,0.3);
+    color: #6ab06a;
+    padding: 8px 18px;
+    border-radius: 50px;
+    font-size: 0.85rem; font-weight: 500;
+    margin-bottom: 24px;
+  }
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #fff 0%, #b8c4b8 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-subtitle {
+    font-size: 1.15rem; color: #9ca3af;
+    max-width: 640px; margin: 0 auto 36px;
+  }
+  .hero-line {
+    width: 80px; height: 4px;
+    background: linear-gradient(90deg, #4a804a, #6ab06a);
+    border-radius: 2px; margin: 0 auto 36px;
+  }
+  .hero-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 28px;
+    border-radius: 8px;
+    font-weight: 600; font-size: 0.95rem;
+    transition: all 0.25s ease;
+    cursor: pointer; border: none;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #4a804a, #5a9a5a);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(74,128,74,0.3);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(74,128,74,0.4); text-decoration: none; }
+  .btn-secondary {
+    background: #1a1f24; color: #d1d5db;
+    border: 1px solid #2a3038;
+  }
+  .btn-secondary:hover { border-color: #4a804a; color: #6ab06a; text-decoration: none; }
+
+  /* ===== OVERVIEW CARDS ===== */
+  .overview { padding: 40px 0 60px; }
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+  }
+  .card {
+    background: #1a1f24;
+    border: 1px solid #2a3038;
+    border-radius: 12px;
+    padding: 28px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #4a804a, #6ab06a);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    border-color: #4a804a;
+    box-shadow: 0 8px 32px rgba(74,128,74,0.12);
+  }
+  .card:hover::before { opacity: 1; }
+  .card-icon {
+    width: 48px; height: 48px;
+    background: rgba(74,128,74,0.12);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; margin-bottom: 16px;
+  }
+  .card h3 { margin: 0 0 8px; font-size: 1.1rem; }
+  .card p { color: #9ca3af; font-size: 0.9rem; margin: 0; }
+  .card .stat { color: #6ab06a; font-weight: 700; font-size: 1.6rem; margin-bottom: 4px; }
+
+  /* ===== STEPS ===== */
+  .step-section { border-top: 1px solid #1e2329; }
+  .step-header {
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 28px;
+  }
+  .step-number {
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, #4a804a, #5a9a5a);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 4px 16px rgba(74,128,74,0.3);
+  }
+  .step-title h2 { margin: 0; }
+  .step-title h2::after { display: none; }
+  .step-title .step-subtitle { color: #9ca3af; font-size: 0.9rem; }
+  .requirements-list {
+    background: rgba(74,128,74,0.08);
+    border: 1px solid rgba(74,128,74,0.2);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 16px 0;
+    list-style: none;
+  }
+  .requirements-list li {
+    padding: 6px 0; padding-left: 24px;
+    position: relative; font-size: 0.9rem;
+  }
+  .requirements-list li::before {
+    content: '\2713';
+    position: absolute; left: 0;
+    color: #6ab06a; font-weight: 700;
+  }
+
+  /* ===== CODE BLOCKS ===== */
+  .code-block {
+    background: #111418;
+    border: 1px solid #1e2329;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 16px 0;
+  }
+  .code-header {
+    background: #181c22;
+    padding: 10px 18px;
+    display: flex; align-items: center; gap: 8px;
+    border-bottom: 1px solid #1e2329;
+  }
+  .code-dots { display: flex; gap: 6px; }
+  .code-dots span { width: 10px; height: 10px; border-radius: 50%; }
+  .code-dots span:nth-child(1) { background: #ff5f56; }
+  .code-dots span:nth-child(2) { background: #ffbd2e; }
+  .code-dots span:nth-child(3) { background: #27c93f; }
+  .code-title { font-size: 0.8rem; color: #6b7280; margin-left: 8px; }
+  pre {
+    padding: 18px 22px;
+    overflow-x: auto;
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+    font-size: 0.85rem;
+    line-height: 1.7;
+  }
+  code { font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace; }
+  .code-keyword { color: #c678dd; }
+  .code-string { color: #98c379; }
+  .code-comment { color: #5c6370; font-style: italic; }
+  .code-function { color: #61afef; }
+  .code-number { color: #d19a66; }
+  .code-operator { color: #56b6c2; }
+
+  /* ===== SCREENSHOT PLACEHOLDERS ===== */
+  .screenshot-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+  }
+  .screenshot {
+    background: #161a20;
+    border: 1px solid #252b33;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+  .screenshot:hover { border-color: #4a804a; }
+  .screenshot-header {
+    background: #1e2329;
+    padding: 10px 14px;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.75rem; color: #6b7280;
+  }
+  .screenshot-body {
+    height: 180px;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(145deg, #161a20, #1a1f26);
+    position: relative;
+    overflow: hidden;
+  }
+  .screenshot-body::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 30% 40%, rgba(74,128,74,0.06) 0%, transparent 50%),
+      radial-gradient(circle at 70% 60%, rgba(74,128,74,0.04) 0%, transparent 50%);
+  }
+  .screenshot-placeholder {
+    color: #4a5560;
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+  }
+  .screenshot-placeholder .ss-icon { font-size: 2.5rem; margin-bottom: 8px; display: block; }
+  .screenshot-label {
+    padding: 12px 14px;
+    font-size: 0.8rem; color: #9ca3af;
+    border-top: 1px solid #252b33;
+  }
+
+  /* ===== OPTIONS ===== */
+  .options { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+  .option-card {
+    background: #161a20;
+    border: 1px solid #252b33;
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .option-card h4 { color: #6ab06a; margin-bottom: 10px; font-size: 1rem; }
+  .option-card p { font-size: 0.85rem; color: #9ca3af; }
+
+  /* ===== ARCHITECTURE DIAGRAM ===== */
+  .arch-diagram {
+    display: flex; align-items: center; justify-content: center;
+    gap: 0;
+    padding: 40px 20px;
+    flex-wrap: wrap;
+  }
+  .arch-box {
+    background: linear-gradient(145deg, #1a1f24, #1e242a);
+    border: 1px solid #2a3038;
+    border-radius: 14px;
+    padding: 24px 28px;
+    text-align: center;
+    min-width: 160px;
+    position: relative;
+    transition: all 0.3s;
+  }
+  .arch-box:hover { border-color: #4a804a; transform: scale(1.03); }
+  .arch-box .arch-icon { font-size: 2rem; margin-bottom: 10px; display: block; }
+  .arch-box .arch-label { font-weight: 600; color: #e5e7eb; font-size: 0.95rem; }
+  .arch-box .arch-sublabel { font-size: 0.75rem; color: #6b7280; margin-top: 4px; }
+  .arch-arrow {
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 16px;
+    color: #4a804a;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+  .arch-stack {
+    display: flex; flex-direction: column; gap: 4px;
+    align-items: center;
+    margin-top: 12px;
+  }
+  .arch-layer {
+    font-size: 0.7rem; color: #5a6560;
+    background: rgba(74,128,74,0.08);
+    padding: 2px 10px;
+    border-radius: 4px;
+  }
+
+  /* ===== DASHBOARD PAGES GRID ===== */
+  .pages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .page-card {
+    background: #161a20;
+    border: 1px solid #252b33;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.25s;
+    position: relative;
+  }
+  .page-card:hover {
+    border-color: #4a804a;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(74,128,74,0.1);
+  }
+  .page-card .page-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    display: block;
+  }
+  .page-card .page-name { font-weight: 600; color: #e5e7eb; font-size: 0.9rem; }
+  .page-card .page-desc { font-size: 0.8rem; color: #6b7280; margin-top: 4px; }
+
+  /* ===== TROUBLESHOOTING TABLE ===== */
+  .table-wrap { overflow-x: auto; margin: 20px 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  thead th {
+    background: #1a1f24;
+    padding: 14px 18px;
+    text-align: left;
+    font-weight: 600;
+    color: #e5e7eb;
+    border-bottom: 2px solid #4a804a;
+  }
+  tbody tr { border-bottom: 1px solid #1e2329; transition: background 0.2s; }
+  tbody tr:hover { background: rgba(74,128,74,0.06); }
+  tbody td { padding: 14px 18px; vertical-align: top; }
+  tbody td:first-child { font-weight: 500; color: #fca5a5; white-space: nowrap; }
+  tbody td code {
+    background: rgba(74,128,74,0.12);
+    color: #6ab06a;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.82rem;
+  }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    border-top: 1px solid #1e2329;
+    padding: 48px 0 32px;
+    text-align: center;
+  }
+  .footer-logo {
+    font-size: 1.3rem; font-weight: 700; color: #fff;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    margin-bottom: 16px;
+  }
+  .footer-links { display: flex; justify-content: center; gap: 28px; margin: 20px 0; flex-wrap: wrap; }
+  .footer-links a { color: #9ca3af; font-size: 0.85rem; }
+  .footer-links a:hover { color: #6ab06a; }
+  .footer-copy { color: #4a5560; font-size: 0.8rem; margin-top: 20px; }
+
+  /* ===== TOAST DEMO ===== */
+  .toast-demo { display: flex; gap: 12px; flex-wrap: wrap; margin: 16px 0; }
+  .toast { padding: 12px 18px; border-radius: 8px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; }
+  .toast-success { background: rgba(74,128,74,0.15); border: 1px solid rgba(74,128,74,0.3); color: #6ab06a; }
+  .toast-error { background: rgba(220,80,60,0.12); border: 1px solid rgba(220,80,60,0.25); color: #e07a6e; }
+  .toast-info { background: rgba(80,140,220,0.12); border: 1px solid rgba(80,140,220,0.25); color: #7aaeea; }
+
+  /* ===== KBD ===== */
+  kbd {
+    background: #2a3038; border: 1px solid #3a4048;
+    border-radius: 4px; padding: 2px 8px;
+    font-size: 0.82rem; font-family: monospace;
+    box-shadow: 0 2px 0 #1a1f24;
+  }
+
+  /* ===== TAGS ===== */
+  .tag {
+    display: inline-flex; align-items: center;
+    background: rgba(74,128,74,0.12);
+    color: #6ab06a;
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-size: 0.78rem; font-weight: 500;
+    margin: 2px;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    .navbar-links { display: none; }
+    .navbar-links.active { display: flex; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: rgba(15,18,21,0.98); padding: 16px 24px; border-bottom: 1px solid #2a3038; }
+    .navbar-toggle { display: block; }
+    .hero { padding: 120px 0 60px; }
+    .options { grid-template-columns: 1fr; }
+    .arch-diagram { flex-direction: column; gap: 8px; }
+    .arch-arrow { transform: rotate(90deg); padding: 8px 0; }
+    h2 { font-size: 1.5rem; }
+  }
+
+  /* ===== PRINT ===== */
+  @media print {
+    body { background: #fff; color: #000; }
+    .navbar, .hero-bg, .btn { display: none; }
+    .card, .code-block, table { break-inside: avoid; }
+    section { padding: 24px 0; }
+  }
+
+  /* ===== ANIMATIONS ===== */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in { animation: fadeInUp 0.6s ease forwards; opacity: 0; }
+  .fade-in-d1 { animation-delay: 0.1s; }
+  .fade-in-d2 { animation-delay: 0.2s; }
+  .fade-in-d3 { animation-delay: 0.3s; }
+  .fade-in-d4 { animation-delay: 0.4s; }
+
+  /* ===== SECTION SEPARATOR ===== */
+  .section-line {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #2a3038, transparent);
+    margin: 0 auto;
+    max-width: 600px;
+  }
+
+  /* ===== ALERT BOXES ===== */
+  .alert {
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    display: flex; align-items: flex-start; gap: 12px;
+    font-size: 0.9rem;
+  }
+  .alert-warning { background: rgba(234,179,8,0.08); border: 1px solid rgba(234,179,8,0.2); color: #eab308; }
+  .alert-info { background: rgba(80,140,220,0.08); border: 1px solid rgba(80,140,220,0.2); color: #7aaeea; }
+  .alert-icon { font-size: 1.2rem; flex-shrink: 0; }
+
+  /* ===== ENV TABLE ===== */
+  .env-table { margin: 12px 0; }
+  .env-table td { padding: 8px 16px; font-size: 0.85rem; border: none; }
+  .env-table td:first-child { color: #6ab06a; font-family: monospace; font-weight: 500; white-space: nowrap; }
+  .env-table tr:nth-child(odd) { background: rgba(255,255,255,0.02); }
+  .env-table tr { border-bottom: 1px solid #1a1e24; }
+</style>
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar">
+  <div class="container">
+    <div class="navbar-brand">
+      <span class="logo-icon">&#127793;</span>
+      <span>AssureManager</span>
+    </div>
+    <button class="navbar-toggle" onclick="document.querySelector('.navbar-links').classList.toggle('active')">&#9776;</button>
+    <ul class="navbar-links">
+      <li><a href="#overzicht">Overzicht</a></li>
+      <li><a href="#stap1">SQL Server</a></li>
+      <li><a href="#stap2">Database</a></li>
+      <li><a href="#stap3">API</a></li>
+      <li><a href="#stap4">Dashboard</a></li>
+      <li><a href="#stap5">VM</a></li>
+      <li><a href="#architectuur">Architectuur</a></li>
+      <li><a href="#troubleshooting">Problemen</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section class="hero" id="hero">
+  <div class="hero-bg"></div>
+  <div class="container">
+    <div class="hero-badge fade-in">
+      <span>&#127891;</span> Complete Tutorial v3.0
+    </div>
+    <h1 class="fade-in fade-in-d1">AssureManager Tutorial</h1>
+    <p class="hero-subtitle fade-in fade-in-d2">
+      Complete installatie- en gebruikersgids voor het Belgische verzekeringsbeheersysteem<br>
+      <em>Complete installation &amp; user guide for the Belgian Insurance Management System</em>
+    </p>
+    <div class="hero-line fade-in fade-in-d3"></div>
+    <div class="hero-buttons fade-in fade-in-d4">
+      <a href="#stap1" class="btn btn-primary">&#128295; Start Installatie</a>
+      <a href="#overzicht" class="btn btn-secondary">&#128196; Bekijk Overzicht</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== OVERVIEW CARDS ===== -->
+<section class="overview" id="overzicht">
+  <div class="container">
+    <div class="cards-grid">
+      <div class="card fade-in">
+        <div class="card-icon">&#128451;</div>
+        <div class="stat">90</div>
+        <h3>Database Tabellen</h3>
+        <p>90 tabellen, 18 stored procedures, 6 views, 13 triggers voor volledige verzekeringsdata</p>
+      </div>
+      <div class="card fade-in fade-in-d1">
+        <div class="card-icon">&#9889;</div>
+        <div class="stat">40+</div>
+        <h3>REST API Endpoints</h3>
+        <p>Node.js + Express backend met volledige CRUD operaties, health checks en rapportage</p>
+      </div>
+      <div class="card fade-in fade-in-d2">
+        <div class="card-icon">&#127919;</div>
+        <div class="stat">8</div>
+        <h3>Beheerpagina's</h3>
+        <p>React 19 dashboard met moderne UI: Personen, Instellingen, Objecten, Contracten, Schadeclaims, Rapporten, Beheer</p>
+      </div>
+      <div class="card fade-in fade-in-d3">
+        <div class="card-icon">&#128424;</div>
+        <div class="stat">VM</div>
+        <h3>Automatische Deploy</h3>
+        <p>Hyper-V/QEMU VHDX creatie met autounattend.xml configuratie voor productie</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-line"></div>
+
+<!-- ===== STEP 1: SQL SERVER ===== -->
+<section class="step-section" id="stap1">
+  <div class="container">
+    <div class="step-header">
+      <div class="step-number">1</div>
+      <div class="step-title">
+        <h2>SQL Server Installeren</h2>
+        <div class="step-subtitle">Install SQL Server 2022 Express + SQL Server Management Studio</div>
+      </div>
+    </div>
+
+    <h3>&#128221; Systeemvereisten / Requirements</h3>
+    <ul class="requirements-list">
+      <li>Windows Server 2012+ of Windows 10/11</li>
+      <li>SQL Server 2016+ (aanbevolen: SQL Server 2022 Express)</li>
+      <li>Minimaal 4 GB RAM, 10 GB vrije schijfruimte</li>
+      <li>Administratieve rechten op de server</li>
+    </ul>
+
+    <h3>&#11015; Download &amp; Installatie</h3>
+    <p>Download <strong>SQL Server 2022 Express</strong> en <strong>SQL Server Management Studio (SSMS)</strong> van de offici&euml;le Microsoft website:</p>
+    <div class="screenshot-row">
+      <div class="screenshot">
+        <div class="screenshot-header">
+          <span>&#128187;</span> SQL Server 2022 Express Setup
+        </div>
+        <div class="screenshot-body">
+          <div class="screenshot-placeholder">
+            <span class="ss-icon">&#128451;</span>
+            <strong>SQL Server Installation Center</strong><br>
+            Kies "New SQL Server stand-alone installation"
+          </div>
+        </div>
+        <div class="screenshot-label">Stap 1: Start het setup programma</div>
+      </div>
+      <div class="screenshot">
+        <div class="screenshot-header">
+          <span>&#128295;</span> Installation Type
+        </div>
+        <div class="screenshot-body">
+          <div class="screenshot-placeholder">
+            <span class="ss-icon">&#9989;</span>
+            <strong>Feature Selection</strong><br>
+            Selecteer: Database Engine Services + SQL Client Connectivity SDK
+          </div>
+        </div>
+        <div class="screenshot-label">Stap 2: Selecteer features</div>
+      </div>
+      <div class="screenshot">
+        <div class="screenshot-header">
+          <span>&#128272;</span> Instance Configuration
+        </div>
+        <div class="screenshot-body">
+          <div class="screenshot-placeholder">
+            <span class="ss-icon">&#128295;</span>
+            <strong>Instance: SQLEXPRESS</strong><br>
+            Authentication: Mixed Mode (SQL + Windows)
+          </div>
+        </div>
+        <div class="screenshot-label">Stap 3: Configureer instance &amp; authenticatie</div>
+      </div>
+    </div>
+
+    <h3>&#9881; Stille Installatie (Unattended)</h3>
+    <p>Gebruik een configuratiebestand voor geautomatiseerde installatie:</p>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span></span><span></span><span></span></div>
+        <span class="code-title">PowerShell - Unattended Install</span>
+      </div>
+      <pre><span class="code-comment"># Start unattended SQL Server 2022 Express installatie</span>
+SQLEXPR_x64_ENU.exe <span class="code-string">/ConfigurationFile=sql\ConfigurationFile.ini</span> <span class="code-operator">/</span>IACCEPTSQLSERVERLICENSETERMS
+
+<span class="code-comment"># Of met parameters direct:</span>
+SQLEXPR_x64_ENU.exe <span class="code-operator">/</span>ACTION<span class="code-operator">=</span>Install <span class="code-operator">/</span>FEATURES<span class="code-operator">=</span>SQLENGINE <span class="code-operator">/</span>INSTANCENAME<span class="code-operator">=</span>SQLEXPRESS <span class="code-operator">/</span>SQLSVCACCOUNT<span class="code-operator">=</span><span class="code-string">"NT AUTHORITY\NETWORK SERVICE"</span> <span class="code-operator">/</span>SECURITYMODE<span class="code-operator">=</span>SQL <span class="code-operator">/</span>SAPWD<span class="code-operator">=</span><span class="code-string">"YourStrongPassword123!"</span> <span class="code-operator">/</span>TCPENABLED<span class="code-operator">=</span>1</pre>
+    </div>
+
+    <div class="alert alert-info">
+      <span class="alert-icon">&#128161;</span>
+      <div><strong>Tip:</strong> Zorg dat <kbd>TCP/IP</kbd> ingeschakeld is in SQL Server Configuration Manager voor netwerktoegang. <em>Ensure TCP/IP is enabled in SQL Server Configuration Manager for network access.</em></div>
+    </div>
+  </div>
+</section>
+
+<div class="section-line"></div>
+
+<!-- ===== STEP 2: DATABASE DEPLOYEN ===== -->
+<section class="step-section" id="stap2">
+  <div class="container">
+    <div class="step-header">
+      <div class="step-number">2</div>
+      <div class="step-title">
+        <h2>Database Deployen</h2>
+        <div class="step-subtitle">Deploy the database using PowerShell or SSMS</div>
+      </div>
+    </div>
+
+    <p>Kies een van de twee methoden om de AssureManager database te deployen:</p>
+
+    <div class="options">
+      <div class="option-card">
+        <h4>&#9889; Optie A: PowerShell (Aanbevolen)</h4>
+        <p>Automatisch alle 8 scripts uitvoeren met een enkel commando. Snel en foutloos.</p>
+        <span class="tag">Automatisch</span> <span class="tag">Snel</span>
+      </div>
+      <div class="option-card">
+        <h4>&#128187; Optie B: SSMS (Handmatig)</h4>
+        <p>Voer 8 SQL scripts handmatig uit in de juiste volgorde via SQL Server Management Studio.</p>
+        <span class="tag">Handmatig</span> <span class="tag">Controle</span>
+      </div>
+    </div>
+
+    <h3>&#9889; Optie A: PowerShell Script</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span></span><span></span><span></span></div>
+        <span class="code-title">PowerShell - .\sql\deploy.ps1</span>
+      </div>
+      <pre><span class="code-comment"># Open PowerShell als Administrator en navigeer naar project root</span>
+<span class="code-keyword">cd</span> C:\AssureManager
+
+<span class="code-comment"># Voer het deployment script uit</span>
+<span class="code-operator">.</span>\sql\<span class="code-function">deploy.ps1</span>
+
+<span class="code-comment"># Het script voert automatisch uit:</span>
+<span class="code-comment"># 1. 01_create_database.sql      - Database aanmaken</span>
+<span class="code-comment"># 2. 02_schema.sql               - 90 tabellen aanmaken</span>
+<span class="code-comment"># 3. 03_constraints.sql          - 36 FK + 3 UK + 2 CK constraints</span>
+<span class="code-comment"># 4. 04_seeds.sql                - 2.000+ lookup records</span>
+<span class="code-comment"># 5. 05_triggers.sql             - 13 triggers (timestamps + business rules)</span>
+<span class="code-comment"># 6. 06_stored_procedures.sql    - 18 stored procedures</span>
+<span class="code-comment"># 7. 07_views.sql                - 6 reporting views</span>
+<span class="code-comment"># 8. 08_test_data.sql            - 300 realistische testrecords</span></pre>
+    </div>
+
+    <h3>&#128187; Optie B: SSMS Handmatig</h3>
+    <p>Voer de volgende scripts <strong>in exacte volgorde</strong> uit in SSMS:</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span></span><span></span><span></span></div>
+        <span class="code-title">SQL Script Volgorde (8 scripts)</span>
+      </div>
+      <pre><span class="code-comment">-- Script 01: Database aanmaken</span>
+<span class="code-operator">:</span><span class="code-function">r</span> .\01_create_database.sql
+<span class="code-keyword">GO</span>
+
+<span class="code-comment">-- Script 02: Schema - Alle 90 tabellen aanmaken</span>
+<span class="code-operator">:</span><span class="code-function">r</span> .\02_schema.sql
+<span class="code-keyword">GO</span>
+
+<span class="code-comment">-- Script 03: Constraints - 36 Foreign Keys + 3 Unique + 2 Check</span>
+<span class="code-operator">:</span><span class="code-function">r</span> .\03_constraints.sql
+<span class="code-keyword">GO</span>
+
+<span class="code-comment">-- Script 04: Seeds - 2.000+ lookup records (landen, talen, domeinen, ...)</span>
+<span class="code-operator">:</span><span class="code-function">r</span> .\04_seeds.sql
+<span class="code-keyword">GO</span>
+
+<span class="code-comment">-- Script 05: Triggers - 13 triggers voor timestamps en business rules</span>
+<span class="code-operator">:</span><span class="code-function">r</span> .\05_triggers.sql
+<span class="code-keyword">GO</span>
+
+<span class="code-comment">-- Script 06: Stored Procedures - 18 SPs voor complexe queries</span>
+<span class="code-operator">:</span><span class="code-function">r</span> .\06_stored_procedures.sql
+<span class="code-keyword">GO</span>
+
+<span class="code-comment">-- Script 07: Views - 6 reporting views</span>
+<span class="code-operator">:</span><span class="code-function">r</span> .\07_views.sql
+<span class="code-keyword">GO</span>
+
+<span class="code-comment">-- Script 08: Test Data - 300 realistische testrecords</span>
+<span class="code-operator">:</span><span class="code-function">r</span> .\08_test_data.sql
+<span class="code-keyword">GO</span></pre>
+    </div>
+
+    <div class="alert alert-warning">
+      <span class="alert-icon">&#9888;</span>
+      <div><strong>Belangrijk:</strong> Draai scripts ALTIJD in volgorde 01 &rarr; 08. Foreign Key errors ontstaan bij verkeerde volgorde! <em>Always run scripts in order 01 &rarr; 08 to avoid FK errors.</em></div>
+    </div>
+
+    <h3>&#9989; Verificatie</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span></span><span></span><span></span></div>
+        <span class="code-title">SQL - Verificatie Query</span>
+      </div>
+      <pre><span class="code-keyword">USE</span> AssureManagerDB;
+<span class="code-keyword">SELECT</span>
+  (<span class="code-keyword">SELECT COUNT</span>(<span class="code-operator">*</span>) <span class="code-keyword">FROM</span> sys.tables) <span class="code-keyword">AS</span> <span class="code-string">'Tabellen'</span>,
+  (<span class="code-keyword">SELECT COUNT</span>(<span class="code-operator">*</span>) <span class="code-keyword">FROM</span> sys.procedures) <span class="code-keyword">AS</span> <span class="code-string">'Stored Procedures'</span>,
+  (<span class="code-keyword">SELECT COUNT</span>(<span class="code-operator">*</span>) <span class="code-keyword">FROM</span> sys.views) <span class="code-keyword">AS</span> <span class="code-string">'Views'</span>,
+  (<span class="code-keyword">SELECT COUNT</span>(<span class="code-operator">*</span>) <span class="code-keyword">FROM</span> sys.triggers) <span class="code-keyword">AS</span> <span class="code-string">'Triggers'</span>;
+
+<span class="code-comment">-- Verwacht resultaat: 90 | 18 | 6 | 13</span></pre>
+    </div>
+  </div>
+</section>
+
+<div class="section-line"></div>
+<!-- ===== STEP 3: API STARTEN ===== -->
+<section class="step-section" id="stap3">
+  <div class="container">
+    <div class="step-header">
+      <div class="step-number">3</div>
+      <div class="step-title">
+        <h2>API Starten</h2>
+        <div class="step-subtitle">Start the Node.js/Express REST API server</div>
+      </div>
+    </div>
+
+    <h3>&#128640; Quick Start</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span></span><span></span><span></span></div>
+        <span class="code-title">Terminal</span>
+      </div>
+      <pre><span class="code-comment"># Navigeer naar de API directory</span>
+<span class="code-keyword">cd</span> api
+
+<span class="code-comment"># Installeer dependencies (eerste keer)</span>
+npm install
+
+<span class="code-comment"># Start de server (development mode met auto-reload)</span>
+npm start
+
+<span class="code-comment"># Output: Server listening on port 3001</span>
+<span class="code-comment">#         Connected to SQL Server (AssureManagerDB)</span>
+<span class="code-comment">#         API ready at http://localhost:3001/api/v1</span></pre>
+    </div>
+
+    <h3>&#128272; Environment Variables (.env)</h3>
+    <p>Maak een <code>.env</code> bestand aan in de <code>api/</code> folder:</p>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span></span><span></span><span></span></div>
+        <span class="code-title">api/.env</span>
+      </div>
+      <pre><span class="code-comment"># Server configuratie</span>
+<span class="code-function">PORT</span>=<span class="code-number">3001</span>
+<span class="code-function">NODE_ENV</span>=<span class="code-string">development</span>
+
+<span class="code-comment"># Database configuratie (SQL Server)</span>
+<span class="code-function">DB_HOST</span>=<span class="code-string">localhost</span>
+<span class="code-function">DB_PORT</span>=<span class="code-number">1433</span>
+<span class="code-function">DB_NAME</span>=<span class="code-string">AssureManagerDB</span>
+<span class="code-function">DB_USER</span>=<span class="code-string">sa</span>
+<span class="code-function">DB_PASSWORD</span>=<span class="code-string">YourStrongPassword123!</span>
+
+<span class="code-comment"># JWT Secret voor authenticatie</span>
+<span class="code-function">JWT_SECRET</span>=<span class="code-string">your-jwt-secret-key-change-in-production</span>
+
+<span class="code-comment"># CORS (voor frontend)</span>
+<span class="code-function">CORS_ORIGIN</span>=<span class="code-string">http://localhost:3000</span></pre>
+    </div>
+
+    <h3>&#127942; Health Check</h3>
+    <p>Test of de API correct draait:</p>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span></span><span></span><span></span></div>
+        <span class="code-title">Terminal - API Test</span>
+      </div>
+      <pre><span class="code-comment"># Test health endpoint</span>
+curl http://localhost:<span class="code-number">3001</span>/api/v1/health
+
+<span class="code-comment"># Verwacht antwoord:</span>
+{
+  <span class="code-string">"status"</span>: <span class="code-string">"healthy"</span>,
+  <span class="code-string">"database"</span>: <span class="code-string">"connected"</span>,
+  <span class="code-string">"version"</span>: <span class="code-string">"3.0.0"</span>,
+  <span class="code-string">"timestamp"</span>: <span class="code-string">"2026-01-15T10:30:00Z"</span>
+}
+
+<span class="code-comment"># Test alle API endpoints</span>
+curl http://localhost:<span class="code-number">3001</span>/api/v1/personen         <span class="code-comment"># Personen (natuurlijk + rechtspersonen)</span>
+curl http://localhost:<span class="code-number">3001</span>/api/v1/instellingen      <span class="code-comment"># Instellingen (verzekeringsmaatschappijen)</span>
+curl http://localhost:<span class="code-number">3001</span>/api/v1/objecten          <span class="code-comment"># Objecten (voertuigen, onroerend, ...)</span>
+curl http://localhost:<span class="code-number">3001</span>/api/v1/contracten         <span class="code-comment"># Contracten (verzekeringspolissen)</span>
+curl http://localhost:<span class="code-number">3001</span>/api/v1/schadeclaims        <span class="code-comment"># Schadeclaims (schademeldingen)</span>
+curl http://localhost:<span class="code-number">3001</span>/api/v1/dashboard/stats     <span class="code-comment"># Dashboard KPI statistieken</span>
+curl http://localhost:<span class="code-number">3001</span>/api/v1/dashboard/charts    <span class="code-comment"># Dashboard grafiekdata</span></pre>
+    </div>
+
+    <h3>&#128202; API Endpoints Overzicht</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Methode</th><th>Endpoint</th><th>Beschrijving</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>GET</code></td><td><code>/api/v1/health</code></td><td>Server + DB health check</td></tr>
+          <tr><td><code>GET</code></td><td><code>/api/v1/dashboard/stats</code></td><td>KPI statistieken voor dashboard</td></tr>
+          <tr><td><code>GET</code></td><td><code>/api/v1/dashboard/charts</code></td><td>Grafiekdata voor dashboard</td></tr>
+          <tr><td><code>GET</code></td><td><code>/api/v1/personen</code></td><td>Alle personen ophalen (natuurlijk + rechtspersonen)</td></tr>
+          <tr><td><code>GET</code></td><td><code>/api/v1/personen/:id</code></td><td>Persoon details met contactinfo</td></tr>
+          <tr><td><code>GET</code></td><td><code>/api/v1/instellingen</code></td><td>Alle instellingen (verzekeraars, banken)</td></tr>
+          <tr><td><code>GET</code></td><td><code>/api/v1/instellingen/:id</code></td><td>Instelling details</td></tr>
+          <tr><td><code>GET</code></td><td><code>/api/v1/objecten</code></td><td>Alle objecten (6 categorie&euml;n)</td></tr>
+          <tr><td><code>GET</code></td><td><code>/api/v1/objecten/:id</code></td><td>Object details</td></tr>
+          <tr><td><code>GET</code></td><td><code>/api/v1/contracten</code></td><td>Alle contracten met versies</td></tr>
+          <tr><td><code>GET</code></td><td><code>/api/v1/contracten/:id</code></td><td>Contract details met partijen</td></tr>
+          <tr><td><code>GET</code></td><td><code>/api/v1/schadeclaims</code></td><td>Alle schadeclaims met urgentie</td></tr>
+          <tr><td><code>GET</code></td><td><code>/api/v1/schadeclaims/:id</code></td><td>Schadeclaim details</td></tr>
+          <tr><td><code>GET</code></td><td><code>/api/v1/rapporten/commissions</code></td><td>Commissierapport</td></tr>
+          <tr><td><code>GET</code></td><td><code>/api/v1/rapporten/contracts</code></td><td>Contract analytics</td></tr>
+          <tr><td><code>GET</code></td><td><code>/api/v1/rapporten/claims</code></td><td>Schadeclaim analytics</td></tr>
+          <tr><td><code>GET</code></td><td><code>/api/v1/rapporten/clients</code></td><td>Klant demografie</td></tr>
+          <tr><td><code>GET</code></td><td><code>/api/v1/beheer/users</code></td><td>Gebruikerslijst</td></tr>
+          <tr><td><code>GET</code></td><td><code>/api/v1/beheer/auditlog</code></td><td>Audit log</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<div class="section-line"></div>
+
+<!-- ===== STEP 4: DASHBOARD GEBRUIKEN ===== -->
+<section class="step-section" id="stap4">
+  <div class="container">
+    <div class="step-header">
+      <div class="step-number">4</div>
+      <div class="step-title">
+        <h2>Dashboard Gebruiken</h2>
+        <div class="step-subtitle">Using the React 19 Dashboard - 8 management pages</div>
+      </div>
+    </div>
+
+    <h3>&#127919; Dashboard Pagina's</h3>
+    <p>Het AssureManager dashboard bevat 8 beheerpagina's voor alle verzekeringsentiteiten:</p>
+    <div class="pages-grid">
+      <div class="page-card">
+        <span class="page-icon">&#128200;</span>
+        <div class="page-name">Dashboard</div>
+        <div class="page-desc">KPI cards &amp; grafieken</div>
+      </div>
+      <div class="page-card">
+        <span class="page-icon">&#128100;</span>
+        <div class="page-name">Personen</div>
+        <div class="page-desc">Natuurlijke &amp; rechtspersonen</div>
+      </div>
+      <div class="page-card">
+        <span class="page-icon">&#127970;</span>
+        <div class="page-name">Instellingen</div>
+        <div class="page-desc">Verzekeraars, banken, tussenpersonen</div>
+      </div>
+      <div class="page-card">
+        <span class="page-icon">&#128663;</span>
+        <div class="page-name">Objecten</div>
+        <div class="page-desc">Voertuigen, onroerend, leningen</div>
+      </div>
+      <div class="page-card">
+        <span class="page-icon">&#128441;</span>
+        <div class="page-name">Contracten</div>
+        <div class="page-desc">Verzekeringspolissen met versies</div>
+      </div>
+      <div class="page-card">
+        <span class="page-icon">&#128165;</span>
+        <div class="page-name">Schadeclaims</div>
+        <div class="page-desc">Schademeldingen &amp; urgentie</div>
+      </div>
+      <div class="page-card">
+        <span class="page-icon">&#128202;</span>
+        <div class="page-name">Rapporten</div>
+        <div class="page-desc">Analytics &amp; rapportages</div>
+      </div>
+      <div class="page-card">
+        <span class="page-icon">&#9881;</span>
+        <div class="page-name">Beheer</div>
+        <div class="page-desc">Gebruikers, rollen, audit log</div>
+      </div>
+    </div>
+
+    <h3>&#128100; 1. Personen</h3>
+    <p>Beheer natuurlijke personen en rechtspersonen met volledige contactinformatie.</p>
+    <div class="screenshot-row">
+      <div class="screenshot">
+        <div class="screenshot-header"><span>&#128100;</span> Personen Overzicht</div>
+        <div class="screenshot-body">
+          <div class="screenshot-placeholder">
+            <span class="ss-icon">&#128100;</span>
+            <strong>Personenlijst</strong><br>
+            Data tabel met zoeken, filteren, paginering
+          </div>
+        </div>
+        <div class="screenshot-label">Personen overzicht met CRUD acties</div>
+      </div>
+      <div class="screenshot">
+        <div class="screenshot-header"><span>&#128203;</span> Persoon Detail Drawer</div>
+        <div class="screenshot-body">
+          <div class="screenshot-placeholder">
+            <span class="ss-icon">&#128203;</span>
+            <strong>Detail Drawer met Tabs</strong><br>
+            Overzicht | Contact | Adressen | Contracten
+          </div>
+        </div>
+        <div class="screenshot-label">Detail drawer met tabbladen</div>
+      </div>
+    </div>
+    <ul class="requirements-list">
+      <li><strong>Natuurlijke personen:</strong> Rijksregisternummer in Belgisch formaat (85.07.15-123.45)</li>
+      <li><strong>Rechtspersonen:</strong> KBO-nummer (BE 0475.123.456)</li>
+      <li><strong>Detail drawer:</strong> 4 tabbladen - Overzicht, Contact, Adressen, Contracten</li>
+      <li><strong>Filters:</strong> Zoeken op naam, type (natuurlijk/rechtspersoon), stad</li>
+    </ul>
+
+    <h3>&#127970; 2. Instellingen</h3>
+    <p>Beheer verzekeringsmaatschappijen, banken en tussenpersonen met KBO-nummers.</p>
+    <div class="screenshot-row">
+      <div class="screenshot">
+        <div class="screenshot-header"><span>&#127970;</span> Instellingen Overzicht</div>
+        <div class="screenshot-body">
+          <div class="screenshot-placeholder">
+            <span class="ss-icon">&#127970;</span>
+            <strong>Instellingenlijst</strong><br>
+            AG Insurance, AXA, KBC, ...
+          </div>
+        </div>
+        <div class="screenshot-label">Instellingen met type filtering</div>
+      </div>
+    </div>
+    <ul class="requirements-list">
+      <li><strong>Verzekeringsmaatschappijen:</strong> AG Insurance, AXA, KBC, ...</li>
+      <li><strong>Banken:</strong> KBC, BNP Paribas Fortis, ING, ...</li>
+      <li><strong>Tussenpersonen:</strong> Onafhankelijke verzekeringsmakelaars</li>
+      <li><strong>KBO-nummer:</strong> BE-formaat voor elke instelling</li>
+    </ul>
+
+    <h3>&#128663; 3. Objecten</h3>
+    <p>Beheer verzekerde objecten in 6 categorie&euml;n met Belgische identificatie.</p>
+    <div class="screenshot-row">
+      <div class="screenshot">
+        <div class="screenshot-header"><span>&#128663;</span> Objecten - 6 Categorie&euml;n</div>
+        <div class="screenshot-body">
+          <div class="screenshot-placeholder">
+            <span class="ss-icon">&#128663;</span>
+            <strong>6 Category Tabs</strong><br>
+            Voertuigen | Onroerend | Leningen | Zaken | Activiteiten | Personen/AO
+          </div>
+        </div>
+        <div class="screenshot-label">Objecten met 6 categorie tabs</div>
+      </div>
+    </div>
+    <ul class="requirements-list">
+      <li><strong>Voertuigen:</strong> Belgische nummerplaten (1-ABC-234), merk, model, chassisnummer</li>
+      <li><strong>Onroerend goed:</strong> Adres, kadasterreferentie, bouwjaar, waarde</li>
+      <li><strong>Leningen:</strong> Kredietbedrag, looptijd, rentevoet, restsaldo</li>
+      <li><strong>Zaken:</strong> Algemene goederen en inventaris</li>
+      <li><strong>Activiteiten:</strong> Beroepsactiviteiten en aansprakelijkheid</li>
+      <li><strong>Personen/AO:</strong> Arbeidsongeschiktheidsdekking per persoon</li>
+    </ul>
+
+    <h3>&#128441; 4. Contracten</h3>
+    <p>Beheer verzekeringscontracten (polissen) met domeintypes, versies en een wizard voor aanmaak.</p>
+    <div class="screenshot-row">
+      <div class="screenshot">
+        <div class="screenshot-header"><span>&#128441;</span> Contracten Overzicht</div>
+        <div class="screenshot-body">
+          <div class="screenshot-placeholder">
+            <span class="ss-icon">&#128441;</span>
+            <strong>Contractenlijst</strong><br>
+            Domein: Auto | Brand | Leven | Hospitalisatie | AO
+          </div>
+        </div>
+        <div class="screenshot-label">Contracten met domein filtering</div>
+      </div>
+      <div class="screenshot">
+        <div class="screenshot-header"><span>&#128302;</span> Wizard - Nieuw Contract</div>
+        <div class="screenshot-body">
+          <div class="screenshot-placeholder">
+            <span class="ss-icon">&#128302;</span>
+            <strong>Stap-voor-stap Wizard</strong><br>
+            Partijen selecteren &rarr; Objecten koppelen &rarr; Dekking configureren
+          </div>
+        </div>
+        <div class="screenshot-label">Contract wizard met stappen</div>
+      </div>
+    </div>
+    <ul class="requirements-list">
+      <li><strong>Domeintypes:</strong> Auto, Brand, Leven, Hospitalisatie, Arbeidsongeschiktheid (AO)</li>
+      <li><strong>Versies:</strong> Elke polis kan meerdere versies hebben (wijzigingen in de tijd)</li>
+      <li><strong>Partijen:</strong> Verzekeringnemer, verzekerde, begunstigde, tussenpersoon</li>
+      <li><strong>Wizard:</strong> Stap-voor-stap aanmaak met partijen, objecten en dekking</li>
+    </ul>
+
+    <h3>&#128165; 5. Schadeclaims</h3>
+    <p>Beheer schademeldingen met status tracking en urgentie-indicatoren.</p>
+    <div class="screenshot-row">
+      <div class="screenshot">
+        <div class="screenshot-header"><span>&#128165;</span> Schadeclaims</div>
+        <div class="screenshot-body">
+          <div class="screenshot-placeholder">
+            <span class="ss-icon">&#128165;</span>
+            <strong>Status Tabs</strong><br>
+            Openstaand | In Behandeling | Afgehandeld
+          </div>
+        </div>
+        <div class="screenshot-label">Schadeclaims met status filtering</div>
+      </div>
+    </div>
+    <ul class="requirements-list">
+      <li><strong>Status tabs:</strong> Openstaand, In Behandeling, Afgehandeld</li>
+      <li><strong>Urgentie-indicator:</strong> Rode rand bij claims ouder dan 45 dagen</li>
+      <li><strong>Partijen:</strong> Melder, benadeelde, tegenpartij</li>
+      <li><strong>Omstandigheden:</strong> Datum, locatie, oorzaak, getuigen</li>
+    </ul>
+
+    <h3>&#128202; 6. Rapporten</h3>
+    <p>6 rapport types met Recharts grafieken en commissie-analytics.</p>
+    <div class="screenshot-row">
+      <div class="screenshot">
+        <div class="screenshot-header"><span>&#128202;</span> Rapporten Dashboard</div>
+        <div class="screenshot-body">
+          <div class="screenshot-placeholder">
+            <span class="ss-icon">&#128202;</span>
+            <strong>6 Rapport Tabs</strong><br>
+            Recharts grafieken met interactieve filters
+          </div>
+        </div>
+        <div class="screenshot-label">Rapporten met Recharts visualisaties</div>
+      </div>
+    </div>
+    <ul class="requirements-list">
+      <li><strong>Commissierapport:</strong> Provisie-overzicht per tussenpersoon en periode</li>
+      <li><strong>Contract analytics:</strong> Aantal polissen, premies, verloop per domein</li>
+      <li><strong>Schadeclaim analytics:</strong> Kostenoverschrijdingen, frequentie per type</li>
+      <li><strong>Klant demografie:</strong> Leeftijdsverdeling, geografische spreiding</li>
+      <li><strong>Grafieken:</strong> Recharts lijn-, staaf- en cirkeldiagrammen</li>
+    </ul>
+
+    <h3>&#9881; 7. Beheer</h3>
+    <p>Systeembeheer met gebruikersbeheer, rollen, audit log en instellingen.</p>
+    <div class="screenshot-row">
+      <div class="screenshot">
+        <div class="screenshot-header"><span>&#9881;</span> Beheer - Gebruikers</div>
+        <div class="screenshot-body">
+          <div class="screenshot-placeholder">
+            <span class="ss-icon">&#9881;</span>
+            <strong>RBAC Permissie Matrix</strong><br>
+            Rollen x Rechten overzicht
+          </div>
+        </div>
+        <div class="screenshot-label">Beheer met RBAC permissiematrix</div>
+      </div>
+    </div>
+    <ul class="requirements-list">
+      <li><strong>Gebruikersbeheer:</strong> Aanmaken, wijzigen, deactiveren van gebruikers</li>
+      <li><strong>RBAC permissiematrix:</strong> Rollen gekruist met rechten per pagina</li>
+      <li><strong>Audit log:</strong> Volledig wijzigingslogboek van alle acties</li>
+      <li><strong>Instellingen:</strong> Systeemvoorkeuren en configuratie</li>
+    </ul>
+
+    <h3>&#128202; KPI Cards</h3>
+    <p>Bovenaan elke pagina zie je KPI (Key Performance Indicator) cards met realtime statistieken:</p>
+    <div class="screenshot-row">
+      <div class="screenshot">
+        <div class="screenshot-header">
+          <span>&#128202;</span> KPI Cards - Personen Pagina
+        </div>
+        <div class="screenshot-body">
+          <div class="screenshot-placeholder">
+            <span style="display:flex; gap:12px; justify-content:center;">
+              <span style="background:rgba(74,128,74,0.15); padding:12px 20px; border-radius:8px;">
+                <strong style="color:#6ab06a; font-size:1.4rem;">1,248</strong><br>
+                <span style="font-size:0.7rem; color:#9ca3af;">Totaal Personen</span>
+              </span>
+              <span style="background:rgba(80,140,220,0.12); padding:12px 20px; border-radius:8px;">
+                <strong style="color:#7aaeea; font-size:1.4rem;">89</strong><br>
+                <span style="font-size:0.7rem; color:#9ca3af;">Nieuw deze maand</span>
+              </span>
+              <span style="background:rgba(234,179,8,0.1); padding:12px 20px; border-radius:8px;">
+                <strong style="color:#eab308; font-size:1.4rem;">97.2%</strong><br>
+                <span style="font-size:0.7rem; color:#9ca3af;">Retentie</span>
+              </span>
+            </span>
+          </div>
+        </div>
+        <div class="screenshot-label">KPI cards met realtime statistieken</div>
+      </div>
+    </div>
+
+    <h3>&#9997; CRUD Operaties</h3>
+    <p>Elke pagina ondersteunt volledige CRUD (Create, Read, Update, Delete) operaties:</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Actie</th><th>Beschrijving</th><th>UI Element</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span style="color:#6ab06a;">&#10133; Create</span></td><td>Nieuw record toevoegen</td><td>"Nieuwe ..." knop bovenaan</td></tr>
+          <tr><td><span style="color:#7aaeea;">&#128065; Read</span></td><td>Record details bekijken</td><td>Oog icoon in actie-kolom</td></tr>
+          <tr><td><span style="color:#eab308;">&#9998; Update</span></td><td>Bestaand record wijzigen</td><td>Potlood icoon in actie-kolom</td></tr>
+          <tr><td><span style="color:#e07a6e;">&#128465; Delete</span></td><td>Record verwijderen</td><td>Prullenbak icoon + bevestiging</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>&#128172; Toast Notificaties</h3>
+    <p>Het dashboard toont toast notificaties bij elke actie:</p>
+    <div class="toast-demo">
+      <div class="toast toast-success">&#9989; Persoon succesvol aangemaakt!</div>
+      <div class="toast toast-error">&#10060; Fout bij opslaan: verplicht veld ontbreekt</div>
+      <div class="toast toast-info">&#128161; 3 nieuwe schademeldingen ontvangen</div>
+    </div>
+
+    <h3>&#128640; Frontend Starten</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span></span><span></span><span></span></div>
+        <span class="code-title">Terminal - Frontend</span>
+      </div>
+      <pre><span class="code-comment"># Open de React frontend in je browser</span>
+<span class="code-keyword">cd</span> frontend
+npm install
+npm start
+
+<span class="code-comment"># De app opent automatisch op http://localhost:3000</span>
+<span class="code-comment"># Of open frontend/index.html direct in je browser</span></pre>
+    </div>
+  </div>
+</section>
+
+<div class="section-line"></div>
+<!-- ===== STEP 5: VM DEPLOYMENT ===== -->
+<section class="step-section" id="stap5">
+  <div class="container">
+    <div class="step-header">
+      <div class="step-number">5</div>
+      <div class="step-title">
+        <h2>VM Deployment (Optioneel)</h2>
+        <div class="step-subtitle">Automated Hyper-V/QEMU VM deployment for production</div>
+      </div>
+    </div>
+
+    <p>Deze stap is optioneel. Gebruik het voor volledig geautomatiseerde VM deployment:</p>
+
+    <h3>&#128424; VM Aanmaken</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span></span><span></span><span></span></div>
+        <span class="code-title">PowerShell - Setup-VM.ps1</span>
+      </div>
+      <pre><span class="code-comment"># Voer het master VM setup script uit</span>
+<span class="code-operator">.</span>\Setup-VM.ps1
+
+<span class="code-comment"># Het script voert uit:</span>
+<span class="code-comment"># 1. Download Windows Server 2022 ISO</span>
+<span class="code-comment"># 2. Maak VHDX virtuele harde schijf (80GB)</span>
+<span class="code-comment"># 3. Genereer autounattend.xml (unattended install)</span>
+<span class="code-comment"># 4. Mount ISO + VHDX</span>
+<span class="code-comment"># 5. Kopieer AssureManager bestanden</span>
+<span class="code-comment"># 6. Start VM in Hyper-V / QEMU</span></pre>
+    </div>
+
+    <h3>&#128209; Autounattend.xml</h3>
+    <p>Het antwoordbestand configureert Windows automatisch zonder gebruikersinteractie:</p>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span></span><span></span><span></span></div>
+        <span class="code-title">autounattend.xml (fragment)</span>
+      </div>
+      <pre><span class="code-operator">&lt;</span><span class="code-function">settings</span> pass=<span class="code-string">"windowsPE"</span><span class="code-operator">&gt;</span>
+  <span class="code-operator">&lt;</span><span class="code-function">component</span> name=<span class="code-string">"Microsoft-Windows-Setup"</span><span class="code-operator">&gt;</span>
+    <span class="code-operator">&lt;</span><span class="code-function">UserData</span><span class="code-operator">&gt;</span>
+      <span class="code-operator">&lt;</span><span class="code-function">ProductKey</span><span class="code-operator">&gt;</span>
+        <span class="code-operator">&lt;</span><span class="code-function">Key</span><span class="code-operator">&gt;</span>D7643-K2T7V-XXXXX-XXXXX-XXXXX<span class="code-operator">&lt;/</span><span class="code-function">Key</span><span class="code-operator">&gt;</span>
+      <span class="code-operator">&lt;/</span><span class="code-function">ProductKey</span><span class="code-operator">&gt;</span>
+    <span class="code-operator">&lt;/</span><span class="code-function">UserData</span><span class="code-operator">&gt;</span>
+    <span class="code-operator">&lt;</span><span class="code-function">ImageInstall</span><span class="code-operator">&gt;</span>
+      <span class="code-operator">&lt;</span><span class="code-function">OSImage</span><span class="code-operator">&gt;</span>
+        <span class="code-operator">&lt;</span><span class="code-function">InstallFrom</span><span class="code-operator">&gt;</span>
+          <span class="code-operator">&lt;</span><span class="code-function">MetaData</span> wcm:action=<span class="code-string">"add"</span><span class="code-operator">&gt;</span>
+            <span class="code-operator">&lt;</span><span class="code-function">Key</span><span class="code-operator">&gt;</span>/IMAGE/NAME<span class="code-operator">&lt;/</span><span class="code-function">Key</span><span class="code-operator">&gt;</span>
+            <span class="code-operator">&lt;</span><span class="code-function">Value</span><span class="code-operator">&gt;</span>Windows Server 2022 Standard<span class="code-operator">&lt;/</span><span class="code-function">Value</span><span class="code-operator">&gt;</span>
+          <span class="code-operator">&lt;/</span><span class="code-function">MetaData</span><span class="code-operator">&gt;</span>
+        <span class="code-operator">&lt;/</span><span class="code-function">InstallFrom</span><span class="code-operator">&gt;</span>
+      <span class="code-operator">&lt;/</span><span class="code-function">OSImage</span><span class="code-operator">&gt;</span>
+    <span class="code-operator">&lt;/</span><span class="code-function">ImageInstall</span><span class="code-operator">&gt;</span>
+  <span class="code-operator">&lt;/</span><span class="code-function">component</span><span class="code-operator">&gt;</span>
+<span class="code-operator">&lt;/</span><span class="code-function">settings</span><span class="code-operator">&gt;</span></pre>
+    </div>
+
+    <div class="alert alert-info">
+      <span class="alert-icon">&#128161;</span>
+      <div><strong>Tip:</strong> Pas de <code>autounattend.xml</code> aan voor jouw omgeving (product key, admin wachtwoord, netwerkinstellingen). <em>Customize the autounattend.xml for your environment.</em></div>
+    </div>
+
+    <h3>&#128451; VHDX Structuur</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span></span><span></span><span></span></div>
+        <span class="code-title">VM VHDX Directory Structuur</span>
+      </div>
+      <pre>C:\AssureManager-VM\
+<span class="code-operator">|--</span> AssureManager.vhdx          <span class="code-comment"># Virtuele harde schijf (80GB)</span>
+<span class="code-operator">|--</span> autounattend.xml           <span class="code-comment"># Windows unattended config</span>
+<span class="code-operator">|--</span> Setup-VM.ps1               <span class="code-comment"># Master deployment script</span>
+<span class="code-operator">|--</span> app\
+<span class="code-operator">|   |--</span> api\                     <span class="code-comment"># Node.js API server</span>
+<span class="code-operator">|   |--</span> frontend\                <span class="code-comment"># React frontend build</span>
+<span class="code-operator">|   |--</span> sql\                     <span class="code-comment"># Database scripts (01-08)</span>
+<span class="code-operator">|--</span> iso\
+<span class="code-operator">|   |--</span> WindowsServer2022.iso  <span class="code-comment"># Windows Server ISO</span></pre>
+    </div>
+  </div>
+</section>
+
+<div class="section-line"></div>
+
+<!-- ===== ARCHITECTURE DIAGRAM ===== -->
+<section class="step-section" id="architectuur">
+  <div class="container">
+    <div class="step-header">
+      <div class="step-number">&#127919;</div>
+      <div class="step-title">
+        <h2>Architectuur Diagram</h2>
+        <div class="step-subtitle">System architecture overview</div>
+      </div>
+    </div>
+
+    <div class="arch-diagram">
+      <div class="arch-box">
+        <span class="arch-icon">&#128100;</span>
+        <div class="arch-label">Gebruiker</div>
+        <div class="arch-sublabel">User</div>
+      </div>
+      <div class="arch-arrow">&#10132;</div>
+      <div class="arch-box">
+        <span class="arch-icon">&#127919;</span>
+        <div class="arch-label">React Frontend</div>
+        <div class="arch-sublabel">localhost:3000</div>
+        <div class="arch-stack">
+          <span class="arch-layer">React 19</span>
+          <span class="arch-layer">TypeScript</span>
+          <span class="arch-layer">Tailwind CSS</span>
+          <span class="arch-layer">shadcn/ui</span>
+        </div>
+      </div>
+      <div class="arch-arrow">&#10132;</div>
+      <div class="arch-box">
+        <span class="arch-icon">&#9889;</span>
+        <div class="arch-label">Express API</div>
+        <div class="arch-sublabel">localhost:3001</div>
+        <div class="arch-stack">
+          <span class="arch-layer">Node.js 20 + Express</span>
+          <span class="arch-layer">mssql (tedious)</span>
+          <span class="arch-layer">JWT Auth</span>
+        </div>
+      </div>
+      <div class="arch-arrow">&#10132;</div>
+      <div class="arch-box">
+        <span class="arch-icon">&#128451;</span>
+        <div class="arch-label">SQL Server 2022</div>
+        <div class="arch-sublabel">localhost:1433</div>
+        <div class="arch-stack">
+          <span class="arch-layer">90 Tabellen</span>
+          <span class="arch-layer">18 SPs + 6 Views</span>
+          <span class="arch-layer">13 Triggers</span>
+        </div>
+      </div>
+    </div>
+
+    <h3>&#128161; Data Flow</h3>
+    <div class="options">
+      <div class="option-card">
+        <h4>1. Gebruiker opent Dashboard</h4>
+        <p>React 19 app wordt geladen in de browser. KPI cards laden automatisch via <code>/api/v1/dashboard/stats</code>.</p>
+      </div>
+      <div class="option-card">
+        <h4>2. API Verwerkt Request</h4>
+        <p>Express ontvangt HTTP request, voert SQL query uit via <code>mssql</code> package, retourneert JSON.</p>
+      </div>
+    </div>
+    <div class="options">
+      <div class="option-card">
+        <h4>3. SQL Server Retourneert Data</h4>
+        <p>Stored procedures of directe queries op 90+ tabellen. Triggers loggen wijzigingen automatisch.</p>
+      </div>
+      <div class="option-card">
+        <h4>4. UI Toont Resultaat</h4>
+        <p>React rendert data in tabellen, cards en grafieken. Toast toont status van elke actie.</p>
+      </div>
+    </div>
+
+    <h3>&#128451; Database Schema Overzicht</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span></span><span></span><span></span></div>
+        <span class="code-title">Belangrijkste Tabellen</span>
+      </div>
+      <pre><span class="code-keyword">Core Entiteiten:</span>
+  <span class="code-operator">--</span> Person              (natuurlijke &amp; rechtspersonen, RRN/KBO)
+  <span class="code-operator">--</span> Institution         (verzekeringsmaatschappijen, banken, tussenpersonen)
+  <span class="code-operator">--</span> Object              (voertuigen, onroerend, leningen, zaken, activiteiten, personen/AO)
+  <span class="code-operator">--</span> Contract            (verzekeringspolissen met versies, partijen, gekoppelde objecten)
+  <span class="code-operator">--</span> Claim               (schademeldingen met partijen, objecten, omstandigheden)
+
+<span class="code-keyword">Ondersteunende Tabellen:</span>
+  <span class="code-operator">--</span> Address             (adressen gekoppeld aan personen en instellingen)
+  <span class="code-operator">--</span> Phone               (telefoonnummers met type)
+  <span class="code-operator">--</span> Email               (e-mailadressen met type)
+  <span class="code-operator">--</span> BankAccount         (bankrekeningen met IBAN/BIC)
+  <span class="code-operator">--</span> ContractVersion     (versies van contracten in de tijd)
+  <span class="code-operator">--</span> ContractParty       (partijen gekoppeld aan contracten)
+  <span class="code-operator">--</span> ClaimParty          (partijen bij schadeclaims)
+  <span class="code-operator">--</span> AuditLog            (wijzigingslogboek via triggers)</pre>
+    </div>
+  </div>
+</section>
+
+<div class="section-line"></div>
+
+<!-- ===== TROUBLESHOOTING ===== -->
+<section class="step-section" id="troubleshooting">
+  <div class="container">
+    <div class="step-header">
+      <div class="step-number">&#128295;</div>
+      <div class="step-title">
+        <h2>Troubleshooting</h2>
+        <div class="step-subtitle">Veelvoorkomende problemen en oplossingen</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Probleem</th><th>Oplossing</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>sqlcmd not found</td>
+            <td>Installeer <strong>SQL Server Command Line Utilities</strong> van Microsoft. Voeg <code>C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\</code> toe aan PATH.</td>
+          </tr>
+          <tr>
+            <td>Connection failed</td>
+            <td>Controleer: 1) SQL Server service draait <code>Get-Service MSSQL$SQLEXPRESS</code>, 2) TCP/IP is ingeschakeld in SQL Server Configuration Manager, 3) Firewall poort 1433 is open.</td>
+          </tr>
+          <tr>
+            <td>FK error</td>
+            <td>Draai scripts in de correcte volgorde: <code>01_create_database.sql</code> t/m <code>08_test_data.sql</code>. Foreign keys vereisen dat referenced tabellen eerst bestaan.</td>
+          </tr>
+          <tr>
+            <td>Port 3001 in use</td>
+            <td>Wijzig <code>PORT=3001</code> naar een ander poortnummer in het <code>.env</code> bestand. Herstart de API server.</td>
+          </tr>
+          <tr>
+            <td>npm install faalt</td>
+            <td>Update Node.js naar versie 20+. Verwijder <code>node_modules</code> en <code>package-lock.json</code>, voer <code>npm install</code> opnieuw uit.</td>
+          </tr>
+          <tr>
+            <td>CORS error in browser</td>
+            <td>Controleer <code>CORS_ORIGIN</code> in <code>.env</code>. Zorg dat deze matcht met de frontend URL (meestal <code>http://localhost:3000</code>).</td>
+          </tr>
+          <tr>
+            <td>Database timeout</td>
+            <td>Verhoog de timeout in de DB connectie string. Controleer netwerkverbinding. Zorg dat SQL Server Browser service draait.</td>
+          </tr>
+          <tr>
+            <td>VM start niet op</td>
+            <td>Controleer of Hyper-V ingeschakeld is: <code>Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V</code>. Zorg voor voldoende RAM (min. 4GB).</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<div class="section-line"></div>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer" id="footer">
+  <div class="container">
+    <div class="footer-logo">
+      <span style="width:36px;height:36px;background:linear-gradient(135deg,#4a804a,#6ab06a);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;">&#127793;</span>
+      AssureManager v3.0
+    </div>
+    <p style="color:#6b7280;font-size:0.9rem;max-width:500px;margin:0 auto;">
+      Belgisch verzekeringsbeheersysteem &middot; Belgian Insurance Management System<br>
+      Gebruikt in productie door meerdere Belgische verzekeringsmakelaars
+    </p>
+    <div class="footer-links">
+      <a href="https://github.com/assuremanager/assuremanager" target="_blank">&#128187; GitHub Repo</a>
+      <a href="https://aka.ms/ssmsfullsetup" target="_blank">&#128451; SSMS Download</a>
+      <a href="https://www.microsoft.com/en-us/sql-server/sql-server-downloads" target="_blank">&#128295; SQL Server Express</a>
+    </div>
+    <p class="footer-copy">
+      &copy; 2026 AssureManager. Alle rechten voorbehouden.<br>
+      Gebouwd met &#10084; in Belgi&euml; &middot; Belgique &middot; Belgi&euml;n
+    </p>
+  </div>
+</footer>
+
+<script>
+// Smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function (e) {
+    e.preventDefault();
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      const navHeight = document.querySelector('.navbar').offsetHeight;
+      window.scrollTo({
+        top: target.offsetTop - navHeight - 20,
+        behavior: 'smooth'
+      });
+      // Close mobile menu
+      document.querySelector('.navbar-links').classList.remove('active');
+    }
+  });
+});
+
+// Highlight active nav link on scroll
+window.addEventListener('scroll', () => {
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.navbar-links a');
+  const navHeight = document.querySelector('.navbar').offsetHeight;
+  let current = '';
+  sections.forEach(section => {
+    const sectionTop = section.offsetTop - navHeight - 50;
+    if (scrollY >= sectionTop) current = section.getAttribute('id');
+  });
+  navLinks.forEach(link => {
+    link.style.color = '';
+    if (link.getAttribute('href') === '#' + current) link.style.color = '#6ab06a';
+  });
+});
+
+// Fade-in animation observer
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.fade-in').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(20px)';
+  el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+  observer.observe(el);
+});
+</script>
+
+</body>
+</html>
