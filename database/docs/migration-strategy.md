@@ -57,3 +57,6 @@ tracked with name, checksum, execution time, user, status, and error message.
 - `012__add_constraints.sql` adds cross-domain constraints that depend on
   multiple prior domains.
 - `011__validate_constraints_exist.sql` validates cross-domain constraints.
+- `013__add_indexes.sql` creates missing FK-supporting indexes from SQL Server
+  catalog metadata and adds dashboard/reporting indexes.
+- `012__validate_indexes.sql` validates FK index coverage and reporting indexes.

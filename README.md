@@ -100,3 +100,5 @@ The audit migration creates centralized audit tables and minimal root-entity
 audit triggers.
 The constraint hardening migration adds cross-domain constraints that depend on
 previously created policy, risk, and core tables.
+The index hardening migration adds FK-supporting indexes and selected dashboard
+indexes, with validation that detects missing FK index coverage.
