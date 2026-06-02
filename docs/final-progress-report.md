@@ -68,16 +68,33 @@ Behavior:
 - Expanded `database/docs/data-dictionary.md` with column-level detail for the
   main operational tables and security classifications.
 
+## SSMS Workbench Status
+
+- Added SSMS-first operational workbench under `database/ssms/`.
+- Added `00__open_first_safety_check.sql` for DEV target and server safety
+  checks before any operational work.
+- Added `01__run_all_dev_migrations_sqlcmd.sql` as the SSMS SQLCMD-mode
+  migration launcher.
+- Added `02__operations_dashboard.sql` for tenant-aware Results Grid
+  dashboards across customers, institutions, risks, policies, claims,
+  documents, tasks, coverage, and lookup health.
+- Added `03__create_renewal_tasks.sql` for controlled execution of
+  `tasking.SP_CreateRenewalTasks`.
+- Added `04__admin_security_audit_queries.sql` for RBAC, audit, and data
+  integrity checks.
+- Primary interface target is SSMS Query Editor and SQL Server engine behavior,
+  not a web site.
+
 ## CI Pipeline Status
 
 - Added `.github/workflows/sql-server-validation.yml`.
 - Added `.github/workflows/backend-build.yml`.
-- Added `.github/workflows/frontend-build.yml`.
+- Removed the frontend workflow because the requested target is SSMS-first.
 - CI has not run locally; it will run after push on GitHub.
 
 ## Backend/API Status
 
-- Added .NET 8 Clean Architecture foundation under `backend/`.
+- Added optional .NET 8 Clean Architecture foundation under `backend/`.
 - Added API, Application, Domain, Infrastructure, and Tests projects.
 - Added Swagger/OpenAPI setup.
 - Added JWT-ready authentication wiring.
@@ -86,20 +103,11 @@ Behavior:
   policies, claims, documents, tasks, coverage, and lookup health.
 - Local backend build: NOT RUN because the .NET SDK is not installed locally.
 
-## Frontend/Panel Status
+## Frontend/Web Status
 
-- Added Next.js TypeScript admin panel under `frontend/`.
-- Added Tailwind CSS, TanStack Query, lucide icons, typed API client foundation.
-- Added screens: Login, Dashboard, Customers, Institutions, Risk Objects,
-  Policies, Claims, Documents, Tasks, Coverage, Settings.
-- Frontend typecheck: PASSED.
-- Frontend lint: PASSED.
-- Frontend build: PASSED.
-- Frontend audit: PASSED, 0 vulnerabilities after `postcss` override.
-- Browser DOM check: PASSED for title, dashboard, coverage table, and console
-  errors.
-- Browser screenshot: NOT CAPTURED because the in-app screenshot command timed
-  out.
+- Removed the Next.js web admin panel after direction was clarified.
+- Removed `.github/workflows/frontend-build.yml`.
+- No web UI is part of the intended operator surface now.
 
 ## Remaining Risks
 
@@ -107,14 +115,15 @@ Behavior:
 - SQL Server CI must be observed after push to confirm container/runtime
   compatibility.
 - Backend build must be confirmed on a machine or CI runner with .NET 8 SDK.
-- Frontend currently uses local fallback rows when `NEXT_PUBLIC_API_BASE_URL` is
-  absent.
 
 ## Next Recommended Work
 
 1. Revoke/rotate any exposed GitHub token.
-2. Install `sqlcmd` or run the generated SSMS fallback script against a verified
-   DEV database.
-3. Set the required `YAFES_SQL_*` variables and rerun the guarded DB runner.
+2. Open `database/ssms/00__open_first_safety_check.sql` in SSMS and verify the
+   DEV database target.
+3. Run `database/ssms/01__run_all_dev_migrations_sqlcmd.sql` in SSMS SQLCMD
+   Mode after setting the database and backup variables.
 4. Review GitHub Actions results after push.
-5. Connect frontend to the validated backend API and replace fallback panel data.
+5. Use `database/ssms/02__operations_dashboard.sql`,
+   `03__create_renewal_tasks.sql`, and
+   `04__admin_security_audit_queries.sql` as the SSMS operator surface.
