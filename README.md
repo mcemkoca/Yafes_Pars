@@ -92,3 +92,5 @@ The coverage migration replaces legacy coverage naming with
 `coverage.Coverage`, domain mapping, and package tables.
 The claim migration creates tenant-aware claims linked to policies, coverages,
 people, and insurable objects.
+The document migration stores file metadata, versions, links, and storage
+references without storing binary file content in SQL Server.

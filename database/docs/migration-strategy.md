@@ -45,3 +45,6 @@ tracked with name, checksum, execution time, user, status, and error message.
 - `008__create_claim_domain.sql` creates tenant-aware claim, party, object,
   circumstance, status, role, and payment method tables.
 - `007__validate_claim_domain.sql` validates the claim migration.
+- `009__create_document_domain.sql` creates document metadata, link, version,
+  and type tables without storing file binaries in SQL Server.
+- `008__validate_document_domain.sql` validates the document migration.

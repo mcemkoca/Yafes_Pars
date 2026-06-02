@@ -58,3 +58,10 @@ domain.
 The claim domain uses `claim.Claim` as the tenant-aware root. Claims link to
 `policy.Contract`, optional `coverage.Coverage`, claim parties, claim objects,
 and circumstance types.
+
+## Document Domain
+
+Documents are represented as metadata records with storage provider and storage
+key fields. Binary file content is intentionally stored outside SQL Server.
+Documents can be versioned and linked to people, institutions, policies, claims,
+or risk objects.

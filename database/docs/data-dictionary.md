@@ -226,3 +226,24 @@ Maps claims to `risk.InsurableObject` records.
 ## claim.ClaimCircumstance
 
 Maps claims to circumstance type records.
+
+## document.Document
+
+Stores file metadata only. Includes tenant, owner entity type/id, document type,
+file metadata, storage provider/key, checksum, language, upload user/time, and
+soft delete state.
+
+## document.DocumentType
+
+Reference table for document categories such as ID cards, policy documents,
+claim photos, invoices, and signed contracts.
+
+## document.DocumentLink
+
+Allows one document to be linked to additional entities beyond its primary
+owner.
+
+## document.DocumentVersion
+
+Stores file metadata for each version of a document. No binary file content is
+stored in SQL Server by default.
