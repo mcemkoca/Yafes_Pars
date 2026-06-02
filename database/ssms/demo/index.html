@@ -299,7 +299,7 @@
 
     .workflow {
       display: grid;
-      grid-template-columns: repeat(5, minmax(95px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
       gap: 6px;
       min-width: 0;
     }
@@ -698,7 +698,7 @@
 <body>
   <div class="window">
     <div class="titlebar">
-      <strong>Microsoft SQL Server Management Studio - YafesPars_Dev - Operator Workbench</strong>
+      <strong>Microsoft SQL Server Management Studio - YafesPars_Dev - Corporate Operator Workbench</strong>
       <div class="title-controls" aria-hidden="true">
         <span class="title-button">_</span>
         <span class="title-button">[]</span>
@@ -826,11 +826,11 @@
             <h2>Bugunku demo akisi</h2>
             <div class="body">
               <ul class="checklist">
-                <li><span class="check">✓</span><span>Once DEV guvenlik kontrolu calisir.</span></li>
-                <li><span class="check">✓</span><span>Migration ve validation sonucu gridde izlenir.</span></li>
-                <li><span class="check">✓</span><span>Operasyon paneli tenant bazinda okunur.</span></li>
-                <li><span class="check">✓</span><span>Renewal task adimi dry-run ile denenir.</span></li>
-                <li><span class="check">✓</span><span>Admin, RBAC ve audit kontrol listesi kapanir.</span></li>
+                <li><span class="check">✓</span><span>Home dashboard kisa yollar ve saglik sinyalleri verir.</span></li>
+                <li><span class="check">✓</span><span>Query library kayit bulma ve ID kopyalama icin kullanilir.</span></li>
+                <li><span class="check">✓</span><span>Data bridge create islemlerini preview-first yapar.</span></li>
+                <li><span class="check">✓</span><span>Edit guardrail rollback default ile calisir.</span></li>
+                <li><span class="check">✓</span><span>Report pack SSMS gridlerini grafik/export verisine cevirir.</span></li>
               </ul>
             </div>
           </div>
@@ -871,246 +871,234 @@
   <script>
     const scenarios = [
       {
-        file: "00__open_first_safety_check.sql",
-        title: "Guvenlik",
-        subtitle: "DEV hedefini dogrula",
-        help: "Operator once server ve database adinin DEV oldugunu dogrular. Prod, live veya prd gecerse script hata verir.",
-        code: `/* Yafes Pars SSMS Workbench - Open First */
-:ON ERROR EXIT
-:setvar YAFES_SQL_DATABASE "YafesPars_Dev"
-
-USE [master];
-GO
-
-DECLARE @TargetDatabase SYSNAME = N'$(YAFES_SQL_DATABASE)';
-
-IF @TargetDatabase NOT LIKE N'%DEV%'
-    THROW 52000, 'Target database name must contain DEV.', 1;
-
-SELECT
-    @@SERVERNAME AS server_name,
-    @TargetDatabase AS target_database,
-    DB_ID(@TargetDatabase) AS target_database_id,
-    SERVERPROPERTY('Edition') AS sql_server_edition;`,
-        metrics: [
-          ["Server", "MIRO-HMM\\SQLEXPRESS"],
-          ["Database", "YafesPars_Dev"],
-          ["Safety", "DEV OK"],
-          ["Edition", "Developer"]
-        ],
-        tables: [
-          {
-            title: "01 - Engine context",
-            columns: ["server_name", "database_name", "machine_name", "safety_status", "checked_at_utc"],
-            rows: [
-              ["MIRO-HMM\\SQLEXPRESS", "YafesPars_Dev", "MIRO-HMM", "DEV SAFE", "2026-06-02 21:52:18"]
-            ]
-          }
-        ],
-        messages: [
-          "Command(s) completed successfully.",
-          "Target DEV database exists.",
-          "Production-like server name check passed."
-        ]
-      },
-      {
-        file: "01__run_all_dev_migrations_sqlcmd.sql",
-        title: "Migration",
-        subtitle: "Schema + validation",
-        help: "Bu adim all-in-one SSMS scriptini calistirir. Backup path girilmeden gercek migration baslatilmaz.",
-        code: `/* Yafes Pars SSMS Workbench - Run DEV Migrations */
-:ON ERROR EXIT
-
--- Query > SQLCMD Mode acik olmali
--- Backup path: SQL Server servis hesabi tarafindan yazilabilir olmali
-
-:r ..\\execution-logs\\20260602_124216\\ssms-dev-migrations.sql`,
-        metrics: [
-          ["Migrations", "19"],
-          ["Validations", "17"],
-          ["Backup", "Required"],
-          ["Status", "Ready"]
-        ],
-        tables: [
-          {
-            title: "03 - Migration status",
-            columns: ["migration_name", "execution_status", "executed_at_utc", "executed_by"],
-            rows: [
-              ["000__create_database.sql", "SUCCESS", "2026-06-02 21:53:02", "MIRO-HMM\\spqr_"],
-              ["007__create_coverage_domain.sql", "SUCCESS", "2026-06-02 21:53:06", "MIRO-HMM\\spqr_"],
-              ["015__add_views.sql", "SUCCESS", "2026-06-02 21:53:13", "MIRO-HMM\\spqr_"],
-              ["018__seed_demo_data.sql", "SUCCESS", "2026-06-02 21:53:19", "MIRO-HMM\\spqr_"]
-            ]
-          },
-          {
-            title: "Validation summary",
-            columns: ["area", "checks", "failed", "status"],
-            rows: [
-              ["person / institution", "28", "0", "PASS"],
-              ["policy / claim / tasking", "41", "0", "PASS"],
-              ["coverage / lookup", "36", "0", "PASS"]
-            ]
-          }
-        ],
-        messages: [
-          "All migrations completed in transaction-safe order.",
-          "All validation scripts returned PASS.",
-          "Review GitHub Actions after push for container parity."
-        ]
-      },
-      {
-        file: "02__operations_dashboard.sql",
-        title: "Dashboard",
-        subtitle: "Is takip ekrani",
-        help: "Operasyon ekibi bu sekmede musteri, kurum, risk, police, hasar, dokuman ve task durumunu Results Grid uzerinden okur.",
-        code: `/* Yafes Pars SSMS Workbench - Operations Dashboard */
+        file: "05__operator_dashboard_home.sql",
+        title: "Home",
+        subtitle: "Kisayol merkezi",
+        help: "Operator dashboard SSMS icinde ana kontrol panelidir: kisayollar, saglik sinyalleri, aktif tenant ve onerilen sonraki adimlari gosterir.",
+        code: `/* Yafes Pars SSMS Workbench - Operator Dashboard Home */
 :ON ERROR EXIT
 :setvar YAFES_SQL_DATABASE "YafesPars_Dev"
 :setvar TENANT_CODE "DEMO-BE-BROKER"
+
+USE [$(YAFES_SQL_DATABASE)];
+GO
+
+PRINT '01 - Operator shortcuts';
+SELECT shortcut_order, shortcut_group, action_name, ssms_file, safety_mode, info_tip
+FROM operator_shortcuts
+ORDER BY shortcut_order;`,
+        metrics: [
+          ["Shortcuts", "10"],
+          ["Health", "4"],
+          ["Mode", "Read-only"],
+          ["Tenant", "DEMO-BE"]
+        ],
+        tables: [
+          {
+            title: "01 - Operator shortcuts",
+            columns: ["order", "group", "action", "ssms_file", "safety"],
+            rows: [
+              ["10", "Start", "Safety check", "00__open_first_safety_check.sql", "READ_ONLY"],
+              ["30", "Operate", "Operations dashboard", "02__operations_dashboard.sql", "READ_ONLY"],
+              ["70", "Edit", "Data entry bridge", "07__data_entry_bridge_templates.sql", "REVIEW_BEFORE_COMMIT"],
+              ["90", "Report", "Graph/report pack", "09__graph_report_pack.sql", "READ_ONLY"]
+            ]
+          },
+          {
+            title: "03 - Health signals",
+            columns: ["signal", "value", "status", "info_tip"],
+            rows: [
+              ["Latest migration", "018__seed_demo_data.sql", "OK", "Expected migration count is 19."],
+              ["Open tasks", "6", "OK", "Review if above team threshold."],
+              ["Renewal candidates", "3", "ACTION", "Run renewal dry-run first."]
+            ]
+          }
+        ],
+        messages: [
+          "Home dashboard loaded.",
+          "Shortcuts are SSMS files, not web links.",
+          "Keep this tab open as the operator cockpit."
+        ]
+      },
+      {
+        file: "06__query_library_shortcuts.sql",
+        title: "Query",
+        subtitle: "Kayit bul ve ID kopyala",
+        help: "Query library kullanicinin musteri, kurum, arac, police, claim ve task kayitlarini guvenli sekilde bulmasini saglar.",
+        code: `/* Query Library Shortcuts */
+:ON ERROR EXIT
+:setvar SEARCH_TEXT "POL-2026"
 :setvar TOP_ROWS "100"
 
-USE [$(YAFES_SQL_DATABASE)];
-GO
+EXEC person.SP_SearchPerson @tenant_id = @TenantId, @search_text = @SearchText;
+EXEC institution.SP_SearchInstitution @tenant_id = @TenantId, @search_text = @SearchText;
 
-SELECT TOP (@TopRows)
-    contract_number,
-    contract_status_code,
-    contract_domain_code,
-    start_date,
-    end_date,
-    company_name
+SELECT TOP (@TopRows) contract_id, contract_number, contract_status_code
 FROM policy.VW_PolicyDashboard
-ORDER BY contract_number DESC;`,
+WHERE tenant_id = @TenantId
+ORDER BY start_date DESC;`,
         metrics: [
-          ["Persons", "12"],
-          ["Policies", "8"],
-          ["Claims", "3"],
-          ["Open tasks", "6"]
+          ["Search sets", "7"],
+          ["Top rows", "100"],
+          ["Mode", "Read-only"],
+          ["Copy IDs", "Yes"]
         ],
         tables: [
           {
-            title: "04 - Operational KPIs",
-            columns: ["persons", "institutions", "risk_objects", "policies", "claims", "documents", "tasks", "active_coverages"],
-            rows: [["12", "5", "9", "8", "3", "11", "6", "18"]]
-          },
-          {
-            title: "08 - Policies",
-            columns: ["contract_number", "status", "domain", "start_date", "end_date", "company_name", "objects"],
+            title: "04 - Recent policies",
+            columns: ["contract_id", "contract_number", "status", "domain", "info_tip"],
             rows: [
-              ["POL-2026-0008", "ACTIVE", "AUTO", "2026-01-01", "2026-12-31", "Yafes Demo Insurance", "1"],
-              ["POL-2026-0007", "ACTIVE", "FIRE", "2026-02-15", "2027-02-14", "Yafes Demo Insurance", "1"],
-              ["POL-2026-0006", "IN_FORCE", "FAMILY", "2026-03-01", "2027-02-28", "Partner Mutual", "0"]
+              ["7E4...A11", "POL-2026-0008", "ACTIVE", "AUTO", "Copy contract_id into claim or version templates."],
+              ["73C...9F2", "POL-2026-0007", "ACTIVE", "FIRE", "Copy contract_id into party/object templates."]
             ]
           },
           {
-            title: "12 - Open tasks",
-            columns: ["title", "entity", "assigned_to_name", "priority", "status", "due_at_utc"],
+            title: "07 - Lookup helper",
+            columns: ["lookup_area", "lookup_code", "label", "info_tip"],
             rows: [
-              ["Policy renewal follow-up", "POLICY", "Demo Broker", "HIGH", "OPEN", "2026-06-28 09:00"],
-              ["Missing inspection document", "DOCUMENT", "Claims Desk", "NORMAL", "WAITING", "2026-06-10 14:00"]
+              ["policy.ContractStatus", "ACTIVE", "Active", "Use for policy status templates."],
+              ["tasking.TaskPriority", "HIGH", "High", "Use for task priority selection."],
+              ["claim.ClaimStatus", "OPEN", "Open", "Use for claim workflow status."]
             ]
           }
         ],
         messages: [
-          "Tenant context loaded: DEMO-BE-BROKER.",
-          "Dashboard result sets rendered.",
-          "No console or script errors in demo mode."
+          "Search executed in read-only mode.",
+          "Use Results Grid IDs in bridge templates.",
+          "No direct table edit required."
         ]
       },
       {
-        file: "03__create_renewal_tasks.sql",
-        title: "Renewal",
-        subtitle: "Task uretimi",
-        help: "Operator once Dry run ile aday policeleri gorur. Execute modunda ayni police icin duplicate open task olusmaz.",
-        code: `/* Yafes Pars SSMS Workbench - Renewal Task Runner */
-:ON ERROR EXIT
-:setvar YAFES_SQL_DATABASE "YafesPars_Dev"
-:setvar TENANT_CODE "DEMO-BE-BROKER"
-:setvar DAYS_AHEAD "60"
-:setvar DRY_RUN "1"
+        file: "07__data_entry_bridge_templates.sql",
+        title: "Bridge",
+        subtitle: "Preview-first veri giris",
+        help: "Data bridge create islemlerini stored procedure uzerinden yapar. EXECUTE_ACTION = 0 iken sadece onizleme verir.",
+        code: `/* Data Entry Bridge Templates */
+:setvar ACTION_NAME "CREATE_NATURAL_PERSON"
+:setvar EXECUTE_ACTION "0"
+:setvar PERSON_DOSSIER "DOS-NEW-001"
+:setvar PERSON_FIRST_NAME "New"
+:setvar PERSON_LAST_NAME "Customer"
 
-EXEC tasking.SP_CreateRenewalTasks
+EXEC person.SP_CreateNaturalPerson
     @tenant_id = @TenantId,
-    @days_ahead = @DaysAhead,
-    @assigned_to_user_id = NULL,
-    @created_by_user_id = NULL,
-    @dry_run = @DryRun;`,
+    @dossier = N'$(PERSON_DOSSIER)',
+    @first_name = N'$(PERSON_FIRST_NAME)',
+    @last_name = N'$(PERSON_LAST_NAME)',
+    @created_person_id = @CreatedPersonId OUTPUT;`,
         metrics: [
-          ["Days ahead", "60"],
-          ["Candidates", "4"],
-          ["Duplicates", "0"],
-          ["Mode", "Dry run"]
+          ["Actions", "5"],
+          ["Default", "Preview"],
+          ["Exec flag", "0"],
+          ["Output IDs", "Yes"]
         ],
         tables: [
           {
-            title: "Renewal candidates",
-            columns: ["contract_number", "domain", "end_date", "days_until_end", "recommended_task"],
+            title: "02 - CREATE_NATURAL_PERSON preview",
+            columns: ["tenant", "dossier", "first_name", "last_name", "birth_date", "info_tip"],
             rows: [
-              ["POL-2026-0008", "AUTO", "2026-06-28", "26", "Policy renewal follow-up"],
-              ["POL-2026-0005", "FIRE", "2026-07-12", "40", "Policy renewal follow-up"],
-              ["POL-2026-0003", "FAMILY", "2026-07-25", "53", "Policy renewal follow-up"]
+              ["DEMO-BE-BROKER", "DOS-NEW-001", "New", "Customer", "1985-01-01", "Confirm lookup values before execute."]
+            ]
+          },
+          {
+            title: "Supported actions",
+            columns: ["action_name", "purpose", "safety"],
+            rows: [
+              ["CREATE_NATURAL_PERSON", "Create customer", "EXECUTE_ACTION required"],
+              ["CREATE_POLICY", "Create policy", "Lookup preview first"],
+              ["CREATE_CLAIM", "Create claim", "Contract ID required"]
             ]
           }
         ],
         messages: [
-          "Dry run completed.",
-          "3 renewal candidates found.",
-          "No duplicate open renewal tasks detected."
+          "Preview mode only.",
+          "Set EXECUTE_ACTION = 1 after review.",
+          "Stored procedures protect tenant and key rules."
         ]
       },
       {
-        file: "04__admin_security_audit_queries.sql",
-        title: "Audit",
-        subtitle: "RBAC + kalite",
-        help: "Son adimda kullanici rolleri, permission setleri, audit trigger envanteri ve acik veri kalitesi sorunlari kontrol edilir.",
-        code: `/* Yafes Pars SSMS Workbench - Admin, Security, Audit */
-:ON ERROR EXIT
-:setvar YAFES_SQL_DATABASE "YafesPars_Dev"
-:setvar TENANT_CODE "DEMO-BE-BROKER"
+        file: "08__data_editing_guardrails.sql",
+        title: "Edit",
+        subtitle: "Rollback default",
+        help: "Edit guardrail guncellemeleri transaction icinde yapar, once/sonra gridlerini gosterir ve COMMIT_CHANGES = 0 iken rollback eder.",
+        code: `/* Data Editing Guardrails */
+:setvar ACTION_NAME "UPDATE_TASK_STATUS"
+:setvar COMMIT_CHANGES "0"
+:setvar TASK_ID "..."
+:setvar TASK_STATUS_CODE "DONE"
 
-USE [$(YAFES_SQL_DATABASE)];
-GO
+BEGIN TRANSACTION;
+SELECT task_id, title, task_status_code FROM tasking.Task WHERE task_id = @TaskId;
+UPDATE tasking.Task SET task_status_code = N'$(TASK_STATUS_CODE)' WHERE task_id = @TaskId;
+SELECT task_id, title, task_status_code FROM tasking.Task WHERE task_id = @TaskId;
+ROLLBACK TRANSACTION;`,
+        metrics: [
+          ["Actions", "3"],
+          ["Default", "Rollback"],
+          ["Row count", "1"],
+          ["Audit after", "Yes"]
+        ],
+        tables: [
+          {
+            title: "Before / after preview",
+            columns: ["phase", "task_id", "title", "status", "info_tip"],
+            rows: [
+              ["Before", "A83...D21", "Policy renewal follow-up", "OPEN", "Expected row count is exactly 1."],
+              ["After", "A83...D21", "Policy renewal follow-up", "DONE", "If wrong, keep COMMIT_CHANGES = 0."]
+            ]
+          }
+        ],
+        messages: [
+          "ROLLBACK completed because COMMIT_CHANGES = 0.",
+          "No persistent data change in preview.",
+          "Set COMMIT_CHANGES = 1 only after approval."
+        ]
+      },
+      {
+        file: "09__graph_report_pack.sql",
+        title: "Reports",
+        subtitle: "Grafik ve export gridleri",
+        help: "Report pack SSMS Results Grid ile grafik-ready veri setleri uretir: chart_axis, chart_value ve text_bar kolonlari Excel/BI icin hazirdir.",
+        code: `/* Graph And Report Pack */
+:ON ERROR EXIT
+:setvar TENANT_CODE "DEMO-BE-BROKER"
 
 SELECT
-    u.email,
-    u.display_name,
-    r.role_code,
-    u.is_active
-FROM core.AppUser u
-LEFT JOIN core.UserRole ur ON ur.user_id = u.user_id
-LEFT JOIN core.Role r ON r.role_id = ur.role_id
-WHERE u.tenant_id = @TenantId
-ORDER BY u.email, r.role_code;`,
+    contract_domain_code AS chart_axis,
+    COUNT_BIG(*) AS chart_value,
+    REPLICATE(N'#', COUNT_BIG(*)) AS text_bar
+FROM policy.Contract
+WHERE tenant_id = @TenantId
+GROUP BY contract_domain_code;`,
         metrics: [
-          ["Users", "3"],
-          ["Roles", "4"],
-          ["Triggers", "11"],
-          ["Open issues", "0"]
+          ["Report sets", "6"],
+          ["Charts", "Grid-ready"],
+          ["Export", "Excel/BI"],
+          ["Mode", "Read-only"]
         ],
         tables: [
           {
-            title: "01 - Users and roles",
-            columns: ["email", "display_name", "role_code", "is_active"],
+            title: "01 - Policy portfolio by domain",
+            columns: ["chart_axis", "chart_value", "text_bar", "info_tip"],
             rows: [
-              ["admin@yafes.demo", "Demo Admin", "TENANT_ADMIN", "1"],
-              ["broker@yafes.demo", "Demo Broker", "BROKER", "1"],
-              ["claims@yafes.demo", "Claims Desk", "CLAIMS_HANDLER", "1"]
+              ["AUTO", "4", "##############################", "Spot concentration by domain."],
+              ["FIRE", "2", "###############", "Useful for portfolio review."],
+              ["FAMILY", "2", "###############", "Copy to Excel for charting."]
             ]
           },
           {
-            title: "Open validation issues",
-            columns: ["check_name", "open_count", "status"],
+            title: "06 - Export catalog",
+            columns: ["export_name", "consumer", "source", "info_tip"],
             rows: [
-              ["active package without item", "0", "PASS"],
-              ["active coverage without domain", "0", "PASS"],
-              ["task assignee outside tenant", "0", "PASS"]
+              ["Portfolio summary", "Operations lead", "Result sets 01 and 04", "Copy to Excel/BI."],
+              ["Task backlog", "Team lead", "Result set 03", "Focus overdue first."]
             ]
           }
         ],
         messages: [
-          "RBAC query completed.",
-          "Audit trigger inventory loaded.",
-          "No open integrity issues in demo result set."
+          "Report grids generated.",
+          "Use chart_axis/chart_value for external charts.",
+          "No data changes."
         ]
       }
     ];

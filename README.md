@@ -20,8 +20,9 @@ target.
 - Ordered migration set from `000` through `018`.
 - Validation scripts for schema, constraints, indexes, triggers, stored
   procedures, seed data, demo data, and cross-domain integrity.
-- SSMS operator workbench scripts for safety checks, migrations, operational
-  dashboards, renewal task generation, and security/audit checks.
+- SSMS operator workbench scripts for safety checks, migrations, dashboards,
+  query shortcuts, safe data entry bridges, guarded editing, report grids,
+  renewal task generation, tutorials, and security/audit checks.
 - Guarded PowerShell migration runner with DEV target checks, backup preflight,
   SQL Server syntax scans, execution logs, and SSMS fallback generation.
 - Optional .NET 8 backend/API foundation for future integration work.
@@ -33,7 +34,7 @@ target.
 | --- | --- |
 | `database/migrations/` | Ordered forward-only SQL Server migrations. |
 | `database/validation/` | Post-migration validation and integrity checks. |
-| `database/ssms/` | SSMS-first operator scripts and visual demo. |
+| `database/ssms/` | SSMS-first operator dashboard, scripts, tutorials, templates, and visual demo. |
 | `database/tools/` | Guarded local and CI migration runners. |
 | `database/docs/` | Architecture, security, ERD, data dictionary, and standards. |
 | `backend/` | Optional .NET 8 API foundation and tests. |
@@ -49,11 +50,20 @@ For scripts that use `:setvar` or `:r`, enable `Query > SQLCMD Mode`.
    database and the connected server does not look like production.
 2. Run `01__run_all_dev_migrations_sqlcmd.sql` after setting the database and
    backup variables in the generated all-in-one SSMS script.
-3. Use `02__operations_dashboard.sql` for tenant-aware Results Grid dashboards.
-4. Use `03__create_renewal_tasks.sql` in `DRY_RUN = 1` mode before inserting
+3. Open `05__operator_dashboard_home.sql` as the SSMS home tab for shortcuts,
+   health signals, and next actions.
+4. Run `10__daily_operator_checklist.sql` before data entry.
+5. Use `02__operations_dashboard.sql` for tenant-aware Results Grid dashboards.
+6. Use `06__query_library_shortcuts.sql` to find and copy IDs into templates.
+7. Use `07__data_entry_bridge_templates.sql` for procedure-based creates.
+8. Use `08__data_editing_guardrails.sql` for rollback-by-default updates.
+9. Use `09__graph_report_pack.sql` for chart-ready grids and exports.
+10. Use `03__create_renewal_tasks.sql` in `DRY_RUN = 1` mode before inserting
    renewal tasks.
-5. Use `04__admin_security_audit_queries.sql` for RBAC, audit, and data quality
+11. Use `04__admin_security_audit_queries.sql` for RBAC, audit, and data quality
    checks.
+
+Detailed SSMS tutorials are available in `database/ssms/tutorials/`.
 
 A local visual mockup of the SSMS-oriented operator experience is available at:
 
@@ -136,7 +146,8 @@ Dependency updates are managed through Dependabot for GitHub Actions and NuGet.
 
 - Database core: complete through migration `018`.
 - Validation coverage: complete for the current database scope.
-- SSMS workbench: available under `database/ssms/`.
+- SSMS workbench: dashboard, query library, bridge templates, editing
+  guardrails, tutorials, and report pack available under `database/ssms/`.
 - Backend/API foundation: available, not the primary operator surface.
 - Real DEV SQL Server execution: must be confirmed in an environment with
   `sqlcmd` or SSMS access to the target SQL Server instance.
