@@ -1,46 +1,70 @@
 # Yafes Pars
 
-Yafes Pars is a SQL Server and SSMS-first insurance core database platform.
+[![SQL Server validation](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/sql-server-validation.yml/badge.svg)](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/sql-server-validation.yml)
+[![Backend build](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/backend-build.yml/badge.svg)](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/backend-build.yml)
 
-The current priority is the database core. Backend, API, and frontend work should
-start only after the migration discipline, validation scripts, tenant model,
-audit model, seed data, and documentation are stable.
+Yafes Pars is an SSMS-first SQL Server insurance core platform for broker and
+policy operations. The project focuses on a disciplined database foundation:
+ordered migrations, validation scripts, tenant-aware data design, auditability,
+lookup seed data, and operator-ready SSMS workbench scripts.
 
-## Scope
+The current product surface is SQL Server Management Studio, not a web
+application. Backend/API work exists as an integration foundation and should
+remain secondary until the database core is validated against a DEV SQL Server
+target.
 
-- Customer and person management
-- Institution and insurance company management
-- Insurable object management
-- Policy and contract management
-- Policy versioning
-- Coverage management
-- Claim management
-- Document metadata
-- Task and reminder tracking
-- Tenant, user, role, and permission foundation
-- Audit logging
+## What Is Included
 
-## Repository Layout
+- SQL Server database core for customer, institution, risk, policy, coverage,
+  claim, document, tasking, RBAC, tenant, and audit domains.
+- Ordered migration set from `000` through `018`.
+- Validation scripts for schema, constraints, indexes, triggers, stored
+  procedures, seed data, demo data, and cross-domain integrity.
+- SSMS operator workbench scripts for safety checks, migrations, operational
+  dashboards, renewal task generation, and security/audit checks.
+- Guarded PowerShell migration runner with DEV target checks, backup preflight,
+  SQL Server syntax scans, execution logs, and SSMS fallback generation.
+- Optional .NET 8 backend/API foundation for future integration work.
+- GitHub Actions for SQL Server validation and backend build/test checks.
 
-- `database/legacy/`: preserved legacy SQL files for traceability.
-- `database/migrations/`: ordered SSMS-compatible migration scripts.
-- `database/rollback/`: rollback scripts kept separate from forward migrations.
-- `database/validation/`: SSMS validation scripts for table, constraint, index,
-  trigger, seed, and business rule checks.
-- `database/docs/`: architecture, setup, domain model, data dictionary, naming,
-  migration, ERD, and security documentation.
-- `database/templates/`: reusable SQL templates for future migrations.
-- `UML/` and `ERD/`: existing visual model artifacts.
-- `trust plan/`: historical planning, packages, experiments, and generated
-  application material.
+## Repository Map
 
-## SSMS Execution Model
+| Path | Purpose |
+| --- | --- |
+| `database/migrations/` | Ordered forward-only SQL Server migrations. |
+| `database/validation/` | Post-migration validation and integrity checks. |
+| `database/ssms/` | SSMS-first operator scripts and visual demo. |
+| `database/tools/` | Guarded local and CI migration runners. |
+| `database/docs/` | Architecture, security, ERD, data dictionary, and standards. |
+| `backend/` | Optional .NET 8 API foundation and tests. |
+| `.github/workflows/` | CI workflows for SQL Server and backend checks. |
+| `.github/` | Dependabot, CODEOWNERS, and pull request standards. |
 
-Run migrations manually from SQL Server Management Studio in filename order.
-Validation scripts should be run after the related migrations and again after a
-full database build.
+## SSMS Operator Flow
 
-Planned migration order:
+Open the scripts in `database/ssms/` from SQL Server Management Studio.
+For scripts that use `:setvar` or `:r`, enable `Query > SQLCMD Mode`.
+
+1. Run `00__open_first_safety_check.sql` to confirm the target is a DEV
+   database and the connected server does not look like production.
+2. Run `01__run_all_dev_migrations_sqlcmd.sql` after setting the database and
+   backup variables in the generated all-in-one SSMS script.
+3. Use `02__operations_dashboard.sql` for tenant-aware Results Grid dashboards.
+4. Use `03__create_renewal_tasks.sql` in `DRY_RUN = 1` mode before inserting
+   renewal tasks.
+5. Use `04__admin_security_audit_queries.sql` for RBAC, audit, and data quality
+   checks.
+
+A local visual mockup of the SSMS-oriented operator experience is available at:
+
+```powershell
+cd database/ssms/demo
+python -m http.server 3000 --bind 127.0.0.1
+```
+
+Then open `http://127.0.0.1:3000/`.
+
+## Migration Order
 
 1. `000__create_database.sql`
 2. `001__create_schemas.sql`
@@ -62,35 +86,57 @@ Planned migration order:
 18. `017__seed_lookup_data.sql`
 19. `018__seed_demo_data.sql`
 
-## Database Standards
+## Local Validation
 
-- Target Microsoft SQL Server only.
-- Use T-SQL syntax and SSMS-compatible batches.
-- Use `GO` separators correctly around batch-scoped objects.
-- Prefer idempotent scripts where practical.
-- Use schemas: `core`, `ref`, `person`, `institution`, `risk`, `policy`,
-  `coverage`, `claim`, `document`, `tasking`, and `audit`.
-- Use PascalCase table names.
-- Use snake_case column names.
-- Do not create a table named `Object`; use `risk.InsurableObject`.
-- Add validation scripts for every major migration.
-- Preserve legacy SQL content instead of deleting it.
+Generate an SSMS fallback script without requiring `sqlcmd`:
+
+```powershell
+./database/tools/run-dev-migrations.ps1 -GenerateSsmsScriptOnly
+```
+
+Run the guarded DEV migration workflow with `sqlcmd`:
+
+```powershell
+$env:YAFES_SQL_SERVER = "localhost,1433"
+$env:YAFES_SQL_DATABASE = "YafesPars_DEV"
+$env:YAFES_SQL_USER = "sa"
+$env:YAFES_SQL_PASSWORD = "<dev-password>"
+$env:YAFES_SQL_BACKUP_DIR = "C:\SqlBackups"
+
+./database/tools/run-dev-migrations.ps1
+```
+
+The runner refuses non-DEV database names, production-like server names, unsafe
+SQL patterns, and missing pre-migration backup configuration.
+
+## Backend Foundation
+
+The backend is an optional .NET 8 integration layer.
+
+```powershell
+dotnet restore backend/src/YafesPars.Api/YafesPars.Api.csproj
+dotnet build backend/src/YafesPars.Api/YafesPars.Api.csproj --configuration Release
+dotnet test backend/tests/YafesPars.Tests/YafesPars.Tests.csproj --configuration Release
+```
+
+Configure database access with either:
+
+- `ConnectionStrings__YafesPars`
+- `YAFES_SQL_CONNECTION_STRING`
+
+## Security
+
+Security policy, supported scope, and vulnerability reporting rules are defined
+in [`SECURITY.md`](SECURITY.md). Do not commit credentials, database backups,
+connection strings, or production data.
+
+Dependency updates are managed through Dependabot for GitHub Actions and NuGet.
 
 ## Current Status
 
-The repository now contains a complete SSMS-first database core through:
-
-- ordered migrations `000` through `018`
-- domain schemas for core, ref, person, institution, risk, policy, coverage,
-  claim, document, tasking, and audit
-- tenant and RBAC foundation
-- migration tracking
-- person, institution, risk, policy, coverage, claim, document, task, and audit
-  domains
-- cross-domain constraints and FK-supporting indexes
-- root audit triggers
-- dashboard and summary views
-- tenant-aware stored procedures
-- production lookup seed data
-- optional Belgian broker demo data
-- validation scripts for each major phase
+- Database core: complete through migration `018`.
+- Validation coverage: complete for the current database scope.
+- SSMS workbench: available under `database/ssms/`.
+- Backend/API foundation: available, not the primary operator surface.
+- Real DEV SQL Server execution: must be confirmed in an environment with
+  `sqlcmd` or SSMS access to the target SQL Server instance.

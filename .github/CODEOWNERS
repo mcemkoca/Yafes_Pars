@@ -1,0 +1,10 @@
+# Repository ownership and review routing.
+* @mcemkoca
+
+# High-risk areas.
+/.github/ @mcemkoca
+/database/migrations/ @mcemkoca
+/database/validation/ @mcemkoca
+/database/tools/ @mcemkoca
+/database/ssms/ @mcemkoca
+/SECURITY.md @mcemkoca

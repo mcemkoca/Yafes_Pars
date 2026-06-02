@@ -14,9 +14,22 @@ on:
       - ".github/workflows/backend-build.yml"
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-build-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
+    name: Restore, build, and test
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      DOTNET_NOLOGO: "true"
+      DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,10 +39,10 @@ jobs:
         with:
           dotnet-version: "8.0.x"
 
-      - name: Restore
+      - name: Restore API
         run: dotnet restore backend/src/YafesPars.Api/YafesPars.Api.csproj
 
-      - name: Build
+      - name: Build API
         run: dotnet build backend/src/YafesPars.Api/YafesPars.Api.csproj --configuration Release --no-restore
 
       - name: Restore tests

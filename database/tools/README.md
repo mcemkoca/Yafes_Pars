@@ -68,8 +68,8 @@ GitHub Actions uses `.github/workflows/sql-server-validation.yml` and
 `YafesPars_DEV`, run migrations `000` through `018`, run validations `001`
 through `017`, and upload execution logs.
 
-The workflow can use `CI_SQL_PASSWORD` as a repository secret. If it is absent,
-the workflow uses a local CI-only SQL Server container password.
+The workflow generates a masked, short-lived SQL Server container password for
+each run. No static SQL Server password is stored in the repository.
 
 ## SSMS fallback
 
