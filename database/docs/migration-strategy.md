@@ -54,3 +54,6 @@ tracked with name, checksum, execution time, user, status, and error message.
 - `011__create_audit_domain.sql` creates audit tables and minimal audit triggers
   for key root tables.
 - `010__validate_audit_domain.sql` validates the audit migration.
+- `012__add_constraints.sql` adds cross-domain constraints that depend on
+  multiple prior domains.
+- `011__validate_constraints_exist.sql` validates cross-domain constraints.

@@ -98,3 +98,5 @@ The task migration creates tenant-aware tasks, comments, reminders, statuses,
 and priorities.
 The audit migration creates centralized audit tables and minimal root-entity
 audit triggers.
+The constraint hardening migration adds cross-domain constraints that depend on
+previously created policy, risk, and core tables.
