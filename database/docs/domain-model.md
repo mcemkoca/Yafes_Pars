@@ -32,3 +32,10 @@ Legacy join table names are normalized to PascalCase:
 The institution domain uses `institution.Institution` as the tenant-aware root
 for insurers, banks, brokers, and partner companies. Identifiers and addresses
 are modeled as child tables with type and role lookup tables.
+
+## Risk Domain
+
+The legacy object domain is refactored to `risk.InsurableObject` and subtype
+tables. No table is named `Object`; subtypes use `InsurableVehicle`,
+`InsurableRealEstate`, `InsurableLoan`, `InsurablePerson`, `InsurableThing`, and
+`InsurableActivity`.

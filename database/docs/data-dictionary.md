@@ -130,3 +130,37 @@ address.
 
 Stores institution addresses with role, country, primary flag, audit columns,
 and soft delete state.
+
+## risk.InsurableObject
+
+Tenant-aware root table for insurable risks. Replaces the legacy `Object` table.
+Includes type, description, status, date range, audit columns, and soft delete
+state.
+
+## risk.InsurableVehicle
+
+Vehicle subtype for make, model, chassis, plate, financing, valuation, and
+technical vehicle attributes.
+
+## risk.InsurableRealEstate
+
+Real estate subtype for risk address, construction details, occupancy, ABEX
+index fields, insured capital, and burglary protection links.
+
+## risk.InsurableLoan
+
+Loan subtype for credit or financing risks. Periodicity and duration type codes
+are stored before policy lookup tables are created.
+
+## risk.InsurablePerson
+
+Person or group subtype for insured people, worker groups, employee groups, and
+family-style risk objects.
+
+## risk.InsurableThing
+
+Movable thing subtype for equipment, valuables, goods, or other tangible risks.
+
+## risk.InsurableActivity
+
+Activity subtype for event or activity-based risks.

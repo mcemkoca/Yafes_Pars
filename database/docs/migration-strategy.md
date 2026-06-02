@@ -32,3 +32,7 @@ tracked with name, checksum, execution time, user, status, and error message.
 - `004__create_institution_domain.sql` creates tenant-aware institution,
   identifier, address, and lookup tables.
 - `003__validate_institution_domain.sql` validates the institution migration.
+- `005__create_object_domain.sql` creates the refactored risk domain using
+  `risk.InsurableObject` instead of the legacy `Object` table name.
+- `004__validate_risk_domain.sql` validates the risk migration and checks that
+  forbidden `Object` tables were not created.
