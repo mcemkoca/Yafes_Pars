@@ -2,13 +2,14 @@
 param(
     [string]$RunId = (Get-Date -Format 'yyyyMMdd_HHmmss'),
     [string]$BackupDirectory = $env:YAFES_SQL_BACKUP_DIR,
+    [bool]$TrustServerCertificate = ($env:YAFES_SQL_TRUST_SERVER_CERTIFICATE -eq '1'),
     [switch]$GenerateSsmsScriptOnly
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
+$repoRoot = (Resolve-Path (Join-Path (Join-Path $PSScriptRoot '..') '..')).Path
 $databaseRoot = Join-Path $repoRoot 'database'
 $migrationRoot = Join-Path $databaseRoot 'migrations'
 $validationRoot = Join-Path $databaseRoot 'validation'
@@ -452,6 +453,9 @@ function Invoke-SqlcmdFile {
         '-i', $InputFile,
         '-o', $OutputFile
     )
+    if ($TrustServerCertificate) {
+        $arguments += '-C'
+    }
 
     & $SqlcmdPath @arguments
     if ($LASTEXITCODE -ne 0) {
@@ -483,6 +487,9 @@ function Invoke-SqlcmdQuery {
         '-Q', $Query,
         '-o', $OutputFile
     )
+    if ($TrustServerCertificate) {
+        $arguments += '-C'
+    }
 
     & $SqlcmdPath @arguments
     if ($LASTEXITCODE -ne 0) {

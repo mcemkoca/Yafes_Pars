@@ -283,13 +283,210 @@ BEGIN TRY
     WHEN NOT MATCHED THEN INSERT (use_type_code, label_nl, label_fr, sort_order, is_active)
         VALUES (source.use_type_code, source.label_nl, source.label_fr, source.sort_order, 1);
 
+    MERGE risk.ResidenceType AS target
+    USING (VALUES
+        (N'PRIMARY', N'Hoofdverblijf', N'Residence principale', 10),
+        (N'SECONDARY', N'Tweede verblijf', N'Residence secondaire', 20),
+        (N'RENTAL', N'Huurwoning', N'Logement locatif', 30)
+    ) AS source (residence_type_code, label_nl, label_fr, sort_order)
+    ON target.residence_type_code = source.residence_type_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (residence_type_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.residence_type_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
+    MERGE risk.DestinationType AS target
+    USING (VALUES
+        (N'PRIVATE_HOME', N'Privewoning', N'Habitation privee', 10),
+        (N'HOLIDAY_HOME', N'Vakantiewoning', N'Maison de vacances', 20),
+        (N'RENTAL_PROPERTY', N'Verhuurpand', N'Bien locatif', 30),
+        (N'BUSINESS_PREMISES', N'Bedrijfsgebouw', N'Locaux professionnels', 40)
+    ) AS source (destination_type_code, label_nl, label_fr, sort_order)
+    ON target.destination_type_code = source.destination_type_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (destination_type_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.destination_type_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
+    MERGE risk.AdjacencyType AS target
+    USING (VALUES
+        (N'DETACHED', N'Vrijstaand', N'Quatre facades', 10),
+        (N'SEMI_DETACHED', N'Halfopen bebouwing', N'Trois facades', 20),
+        (N'ROW_HOUSE', N'Rijwoning', N'Maison mitoyenne', 30),
+        (N'APARTMENT_BLOCK', N'Appartementengebouw', N'Immeuble a appartements', 40)
+    ) AS source (adjacency_type_code, label_nl, label_fr, sort_order)
+    ON target.adjacency_type_code = source.adjacency_type_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (adjacency_type_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.adjacency_type_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
+    MERGE risk.OccupancyLevel AS target
+    USING (VALUES
+        (N'OWNER_OCCUPIED', N'Bewoond door eigenaar', N'Occupe par proprietaire', 10),
+        (N'TENANT_OCCUPIED', N'Bewoond door huurder', N'Occupe par locataire', 20),
+        (N'VACANT', N'Leegstaand', N'Inoccupe', 30),
+        (N'SEASONAL', N'Seizoensgebruik', N'Usage saisonnier', 40)
+    ) AS source (occupancy_level_code, label_nl, label_fr, sort_order)
+    ON target.occupancy_level_code = source.occupancy_level_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (occupancy_level_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.occupancy_level_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
+    MERGE risk.ConstructionType AS target
+    USING (VALUES
+        (N'TRADITIONAL', N'Traditionele bouw', N'Construction traditionnelle', 10),
+        (N'WOOD_FRAME', N'Houtskeletbouw', N'Ossature bois', 20),
+        (N'STEEL_FRAME', N'Staalskeletbouw', N'Ossature acier', 30),
+        (N'MIXED', N'Gemengde constructie', N'Construction mixte', 40)
+    ) AS source (construction_type_code, label_nl, label_fr, sort_order)
+    ON target.construction_type_code = source.construction_type_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (construction_type_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.construction_type_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
+    MERGE risk.RoofType AS target
+    USING (VALUES
+        (N'TILE', N'Dakpannen', N'Tuiles', 10),
+        (N'SLATE', N'Leien', N'Ardoises', 20),
+        (N'FLAT', N'Plat dak', N'Toit plat', 30),
+        (N'METAL', N'Metalen dak', N'Toit metallique', 40)
+    ) AS source (roof_type_code, label_nl, label_fr, sort_order)
+    ON target.roof_type_code = source.roof_type_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (roof_type_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.roof_type_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
+    MERGE risk.BurglaryProtectionType AS target
+    USING (VALUES
+        (N'STANDARD_LOCKS', N'Standaardsloten', N'Serrures standard', 10),
+        (N'ALARM', N'Alarmsysteem', N'Systeme alarme', 20),
+        (N'CAMERA', N'Camerabewaking', N'Videosurveillance', 30),
+        (N'CERTIFIED_DOORS', N'Gecertificeerde deuren', N'Portes certifiees', 40)
+    ) AS source (burglary_protection_type_code, label_nl, label_fr, sort_order)
+    ON target.burglary_protection_type_code = source.burglary_protection_type_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (burglary_protection_type_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.burglary_protection_type_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
+    MERGE risk.InsurablePersonSubtype AS target
+    USING (VALUES
+        (N'PERS_IND', N'Individuele persoon', N'Personne individuelle', 10),
+        (N'PERS_ACT', N'Actieve persoon', N'Personne active', 20),
+        (N'GROEP_COL', N'Collectieve groep', N'Groupe collectif', 30),
+        (N'GROEP_ARB', N'Arbeidersgroep', N'Groupe ouvriers', 40),
+        (N'GROEP_BED', N'Bediendengroep', N'Groupe employes', 50),
+        (N'GROEP_POB', N'Personeelsgroep', N'Groupe personnel', 60),
+        (N'GROEP_GEZIN', N'Gezinsgroep', N'Groupe familial', 70),
+        (N'GEZIN_PRIV', N'Privegezin', N'Famille privee', 80)
+    ) AS source (subtype_code, label_nl, label_fr, sort_order)
+    ON target.subtype_code = source.subtype_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (subtype_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.subtype_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
+    MERGE risk.WorkerRiskClass AS target
+    USING (VALUES
+        (N'LOW', N'Lage arbeidersrisico', N'Risque ouvrier faible', 10),
+        (N'MEDIUM', N'Middelmatig arbeidersrisico', N'Risque ouvrier moyen', 20),
+        (N'HIGH', N'Hoog arbeidersrisico', N'Risque ouvrier eleve', 30)
+    ) AS source (worker_risk_class_code, label_nl, label_fr, sort_order)
+    ON target.worker_risk_class_code = source.worker_risk_class_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (worker_risk_class_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.worker_risk_class_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
+    MERGE risk.EmployeeRiskClass AS target
+    USING (VALUES
+        (N'OFFICE', N'Kantoorbediende', N'Employe bureau', 10),
+        (N'FIELD', N'Buitendienst', N'Service externe', 20),
+        (N'MANAGEMENT', N'Leidinggevend', N'Direction', 30)
+    ) AS source (employee_risk_class_code, label_nl, label_fr, sort_order)
+    ON target.employee_risk_class_code = source.employee_risk_class_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (employee_risk_class_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.employee_risk_class_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
+    MERGE risk.AgeCategory AS target
+    USING (VALUES
+        (N'CHILD', N'Kind', N'Enfant', 10),
+        (N'ADULT', N'Volwassene', N'Adulte', 20),
+        (N'SENIOR', N'Senior', N'Senior', 30)
+    ) AS source (age_category_code, label_nl, label_fr, sort_order)
+    ON target.age_category_code = source.age_category_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (age_category_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.age_category_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
+    MERGE risk.InsurableThingSubtype AS target
+    USING (VALUES
+        (N'JEWELRY', N'Juwelen', N'Bijoux', 10),
+        (N'ART', N'Kunst', N'Art', 20),
+        (N'ELECTRONICS', N'Elektronica', N'Electronique', 30),
+        (N'EQUIPMENT', N'Materieel', N'Materiel', 40)
+    ) AS source (subtype_code, label_nl, label_fr, sort_order)
+    ON target.subtype_code = source.subtype_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (subtype_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.subtype_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
+    MERGE risk.ThingRiskCategory AS target
+    USING (VALUES
+        (N'LOW', N'Laag risico', N'Risque faible', 10),
+        (N'MEDIUM', N'Middelmatig risico', N'Risque moyen', 20),
+        (N'HIGH', N'Hoog risico', N'Risque eleve', 30)
+    ) AS source (risk_category_code, label_nl, label_fr, sort_order)
+    ON target.risk_category_code = source.risk_category_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (risk_category_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.risk_category_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
+    MERGE risk.ThingMaterialType AS target
+    USING (VALUES
+        (N'METAL', N'Metaal', N'Metal', 10),
+        (N'WOOD', N'Hout', N'Bois', 20),
+        (N'GLASS', N'Glas', N'Verre', 30),
+        (N'MIXED', N'Gemengd', N'Mixte', 40)
+    ) AS source (material_type_code, label_nl, label_fr, sort_order)
+    ON target.material_type_code = source.material_type_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (material_type_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.material_type_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
+    MERGE risk.InsurableActivitySubtype AS target
+    USING (VALUES
+        (N'SPORT', N'Sportactiviteit', N'Activite sportive', 10),
+        (N'EVENT', N'Evenement', N'Evenement', 20),
+        (N'PROFESSIONAL_ACTIVITY', N'Beroepsactiviteit', N'Activite professionnelle', 30),
+        (N'VOLUNTEER', N'Vrijwilligersactiviteit', N'Activite benevole', 40)
+    ) AS source (activity_type_code, label_nl, label_fr, sort_order)
+    ON target.activity_type_code = source.activity_type_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (activity_type_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.activity_type_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
+    MERGE risk.ActivityRiskLevel AS target
+    USING (VALUES
+        (N'LOW', N'Laag', N'Faible', 10),
+        (N'MEDIUM', N'Middelmatig', N'Moyen', 20),
+        (N'HIGH', N'Hoog', N'Eleve', 30)
+    ) AS source (risk_level_code, label_nl, label_fr, sort_order)
+    ON target.risk_level_code = source.risk_level_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (risk_level_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.risk_level_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
     MERGE policy.ContractDomain AS target
     USING (VALUES
         (N'MOTOR', N'Motor', N'Auto', N'Motor', N'Trafik', 10),
+        (N'AUTO', N'Auto', N'Auto', N'Auto', N'Auto', 15),
         (N'FIRE', N'Brand', N'Incendie', N'Fire', N'Yangin', 20),
         (N'FAMILY', N'Familie', N'Famille', N'Family', N'Aile', 30),
-        (N'LOAN', N'Lening', N'Pret', N'Loan', N'Kredi', 40),
-        (N'GENERAL', N'Algemeen', N'General', N'General', N'Genel', 50)
+        (N'LIABILITY', N'Aansprakelijkheid', N'Responsabilite', N'Liability', N'Sorumluluk', 35),
+        (N'LEGAL_PROTECTION', N'Rechtsbijstand', N'Protection juridique', N'Legal protection', N'Hukuki koruma', 38),
+        (N'HEALTH', N'Gezondheid', N'Sante', N'Health', N'Saglik', 40),
+        (N'LIFE', N'Leven', N'Vie', N'Life', N'Hayat', 45),
+        (N'LOAN', N'Lening', N'Pret', N'Loan', N'Kredi', 50),
+        (N'BUSINESS', N'Onderneming', N'Entreprise', N'Business', N'Isletme', 55),
+        (N'TRAVEL', N'Reis', N'Voyage', N'Travel', N'Seyahat', 60),
+        (N'GENERAL', N'Algemeen', N'General', N'General', N'Genel', 70)
     ) AS source (contract_domain_code, label_nl, label_fr, label_en, label_tr, sort_order)
     ON target.contract_domain_code = source.contract_domain_code
     WHEN MATCHED THEN
@@ -299,6 +496,131 @@ BEGIN TRY
     WHEN NOT MATCHED THEN
         INSERT (contract_domain_code, label_nl, label_fr, label_en, label_tr, sort_order, is_active)
         VALUES (source.contract_domain_code, source.label_nl, source.label_fr, source.label_en, source.label_tr, source.sort_order, 1);
+
+    MERGE coverage.Coverage AS target
+    USING (VALUES
+        (N'BA_AUTO', N'BA Auto', N'RC Auto', N'Motor liability', N'Trafik sorumluluk', N'Verplichte burgerlijke aansprakelijkheid voor voertuigen.', 10),
+        (N'AUTO_LIABILITY', N'BA Auto legacy', N'RC Auto legacy', N'Motor liability legacy', N'Trafik sorumluluk legacy', N'Compatibele code voor bestaande auto aansprakelijkheid.', 11),
+        (N'OMNIUM', N'Omnium', N'Omnium', N'Comprehensive motor', N'Kapsamli kasko', N'Uitgebreide voertuigschade dekking.', 20),
+        (N'MINI_OMNIUM', N'Mini omnium', N'Mini omnium', N'Limited comprehensive motor', N'Sinirli kasko', N'Beperkte voertuigschade dekking.', 30),
+        (N'DRIVER_PROTECTION', N'Bestuurdersbescherming', N'Protection conducteur', N'Driver protection', N'Surucu koruma', N'Bescherming voor de bestuurder.', 40),
+        (N'LEGAL_PROTECTION_AUTO', N'Rechtsbijstand auto', N'Protection juridique auto', N'Auto legal protection', N'Arac hukuki koruma', N'Rechtsbijstand voor voertuigschades.', 50),
+        (N'LEGAL_ASSISTANCE', N'Rechtsbijstand algemeen', N'Protection juridique generale', N'General legal assistance', N'Genel hukuki yardim', N'Algemene rechtsbijstand.', 55),
+        (N'FIRE_BUILDING', N'Brand gebouw', N'Incendie batiment', N'Fire building', N'Bina yangin', N'Gebouwschade door brand.', 60),
+        (N'FIRE_CONTENTS', N'Brand inhoud', N'Incendie contenu', N'Fire contents', N'Esya yangin', N'Inboedelschade door brand.', 70),
+        (N'THEFT', N'Diefstal', N'Vol', N'Theft', N'Hirsizlik', N'Diefstal en inbraakschade.', 80),
+        (N'GLASS_BREAKAGE', N'Glasbreuk', N'Bris de vitre', N'Glass breakage', N'Cam kirilmasi', N'Glasbreuk aan gebouw of inhoud.', 90),
+        (N'WATER_DAMAGE', N'Waterschade', N'Degats des eaux', N'Water damage', N'Su hasari', N'Schade door waterlekken.', 100),
+        (N'FAMILY_LIABILITY', N'Familiale BA', N'RC familiale', N'Family liability', N'Aile sorumluluk', N'Burgerlijke aansprakelijkheid priveleven.', 110),
+        (N'LEGAL_PROTECTION_PRIVATE', N'Rechtsbijstand prive', N'Protection juridique privee', N'Private legal protection', N'Ozel hukuki koruma', N'Rechtsbijstand voor priveleven.', 120),
+        (N'HOSPITALIZATION', N'Hospitalisatie', N'Hospitalisation', N'Hospitalization', N'Hastane', N'Hospitalisatiekosten.', 130),
+        (N'LIFE_COVER', N'Levensdekking', N'Couverture vie', N'Life cover', N'Hayat teminati', N'Kapitaal bij overlijden of leven.', 140),
+        (N'OUTSTANDING_BALANCE', N'Saldo schuldsaldo', N'Solde restant du', N'Outstanding balance', N'Kalan borc', N'Bescherming van openstaand kredietsaldo.', 150),
+        (N'BUSINESS_LIABILITY', N'BA onderneming', N'RC entreprise', N'Business liability', N'Isletme sorumluluk', N'Aansprakelijkheid voor ondernemingen.', 160),
+        (N'TRAVEL_ASSISTANCE', N'Reisbijstand', N'Assistance voyage', N'Travel assistance', N'Seyahat yardimi', N'Bijstand tijdens reizen.', 170),
+        (N'CLAIM_ASSISTANCE', N'Bijstand schade', N'Assistance sinistre', N'Claim assistance', N'Hasar yardimi', N'Operationele schadebijstand.', 180)
+    ) AS source (coverage_code, label_nl, label_fr, label_en, label_tr, description, sort_order)
+    ON target.coverage_code = source.coverage_code
+    WHEN MATCHED THEN
+        UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr,
+            label_en = source.label_en, label_tr = source.label_tr, description = source.description,
+            sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN
+        INSERT (coverage_code, label_nl, label_fr, label_en, label_tr, description, sort_order, is_active)
+        VALUES (source.coverage_code, source.label_nl, source.label_fr, source.label_en, source.label_tr, source.description, source.sort_order, 1);
+
+    MERGE coverage.CoverageDomain AS target
+    USING (VALUES
+        (N'BA_AUTO', N'AUTO', 1, 10),
+        (N'AUTO_LIABILITY', N'AUTO', 0, 11),
+        (N'OMNIUM', N'AUTO', 0, 20),
+        (N'MINI_OMNIUM', N'AUTO', 0, 30),
+        (N'DRIVER_PROTECTION', N'AUTO', 0, 40),
+        (N'LEGAL_PROTECTION_AUTO', N'AUTO', 0, 50),
+        (N'LEGAL_PROTECTION_AUTO', N'LEGAL_PROTECTION', 0, 55),
+        (N'LEGAL_ASSISTANCE', N'LEGAL_PROTECTION', 1, 60),
+        (N'LEGAL_ASSISTANCE', N'BUSINESS', 0, 65),
+        (N'FIRE_BUILDING', N'FIRE', 1, 70),
+        (N'FIRE_CONTENTS', N'FIRE', 0, 80),
+        (N'THEFT', N'FIRE', 0, 90),
+        (N'GLASS_BREAKAGE', N'FIRE', 0, 100),
+        (N'WATER_DAMAGE', N'FIRE', 0, 110),
+        (N'FAMILY_LIABILITY', N'FAMILY', 1, 120),
+        (N'FAMILY_LIABILITY', N'LIABILITY', 1, 125),
+        (N'LEGAL_PROTECTION_PRIVATE', N'FAMILY', 0, 130),
+        (N'LEGAL_PROTECTION_PRIVATE', N'LEGAL_PROTECTION', 0, 135),
+        (N'HOSPITALIZATION', N'HEALTH', 1, 140),
+        (N'LIFE_COVER', N'LIFE', 1, 150),
+        (N'OUTSTANDING_BALANCE', N'LOAN', 1, 160),
+        (N'BUSINESS_LIABILITY', N'BUSINESS', 1, 170),
+        (N'BUSINESS_LIABILITY', N'LIABILITY', 0, 175),
+        (N'TRAVEL_ASSISTANCE', N'TRAVEL', 1, 180),
+        (N'CLAIM_ASSISTANCE', N'GENERAL', 0, 190)
+    ) AS source (coverage_code, contract_domain_code, is_default, sort_order)
+    ON target.coverage_code = source.coverage_code
+       AND target.contract_domain_code = source.contract_domain_code
+    WHEN MATCHED THEN
+        UPDATE SET is_default = source.is_default, sort_order = source.sort_order
+    WHEN NOT MATCHED THEN
+        INSERT (coverage_code, contract_domain_code, is_default, sort_order)
+        VALUES (source.coverage_code, source.contract_domain_code, source.is_default, source.sort_order);
+
+    MERGE coverage.CoveragePackage AS target
+    USING (VALUES
+        (N'AUTO_BASIC', N'AUTO', N'Auto basis', N'Verplichte BA auto met basis rechtsbijstand.'),
+        (N'AUTO_FULL', N'AUTO', N'Auto volledig', N'BA auto, omnium, bestuurdersbescherming en rechtsbijstand.'),
+        (N'HOME_BASIC', N'FIRE', N'Woning basis', N'Brand gebouw en inhoud.'),
+        (N'HOME_FULL', N'FIRE', N'Woning volledig', N'Brand, diefstal, glasbreuk en waterschade.'),
+        (N'FAMILY_BASIC', N'FAMILY', N'Familie basis', N'Familiale aansprakelijkheid en prive rechtsbijstand.'),
+        (N'BUSINESS_BASIC', N'BUSINESS', N'Onderneming basis', N'Basis aansprakelijkheid voor ondernemingen.')
+    ) AS source (package_code, contract_domain_code, package_name, description)
+    ON target.package_code = source.package_code
+    WHEN MATCHED THEN
+        UPDATE SET contract_domain_code = source.contract_domain_code,
+            package_name = source.package_name,
+            description = source.description,
+            is_active = 1,
+            updated_at_utc = SYSUTCDATETIME()
+    WHEN NOT MATCHED THEN
+        INSERT (package_code, contract_domain_code, package_name, description, is_active)
+        VALUES (source.package_code, source.contract_domain_code, source.package_name, source.description, 1);
+
+    MERGE coverage.CoveragePackageItem AS target
+    USING (
+        SELECT
+            cp.coverage_package_id,
+            item.coverage_code,
+            item.is_mandatory,
+            item.sort_order
+        FROM (VALUES
+            (N'AUTO_BASIC', N'BA_AUTO', 1, 10),
+            (N'AUTO_BASIC', N'LEGAL_PROTECTION_AUTO', 0, 20),
+            (N'AUTO_FULL', N'BA_AUTO', 1, 10),
+            (N'AUTO_FULL', N'OMNIUM', 1, 20),
+            (N'AUTO_FULL', N'DRIVER_PROTECTION', 0, 30),
+            (N'AUTO_FULL', N'LEGAL_PROTECTION_AUTO', 0, 40),
+            (N'HOME_BASIC', N'FIRE_BUILDING', 1, 10),
+            (N'HOME_BASIC', N'FIRE_CONTENTS', 0, 20),
+            (N'HOME_FULL', N'FIRE_BUILDING', 1, 10),
+            (N'HOME_FULL', N'FIRE_CONTENTS', 1, 20),
+            (N'HOME_FULL', N'THEFT', 0, 30),
+            (N'HOME_FULL', N'GLASS_BREAKAGE', 0, 40),
+            (N'HOME_FULL', N'WATER_DAMAGE', 0, 50),
+            (N'FAMILY_BASIC', N'FAMILY_LIABILITY', 1, 10),
+            (N'FAMILY_BASIC', N'LEGAL_PROTECTION_PRIVATE', 0, 20),
+            (N'BUSINESS_BASIC', N'BUSINESS_LIABILITY', 1, 10),
+            (N'BUSINESS_BASIC', N'LEGAL_ASSISTANCE', 0, 20)
+        ) AS item (package_code, coverage_code, is_mandatory, sort_order)
+        INNER JOIN coverage.CoveragePackage cp
+            ON cp.package_code = item.package_code
+    ) AS source
+    ON target.coverage_package_id = source.coverage_package_id
+       AND target.coverage_code = source.coverage_code
+    WHEN MATCHED THEN
+        UPDATE SET is_mandatory = source.is_mandatory, sort_order = source.sort_order
+    WHEN NOT MATCHED THEN
+        INSERT (coverage_package_id, coverage_code, is_mandatory, sort_order)
+        VALUES (source.coverage_package_id, source.coverage_code, source.is_mandatory, source.sort_order);
 
     MERGE policy.ContractStatus AS target
     USING (VALUES

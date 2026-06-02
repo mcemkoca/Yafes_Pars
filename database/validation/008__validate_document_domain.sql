@@ -46,5 +46,35 @@ IF NOT EXISTS (
 )
     THROW 50809, 'Missing index: IX_Document_tenant_owner', 1;
 
+IF EXISTS (
+    SELECT 1
+    FROM document.Document
+    WHERE owner_entity_type NOT IN (N'PERSON', N'INSTITUTION', N'POLICY', N'CLAIM', N'RISK_OBJECT')
+)
+    THROW 50810, 'Invalid document owner_entity_type.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM document.Document
+    WHERE file_size_bytes <= 0
+)
+    THROW 50811, 'Document file_size_bytes must be positive.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM document.Document
+    WHERE storage_key IS NULL
+       OR LTRIM(RTRIM(storage_key)) = N''
+)
+    THROW 50812, 'Document storage_key cannot be empty.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM document.Document
+    WHERE (is_deleted = 1 AND deleted_at_utc IS NULL)
+       OR (is_deleted = 0 AND deleted_at_utc IS NOT NULL)
+)
+    THROW 50813, 'Document deleted state is inconsistent.', 1;
+
 PRINT 'Document domain validation passed.';
 GO

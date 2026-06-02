@@ -539,6 +539,172 @@ BEGIN
 END;
 GO
 
+CREATE OR ALTER PROCEDURE tasking.SP_CreateRenewalTasks
+    @tenant_id UNIQUEIDENTIFIER,
+    @days_ahead INT = 60,
+    @assigned_to_user_id UNIQUEIDENTIFIER = NULL,
+    @created_by_user_id UNIQUEIDENTIFIER = NULL,
+    @dry_run BIT = 0
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    IF @tenant_id IS NULL
+        THROW 51620, 'tenant_id is required.', 1;
+
+    IF @days_ahead IS NULL OR @days_ahead < 0 OR @days_ahead > 366
+        THROW 51621, 'days_ahead must be between 0 and 366.', 1;
+
+    IF @assigned_to_user_id IS NOT NULL
+       AND NOT EXISTS (
+            SELECT 1
+            FROM core.AppUser
+            WHERE user_id = @assigned_to_user_id
+              AND tenant_id = @tenant_id
+              AND is_active = 1
+       )
+        THROW 51622, 'assigned_to_user_id does not belong to the tenant.', 1;
+
+    IF @created_by_user_id IS NOT NULL
+       AND NOT EXISTS (
+            SELECT 1
+            FROM core.AppUser
+            WHERE user_id = @created_by_user_id
+              AND tenant_id = @tenant_id
+              AND is_active = 1
+       )
+        THROW 51623, 'created_by_user_id does not belong to the tenant.', 1;
+
+    DECLARE @today DATE = CONVERT(DATE, SYSUTCDATETIME());
+    DECLARE @now DATETIME2(0) = SYSUTCDATETIME();
+
+    DECLARE @Candidates TABLE (
+        contract_id UNIQUEIDENTIFIER NOT NULL PRIMARY KEY,
+        contract_number NVARCHAR(40) NOT NULL,
+        contract_domain_code NVARCHAR(40) NOT NULL,
+        contract_type_code NVARCHAR(80) NOT NULL,
+        end_date DATE NOT NULL,
+        due_at_utc DATETIME2(0) NOT NULL,
+        task_priority_code NVARCHAR(20) NOT NULL
+    );
+
+    INSERT INTO @Candidates (
+        contract_id,
+        contract_number,
+        contract_domain_code,
+        contract_type_code,
+        end_date,
+        due_at_utc,
+        task_priority_code
+    )
+    SELECT
+        c.contract_id,
+        c.contract_number,
+        c.contract_domain_code,
+        c.contract_type_code,
+        c.end_date,
+        CASE
+            WHEN DATEADD(DAY, -@days_ahead, CONVERT(DATETIME2(0), c.end_date)) < @now
+                THEN @now
+            ELSE DATEADD(DAY, -@days_ahead, CONVERT(DATETIME2(0), c.end_date))
+        END AS due_at_utc,
+        CASE
+            WHEN DATEDIFF(DAY, @today, c.end_date) <= 14 THEN N'HIGH'
+            ELSE N'NORMAL'
+        END AS task_priority_code
+    FROM policy.Contract c
+    WHERE c.tenant_id = @tenant_id
+      AND c.is_deleted = 0
+      AND c.contract_status_code = N'ACTIVE'
+      AND c.end_date IS NOT NULL
+      AND c.end_date >= @today
+      AND c.end_date <= DATEADD(DAY, @days_ahead, @today)
+      AND NOT EXISTS (
+            SELECT 1
+            FROM tasking.Task t
+            WHERE t.tenant_id = c.tenant_id
+              AND t.related_entity_type = N'POLICY'
+              AND t.related_entity_id = c.contract_id
+              AND t.task_status_code IN (N'OPEN', N'IN_PROGRESS', N'WAITING')
+              AND t.is_deleted = 0
+              AND t.title = N'Policy renewal follow-up'
+      );
+
+    IF @dry_run = 1
+    BEGIN
+        SELECT
+            contract_id,
+            contract_number,
+            contract_domain_code,
+            contract_type_code,
+            end_date,
+            due_at_utc,
+            task_priority_code
+        FROM @Candidates
+        ORDER BY end_date, contract_number;
+
+        SELECT COUNT(1) AS candidate_task_count
+        FROM @Candidates;
+
+        RETURN;
+    END;
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        DECLARE @CreatedTasks TABLE (
+            task_id UNIQUEIDENTIFIER NOT NULL,
+            contract_id UNIQUEIDENTIFIER NOT NULL
+        );
+
+        INSERT INTO tasking.Task (
+            tenant_id,
+            title,
+            description,
+            related_entity_type,
+            related_entity_id,
+            assigned_to_user_id,
+            created_by_user_id,
+            task_priority_code,
+            task_status_code,
+            due_at_utc
+        )
+        OUTPUT inserted.task_id, inserted.related_entity_id
+        INTO @CreatedTasks (task_id, contract_id)
+        SELECT
+            @tenant_id,
+            N'Policy renewal follow-up',
+            N'Automatically generated renewal reminder for policy ' + c.contract_number + N'.',
+            N'POLICY',
+            c.contract_id,
+            @assigned_to_user_id,
+            @created_by_user_id,
+            c.task_priority_code,
+            N'OPEN',
+            c.due_at_utc
+        FROM @Candidates c;
+
+        SELECT COUNT(1) AS created_task_count
+        FROM @CreatedTasks;
+
+        SELECT
+            ct.task_id,
+            ct.contract_id
+        FROM @CreatedTasks ct
+        ORDER BY ct.task_id;
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+
+        THROW;
+    END CATCH
+END;
+GO
+
 BEGIN TRY
     BEGIN TRANSACTION;
 

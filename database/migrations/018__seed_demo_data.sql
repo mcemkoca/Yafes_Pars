@@ -220,6 +220,9 @@ BEGIN TRY
     IF NOT EXISTS (SELECT 1 FROM policy.ContractVersion WHERE contract_version_id = @Version2)
         INSERT INTO policy.ContractVersion (contract_version_id, contract_id, version_no, effective_from, contract_version_status_code, duration_type_code, periodicity_code, collection_method_code, created_by_user_id)
         VALUES (@Version2, @Contract3, 1, '2026-03-01', N'ACTIVE', N'INDEFINITE', N'YEARLY', N'BANK_TRANSFER', @UserBroker);
+    IF NOT EXISTS (SELECT 1 FROM policy.ContractVersion WHERE contract_version_id = '10000000-0000-0000-0000-000000004103')
+        INSERT INTO policy.ContractVersion (contract_version_id, contract_id, version_no, effective_from, contract_version_status_code, duration_type_code, periodicity_code, collection_method_code, created_by_user_id)
+        VALUES ('10000000-0000-0000-0000-000000004103', @Contract2, 1, '2026-02-01', N'ACTIVE', N'INDEFINITE', N'YEARLY', N'DIRECT_DEBIT', @UserBroker);
 
     IF NOT EXISTS (SELECT 1 FROM policy.ContractParty WHERE contract_id = @Contract1 AND person_id = @Person1 AND contract_party_role_code = N'POLICYHOLDER')
         INSERT INTO policy.ContractParty (contract_id, person_id, contract_party_role_code, is_primary)
@@ -227,6 +230,12 @@ BEGIN TRY
     IF NOT EXISTS (SELECT 1 FROM policy.ContractObject WHERE contract_id = @Contract1 AND insurable_object_id = @Vehicle1)
         INSERT INTO policy.ContractObject (contract_id, insurable_object_id, contract_object_status_code, is_primary)
         VALUES (@Contract1, @Vehicle1, N'ACTIVE', 1);
+    IF NOT EXISTS (SELECT 1 FROM policy.ContractParty WHERE contract_id = @Contract2 AND person_id = @Person3 AND contract_party_role_code = N'POLICYHOLDER')
+        INSERT INTO policy.ContractParty (contract_id, person_id, contract_party_role_code, is_primary)
+        VALUES (@Contract2, @Person3, N'POLICYHOLDER', 1);
+    IF NOT EXISTS (SELECT 1 FROM policy.ContractObject WHERE contract_id = @Contract2 AND insurable_object_id = @Vehicle2)
+        INSERT INTO policy.ContractObject (contract_id, insurable_object_id, contract_object_status_code, is_primary)
+        VALUES (@Contract2, @Vehicle2, N'ACTIVE', 1);
     IF NOT EXISTS (SELECT 1 FROM policy.ContractParty WHERE contract_id = @Contract3 AND person_id = @Person2 AND contract_party_role_code = N'POLICYHOLDER')
         INSERT INTO policy.ContractParty (contract_id, person_id, contract_party_role_code, is_primary)
         VALUES (@Contract3, @Person2, N'POLICYHOLDER', 1);

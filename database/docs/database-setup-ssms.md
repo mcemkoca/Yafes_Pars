@@ -60,3 +60,22 @@ separate operational approval.
 Rollback scripts are guarded by confirmation variables and should not be used
 against production databases. Prefer rebuilding disposable development databases
 from migration order instead of object-level rollback.
+
+## Renewal Task Procedure
+
+After `016__add_stored_procedures.sql` is applied, preview renewal candidates in
+SSMS before inserting tasks:
+
+```sql
+DECLARE @TenantId UNIQUEIDENTIFIER = '00000000-0000-0000-0000-000000000000';
+
+EXEC tasking.SP_CreateRenewalTasks
+    @tenant_id = @TenantId,
+    @days_ahead = 60,
+    @assigned_to_user_id = NULL,
+    @created_by_user_id = NULL,
+    @dry_run = 1;
+```
+
+When the candidate set is correct, rerun with `@dry_run = 0`. The procedure is
+tenant-aware and refuses assignee or creator users outside the tenant.

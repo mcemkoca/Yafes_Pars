@@ -73,5 +73,31 @@ IF NOT EXISTS (
 )
     THROW 50313, 'Missing index: IX_InstitutionIdentifier_value', 1;
 
+IF EXISTS (
+    SELECT institution_id, institution_code, tenant_id
+    FROM institution.Institution
+    WHERE is_deleted = 0
+    GROUP BY institution_id, institution_code, tenant_id
+    HAVING COUNT(1) > 1
+)
+    THROW 50314, 'Duplicate institution identity row detected.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM institution.InstitutionIdentifier
+    WHERE is_deleted = 0
+      AND (LTRIM(RTRIM(id_value)) = N'' OR id_value IS NULL)
+)
+    THROW 50315, 'Institution identifier value cannot be empty.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM institution.InstitutionIdentifier
+    WHERE is_deleted = 0
+      AND valid_to IS NOT NULL
+      AND valid_to < valid_from
+)
+    THROW 50316, 'Institution identifier valid_to cannot be before valid_from.', 1;
+
 PRINT 'Institution domain validation passed.';
 GO

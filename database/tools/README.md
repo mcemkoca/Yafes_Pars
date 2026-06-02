@@ -61,6 +61,16 @@ The folder contains prepared scripts, one log per migration, one log per validat
 
 The runner prepares temporary copies of the SQL files with the configured DEV database name. Original migration and validation files are not modified.
 
+## CI validation
+
+GitHub Actions uses `.github/workflows/sql-server-validation.yml` and
+`run-ci-sql-validation.ps1` to start a SQL Server Developer container, create
+`YafesPars_DEV`, run migrations `000` through `018`, run validations `001`
+through `017`, and upload execution logs.
+
+The workflow can use `CI_SQL_PASSWORD` as a repository secret. If it is absent,
+the workflow uses a local CI-only SQL Server container password.
+
 ## SSMS fallback
 
 If `sqlcmd` is not installed, the runner creates:

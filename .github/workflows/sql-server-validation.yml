@@ -1,0 +1,88 @@
+name: SQL Server validation
+
+on:
+  pull_request:
+    paths:
+      - "database/**"
+      - ".github/workflows/sql-server-validation.yml"
+  push:
+    branches:
+      - main
+      - "feature/**"
+    paths:
+      - "database/**"
+      - ".github/workflows/sql-server-validation.yml"
+  workflow_dispatch:
+
+jobs:
+  validate-sql-server:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: "Y"
+          MSSQL_PID: Developer
+          MSSQL_SA_PASSWORD: ${{ secrets.CI_SQL_PASSWORD || 'Yafes_Strong_Passw0rd_2026!' }}
+        ports:
+          - 1433:1433
+
+    env:
+      YAFES_SQL_SERVER: localhost,1433
+      YAFES_SQL_DATABASE: YafesPars_DEV
+      YAFES_SQL_USER: sa
+      YAFES_SQL_PASSWORD: ${{ secrets.CI_SQL_PASSWORD || 'Yafes_Strong_Passw0rd_2026!' }}
+      YAFES_SQL_BACKUP_DIR: /var/opt/mssql/backup
+      YAFES_SQL_TRUST_SERVER_CERTIFICATE: "1"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install sqlcmd
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
+          curl -fsSL https://packages.microsoft.com/config/ubuntu/24.04/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list >/dev/null
+          sudo apt-get update
+          sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev
+          echo "/opt/mssql-tools18/bin" >> "$GITHUB_PATH"
+
+      - name: Wait for SQL Server
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in {1..60}; do
+            if /opt/mssql-tools18/bin/sqlcmd -S "$YAFES_SQL_SERVER" -U "$YAFES_SQL_USER" -P "$YAFES_SQL_PASSWORD" -C -Q "SELECT 1" >/dev/null 2>&1; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "SQL Server did not become ready in time." >&2
+          exit 1
+
+      - name: Create DEV database for backup preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          /opt/mssql-tools18/bin/sqlcmd \
+            -S "$YAFES_SQL_SERVER" \
+            -U "$YAFES_SQL_USER" \
+            -P "$YAFES_SQL_PASSWORD" \
+            -C \
+            -Q "IF DB_ID(N'YafesPars_DEV') IS NULL CREATE DATABASE [YafesPars_DEV];"
+
+      - name: Run migrations and validations
+        shell: pwsh
+        run: ./database/tools/run-ci-sql-validation.ps1
+
+      - name: Upload SQL execution logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-execution-logs
+          path: database/execution-logs/**
+          if-no-files-found: ignore

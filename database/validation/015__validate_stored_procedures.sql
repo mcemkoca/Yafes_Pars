@@ -37,5 +37,32 @@ IF OBJECT_ID(N'claim.SP_CloseClaim', N'P') IS NULL
 IF OBJECT_ID(N'audit.SP_GetEntityAuditTrail', N'P') IS NULL
     THROW 51511, 'Missing procedure: audit.SP_GetEntityAuditTrail', 1;
 
+IF OBJECT_ID(N'tasking.SP_CreateRenewalTasks', N'P') IS NULL
+    THROW 51512, 'Missing procedure: tasking.SP_CreateRenewalTasks', 1;
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.parameters
+    WHERE object_id = OBJECT_ID(N'tasking.SP_CreateRenewalTasks')
+      AND name = N'@tenant_id'
+)
+    THROW 51513, 'Missing parameter: tasking.SP_CreateRenewalTasks.@tenant_id', 1;
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.parameters
+    WHERE object_id = OBJECT_ID(N'tasking.SP_CreateRenewalTasks')
+      AND name = N'@days_ahead'
+)
+    THROW 51514, 'Missing parameter: tasking.SP_CreateRenewalTasks.@days_ahead', 1;
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.parameters
+    WHERE object_id = OBJECT_ID(N'tasking.SP_CreateRenewalTasks')
+      AND name = N'@dry_run'
+)
+    THROW 51515, 'Missing parameter: tasking.SP_CreateRenewalTasks.@dry_run', 1;
+
 PRINT 'Stored procedure validation passed.';
 GO

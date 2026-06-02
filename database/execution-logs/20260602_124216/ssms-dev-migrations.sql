@@ -4603,6 +4603,172 @@ BEGIN
 END;
 GO
 
+CREATE OR ALTER PROCEDURE tasking.SP_CreateRenewalTasks
+    @tenant_id UNIQUEIDENTIFIER,
+    @days_ahead INT = 60,
+    @assigned_to_user_id UNIQUEIDENTIFIER = NULL,
+    @created_by_user_id UNIQUEIDENTIFIER = NULL,
+    @dry_run BIT = 0
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    IF @tenant_id IS NULL
+        THROW 51620, 'tenant_id is required.', 1;
+
+    IF @days_ahead IS NULL OR @days_ahead < 0 OR @days_ahead > 366
+        THROW 51621, 'days_ahead must be between 0 and 366.', 1;
+
+    IF @assigned_to_user_id IS NOT NULL
+       AND NOT EXISTS (
+            SELECT 1
+            FROM core.AppUser
+            WHERE user_id = @assigned_to_user_id
+              AND tenant_id = @tenant_id
+              AND is_active = 1
+       )
+        THROW 51622, 'assigned_to_user_id does not belong to the tenant.', 1;
+
+    IF @created_by_user_id IS NOT NULL
+       AND NOT EXISTS (
+            SELECT 1
+            FROM core.AppUser
+            WHERE user_id = @created_by_user_id
+              AND tenant_id = @tenant_id
+              AND is_active = 1
+       )
+        THROW 51623, 'created_by_user_id does not belong to the tenant.', 1;
+
+    DECLARE @today DATE = CONVERT(DATE, SYSUTCDATETIME());
+    DECLARE @now DATETIME2(0) = SYSUTCDATETIME();
+
+    DECLARE @Candidates TABLE (
+        contract_id UNIQUEIDENTIFIER NOT NULL PRIMARY KEY,
+        contract_number NVARCHAR(40) NOT NULL,
+        contract_domain_code NVARCHAR(40) NOT NULL,
+        contract_type_code NVARCHAR(80) NOT NULL,
+        end_date DATE NOT NULL,
+        due_at_utc DATETIME2(0) NOT NULL,
+        task_priority_code NVARCHAR(20) NOT NULL
+    );
+
+    INSERT INTO @Candidates (
+        contract_id,
+        contract_number,
+        contract_domain_code,
+        contract_type_code,
+        end_date,
+        due_at_utc,
+        task_priority_code
+    )
+    SELECT
+        c.contract_id,
+        c.contract_number,
+        c.contract_domain_code,
+        c.contract_type_code,
+        c.end_date,
+        CASE
+            WHEN DATEADD(DAY, -@days_ahead, CONVERT(DATETIME2(0), c.end_date)) < @now
+                THEN @now
+            ELSE DATEADD(DAY, -@days_ahead, CONVERT(DATETIME2(0), c.end_date))
+        END AS due_at_utc,
+        CASE
+            WHEN DATEDIFF(DAY, @today, c.end_date) <= 14 THEN N'HIGH'
+            ELSE N'NORMAL'
+        END AS task_priority_code
+    FROM policy.Contract c
+    WHERE c.tenant_id = @tenant_id
+      AND c.is_deleted = 0
+      AND c.contract_status_code = N'ACTIVE'
+      AND c.end_date IS NOT NULL
+      AND c.end_date >= @today
+      AND c.end_date <= DATEADD(DAY, @days_ahead, @today)
+      AND NOT EXISTS (
+            SELECT 1
+            FROM tasking.Task t
+            WHERE t.tenant_id = c.tenant_id
+              AND t.related_entity_type = N'POLICY'
+              AND t.related_entity_id = c.contract_id
+              AND t.task_status_code IN (N'OPEN', N'IN_PROGRESS', N'WAITING')
+              AND t.is_deleted = 0
+              AND t.title = N'Policy renewal follow-up'
+      );
+
+    IF @dry_run = 1
+    BEGIN
+        SELECT
+            contract_id,
+            contract_number,
+            contract_domain_code,
+            contract_type_code,
+            end_date,
+            due_at_utc,
+            task_priority_code
+        FROM @Candidates
+        ORDER BY end_date, contract_number;
+
+        SELECT COUNT(1) AS candidate_task_count
+        FROM @Candidates;
+
+        RETURN;
+    END;
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        DECLARE @CreatedTasks TABLE (
+            task_id UNIQUEIDENTIFIER NOT NULL,
+            contract_id UNIQUEIDENTIFIER NOT NULL
+        );
+
+        INSERT INTO tasking.Task (
+            tenant_id,
+            title,
+            description,
+            related_entity_type,
+            related_entity_id,
+            assigned_to_user_id,
+            created_by_user_id,
+            task_priority_code,
+            task_status_code,
+            due_at_utc
+        )
+        OUTPUT inserted.task_id, inserted.related_entity_id
+        INTO @CreatedTasks (task_id, contract_id)
+        SELECT
+            @tenant_id,
+            N'Policy renewal follow-up',
+            N'Automatically generated renewal reminder for policy ' + c.contract_number + N'.',
+            N'POLICY',
+            c.contract_id,
+            @assigned_to_user_id,
+            @created_by_user_id,
+            c.task_priority_code,
+            N'OPEN',
+            c.due_at_utc
+        FROM @Candidates c;
+
+        SELECT COUNT(1) AS created_task_count
+        FROM @CreatedTasks;
+
+        SELECT
+            ct.task_id,
+            ct.contract_id
+        FROM @CreatedTasks ct
+        ORDER BY ct.task_id;
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+
+        THROW;
+    END CATCH
+END;
+GO
+
 BEGIN TRY
     BEGIN TRANSACTION;
 
@@ -4925,13 +5091,210 @@ BEGIN TRY
     WHEN NOT MATCHED THEN INSERT (use_type_code, label_nl, label_fr, sort_order, is_active)
         VALUES (source.use_type_code, source.label_nl, source.label_fr, source.sort_order, 1);
 
+    MERGE risk.ResidenceType AS target
+    USING (VALUES
+        (N'PRIMARY', N'Hoofdverblijf', N'Residence principale', 10),
+        (N'SECONDARY', N'Tweede verblijf', N'Residence secondaire', 20),
+        (N'RENTAL', N'Huurwoning', N'Logement locatif', 30)
+    ) AS source (residence_type_code, label_nl, label_fr, sort_order)
+    ON target.residence_type_code = source.residence_type_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (residence_type_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.residence_type_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
+    MERGE risk.DestinationType AS target
+    USING (VALUES
+        (N'PRIVATE_HOME', N'Privewoning', N'Habitation privee', 10),
+        (N'HOLIDAY_HOME', N'Vakantiewoning', N'Maison de vacances', 20),
+        (N'RENTAL_PROPERTY', N'Verhuurpand', N'Bien locatif', 30),
+        (N'BUSINESS_PREMISES', N'Bedrijfsgebouw', N'Locaux professionnels', 40)
+    ) AS source (destination_type_code, label_nl, label_fr, sort_order)
+    ON target.destination_type_code = source.destination_type_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (destination_type_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.destination_type_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
+    MERGE risk.AdjacencyType AS target
+    USING (VALUES
+        (N'DETACHED', N'Vrijstaand', N'Quatre facades', 10),
+        (N'SEMI_DETACHED', N'Halfopen bebouwing', N'Trois facades', 20),
+        (N'ROW_HOUSE', N'Rijwoning', N'Maison mitoyenne', 30),
+        (N'APARTMENT_BLOCK', N'Appartementengebouw', N'Immeuble a appartements', 40)
+    ) AS source (adjacency_type_code, label_nl, label_fr, sort_order)
+    ON target.adjacency_type_code = source.adjacency_type_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (adjacency_type_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.adjacency_type_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
+    MERGE risk.OccupancyLevel AS target
+    USING (VALUES
+        (N'OWNER_OCCUPIED', N'Bewoond door eigenaar', N'Occupe par proprietaire', 10),
+        (N'TENANT_OCCUPIED', N'Bewoond door huurder', N'Occupe par locataire', 20),
+        (N'VACANT', N'Leegstaand', N'Inoccupe', 30),
+        (N'SEASONAL', N'Seizoensgebruik', N'Usage saisonnier', 40)
+    ) AS source (occupancy_level_code, label_nl, label_fr, sort_order)
+    ON target.occupancy_level_code = source.occupancy_level_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (occupancy_level_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.occupancy_level_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
+    MERGE risk.ConstructionType AS target
+    USING (VALUES
+        (N'TRADITIONAL', N'Traditionele bouw', N'Construction traditionnelle', 10),
+        (N'WOOD_FRAME', N'Houtskeletbouw', N'Ossature bois', 20),
+        (N'STEEL_FRAME', N'Staalskeletbouw', N'Ossature acier', 30),
+        (N'MIXED', N'Gemengde constructie', N'Construction mixte', 40)
+    ) AS source (construction_type_code, label_nl, label_fr, sort_order)
+    ON target.construction_type_code = source.construction_type_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (construction_type_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.construction_type_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
+    MERGE risk.RoofType AS target
+    USING (VALUES
+        (N'TILE', N'Dakpannen', N'Tuiles', 10),
+        (N'SLATE', N'Leien', N'Ardoises', 20),
+        (N'FLAT', N'Plat dak', N'Toit plat', 30),
+        (N'METAL', N'Metalen dak', N'Toit metallique', 40)
+    ) AS source (roof_type_code, label_nl, label_fr, sort_order)
+    ON target.roof_type_code = source.roof_type_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (roof_type_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.roof_type_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
+    MERGE risk.BurglaryProtectionType AS target
+    USING (VALUES
+        (N'STANDARD_LOCKS', N'Standaardsloten', N'Serrures standard', 10),
+        (N'ALARM', N'Alarmsysteem', N'Systeme alarme', 20),
+        (N'CAMERA', N'Camerabewaking', N'Videosurveillance', 30),
+        (N'CERTIFIED_DOORS', N'Gecertificeerde deuren', N'Portes certifiees', 40)
+    ) AS source (burglary_protection_type_code, label_nl, label_fr, sort_order)
+    ON target.burglary_protection_type_code = source.burglary_protection_type_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (burglary_protection_type_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.burglary_protection_type_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
+    MERGE risk.InsurablePersonSubtype AS target
+    USING (VALUES
+        (N'PERS_IND', N'Individuele persoon', N'Personne individuelle', 10),
+        (N'PERS_ACT', N'Actieve persoon', N'Personne active', 20),
+        (N'GROEP_COL', N'Collectieve groep', N'Groupe collectif', 30),
+        (N'GROEP_ARB', N'Arbeidersgroep', N'Groupe ouvriers', 40),
+        (N'GROEP_BED', N'Bediendengroep', N'Groupe employes', 50),
+        (N'GROEP_POB', N'Personeelsgroep', N'Groupe personnel', 60),
+        (N'GROEP_GEZIN', N'Gezinsgroep', N'Groupe familial', 70),
+        (N'GEZIN_PRIV', N'Privegezin', N'Famille privee', 80)
+    ) AS source (subtype_code, label_nl, label_fr, sort_order)
+    ON target.subtype_code = source.subtype_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (subtype_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.subtype_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
+    MERGE risk.WorkerRiskClass AS target
+    USING (VALUES
+        (N'LOW', N'Lage arbeidersrisico', N'Risque ouvrier faible', 10),
+        (N'MEDIUM', N'Middelmatig arbeidersrisico', N'Risque ouvrier moyen', 20),
+        (N'HIGH', N'Hoog arbeidersrisico', N'Risque ouvrier eleve', 30)
+    ) AS source (worker_risk_class_code, label_nl, label_fr, sort_order)
+    ON target.worker_risk_class_code = source.worker_risk_class_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (worker_risk_class_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.worker_risk_class_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
+    MERGE risk.EmployeeRiskClass AS target
+    USING (VALUES
+        (N'OFFICE', N'Kantoorbediende', N'Employe bureau', 10),
+        (N'FIELD', N'Buitendienst', N'Service externe', 20),
+        (N'MANAGEMENT', N'Leidinggevend', N'Direction', 30)
+    ) AS source (employee_risk_class_code, label_nl, label_fr, sort_order)
+    ON target.employee_risk_class_code = source.employee_risk_class_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (employee_risk_class_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.employee_risk_class_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
+    MERGE risk.AgeCategory AS target
+    USING (VALUES
+        (N'CHILD', N'Kind', N'Enfant', 10),
+        (N'ADULT', N'Volwassene', N'Adulte', 20),
+        (N'SENIOR', N'Senior', N'Senior', 30)
+    ) AS source (age_category_code, label_nl, label_fr, sort_order)
+    ON target.age_category_code = source.age_category_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (age_category_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.age_category_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
+    MERGE risk.InsurableThingSubtype AS target
+    USING (VALUES
+        (N'JEWELRY', N'Juwelen', N'Bijoux', 10),
+        (N'ART', N'Kunst', N'Art', 20),
+        (N'ELECTRONICS', N'Elektronica', N'Electronique', 30),
+        (N'EQUIPMENT', N'Materieel', N'Materiel', 40)
+    ) AS source (subtype_code, label_nl, label_fr, sort_order)
+    ON target.subtype_code = source.subtype_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (subtype_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.subtype_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
+    MERGE risk.ThingRiskCategory AS target
+    USING (VALUES
+        (N'LOW', N'Laag risico', N'Risque faible', 10),
+        (N'MEDIUM', N'Middelmatig risico', N'Risque moyen', 20),
+        (N'HIGH', N'Hoog risico', N'Risque eleve', 30)
+    ) AS source (risk_category_code, label_nl, label_fr, sort_order)
+    ON target.risk_category_code = source.risk_category_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (risk_category_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.risk_category_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
+    MERGE risk.ThingMaterialType AS target
+    USING (VALUES
+        (N'METAL', N'Metaal', N'Metal', 10),
+        (N'WOOD', N'Hout', N'Bois', 20),
+        (N'GLASS', N'Glas', N'Verre', 30),
+        (N'MIXED', N'Gemengd', N'Mixte', 40)
+    ) AS source (material_type_code, label_nl, label_fr, sort_order)
+    ON target.material_type_code = source.material_type_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (material_type_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.material_type_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
+    MERGE risk.InsurableActivitySubtype AS target
+    USING (VALUES
+        (N'SPORT', N'Sportactiviteit', N'Activite sportive', 10),
+        (N'EVENT', N'Evenement', N'Evenement', 20),
+        (N'PROFESSIONAL_ACTIVITY', N'Beroepsactiviteit', N'Activite professionnelle', 30),
+        (N'VOLUNTEER', N'Vrijwilligersactiviteit', N'Activite benevole', 40)
+    ) AS source (activity_type_code, label_nl, label_fr, sort_order)
+    ON target.activity_type_code = source.activity_type_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (activity_type_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.activity_type_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
+    MERGE risk.ActivityRiskLevel AS target
+    USING (VALUES
+        (N'LOW', N'Laag', N'Faible', 10),
+        (N'MEDIUM', N'Middelmatig', N'Moyen', 20),
+        (N'HIGH', N'Hoog', N'Eleve', 30)
+    ) AS source (risk_level_code, label_nl, label_fr, sort_order)
+    ON target.risk_level_code = source.risk_level_code
+    WHEN MATCHED THEN UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr, sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN INSERT (risk_level_code, label_nl, label_fr, sort_order, is_active)
+        VALUES (source.risk_level_code, source.label_nl, source.label_fr, source.sort_order, 1);
+
     MERGE policy.ContractDomain AS target
     USING (VALUES
         (N'MOTOR', N'Motor', N'Auto', N'Motor', N'Trafik', 10),
+        (N'AUTO', N'Auto', N'Auto', N'Auto', N'Auto', 15),
         (N'FIRE', N'Brand', N'Incendie', N'Fire', N'Yangin', 20),
         (N'FAMILY', N'Familie', N'Famille', N'Family', N'Aile', 30),
-        (N'LOAN', N'Lening', N'Pret', N'Loan', N'Kredi', 40),
-        (N'GENERAL', N'Algemeen', N'General', N'General', N'Genel', 50)
+        (N'LIABILITY', N'Aansprakelijkheid', N'Responsabilite', N'Liability', N'Sorumluluk', 35),
+        (N'LEGAL_PROTECTION', N'Rechtsbijstand', N'Protection juridique', N'Legal protection', N'Hukuki koruma', 38),
+        (N'HEALTH', N'Gezondheid', N'Sante', N'Health', N'Saglik', 40),
+        (N'LIFE', N'Leven', N'Vie', N'Life', N'Hayat', 45),
+        (N'LOAN', N'Lening', N'Pret', N'Loan', N'Kredi', 50),
+        (N'BUSINESS', N'Onderneming', N'Entreprise', N'Business', N'Isletme', 55),
+        (N'TRAVEL', N'Reis', N'Voyage', N'Travel', N'Seyahat', 60),
+        (N'GENERAL', N'Algemeen', N'General', N'General', N'Genel', 70)
     ) AS source (contract_domain_code, label_nl, label_fr, label_en, label_tr, sort_order)
     ON target.contract_domain_code = source.contract_domain_code
     WHEN MATCHED THEN
@@ -4941,6 +5304,131 @@ BEGIN TRY
     WHEN NOT MATCHED THEN
         INSERT (contract_domain_code, label_nl, label_fr, label_en, label_tr, sort_order, is_active)
         VALUES (source.contract_domain_code, source.label_nl, source.label_fr, source.label_en, source.label_tr, source.sort_order, 1);
+
+    MERGE coverage.Coverage AS target
+    USING (VALUES
+        (N'BA_AUTO', N'BA Auto', N'RC Auto', N'Motor liability', N'Trafik sorumluluk', N'Verplichte burgerlijke aansprakelijkheid voor voertuigen.', 10),
+        (N'AUTO_LIABILITY', N'BA Auto legacy', N'RC Auto legacy', N'Motor liability legacy', N'Trafik sorumluluk legacy', N'Compatibele code voor bestaande auto aansprakelijkheid.', 11),
+        (N'OMNIUM', N'Omnium', N'Omnium', N'Comprehensive motor', N'Kapsamli kasko', N'Uitgebreide voertuigschade dekking.', 20),
+        (N'MINI_OMNIUM', N'Mini omnium', N'Mini omnium', N'Limited comprehensive motor', N'Sinirli kasko', N'Beperkte voertuigschade dekking.', 30),
+        (N'DRIVER_PROTECTION', N'Bestuurdersbescherming', N'Protection conducteur', N'Driver protection', N'Surucu koruma', N'Bescherming voor de bestuurder.', 40),
+        (N'LEGAL_PROTECTION_AUTO', N'Rechtsbijstand auto', N'Protection juridique auto', N'Auto legal protection', N'Arac hukuki koruma', N'Rechtsbijstand voor voertuigschades.', 50),
+        (N'LEGAL_ASSISTANCE', N'Rechtsbijstand algemeen', N'Protection juridique generale', N'General legal assistance', N'Genel hukuki yardim', N'Algemene rechtsbijstand.', 55),
+        (N'FIRE_BUILDING', N'Brand gebouw', N'Incendie batiment', N'Fire building', N'Bina yangin', N'Gebouwschade door brand.', 60),
+        (N'FIRE_CONTENTS', N'Brand inhoud', N'Incendie contenu', N'Fire contents', N'Esya yangin', N'Inboedelschade door brand.', 70),
+        (N'THEFT', N'Diefstal', N'Vol', N'Theft', N'Hirsizlik', N'Diefstal en inbraakschade.', 80),
+        (N'GLASS_BREAKAGE', N'Glasbreuk', N'Bris de vitre', N'Glass breakage', N'Cam kirilmasi', N'Glasbreuk aan gebouw of inhoud.', 90),
+        (N'WATER_DAMAGE', N'Waterschade', N'Degats des eaux', N'Water damage', N'Su hasari', N'Schade door waterlekken.', 100),
+        (N'FAMILY_LIABILITY', N'Familiale BA', N'RC familiale', N'Family liability', N'Aile sorumluluk', N'Burgerlijke aansprakelijkheid priveleven.', 110),
+        (N'LEGAL_PROTECTION_PRIVATE', N'Rechtsbijstand prive', N'Protection juridique privee', N'Private legal protection', N'Ozel hukuki koruma', N'Rechtsbijstand voor priveleven.', 120),
+        (N'HOSPITALIZATION', N'Hospitalisatie', N'Hospitalisation', N'Hospitalization', N'Hastane', N'Hospitalisatiekosten.', 130),
+        (N'LIFE_COVER', N'Levensdekking', N'Couverture vie', N'Life cover', N'Hayat teminati', N'Kapitaal bij overlijden of leven.', 140),
+        (N'OUTSTANDING_BALANCE', N'Saldo schuldsaldo', N'Solde restant du', N'Outstanding balance', N'Kalan borc', N'Bescherming van openstaand kredietsaldo.', 150),
+        (N'BUSINESS_LIABILITY', N'BA onderneming', N'RC entreprise', N'Business liability', N'Isletme sorumluluk', N'Aansprakelijkheid voor ondernemingen.', 160),
+        (N'TRAVEL_ASSISTANCE', N'Reisbijstand', N'Assistance voyage', N'Travel assistance', N'Seyahat yardimi', N'Bijstand tijdens reizen.', 170),
+        (N'CLAIM_ASSISTANCE', N'Bijstand schade', N'Assistance sinistre', N'Claim assistance', N'Hasar yardimi', N'Operationele schadebijstand.', 180)
+    ) AS source (coverage_code, label_nl, label_fr, label_en, label_tr, description, sort_order)
+    ON target.coverage_code = source.coverage_code
+    WHEN MATCHED THEN
+        UPDATE SET label_nl = source.label_nl, label_fr = source.label_fr,
+            label_en = source.label_en, label_tr = source.label_tr, description = source.description,
+            sort_order = source.sort_order, is_active = 1
+    WHEN NOT MATCHED THEN
+        INSERT (coverage_code, label_nl, label_fr, label_en, label_tr, description, sort_order, is_active)
+        VALUES (source.coverage_code, source.label_nl, source.label_fr, source.label_en, source.label_tr, source.description, source.sort_order, 1);
+
+    MERGE coverage.CoverageDomain AS target
+    USING (VALUES
+        (N'BA_AUTO', N'AUTO', 1, 10),
+        (N'AUTO_LIABILITY', N'AUTO', 0, 11),
+        (N'OMNIUM', N'AUTO', 0, 20),
+        (N'MINI_OMNIUM', N'AUTO', 0, 30),
+        (N'DRIVER_PROTECTION', N'AUTO', 0, 40),
+        (N'LEGAL_PROTECTION_AUTO', N'AUTO', 0, 50),
+        (N'LEGAL_PROTECTION_AUTO', N'LEGAL_PROTECTION', 0, 55),
+        (N'LEGAL_ASSISTANCE', N'LEGAL_PROTECTION', 1, 60),
+        (N'LEGAL_ASSISTANCE', N'BUSINESS', 0, 65),
+        (N'FIRE_BUILDING', N'FIRE', 1, 70),
+        (N'FIRE_CONTENTS', N'FIRE', 0, 80),
+        (N'THEFT', N'FIRE', 0, 90),
+        (N'GLASS_BREAKAGE', N'FIRE', 0, 100),
+        (N'WATER_DAMAGE', N'FIRE', 0, 110),
+        (N'FAMILY_LIABILITY', N'FAMILY', 1, 120),
+        (N'FAMILY_LIABILITY', N'LIABILITY', 1, 125),
+        (N'LEGAL_PROTECTION_PRIVATE', N'FAMILY', 0, 130),
+        (N'LEGAL_PROTECTION_PRIVATE', N'LEGAL_PROTECTION', 0, 135),
+        (N'HOSPITALIZATION', N'HEALTH', 1, 140),
+        (N'LIFE_COVER', N'LIFE', 1, 150),
+        (N'OUTSTANDING_BALANCE', N'LOAN', 1, 160),
+        (N'BUSINESS_LIABILITY', N'BUSINESS', 1, 170),
+        (N'BUSINESS_LIABILITY', N'LIABILITY', 0, 175),
+        (N'TRAVEL_ASSISTANCE', N'TRAVEL', 1, 180),
+        (N'CLAIM_ASSISTANCE', N'GENERAL', 0, 190)
+    ) AS source (coverage_code, contract_domain_code, is_default, sort_order)
+    ON target.coverage_code = source.coverage_code
+       AND target.contract_domain_code = source.contract_domain_code
+    WHEN MATCHED THEN
+        UPDATE SET is_default = source.is_default, sort_order = source.sort_order
+    WHEN NOT MATCHED THEN
+        INSERT (coverage_code, contract_domain_code, is_default, sort_order)
+        VALUES (source.coverage_code, source.contract_domain_code, source.is_default, source.sort_order);
+
+    MERGE coverage.CoveragePackage AS target
+    USING (VALUES
+        (N'AUTO_BASIC', N'AUTO', N'Auto basis', N'Verplichte BA auto met basis rechtsbijstand.'),
+        (N'AUTO_FULL', N'AUTO', N'Auto volledig', N'BA auto, omnium, bestuurdersbescherming en rechtsbijstand.'),
+        (N'HOME_BASIC', N'FIRE', N'Woning basis', N'Brand gebouw en inhoud.'),
+        (N'HOME_FULL', N'FIRE', N'Woning volledig', N'Brand, diefstal, glasbreuk en waterschade.'),
+        (N'FAMILY_BASIC', N'FAMILY', N'Familie basis', N'Familiale aansprakelijkheid en prive rechtsbijstand.'),
+        (N'BUSINESS_BASIC', N'BUSINESS', N'Onderneming basis', N'Basis aansprakelijkheid voor ondernemingen.')
+    ) AS source (package_code, contract_domain_code, package_name, description)
+    ON target.package_code = source.package_code
+    WHEN MATCHED THEN
+        UPDATE SET contract_domain_code = source.contract_domain_code,
+            package_name = source.package_name,
+            description = source.description,
+            is_active = 1,
+            updated_at_utc = SYSUTCDATETIME()
+    WHEN NOT MATCHED THEN
+        INSERT (package_code, contract_domain_code, package_name, description, is_active)
+        VALUES (source.package_code, source.contract_domain_code, source.package_name, source.description, 1);
+
+    MERGE coverage.CoveragePackageItem AS target
+    USING (
+        SELECT
+            cp.coverage_package_id,
+            item.coverage_code,
+            item.is_mandatory,
+            item.sort_order
+        FROM (VALUES
+            (N'AUTO_BASIC', N'BA_AUTO', 1, 10),
+            (N'AUTO_BASIC', N'LEGAL_PROTECTION_AUTO', 0, 20),
+            (N'AUTO_FULL', N'BA_AUTO', 1, 10),
+            (N'AUTO_FULL', N'OMNIUM', 1, 20),
+            (N'AUTO_FULL', N'DRIVER_PROTECTION', 0, 30),
+            (N'AUTO_FULL', N'LEGAL_PROTECTION_AUTO', 0, 40),
+            (N'HOME_BASIC', N'FIRE_BUILDING', 1, 10),
+            (N'HOME_BASIC', N'FIRE_CONTENTS', 0, 20),
+            (N'HOME_FULL', N'FIRE_BUILDING', 1, 10),
+            (N'HOME_FULL', N'FIRE_CONTENTS', 1, 20),
+            (N'HOME_FULL', N'THEFT', 0, 30),
+            (N'HOME_FULL', N'GLASS_BREAKAGE', 0, 40),
+            (N'HOME_FULL', N'WATER_DAMAGE', 0, 50),
+            (N'FAMILY_BASIC', N'FAMILY_LIABILITY', 1, 10),
+            (N'FAMILY_BASIC', N'LEGAL_PROTECTION_PRIVATE', 0, 20),
+            (N'BUSINESS_BASIC', N'BUSINESS_LIABILITY', 1, 10),
+            (N'BUSINESS_BASIC', N'LEGAL_ASSISTANCE', 0, 20)
+        ) AS item (package_code, coverage_code, is_mandatory, sort_order)
+        INNER JOIN coverage.CoveragePackage cp
+            ON cp.package_code = item.package_code
+    ) AS source
+    ON target.coverage_package_id = source.coverage_package_id
+       AND target.coverage_code = source.coverage_code
+    WHEN MATCHED THEN
+        UPDATE SET is_mandatory = source.is_mandatory, sort_order = source.sort_order
+    WHEN NOT MATCHED THEN
+        INSERT (coverage_package_id, coverage_code, is_mandatory, sort_order)
+        VALUES (source.coverage_package_id, source.coverage_code, source.is_mandatory, source.sort_order);
 
     MERGE policy.ContractStatus AS target
     USING (VALUES
@@ -5528,6 +6016,9 @@ BEGIN TRY
     IF NOT EXISTS (SELECT 1 FROM policy.ContractVersion WHERE contract_version_id = @Version2)
         INSERT INTO policy.ContractVersion (contract_version_id, contract_id, version_no, effective_from, contract_version_status_code, duration_type_code, periodicity_code, collection_method_code, created_by_user_id)
         VALUES (@Version2, @Contract3, 1, '2026-03-01', N'ACTIVE', N'INDEFINITE', N'YEARLY', N'BANK_TRANSFER', @UserBroker);
+    IF NOT EXISTS (SELECT 1 FROM policy.ContractVersion WHERE contract_version_id = '10000000-0000-0000-0000-000000004103')
+        INSERT INTO policy.ContractVersion (contract_version_id, contract_id, version_no, effective_from, contract_version_status_code, duration_type_code, periodicity_code, collection_method_code, created_by_user_id)
+        VALUES ('10000000-0000-0000-0000-000000004103', @Contract2, 1, '2026-02-01', N'ACTIVE', N'INDEFINITE', N'YEARLY', N'DIRECT_DEBIT', @UserBroker);
 
     IF NOT EXISTS (SELECT 1 FROM policy.ContractParty WHERE contract_id = @Contract1 AND person_id = @Person1 AND contract_party_role_code = N'POLICYHOLDER')
         INSERT INTO policy.ContractParty (contract_id, person_id, contract_party_role_code, is_primary)
@@ -5535,6 +6026,12 @@ BEGIN TRY
     IF NOT EXISTS (SELECT 1 FROM policy.ContractObject WHERE contract_id = @Contract1 AND insurable_object_id = @Vehicle1)
         INSERT INTO policy.ContractObject (contract_id, insurable_object_id, contract_object_status_code, is_primary)
         VALUES (@Contract1, @Vehicle1, N'ACTIVE', 1);
+    IF NOT EXISTS (SELECT 1 FROM policy.ContractParty WHERE contract_id = @Contract2 AND person_id = @Person3 AND contract_party_role_code = N'POLICYHOLDER')
+        INSERT INTO policy.ContractParty (contract_id, person_id, contract_party_role_code, is_primary)
+        VALUES (@Contract2, @Person3, N'POLICYHOLDER', 1);
+    IF NOT EXISTS (SELECT 1 FROM policy.ContractObject WHERE contract_id = @Contract2 AND insurable_object_id = @Vehicle2)
+        INSERT INTO policy.ContractObject (contract_id, insurable_object_id, contract_object_status_code, is_primary)
+        VALUES (@Contract2, @Vehicle2, N'ACTIVE', 1);
     IF NOT EXISTS (SELECT 1 FROM policy.ContractParty WHERE contract_id = @Contract3 AND person_id = @Person2 AND contract_party_role_code = N'POLICYHOLDER')
         INSERT INTO policy.ContractParty (contract_id, person_id, contract_party_role_code, is_primary)
         VALUES (@Contract3, @Person2, N'POLICYHOLDER', 1);
@@ -5893,6 +6390,56 @@ IF COL_LENGTH(N'person.Person', N'tenant_id') IS NULL
 IF COL_LENGTH(N'person.Person', N'is_deleted') IS NULL
     THROW 50219, 'Missing column: person.Person.is_deleted', 1;
 
+IF EXISTS (
+    SELECT 1
+    FROM person.Person p
+    WHERE p.person_kind = N'NATURAL'
+      AND p.is_deleted = 0
+      AND NOT EXISTS (
+            SELECT 1
+            FROM person.NaturalPerson np
+            WHERE np.person_id = p.person_id
+              AND np.is_deleted = 0
+      )
+)
+    THROW 50220, 'Natural person without NaturalPerson row.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM person.Person p
+    WHERE p.person_kind = N'LEGAL'
+      AND p.is_deleted = 0
+      AND NOT EXISTS (
+            SELECT 1
+            FROM person.LegalPerson lp
+            WHERE lp.person_id = p.person_id
+              AND lp.is_deleted = 0
+      )
+)
+    THROW 50221, 'Legal person without LegalPerson row.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM person.NaturalPerson np
+    INNER JOIN person.LegalPerson lp
+        ON lp.person_id = np.person_id
+    WHERE np.is_deleted = 0
+      AND lp.is_deleted = 0
+)
+    THROW 50222, 'Person cannot be both natural and legal.', 1;
+
+IF EXISTS (
+    SELECT p.tenant_id, e.email
+    FROM person.Email e
+    INNER JOIN person.Person p
+        ON p.person_id = e.person_id
+    WHERE e.is_deleted = 0
+      AND e.is_primary = 1
+    GROUP BY p.tenant_id, e.email
+    HAVING COUNT(1) > 1
+)
+    THROW 50223, 'Duplicate primary email per tenant.', 1;
+
 PRINT 'Person domain validation passed.';
 GO
 
@@ -5973,6 +6520,32 @@ IF NOT EXISTS (
       AND object_id = OBJECT_ID(N'institution.InstitutionIdentifier')
 )
     THROW 50313, 'Missing index: IX_InstitutionIdentifier_value', 1;
+
+IF EXISTS (
+    SELECT institution_id, institution_code, tenant_id
+    FROM institution.Institution
+    WHERE is_deleted = 0
+    GROUP BY institution_id, institution_code, tenant_id
+    HAVING COUNT(1) > 1
+)
+    THROW 50314, 'Duplicate institution identity row detected.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM institution.InstitutionIdentifier
+    WHERE is_deleted = 0
+      AND (LTRIM(RTRIM(id_value)) = N'' OR id_value IS NULL)
+)
+    THROW 50315, 'Institution identifier value cannot be empty.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM institution.InstitutionIdentifier
+    WHERE is_deleted = 0
+      AND valid_to IS NOT NULL
+      AND valid_to < valid_from
+)
+    THROW 50316, 'Institution identifier valid_to cannot be before valid_from.', 1;
 
 PRINT 'Institution domain validation passed.';
 GO
@@ -6066,6 +6639,75 @@ IF NOT EXISTS (
       AND object_id = OBJECT_ID(N'risk.InsurableRealEstate')
 )
     THROW 50417, 'Missing index: IX_InsurableRealEstate_address', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM risk.InsurableVehicle
+    WHERE (is_financed = 1 AND finance_institution_id IS NULL)
+       OR (is_financed = 0 AND finance_institution_id IS NOT NULL)
+)
+    THROW 50418, 'Vehicle financing rule violation.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM risk.InsurableVehicle
+    WHERE build_year < 1886
+       OR build_year > YEAR(SYSUTCDATETIME()) + 1
+)
+    THROW 50419, 'Vehicle build year outside sane range.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM risk.InsurableVehicle
+    WHERE registration_date < first_commissioning_date
+)
+    THROW 50420, 'Vehicle registration date cannot be before first commissioning date.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM risk.InsurableRealEstate
+    WHERE flammable_materials_pct IS NOT NULL
+      AND (flammable_materials_pct < 0 OR flammable_materials_pct > 100)
+)
+    THROW 50421, 'Real estate flammable percentage outside 0-100.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM risk.InsurableActivity
+    WHERE end_datetime < start_datetime
+)
+    THROW 50422, 'Activity end date cannot be before start date.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM risk.InsurableObject
+    WHERE status_code NOT IN (N'ACTIVE', N'INACTIVE', N'ARCHIVED', N'PENDING')
+)
+    THROW 50423, 'Invalid insurable object status_code.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM (VALUES
+        (N'risk.ResidenceType', OBJECT_ID(N'risk.ResidenceType')),
+        (N'risk.DestinationType', OBJECT_ID(N'risk.DestinationType')),
+        (N'risk.AdjacencyType', OBJECT_ID(N'risk.AdjacencyType')),
+        (N'risk.OccupancyLevel', OBJECT_ID(N'risk.OccupancyLevel')),
+        (N'risk.ConstructionType', OBJECT_ID(N'risk.ConstructionType')),
+        (N'risk.RoofType', OBJECT_ID(N'risk.RoofType')),
+        (N'risk.BurglaryProtectionType', OBJECT_ID(N'risk.BurglaryProtectionType')),
+        (N'risk.InsurablePersonSubtype', OBJECT_ID(N'risk.InsurablePersonSubtype')),
+        (N'risk.WorkerRiskClass', OBJECT_ID(N'risk.WorkerRiskClass')),
+        (N'risk.EmployeeRiskClass', OBJECT_ID(N'risk.EmployeeRiskClass')),
+        (N'risk.AgeCategory', OBJECT_ID(N'risk.AgeCategory')),
+        (N'risk.InsurableThingSubtype', OBJECT_ID(N'risk.InsurableThingSubtype')),
+        (N'risk.ThingRiskCategory', OBJECT_ID(N'risk.ThingRiskCategory')),
+        (N'risk.ThingMaterialType', OBJECT_ID(N'risk.ThingMaterialType')),
+        (N'risk.InsurableActivitySubtype', OBJECT_ID(N'risk.InsurableActivitySubtype')),
+        (N'risk.ActivityRiskLevel', OBJECT_ID(N'risk.ActivityRiskLevel'))
+    ) AS lookup_tables (lookup_name, object_id)
+    WHERE lookup_tables.object_id IS NULL
+)
+    THROW 50424, 'Missing advanced risk lookup table.', 1;
 
 PRINT 'Risk domain validation passed.';
 GO
@@ -6172,6 +6814,62 @@ IF NOT EXISTS (
 )
     THROW 50516, 'Missing index: IX_ContractVersion_contract_effective', 1;
 
+IF EXISTS (
+    SELECT 1
+    FROM policy.Contract
+    WHERE is_deleted = 0
+      AND end_date IS NOT NULL
+      AND end_date < start_date
+)
+    THROW 50517, 'Contract end_date cannot be before start_date.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM policy.Contract c
+    WHERE c.is_deleted = 0
+      AND c.contract_status_code = N'ACTIVE'
+      AND NOT EXISTS (
+            SELECT 1
+            FROM policy.ContractParty cp
+            WHERE cp.contract_id = c.contract_id
+      )
+)
+    THROW 50518, 'Active contract must have at least one party.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM policy.Contract c
+    WHERE c.is_deleted = 0
+      AND c.contract_status_code = N'ACTIVE'
+      AND c.contract_domain_code IN (N'MOTOR', N'AUTO', N'FIRE', N'FAMILY', N'BUSINESS')
+      AND NOT EXISTS (
+            SELECT 1
+            FROM policy.ContractObject co
+            WHERE co.contract_id = c.contract_id
+              AND co.contract_object_status_code = N'ACTIVE'
+      )
+)
+    THROW 50519, 'Active contract in object-backed domain must have at least one active object.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM policy.ContractVersion
+    WHERE is_deleted = 0
+      AND effective_to IS NOT NULL
+      AND effective_to < effective_from
+)
+    THROW 50520, 'Contract version effective_to cannot be before effective_from.', 1;
+
+IF EXISTS (
+    SELECT contract_id
+    FROM policy.ContractVersion
+    WHERE is_deleted = 0
+      AND contract_version_status_code = N'ACTIVE'
+    GROUP BY contract_id
+    HAVING COUNT(1) > 1
+)
+    THROW 50521, 'Duplicate active contract versions detected.', 1;
+
 PRINT 'Policy domain validation passed.';
 GO
 
@@ -6224,6 +6922,58 @@ IF NOT EXISTS (
     WHERE coverage_code = N'AUTO_LIABILITY'
 )
     THROW 50609, 'Missing seed coverage: AUTO_LIABILITY', 1;
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM coverage.Coverage
+    WHERE coverage_code = N'BA_AUTO'
+)
+    THROW 50610, 'Missing seed coverage: BA_AUTO', 1;
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM coverage.CoveragePackage
+    WHERE package_code = N'AUTO_BASIC'
+)
+    THROW 50611, 'Missing coverage package: AUTO_BASIC', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM coverage.CoveragePackage cp
+    WHERE cp.is_active = 1
+      AND NOT EXISTS (
+            SELECT 1
+            FROM coverage.CoveragePackageItem cpi
+            WHERE cpi.coverage_package_id = cp.coverage_package_id
+      )
+)
+    THROW 50612, 'Active coverage package without items.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM coverage.Coverage c
+    WHERE c.is_active = 1
+      AND NOT EXISTS (
+            SELECT 1
+            FROM coverage.CoverageDomain cd
+            WHERE cd.coverage_code = c.coverage_code
+      )
+)
+    THROW 50613, 'Active coverage without coverage domain mapping.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM coverage.CoveragePackage cp
+    INNER JOIN coverage.CoveragePackageItem cpi
+        ON cpi.coverage_package_id = cp.coverage_package_id
+    WHERE NOT EXISTS (
+        SELECT 1
+        FROM coverage.CoverageDomain cd
+        WHERE cd.coverage_code = cpi.coverage_code
+          AND cd.contract_domain_code = cp.contract_domain_code
+    )
+)
+    THROW 50614, 'Coverage package item is not valid for the package domain.', 1;
 
 PRINT 'Coverage domain validation passed.';
 GO
@@ -6303,6 +7053,51 @@ IF NOT EXISTS (
 )
     THROW 50712, 'Missing index: IX_Claim_status_reported', 1;
 
+IF EXISTS (
+    SELECT 1
+    FROM claim.Claim
+    WHERE incident_date IS NOT NULL
+      AND reported_date < incident_date
+)
+    THROW 50713, 'Claim reported_date cannot be before incident_date.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM claim.Claim
+    WHERE (claim_status_code = N'CLOSED' AND closed_date IS NULL)
+       OR (claim_status_code <> N'CLOSED' AND closed_date IS NOT NULL)
+)
+    THROW 50714, 'Claim closed status/date state is inconsistent.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM claim.Claim
+    WHERE paid_amount > 0
+      AND payment_method_code IS NULL
+)
+    THROW 50715, 'Paid claim must have payment method.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM claim.Claim
+    WHERE ISNULL(paid_amount, 0) < 0
+       OR ISNULL(reserved_amount, 0) < 0
+)
+    THROW 50716, 'Claim paid/reserved amount cannot be negative.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM claim.Claim c
+    WHERE c.is_deleted = 0
+      AND NOT EXISTS (
+            SELECT 1
+            FROM policy.Contract pc
+            WHERE pc.contract_id = c.contract_id
+              AND pc.tenant_id = c.tenant_id
+      )
+)
+    THROW 50717, 'Claim contract tenant linkage is invalid.', 1;
+
 PRINT 'Claim domain validation passed.';
 GO
 
@@ -6356,6 +7151,36 @@ IF NOT EXISTS (
       AND object_id = OBJECT_ID(N'document.Document')
 )
     THROW 50809, 'Missing index: IX_Document_tenant_owner', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM document.Document
+    WHERE owner_entity_type NOT IN (N'PERSON', N'INSTITUTION', N'POLICY', N'CLAIM', N'RISK_OBJECT')
+)
+    THROW 50810, 'Invalid document owner_entity_type.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM document.Document
+    WHERE file_size_bytes <= 0
+)
+    THROW 50811, 'Document file_size_bytes must be positive.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM document.Document
+    WHERE storage_key IS NULL
+       OR LTRIM(RTRIM(storage_key)) = N''
+)
+    THROW 50812, 'Document storage_key cannot be empty.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM document.Document
+    WHERE (is_deleted = 1 AND deleted_at_utc IS NULL)
+       OR (is_deleted = 0 AND deleted_at_utc IS NOT NULL)
+)
+    THROW 50813, 'Document deleted state is inconsistent.', 1;
 
 PRINT 'Document domain validation passed.';
 GO
@@ -6419,6 +7244,40 @@ IF NOT EXISTS (
 )
     THROW 50910, 'Missing index: IX_TaskReminder_due', 1;
 
+IF EXISTS (
+    SELECT 1
+    FROM tasking.Task
+    WHERE (task_status_code = N'DONE' AND completed_at_utc IS NULL)
+       OR (task_status_code <> N'DONE' AND completed_at_utc IS NOT NULL)
+)
+    THROW 50911, 'Task completion state is inconsistent.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM tasking.Task t
+    INNER JOIN core.AppUser u
+        ON u.user_id = t.assigned_to_user_id
+    WHERE t.assigned_to_user_id IS NOT NULL
+      AND u.tenant_id <> t.tenant_id
+)
+    THROW 50912, 'Assigned task user must belong to task tenant.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM tasking.Task
+    WHERE related_entity_type IS NOT NULL
+      AND related_entity_id IS NULL
+)
+    THROW 50913, 'Task related_entity_type requires related_entity_id.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM tasking.TaskReminder
+    WHERE sent_at_utc IS NOT NULL
+      AND sent_at_utc < remind_at_utc
+)
+    THROW 50914, 'Task reminder sent_at_utc cannot be before remind_at_utc.', 1;
+
 PRINT 'Task domain validation passed.';
 GO
 
@@ -6471,6 +7330,27 @@ IF OBJECT_ID(N'policy.TR_ContractVersion_Audit', N'TR') IS NULL
 IF OBJECT_ID(N'claim.TR_Claim_Audit', N'TR') IS NULL
     THROW 51010, 'Missing trigger: claim.TR_Claim_Audit', 1;
 
+IF EXISTS (
+    SELECT 1
+    FROM audit.AuditLog
+    WHERE action_type NOT IN (N'INSERT', N'UPDATE', N'DELETE')
+)
+    THROW 51011, 'Invalid audit action_type.', 1;
+
+IF EXISTS (
+    SELECT expected.trigger_name
+    FROM (VALUES
+        (N'person.TR_Person_Audit'),
+        (N'institution.TR_Institution_Audit'),
+        (N'risk.TR_InsurableObject_Audit'),
+        (N'policy.TR_Contract_Audit'),
+        (N'policy.TR_ContractVersion_Audit'),
+        (N'claim.TR_Claim_Audit')
+    ) AS expected (trigger_name)
+    WHERE OBJECT_ID(expected.trigger_name, N'TR') IS NULL
+)
+    THROW 51012, 'Audited core table is missing an audit trigger.', 1;
+
 PRINT 'Audit domain validation passed.';
 GO
 
@@ -6514,6 +7394,41 @@ IF NOT EXISTS (
       AND parent_object_id = OBJECT_ID(N'policy.ContractVersion')
 )
     THROW 51104, 'Missing FK: FK_ContractVersion_AppUser_CreatedBy', 1;
+
+IF EXISTS (
+    SELECT required.table_name
+    FROM (VALUES
+        (N'person.Person'),
+        (N'institution.Institution'),
+        (N'risk.InsurableObject'),
+        (N'policy.Contract'),
+        (N'claim.Claim'),
+        (N'document.Document'),
+        (N'tasking.Task')
+    ) AS required (table_name)
+    WHERE COL_LENGTH(required.table_name, N'tenant_id') IS NULL
+)
+    THROW 51105, 'Business root table missing tenant_id.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM policy.ContractObject co
+    INNER JOIN policy.Contract c
+        ON c.contract_id = co.contract_id
+    INNER JOIN risk.InsurableObject io
+        ON io.insurable_object_id = co.insurable_object_id
+    WHERE c.tenant_id <> io.tenant_id
+)
+    THROW 51106, 'Contract object tenant mismatch.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM claim.Claim cl
+    INNER JOIN policy.Contract c
+        ON c.contract_id = cl.contract_id
+    WHERE cl.tenant_id <> c.tenant_id
+)
+    THROW 51107, 'Claim contract tenant mismatch.', 1;
 
 PRINT 'Cross-domain constraint validation passed.';
 GO
@@ -6709,6 +7624,33 @@ IF OBJECT_ID(N'claim.SP_CloseClaim', N'P') IS NULL
 IF OBJECT_ID(N'audit.SP_GetEntityAuditTrail', N'P') IS NULL
     THROW 51511, 'Missing procedure: audit.SP_GetEntityAuditTrail', 1;
 
+IF OBJECT_ID(N'tasking.SP_CreateRenewalTasks', N'P') IS NULL
+    THROW 51512, 'Missing procedure: tasking.SP_CreateRenewalTasks', 1;
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.parameters
+    WHERE object_id = OBJECT_ID(N'tasking.SP_CreateRenewalTasks')
+      AND name = N'@tenant_id'
+)
+    THROW 51513, 'Missing parameter: tasking.SP_CreateRenewalTasks.@tenant_id', 1;
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.parameters
+    WHERE object_id = OBJECT_ID(N'tasking.SP_CreateRenewalTasks')
+      AND name = N'@days_ahead'
+)
+    THROW 51514, 'Missing parameter: tasking.SP_CreateRenewalTasks.@days_ahead', 1;
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.parameters
+    WHERE object_id = OBJECT_ID(N'tasking.SP_CreateRenewalTasks')
+      AND name = N'@dry_run'
+)
+    THROW 51515, 'Missing parameter: tasking.SP_CreateRenewalTasks.@dry_run', 1;
+
 PRINT 'Stored procedure validation passed.';
 GO
 
@@ -6750,6 +7692,128 @@ IF NOT EXISTS (SELECT 1 FROM core.Role WHERE tenant_id IS NULL AND role_code = N
 
 IF NOT EXISTS (SELECT 1 FROM risk.InsurableObjectType WHERE object_type_code = N'VEHICLE')
     THROW 51610, 'Missing seed: InsurableObjectType VEHICLE', 1;
+
+IF EXISTS (
+    SELECT required.contract_domain_code
+    FROM (VALUES
+        (N'AUTO'), (N'FIRE'), (N'FAMILY'), (N'LIABILITY'), (N'LEGAL_PROTECTION'),
+        (N'HEALTH'), (N'LIFE'), (N'LOAN'), (N'BUSINESS'), (N'TRAVEL')
+    ) AS required (contract_domain_code)
+    WHERE NOT EXISTS (
+        SELECT 1
+        FROM policy.ContractDomain cd
+        WHERE cd.contract_domain_code = required.contract_domain_code
+          AND cd.is_active = 1
+    )
+)
+    THROW 51611, 'Missing required coverage contract domain seed.', 1;
+
+IF EXISTS (
+    SELECT required.coverage_code
+    FROM (VALUES
+        (N'BA_AUTO'), (N'OMNIUM'), (N'MINI_OMNIUM'), (N'DRIVER_PROTECTION'),
+        (N'LEGAL_PROTECTION_AUTO'), (N'FIRE_BUILDING'), (N'FIRE_CONTENTS'),
+        (N'THEFT'), (N'GLASS_BREAKAGE'), (N'WATER_DAMAGE'), (N'FAMILY_LIABILITY'),
+        (N'LEGAL_PROTECTION_PRIVATE'), (N'HOSPITALIZATION'), (N'LIFE_COVER'),
+        (N'OUTSTANDING_BALANCE'), (N'BUSINESS_LIABILITY'), (N'TRAVEL_ASSISTANCE')
+    ) AS required (coverage_code)
+    WHERE NOT EXISTS (
+        SELECT 1
+        FROM coverage.Coverage c
+        WHERE c.coverage_code = required.coverage_code
+          AND c.is_active = 1
+    )
+)
+    THROW 51612, 'Missing required coverage seed.', 1;
+
+IF EXISTS (
+    SELECT required.package_code
+    FROM (VALUES
+        (N'AUTO_BASIC'), (N'AUTO_FULL'), (N'HOME_BASIC'), (N'HOME_FULL'),
+        (N'FAMILY_BASIC'), (N'BUSINESS_BASIC')
+    ) AS required (package_code)
+    WHERE NOT EXISTS (
+        SELECT 1
+        FROM coverage.CoveragePackage cp
+        WHERE cp.package_code = required.package_code
+          AND cp.is_active = 1
+    )
+)
+    THROW 51613, 'Missing required coverage package seed.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM coverage.CoveragePackage cp
+    WHERE cp.is_active = 1
+      AND NOT EXISTS (
+            SELECT 1
+            FROM coverage.CoveragePackageItem cpi
+            WHERE cpi.coverage_package_id = cp.coverage_package_id
+      )
+)
+    THROW 51614, 'Coverage package seed has no items.', 1;
+
+IF EXISTS (
+    SELECT required.lookup_name
+    FROM (VALUES
+        (N'risk.VehicleType', 3),
+        (N'risk.UsageType', 2),
+        (N'risk.LicensePlateType', 2),
+        (N'risk.FuelType', 3),
+        (N'risk.DriveType', 3),
+        (N'risk.RealEstateType', 3),
+        (N'risk.UseTypeRealEstate', 2),
+        (N'risk.InsuredRole', 2),
+        (N'risk.ResidenceType', 3),
+        (N'risk.DestinationType', 4),
+        (N'risk.AdjacencyType', 4),
+        (N'risk.OccupancyLevel', 4),
+        (N'risk.ConstructionType', 4),
+        (N'risk.RoofType', 4),
+        (N'risk.BurglaryProtectionType', 4),
+        (N'risk.InsurablePersonSubtype', 8),
+        (N'risk.WorkerRiskClass', 3),
+        (N'risk.EmployeeRiskClass', 3),
+        (N'risk.AgeCategory', 3),
+        (N'risk.InsurableThingSubtype', 4),
+        (N'risk.ThingRiskCategory', 3),
+        (N'risk.ThingMaterialType', 4),
+        (N'risk.InsurableActivitySubtype', 4),
+        (N'risk.ActivityRiskLevel', 3)
+    ) AS required (lookup_name, minimum_count)
+    CROSS APPLY (
+        SELECT current_count =
+            CASE required.lookup_name
+                WHEN N'risk.VehicleType' THEN (SELECT COUNT(1) FROM risk.VehicleType WHERE is_active = 1)
+                WHEN N'risk.UsageType' THEN (SELECT COUNT(1) FROM risk.UsageType WHERE is_active = 1)
+                WHEN N'risk.LicensePlateType' THEN (SELECT COUNT(1) FROM risk.LicensePlateType WHERE is_active = 1)
+                WHEN N'risk.FuelType' THEN (SELECT COUNT(1) FROM risk.FuelType WHERE is_active = 1)
+                WHEN N'risk.DriveType' THEN (SELECT COUNT(1) FROM risk.DriveType WHERE is_active = 1)
+                WHEN N'risk.RealEstateType' THEN (SELECT COUNT(1) FROM risk.RealEstateType WHERE is_active = 1)
+                WHEN N'risk.UseTypeRealEstate' THEN (SELECT COUNT(1) FROM risk.UseTypeRealEstate WHERE is_active = 1)
+                WHEN N'risk.InsuredRole' THEN (SELECT COUNT(1) FROM risk.InsuredRole WHERE is_active = 1)
+                WHEN N'risk.ResidenceType' THEN (SELECT COUNT(1) FROM risk.ResidenceType WHERE is_active = 1)
+                WHEN N'risk.DestinationType' THEN (SELECT COUNT(1) FROM risk.DestinationType WHERE is_active = 1)
+                WHEN N'risk.AdjacencyType' THEN (SELECT COUNT(1) FROM risk.AdjacencyType WHERE is_active = 1)
+                WHEN N'risk.OccupancyLevel' THEN (SELECT COUNT(1) FROM risk.OccupancyLevel WHERE is_active = 1)
+                WHEN N'risk.ConstructionType' THEN (SELECT COUNT(1) FROM risk.ConstructionType WHERE is_active = 1)
+                WHEN N'risk.RoofType' THEN (SELECT COUNT(1) FROM risk.RoofType WHERE is_active = 1)
+                WHEN N'risk.BurglaryProtectionType' THEN (SELECT COUNT(1) FROM risk.BurglaryProtectionType WHERE is_active = 1)
+                WHEN N'risk.InsurablePersonSubtype' THEN (SELECT COUNT(1) FROM risk.InsurablePersonSubtype WHERE is_active = 1)
+                WHEN N'risk.WorkerRiskClass' THEN (SELECT COUNT(1) FROM risk.WorkerRiskClass WHERE is_active = 1)
+                WHEN N'risk.EmployeeRiskClass' THEN (SELECT COUNT(1) FROM risk.EmployeeRiskClass WHERE is_active = 1)
+                WHEN N'risk.AgeCategory' THEN (SELECT COUNT(1) FROM risk.AgeCategory WHERE is_active = 1)
+                WHEN N'risk.InsurableThingSubtype' THEN (SELECT COUNT(1) FROM risk.InsurableThingSubtype WHERE is_active = 1)
+                WHEN N'risk.ThingRiskCategory' THEN (SELECT COUNT(1) FROM risk.ThingRiskCategory WHERE is_active = 1)
+                WHEN N'risk.ThingMaterialType' THEN (SELECT COUNT(1) FROM risk.ThingMaterialType WHERE is_active = 1)
+                WHEN N'risk.InsurableActivitySubtype' THEN (SELECT COUNT(1) FROM risk.InsurableActivitySubtype WHERE is_active = 1)
+                WHEN N'risk.ActivityRiskLevel' THEN (SELECT COUNT(1) FROM risk.ActivityRiskLevel WHERE is_active = 1)
+                ELSE 0
+            END
+    ) AS actual
+    WHERE actual.current_count < required.minimum_count
+)
+    THROW 51615, 'Risk lookup seed is below required minimum row count.', 1;
 
 PRINT 'Seed validation passed.';
 GO
