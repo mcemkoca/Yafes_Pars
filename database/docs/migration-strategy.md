@@ -71,3 +71,8 @@ tracked with name, checksum, execution time, user, status, and error message.
 - `017__seed_lookup_data.sql` seeds production lookup/reference data and core
   RBAC permissions and system roles.
 - `016__validate_seed_data.sql` validates required seed data.
+- `018__seed_demo_data.sql` optionally seeds a Belgian insurance broker demo
+  tenant with users, people, institutions, risks, policies, claims, tasks, and
+  documents.
+- `017__validate_demo_data.sql` validates optional demo data when the demo seed
+  has been run.
