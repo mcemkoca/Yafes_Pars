@@ -1,6 +1,7 @@
 # Yafes Pars
 
 [![SQL Server validation](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/sql-server-validation.yml/badge.svg)](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/sql-server-validation.yml)
+[![SSMS workbench validation](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/ssms-workbench-validation.yml/badge.svg)](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/ssms-workbench-validation.yml)
 [![Backend build](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/backend-build.yml/badge.svg)](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/backend-build.yml)
 
 Yafes Pars is an SSMS-first SQL Server insurance core platform for broker and
@@ -26,7 +27,8 @@ target.
 - Guarded PowerShell migration runner with DEV target checks, backup preflight,
   SQL Server syntax scans, execution logs, and SSMS fallback generation.
 - Optional .NET 8 backend/API foundation for future integration work.
-- GitHub Actions for SQL Server validation and backend build/test checks.
+- GitHub Actions for SQL Server validation, SSMS workbench validation, and
+  backend build/test checks.
 
 ## Repository Map
 

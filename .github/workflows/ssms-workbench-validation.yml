@@ -1,0 +1,125 @@
+name: SSMS workbench validation
+
+on:
+  pull_request:
+    paths:
+      - "database/ssms/**"
+      - "README.md"
+      - ".github/workflows/ssms-workbench-validation.yml"
+  push:
+    branches:
+      - main
+      - "feature/**"
+    paths:
+      - "database/ssms/**"
+      - "README.md"
+      - ".github/workflows/ssms-workbench-validation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ssms-workbench-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-ssms-workbench:
+    name: Validate SSMS operator assets
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate required SSMS files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          required_files=(
+            database/ssms/00__open_first_safety_check.sql
+            database/ssms/01__run_all_dev_migrations_sqlcmd.sql
+            database/ssms/02__operations_dashboard.sql
+            database/ssms/03__create_renewal_tasks.sql
+            database/ssms/04__admin_security_audit_queries.sql
+            database/ssms/05__operator_dashboard_home.sql
+            database/ssms/06__query_library_shortcuts.sql
+            database/ssms/07__data_entry_bridge_templates.sql
+            database/ssms/08__data_editing_guardrails.sql
+            database/ssms/09__graph_report_pack.sql
+            database/ssms/10__daily_operator_checklist.sql
+            database/ssms/README.md
+            database/ssms/dashboard-plan.md
+            database/ssms/tutorials/README.md
+            database/ssms/templates/README.md
+            database/ssms/demo/index.html
+          )
+
+          for file in "${required_files[@]}"; do
+            test -f "$file" || { echo "Missing required file: $file" >&2; exit 1; }
+          done
+
+      - name: Validate SQLCMD and info-tip conventions
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          for file in database/ssms/05__operator_dashboard_home.sql \
+                      database/ssms/06__query_library_shortcuts.sql \
+                      database/ssms/07__data_entry_bridge_templates.sql \
+                      database/ssms/08__data_editing_guardrails.sql \
+                      database/ssms/09__graph_report_pack.sql \
+                      database/ssms/10__daily_operator_checklist.sql; do
+            grep -q ":ON ERROR EXIT" "$file" || { echo "Missing SQLCMD guard: $file" >&2; exit 1; }
+            grep -q "TENANT_CODE" "$file" || { echo "Missing TENANT_CODE variable: $file" >&2; exit 1; }
+            grep -q "INFO TIP" "$file" || { echo "Missing INFO TIP guidance: $file" >&2; exit 1; }
+          done
+
+      - name: Scan SSMS SQL for unsupported syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if grep -RInE '\b(AUTO_INCREMENT|SERIAL|jsonb|uuid_generate|RETURNING|LIMIT[[:space:]]+[0-9]+)\b' database/ssms; then
+            echo "Unsupported non-SQL Server syntax found in SSMS workbench files." >&2
+            exit 1
+          fi
+
+      - name: Scan SSMS SQL for destructive patterns
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if grep -RInE '\b(DROP[[:space:]]+DATABASE|DROP[[:space:]]+TABLE|TRUNCATE[[:space:]]+TABLE|ALTER[[:space:]]+TABLE.*DROP[[:space:]]+COLUMN)\b' database/ssms; then
+            echo "Destructive pattern found in SSMS workbench files." >&2
+            exit 1
+          fi
+
+      - name: Validate demo JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          node <<'NODE'
+          const fs = require('fs');
+          const vm = require('vm');
+          const html = fs.readFileSync('database/ssms/demo/index.html', 'utf8');
+          const match = html.match(/<script>([\s\S]*)<\/script>/);
+          if (!match) {
+            throw new Error('Demo script block is missing.');
+          }
+          new vm.Script(match[1]);
+          const requiredText = [
+            'Corporate Operator Workbench',
+            '05__operator_dashboard_home.sql',
+            '07__data_entry_bridge_templates.sql',
+            '09__graph_report_pack.sql'
+          ];
+          for (const text of requiredText) {
+            if (!html.includes(text)) {
+              throw new Error(`Demo is missing required text: ${text}`);
+            }
+          }
+          NODE

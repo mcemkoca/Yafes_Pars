@@ -3,14 +3,20 @@ name: SQL Server validation
 on:
   pull_request:
     paths:
-      - "database/**"
+      - "database/migrations/**"
+      - "database/validation/**"
+      - "database/tools/**"
+      - "database/templates/**"
       - ".github/workflows/sql-server-validation.yml"
   push:
     branches:
       - main
       - "feature/**"
     paths:
-      - "database/**"
+      - "database/migrations/**"
+      - "database/validation/**"
+      - "database/tools/**"
+      - "database/templates/**"
       - ".github/workflows/sql-server-validation.yml"
   workflow_dispatch:
 
