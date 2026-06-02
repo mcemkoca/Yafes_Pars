@@ -65,3 +65,9 @@ Documents are represented as metadata records with storage provider and storage
 key fields. Binary file content is intentionally stored outside SQL Server.
 Documents can be versioned and linked to people, institutions, policies, claims,
 or risk objects.
+
+## Task Domain
+
+Tasks are tenant-aware operational records that can point to a person,
+institution, policy, claim, risk object, or document. Comments and reminders are
+modeled as child tables.

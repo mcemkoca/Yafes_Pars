@@ -247,3 +247,24 @@ owner.
 
 Stores file metadata for each version of a document. No binary file content is
 stored in SQL Server by default.
+
+## tasking.Task
+
+Tenant-aware task table with related entity type/id, assignee, creator, priority,
+status, due date, completion date, audit timestamps, and soft delete state.
+
+## tasking.TaskComment
+
+Stores comments on tasks.
+
+## tasking.TaskReminder
+
+Stores reminder schedule and delivery metadata for tasks.
+
+## tasking.TaskStatus
+
+Reference table for task lifecycle statuses.
+
+## tasking.TaskPriority
+
+Reference table for task priorities.

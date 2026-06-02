@@ -94,3 +94,5 @@ The claim migration creates tenant-aware claims linked to policies, coverages,
 people, and insurable objects.
 The document migration stores file metadata, versions, links, and storage
 references without storing binary file content in SQL Server.
+The task migration creates tenant-aware tasks, comments, reminders, statuses,
+and priorities.

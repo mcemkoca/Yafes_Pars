@@ -48,3 +48,6 @@ tracked with name, checksum, execution time, user, status, and error message.
 - `009__create_document_domain.sql` creates document metadata, link, version,
   and type tables without storing file binaries in SQL Server.
 - `008__validate_document_domain.sql` validates the document migration.
+- `010__create_task_domain.sql` creates task, comment, reminder, status, and
+  priority tables.
+- `009__validate_task_domain.sql` validates the task migration.
