@@ -62,5 +62,13 @@ Operators open the listed script in a new SSMS tab.
 - Add SQL Agent job monitoring result sets.
 - Add standard SSMS registered-server instructions.
 - Add Power BI template consuming report pack exports.
-- Add a release checklist for production deployment when the DEV flow is fully
+- Extend the production readiness checklist with real restore drill evidence,
+  monitoring owners, and SQL Agent maintenance jobs after DEV/TEST execution is
   validated.
+
+## Corporate Readiness Links
+
+- `../docs/ssms-deployment-runbook.md`
+- `../docs/environment-matrix.md`
+- `../docs/production-readiness-checklist.md`
+- `../docs/migration-execution-log-template.md`

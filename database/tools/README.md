@@ -2,6 +2,33 @@
 
 This folder contains guarded helpers for running the Yafes Pars SQL Server DEV database workflow.
 
+## Static quality gate
+
+Run the static quality gate before heavier SQL Server execution:
+
+```powershell
+.\database\tools\test-sql-quality-gate.ps1
+```
+
+In CI, use `-NoReportFile` to avoid writing local execution artifacts:
+
+```powershell
+.\database\tools\test-sql-quality-gate.ps1 -NoReportFile
+```
+
+Use `-StrictStyle` when you want style advisories such as `SET XACT_ABORT ON`
+to become blocking failures.
+
+The gate checks:
+
+- protected migration order `000` through `018`
+- protected validation order `001` through `017`
+- unsupported non-SQL Server syntax
+- destructive SQL patterns outside rollback scripts
+- forbidden `Object` table naming
+- SSMS operator conventions for info tips, SQLCMD guards, and tenant context
+- required production readiness documentation
+
 ## Required variables
 
 Set these environment variables before running the migration runner:
@@ -70,6 +97,10 @@ through `017`, and upload execution logs.
 
 The workflow generates a masked, short-lived SQL Server container password for
 each run. No static SQL Server password is stored in the repository.
+
+`.github/workflows/database-quality-gate.yml` runs the static gate without a SQL
+Server container so documentation, SSMS, template, and migration structure
+problems are caught quickly.
 
 ## SSMS fallback
 

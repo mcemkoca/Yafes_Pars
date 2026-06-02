@@ -42,6 +42,19 @@ shortcut grids, health signals, and recommended next actions.
 | `demo/` | Local visual demo of the SSMS-style operator workbench. |
 | `dashboard-plan.md` | Corporate dashboard architecture and future roadmap. |
 
+## Production Runbooks
+
+The SSMS workbench is supported by production planning documents under
+`database/docs/`:
+
+- `ssms-deployment-runbook.md`
+- `azure-windows-server-deployment.md`
+- `sql-server-installation-checklist.md`
+- `backup-restore-strategy.md`
+- `security-hardening.md`
+- `environment-matrix.md`
+- `production-readiness-checklist.md`
+
 ## Safety Modes
 
 - `READ_ONLY`: no data changes.

@@ -44,6 +44,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Run static SQL quality gate
+        shell: pwsh
+        run: ./database/tools/test-sql-quality-gate.ps1 -NoReportFile
+
       - name: Install sqlcmd
         shell: bash
         run: |

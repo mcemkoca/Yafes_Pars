@@ -1,6 +1,7 @@
 # Yafes Pars
 
 [![SQL Server validation](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/sql-server-validation.yml/badge.svg)](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/sql-server-validation.yml)
+[![Database quality gate](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/database-quality-gate.yml/badge.svg)](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/database-quality-gate.yml)
 [![SSMS workbench validation](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/ssms-workbench-validation.yml/badge.svg)](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/ssms-workbench-validation.yml)
 [![Backend build](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/backend-build.yml/badge.svg)](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/backend-build.yml)
 
@@ -26,9 +27,13 @@ target.
   renewal task generation, tutorials, and security/audit checks.
 - Guarded PowerShell migration runner with DEV target checks, backup preflight,
   SQL Server syntax scans, execution logs, and SSMS fallback generation.
+- Static SQL quality gate for protected migration order, SQL Server syntax,
+  destructive pattern scanning, SSMS conventions, and production documentation.
+- Azure Windows Server, SQL Server installation, SSMS deployment, backup/restore,
+  security hardening, environment matrix, and production readiness runbooks.
 - Optional .NET 8 backend/API foundation for future integration work.
-- GitHub Actions for SQL Server validation, SSMS workbench validation, and
-  backend build/test checks.
+- GitHub Actions for database quality gate, SQL Server validation, SSMS
+  workbench validation, and backend build/test checks.
 
 ## Repository Map
 
@@ -38,7 +43,7 @@ target.
 | `database/validation/` | Post-migration validation and integrity checks. |
 | `database/ssms/` | SSMS-first operator dashboard, scripts, tutorials, templates, and visual demo. |
 | `database/tools/` | Guarded local and CI migration runners. |
-| `database/docs/` | Architecture, security, ERD, data dictionary, and standards. |
+| `database/docs/` | Architecture, security, ERD, data dictionary, Azure/SSMS runbooks, and production readiness standards. |
 | `backend/` | Optional .NET 8 API foundation and tests. |
 | `.github/workflows/` | CI workflows for SQL Server and backend checks. |
 | `.github/` | Dependabot, CODEOWNERS, and pull request standards. |
@@ -100,6 +105,12 @@ Then open `http://127.0.0.1:3000/`.
 
 ## Local Validation
 
+Run the static quality gate before migration execution:
+
+```powershell
+./database/tools/test-sql-quality-gate.ps1 -NoReportFile
+```
+
 Generate an SSMS fallback script without requiring `sqlcmd`:
 
 ```powershell
@@ -120,6 +131,23 @@ $env:YAFES_SQL_BACKUP_DIR = "C:\SqlBackups"
 
 The runner refuses non-DEV database names, production-like server names, unsafe
 SQL patterns, and missing pre-migration backup configuration.
+
+## Production Readiness
+
+Production planning is documented for Azure Windows Server and SQL Server while
+preserving the SSMS operator model:
+
+- `database/docs/azure-windows-server-deployment.md`
+- `database/docs/ssms-deployment-runbook.md`
+- `database/docs/sql-server-installation-checklist.md`
+- `database/docs/backup-restore-strategy.md`
+- `database/docs/security-hardening.md`
+- `database/docs/environment-matrix.md`
+- `database/docs/production-readiness-checklist.md`
+- `database/docs/repository-development-plan.md`
+
+Use `database/docs/migration-execution-log-template.md` for TEST and PROD
+deployment records.
 
 ## Backend Foundation
 
@@ -150,6 +178,9 @@ Dependency updates are managed through Dependabot for GitHub Actions and NuGet.
 - Validation coverage: complete for the current database scope.
 - SSMS workbench: dashboard, query library, bridge templates, editing
   guardrails, tutorials, and report pack available under `database/ssms/`.
+- Production readiness pack: Azure Windows Server, SSMS deployment, SQL Server
+  installation, backup/restore, security hardening, environment matrix, and
+  execution log templates available under `database/docs/`.
 - Backend/API foundation: available, not the primary operator surface.
 - Real DEV SQL Server execution: must be confirmed in an environment with
   `sqlcmd` or SSMS access to the target SQL Server instance.

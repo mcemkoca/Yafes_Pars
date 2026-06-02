@@ -1,0 +1,48 @@
+name: Database quality gate
+
+on:
+  pull_request:
+    paths:
+      - "database/docs/**"
+      - "database/migrations/**"
+      - "database/ssms/**"
+      - "database/templates/**"
+      - "database/tools/**"
+      - "database/validation/**"
+      - "README.md"
+      - ".github/workflows/database-quality-gate.yml"
+  push:
+    branches:
+      - main
+      - "feature/**"
+    paths:
+      - "database/docs/**"
+      - "database/migrations/**"
+      - "database/ssms/**"
+      - "database/templates/**"
+      - "database/tools/**"
+      - "database/validation/**"
+      - "README.md"
+      - ".github/workflows/database-quality-gate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: database-quality-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  database-quality-gate:
+    name: Run static SQL and SSMS checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run SQL quality gate
+        shell: pwsh
+        run: ./database/tools/test-sql-quality-gate.ps1 -NoReportFile

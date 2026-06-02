@@ -43,3 +43,17 @@ The build order follows dependency direction:
    data.
 
 Backend/API work should consume this database model after SSMS validation passes.
+
+## Deployment Architecture
+
+The production target is Azure Windows Server with SQL Server and SSMS as the
+primary operational interface. Deployment and readiness details are split into
+focused runbooks:
+
+- `azure-windows-server-deployment.md`
+- `ssms-deployment-runbook.md`
+- `sql-server-installation-checklist.md`
+- `backup-restore-strategy.md`
+- `security-hardening.md`
+- `environment-matrix.md`
+- `production-readiness-checklist.md`

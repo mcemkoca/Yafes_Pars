@@ -6,12 +6,22 @@ All scripts target Microsoft SQL Server T-SQL and use SSMS batch separators.
 ## Initial Process
 
 1. Open the target SQL Server instance in SSMS.
-2. Run the migration files in the order below.
-3. Run the validation files in the order below.
-4. Run optional demo data only in development or test environments.
+2. Run the static quality gate from the repository.
+3. Run the migration files in the order below.
+4. Run the validation files in the order below.
+5. Run optional demo data only in development or test environments.
 
 Do not run destructive rollback scripts against production databases without a
 separate operational approval.
+
+For Azure Windows Server, SQL Server installation, backup/restore, and
+production release procedures, use:
+
+- `azure-windows-server-deployment.md`
+- `sql-server-installation-checklist.md`
+- `ssms-deployment-runbook.md`
+- `backup-restore-strategy.md`
+- `production-readiness-checklist.md`
 
 ## Migration Order
 
