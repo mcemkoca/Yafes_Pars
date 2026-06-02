@@ -192,3 +192,19 @@ Maps contract versions to the contract objects active in that version.
 ## policy.ContractTakeover
 
 Stores incoming, outgoing, or internal takeover metadata for a contract version.
+
+## coverage.Coverage
+
+Reference table for core insurance coverages and localized labels.
+
+## coverage.CoverageDomain
+
+Maps coverages to policy contract domains.
+
+## coverage.CoveragePackage
+
+Groups coverages into reusable packages by contract domain.
+
+## coverage.CoveragePackageItem
+
+Maps coverages into packages with mandatory flags and sort order.

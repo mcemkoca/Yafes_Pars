@@ -45,3 +45,10 @@ tables. No table is named `Object`; subtypes use `InsurableVehicle`,
 The policy domain uses `policy.Contract` as the tenant-aware root and
 `policy.ContractVersion` as the lifecycle history model. Parties link to
 `person.Person`; insured objects link to `risk.InsurableObject`.
+
+## Coverage Domain
+
+The coverage domain replaces legacy `lookup_coverage` and `coverage_domain`
+tables with schema-qualified `coverage.Coverage` and
+`coverage.CoverageDomain`. Coverage packages allow reusable bundles per policy
+domain.

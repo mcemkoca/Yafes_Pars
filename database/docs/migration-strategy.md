@@ -39,3 +39,6 @@ tracked with name, checksum, execution time, user, status, and error message.
 - `006__create_contract_domain.sql` creates the policy contract, version,
   party, object, takeover, and lookup tables.
 - `005__validate_policy_domain.sql` validates the policy migration.
+- `007__create_coverage_domain.sql` creates coverage, domain mapping, package,
+  package item tables, and core coverage seed rows.
+- `006__validate_coverage_domain.sql` validates the coverage migration.

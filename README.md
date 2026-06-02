@@ -88,3 +88,5 @@ The risk migration refactors the legacy object model to `risk.InsurableObject`
 and subtype tables without creating an `Object` table.
 The policy migration creates `policy.Contract`, `policy.ContractVersion`,
 parties, insured object links, takeover metadata, and policy lookup tables.
+The coverage migration replaces legacy coverage naming with
+`coverage.Coverage`, domain mapping, and package tables.
