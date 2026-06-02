@@ -268,3 +268,13 @@ Reference table for task lifecycle statuses.
 ## tasking.TaskPriority
 
 Reference table for task priorities.
+
+## audit.AuditLog
+
+Stores insert, update, and delete events by schema, table, primary key, action,
+change time, optional user, old/new JSON summaries, source system, and
+correlation id.
+
+## audit.EntityChangeSet
+
+Optional per-column change detail table linked to `audit.AuditLog`.

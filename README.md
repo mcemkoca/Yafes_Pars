@@ -96,3 +96,5 @@ The document migration stores file metadata, versions, links, and storage
 references without storing binary file content in SQL Server.
 The task migration creates tenant-aware tasks, comments, reminders, statuses,
 and priorities.
+The audit migration creates centralized audit tables and minimal root-entity
+audit triggers.

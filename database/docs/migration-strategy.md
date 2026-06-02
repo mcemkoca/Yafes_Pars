@@ -51,3 +51,6 @@ tracked with name, checksum, execution time, user, status, and error message.
 - `010__create_task_domain.sql` creates task, comment, reminder, status, and
   priority tables.
 - `009__validate_task_domain.sql` validates the task migration.
+- `011__create_audit_domain.sql` creates audit tables and minimal audit triggers
+  for key root tables.
+- `010__validate_audit_domain.sql` validates the audit migration.

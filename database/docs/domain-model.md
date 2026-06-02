@@ -71,3 +71,9 @@ or risk objects.
 Tasks are tenant-aware operational records that can point to a person,
 institution, policy, claim, risk object, or document. Comments and reminders are
 modeled as child tables.
+
+## Audit Domain
+
+Audit logging is centralized in `audit.AuditLog`. The first migration version
+adds minimal insert/update/delete triggers for key root tables: person,
+institution, insurable object, contract, contract version, and claim.
