@@ -106,3 +106,5 @@ The trigger phase validates the root audit triggers created by the audit
 migration.
 The view migration adds customer, institution, risk, policy, claim, and task
 dashboard views.
+The stored procedure migration adds tenant-aware create/search operations and
+audit trail lookup procedures.

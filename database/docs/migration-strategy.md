@@ -65,3 +65,6 @@ tracked with name, checksum, execution time, user, status, and error message.
 - `013__validate_triggers.sql` validates root audit trigger existence.
 - `015__add_views.sql` creates reporting and dashboard views.
 - `014__validate_views.sql` validates view existence.
+- `016__add_stored_procedures.sql` creates tenant-aware search, create, close,
+  and audit lookup stored procedures.
+- `015__validate_stored_procedures.sql` validates stored procedure existence.
