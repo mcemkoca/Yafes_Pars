@@ -164,3 +164,31 @@ Movable thing subtype for equipment, valuables, goods, or other tangible risks.
 ## risk.InsurableActivity
 
 Activity subtype for event or activity-based risks.
+
+## policy.Contract
+
+Tenant-aware policy or contract root table. Includes contract number, domain,
+type, status, company, handling company, date range, audit columns, and soft
+delete state.
+
+## policy.ContractVersion
+
+First-class version table for contract lifecycle changes. Version numbers are
+unique per contract and effective date ranges are validated.
+
+## policy.ContractParty
+
+Maps people to contracts through contract party roles.
+
+## policy.ContractObject
+
+Maps contracts to `risk.InsurableObject` records with object status and primary
+flags.
+
+## policy.ContractVersionObject
+
+Maps contract versions to the contract objects active in that version.
+
+## policy.ContractTakeover
+
+Stores incoming, outgoing, or internal takeover metadata for a contract version.

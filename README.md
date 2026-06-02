@@ -86,3 +86,5 @@ The institution domain migration adds tenant-aware company, identifier, address,
 and role tables.
 The risk migration refactors the legacy object model to `risk.InsurableObject`
 and subtype tables without creating an `Object` table.
+The policy migration creates `policy.Contract`, `policy.ContractVersion`,
+parties, insured object links, takeover metadata, and policy lookup tables.

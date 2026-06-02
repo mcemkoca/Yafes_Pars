@@ -39,3 +39,9 @@ The legacy object domain is refactored to `risk.InsurableObject` and subtype
 tables. No table is named `Object`; subtypes use `InsurableVehicle`,
 `InsurableRealEstate`, `InsurableLoan`, `InsurablePerson`, `InsurableThing`, and
 `InsurableActivity`.
+
+## Policy Domain
+
+The policy domain uses `policy.Contract` as the tenant-aware root and
+`policy.ContractVersion` as the lifecycle history model. Parties link to
+`person.Person`; insured objects link to `risk.InsurableObject`.

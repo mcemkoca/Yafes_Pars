@@ -36,3 +36,6 @@ tracked with name, checksum, execution time, user, status, and error message.
   `risk.InsurableObject` instead of the legacy `Object` table name.
 - `004__validate_risk_domain.sql` validates the risk migration and checks that
   forbidden `Object` tables were not created.
+- `006__create_contract_domain.sql` creates the policy contract, version,
+  party, object, takeover, and lookup tables.
+- `005__validate_policy_domain.sql` validates the policy migration.
