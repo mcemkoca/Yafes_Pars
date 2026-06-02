@@ -78,36 +78,19 @@ Planned migration order:
 
 ## Current Status
 
-The repository has been reorganized into a professional database project layout.
-The initial SSMS-compatible migration base creates the database, domain schemas,
-migration tracking table, tenant foundation, application users, roles,
-permissions, role assignment tables, and the first person domain migration.
-The institution domain migration adds tenant-aware company, identifier, address,
-and role tables.
-The risk migration refactors the legacy object model to `risk.InsurableObject`
-and subtype tables without creating an `Object` table.
-The policy migration creates `policy.Contract`, `policy.ContractVersion`,
-parties, insured object links, takeover metadata, and policy lookup tables.
-The coverage migration replaces legacy coverage naming with
-`coverage.Coverage`, domain mapping, and package tables.
-The claim migration creates tenant-aware claims linked to policies, coverages,
-people, and insurable objects.
-The document migration stores file metadata, versions, links, and storage
-references without storing binary file content in SQL Server.
-The task migration creates tenant-aware tasks, comments, reminders, statuses,
-and priorities.
-The audit migration creates centralized audit tables and minimal root-entity
-audit triggers.
-The constraint hardening migration adds cross-domain constraints that depend on
-previously created policy, risk, and core tables.
-The index hardening migration adds FK-supporting indexes and selected dashboard
-indexes, with validation that detects missing FK index coverage.
-The trigger phase validates the root audit triggers created by the audit
-migration.
-The view migration adds customer, institution, risk, policy, claim, and task
-dashboard views.
-The stored procedure migration adds tenant-aware create/search operations and
-audit trail lookup procedures.
-The lookup seed migration adds production reference data and core RBAC
-permissions; optional demo data remains separate.
-The demo seed migration is optional and creates a Belgian broker sample tenant.
+The repository now contains a complete SSMS-first database core through:
+
+- ordered migrations `000` through `018`
+- domain schemas for core, ref, person, institution, risk, policy, coverage,
+  claim, document, tasking, and audit
+- tenant and RBAC foundation
+- migration tracking
+- person, institution, risk, policy, coverage, claim, document, task, and audit
+  domains
+- cross-domain constraints and FK-supporting indexes
+- root audit triggers
+- dashboard and summary views
+- tenant-aware stored procedures
+- production lookup seed data
+- optional Belgian broker demo data
+- validation scripts for each major phase

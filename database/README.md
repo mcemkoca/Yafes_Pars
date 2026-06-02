@@ -22,3 +22,9 @@ Every major database change should include:
 4. A focused commit.
 
 Production lookup seed data and optional demo data must remain separate.
+
+## Build Status
+
+The database folder now contains ordered migrations from `000` through `018`,
+validation scripts for each major phase, guarded rollback scripts, reusable SQL
+templates, and domain documentation.

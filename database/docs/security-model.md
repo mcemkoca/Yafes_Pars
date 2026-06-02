@@ -27,3 +27,16 @@ who changed what, when possible, without storing application secrets.
 `core.AppUser.person_id` is intentionally nullable and not constrained during
 the core migration because `person.Person` is created later in the migration
 sequence.
+
+## Tenant Isolation
+
+Root business tables include `tenant_id`, including person, institution, risk
+object, contract, claim, document, and task records. Cross-domain references
+that can enforce tenant consistency do so through composite constraints, such as
+claim-to-contract.
+
+## Audit
+
+`audit.AuditLog` records root entity changes from SQL triggers for key tables.
+Application-layer audit can later enrich these rows with user id and correlation
+id context.
