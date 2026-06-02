@@ -12,3 +12,10 @@ Use SQL Server Management Studio to execute migration files in filename order.
 
 Do not run destructive rollback scripts against production databases without a
 separate operational approval.
+
+## Current Validation
+
+After running `000__create_database.sql`, `001__create_schemas.sql`, and
+`002__create_core_infrastructure.sql`, run:
+
+- `database/validation/001__validate_core_infrastructure.sql`

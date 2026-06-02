@@ -79,4 +79,6 @@ Planned migration order:
 ## Current Status
 
 The repository has been reorganized into a professional database project layout.
-The next phase is the SSMS-compatible migration base and core infrastructure.
+The initial SSMS-compatible migration base creates the database, domain schemas,
+and migration tracking table. The next phase is tenant, user, role, and
+permission infrastructure.

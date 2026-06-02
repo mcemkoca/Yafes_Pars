@@ -18,3 +18,11 @@ Studio.
 
 The migration base will include `core.SchemaMigration` so applied scripts can be
 tracked with name, checksum, execution time, user, status, and error message.
+
+## Initial Migration Base
+
+- `000__create_database.sql` creates `YafesPars` when it does not exist.
+- `001__create_schemas.sql` creates the required domain schemas.
+- `002__create_core_infrastructure.sql` creates `core.SchemaMigration`.
+- `001__validate_core_infrastructure.sql` validates schemas and migration
+  tracking objects.
