@@ -68,3 +68,6 @@ tracked with name, checksum, execution time, user, status, and error message.
 - `016__add_stored_procedures.sql` creates tenant-aware search, create, close,
   and audit lookup stored procedures.
 - `015__validate_stored_procedures.sql` validates stored procedure existence.
+- `017__seed_lookup_data.sql` seeds production lookup/reference data and core
+  RBAC permissions and system roles.
+- `016__validate_seed_data.sql` validates required seed data.

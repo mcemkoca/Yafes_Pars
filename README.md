@@ -108,3 +108,5 @@ The view migration adds customer, institution, risk, policy, claim, and task
 dashboard views.
 The stored procedure migration adds tenant-aware create/search operations and
 audit trail lookup procedures.
+The lookup seed migration adds production reference data and core RBAC
+permissions; optional demo data remains separate.
