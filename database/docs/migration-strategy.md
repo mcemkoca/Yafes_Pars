@@ -29,3 +29,6 @@ tracked with name, checksum, execution time, user, status, and error message.
 - `003__create_person_domain.sql` creates person and contact tables from the
   legacy person domain under the `person` schema and lookup tables under `ref`.
 - `002__validate_person_domain.sql` validates the person migration.
+- `004__create_institution_domain.sql` creates tenant-aware institution,
+  identifier, address, and lookup tables.
+- `003__validate_institution_domain.sql` validates the institution migration.

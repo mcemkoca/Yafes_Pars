@@ -82,3 +82,5 @@ The repository has been reorganized into a professional database project layout.
 The initial SSMS-compatible migration base creates the database, domain schemas,
 migration tracking table, tenant foundation, application users, roles,
 permissions, role assignment tables, and the first person domain migration.
+The institution domain migration adds tenant-aware company, identifier, address,
+and role tables.

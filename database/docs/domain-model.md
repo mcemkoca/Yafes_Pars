@@ -26,3 +26,9 @@ Legacy join table names are normalized to PascalCase:
 
 - `Person_PersonType` becomes `person.PersonPersonType`.
 - `PersonRelation_Person` becomes `person.PersonRelationPerson`.
+
+## Institution Domain
+
+The institution domain uses `institution.Institution` as the tenant-aware root
+for insurers, banks, brokers, and partner companies. Identifiers and addresses
+are modeled as child tables with type and role lookup tables.

@@ -101,3 +101,32 @@ relations.
 ## person.PersonRelationPerson
 
 Join table connecting relation records to the from and to persons.
+
+## institution.Institution
+
+Tenant-aware root table for insurers, banks, brokers, partners, and other
+companies. Includes institution code, display name, legal name, VAT number,
+country, active state, audit columns, and soft delete state.
+
+## institution.InstitutionRole
+
+Reference table for institution roles in policy, claim, or operational context.
+
+## institution.InstitutionIdentifierType
+
+Reference table for external identifier types such as KBO, VAT, FSMA, or
+internal company codes.
+
+## institution.InstitutionIdentifier
+
+Stores typed external identifiers for institutions with validity dates.
+
+## institution.InstitutionAddressRole
+
+Reference table for address roles such as head office, billing, or postal
+address.
+
+## institution.InstitutionAddress
+
+Stores institution addresses with role, country, primary flag, audit columns,
+and soft delete state.
