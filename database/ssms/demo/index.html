@@ -1,24 +1,27 @@
 <!doctype html>
-<html lang="en">
+<html lang="tr">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Yafes Pars - SSMS Workbench Demo</title>
+  <title>Yafes Pars - Kullanici Dostu SSMS Demo</title>
   <style>
     :root {
       --chrome: #f3f3f3;
-      --chrome-dark: #e5e5e5;
-      --line: #c7c7c7;
-      --text: #1f1f1f;
-      --muted: #595959;
+      --chrome-2: #e8e8e8;
+      --line: #c6c6c6;
+      --line-2: #dedede;
+      --text: #1e1e1e;
+      --muted: #5b5b5b;
       --blue: #0078d4;
-      --selection: #cce8ff;
-      --editor: #ffffff;
-      --tree: #fbfbfb;
-      --grid-head: #f0f0f0;
-      --status: #007acc;
-      --warn: #fff4ce;
+      --blue-2: #cce8ff;
       --green: #107c10;
+      --amber: #fff4ce;
+      --amber-line: #dfc15f;
+      --red: #c50f1f;
+      --panel: #fbfbfb;
+      --editor: #ffffff;
+      --head: #f0f0f0;
+      --status: #007acc;
     }
 
     * {
@@ -27,20 +30,27 @@
 
     html,
     body {
+      width: 100%;
       height: 100%;
       margin: 0;
       overflow: hidden;
       color: var(--text);
-      background: #d8d8d8;
+      background: #dadada;
       font-family: "Segoe UI", Tahoma, Arial, sans-serif;
       font-size: 12px;
       letter-spacing: 0;
     }
 
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
     .window {
       height: 100vh;
       display: grid;
-      grid-template-rows: 30px 28px 1fr 24px;
+      grid-template-rows: 30px 29px 1fr 24px;
       border: 1px solid #8a8a8a;
       background: var(--chrome);
     }
@@ -71,7 +81,6 @@
       place-items: center;
       border: 1px solid transparent;
       color: #333;
-      font-size: 11px;
     }
 
     .title-button:hover {
@@ -84,20 +93,20 @@
       align-items: center;
       gap: 6px;
       padding: 3px 8px;
-      background: var(--chrome);
       border-bottom: 1px solid var(--line);
+      background: var(--chrome);
       white-space: nowrap;
     }
 
     .menu {
       display: flex;
-      gap: 14px;
-      margin-right: 10px;
+      gap: 13px;
+      margin-right: 8px;
     }
 
     .tool {
+      min-width: 26px;
       height: 22px;
-      min-width: 24px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -106,40 +115,61 @@
       border: 1px solid #b8b8b8;
       background: linear-gradient(#fff, #e7e7e7);
       color: #222;
-      font: inherit;
     }
 
     .tool.primary {
-      border-color: #7aa7d9;
-      background: linear-gradient(#eef7ff, #d4eaff);
+      border-color: #6ca1d3;
+      background: linear-gradient(#eef7ff, #d5eaff);
+      color: #003b67;
+      font-weight: 600;
     }
 
     .tool[aria-pressed="true"] {
       border-color: #6c9dce;
       background: #d8ecff;
-      box-shadow: inset 0 0 0 1px #ffffff;
+      box-shadow: inset 0 0 0 1px #fff;
     }
 
-    .tool-separator {
+    .separator {
       width: 1px;
       height: 20px;
       background: var(--line);
       margin: 0 2px;
     }
 
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      height: 20px;
+      padding: 0 7px;
+      border: 1px solid #9bc89b;
+      background: #ecf7ec;
+      color: #0b5a0b;
+      font-weight: 600;
+    }
+
     .workspace {
       min-height: 0;
       display: grid;
-      grid-template-columns: 270px 1fr;
+      grid-template-columns: 260px minmax(520px, 1fr) 315px;
       background: #fff;
     }
 
-    .explorer {
+    .dock {
       min-width: 0;
+      min-height: 0;
       display: grid;
-      grid-template-rows: 25px 1fr;
+      grid-template-rows: 26px 1fr;
+      background: var(--panel);
+    }
+
+    .explorer {
       border-right: 1px solid var(--line);
-      background: var(--tree);
+    }
+
+    .assistant {
+      border-left: 1px solid var(--line);
     }
 
     .pane-title {
@@ -152,9 +182,14 @@
       font-weight: 600;
     }
 
-    .tree {
+    .tree,
+    .guide {
+      min-height: 0;
       overflow: auto;
-      padding: 8px 10px 20px;
+      padding: 8px 10px 18px;
+    }
+
+    .tree {
       line-height: 1.8;
       white-space: nowrap;
     }
@@ -173,7 +208,7 @@
 
     .node.selected {
       border-color: #99c2e6;
-      background: var(--selection);
+      background: var(--blue-2);
     }
 
     .node::before {
@@ -204,7 +239,7 @@
       min-width: 0;
       min-height: 0;
       display: grid;
-      grid-template-rows: 30px minmax(170px, 40%) 1fr;
+      grid-template-rows: 31px auto minmax(150px, 33%) 1fr;
       background: #fff;
     }
 
@@ -213,8 +248,8 @@
       align-items: end;
       overflow: hidden;
       padding: 4px 5px 0;
-      background: #ececec;
       border-bottom: 1px solid var(--line);
+      background: #ececec;
     }
 
     .tab {
@@ -226,22 +261,137 @@
       border-bottom: 0;
       background: #f8f8f8;
       color: #333;
-      max-width: 270px;
+      max-width: 260px;
     }
 
     .tab.active {
       height: 27px;
       background: #fff;
       color: #000;
+      font-weight: 600;
+    }
+
+    .operator-strip {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--line-2);
+      background: #fff;
+    }
+
+    .operator-note {
+      grid-column: 1 / -1;
+      min-height: 28px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 7px;
+      border: 1px solid #9ec4e6;
+      background: #edf6ff;
+      color: #163f5f;
+      line-height: 1.35;
+    }
+
+    .operator-note strong {
+      white-space: nowrap;
+    }
+
+    .workflow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(95px, 1fr));
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .step {
+      min-width: 0;
+      height: 52px;
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 6px;
+      align-items: center;
+      padding: 6px;
+      border: 1px solid var(--line);
+      background: #f9f9f9;
+      text-align: left;
+      color: #222;
+    }
+
+    .step.active {
+      border-color: #6ca1d3;
+      background: #eaf4ff;
+    }
+
+    .step.done {
+      border-color: #8fbd8f;
+      background: #f0f8f0;
+    }
+
+    .step-num {
+      width: 22px;
+      height: 22px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: #dcdcdc;
+      font-weight: 600;
+    }
+
+    .step.active .step-num {
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .step.done .step-num {
+      background: var(--green);
+      color: #fff;
+    }
+
+    .step-title {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 600;
+    }
+
+    .step-sub {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--muted);
+    }
+
+    .quick-form {
+      width: 250px;
+      display: grid;
+      grid-template-columns: 82px 1fr;
+      gap: 5px 7px;
+      align-items: center;
+    }
+
+    .quick-form label {
+      color: var(--muted);
+    }
+
+    .quick-form select,
+    .quick-form input {
+      min-width: 0;
+      height: 22px;
+      padding: 1px 5px;
+      border: 1px solid #b8b8b8;
+      background: #fff;
     }
 
     .editor {
       min-height: 0;
       display: grid;
-      grid-template-columns: 48px 1fr;
+      grid-template-columns: 46px 1fr;
       border-bottom: 1px solid var(--line);
-      background: var(--editor);
       overflow: hidden;
+      background: var(--editor);
     }
 
     .line-numbers {
@@ -286,7 +436,7 @@
     .split {
       min-height: 0;
       display: grid;
-      grid-template-rows: 28px 1fr 102px;
+      grid-template-rows: 28px 1fr 103px;
       background: #fff;
     }
 
@@ -321,8 +471,36 @@
       background: #fff;
     }
 
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(110px, 1fr));
+      gap: 7px;
+      margin-bottom: 9px;
+    }
+
+    .metric {
+      min-width: 0;
+      border: 1px solid var(--line-2);
+      background: #fafafa;
+      padding: 7px;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 18px;
+      line-height: 21px;
+      color: #202020;
+    }
+
+    .metric span {
+      color: var(--muted);
+    }
+
     .section-title {
-      margin: 0 0 4px;
+      margin: 0 0 5px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
       font-weight: 600;
       color: #333;
     }
@@ -331,7 +509,7 @@
       width: 100%;
       border-collapse: collapse;
       table-layout: fixed;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
       font-size: 12px;
     }
 
@@ -347,7 +525,7 @@
     }
 
     th {
-      background: var(--grid-head);
+      background: var(--head);
       font-weight: 600;
     }
 
@@ -356,7 +534,29 @@
     }
 
     tbody tr.selected-row {
-      background: var(--selection);
+      background: var(--blue-2);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      height: 18px;
+      padding: 0 6px;
+      border: 1px solid var(--line);
+      background: #fff;
+      font-weight: 600;
+    }
+
+    .pill.ok {
+      border-color: #8fbd8f;
+      background: #eef8ee;
+      color: var(--green);
+    }
+
+    .pill.warn {
+      border-color: var(--amber-line);
+      background: var(--amber);
+      color: #5f4700;
     }
 
     .messages {
@@ -371,8 +571,8 @@
       display: flex;
       align-items: center;
       padding: 0 8px;
-      background: #f3f3f3;
       border-bottom: 1px solid #ddd;
+      background: #f3f3f3;
       font-weight: 600;
     }
 
@@ -384,16 +584,70 @@
       background: #fff;
     }
 
-    .ok {
+    .message-ok {
       color: var(--green);
+      font-weight: 600;
     }
 
-    .warning {
-      display: inline-block;
-      padding: 2px 6px;
-      background: var(--warn);
-      border: 1px solid #e1c771;
+    .guide-card {
+      border: 1px solid var(--line-2);
+      background: #fff;
+      margin-bottom: 8px;
+    }
+
+    .guide-card h2,
+    .guide-card h3 {
+      margin: 0;
+      padding: 7px 8px;
+      border-bottom: 1px solid var(--line-2);
+      background: #f8f8f8;
+      font-size: 12px;
+    }
+
+    .guide-card .body {
+      padding: 8px;
+      line-height: 1.45;
+    }
+
+    .checklist {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .checklist li {
+      display: grid;
+      grid-template-columns: 18px 1fr;
+      gap: 5px;
+      margin: 0 0 7px;
+    }
+
+    .check {
+      width: 14px;
+      height: 14px;
+      display: grid;
+      place-items: center;
+      margin-top: 1px;
+      border: 1px solid #8fbd8f;
+      background: #eef8ee;
+      color: var(--green);
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .callout {
+      border: 1px solid var(--amber-line);
+      background: var(--amber);
+      padding: 7px;
       color: #604400;
+      line-height: 1.4;
+    }
+
+    .demo-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-top: 8px;
     }
 
     .statusbar {
@@ -407,17 +661,36 @@
       font-size: 12px;
     }
 
-    @media (max-width: 900px) {
+    @media (max-width: 1120px) {
       .workspace {
-        grid-template-columns: 210px 1fr;
+        grid-template-columns: 225px minmax(450px, 1fr);
       }
 
-      .toolbar .menu {
+      .assistant {
+        display: none;
+      }
+    }
+
+    @media (max-width: 820px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .explorer {
         display: none;
       }
 
-      .main {
-        grid-template-rows: 30px 35% 1fr;
+      .operator-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .quick-form {
+        width: 100%;
+        grid-template-columns: 70px 1fr;
+      }
+
+      .workflow {
+        grid-template-columns: repeat(2, minmax(120px, 1fr));
       }
     }
   </style>
@@ -425,7 +698,7 @@
 <body>
   <div class="window">
     <div class="titlebar">
-      <strong>Microsoft SQL Server Management Studio - YafesPars_Dev</strong>
+      <strong>Microsoft SQL Server Management Studio - YafesPars_Dev - Operator Workbench</strong>
       <div class="title-controls" aria-hidden="true">
         <span class="title-button">_</span>
         <span class="title-button">[]</span>
@@ -443,23 +716,25 @@
         <span>Window</span>
         <span>Help</span>
       </div>
-      <button class="tool" title="New Query">New Query</button>
-      <button class="tool" title="Open File">Open</button>
-      <button class="tool" title="Save">Save</button>
-      <span class="tool-separator"></span>
-      <button class="tool primary" title="Execute selected query">Execute</button>
-      <button class="tool" title="Cancel executing query">Cancel</button>
-      <button class="tool" title="Parse query">Parse</button>
-      <span class="tool-separator"></span>
-      <button class="tool" aria-pressed="true" title="Query > SQLCMD Mode is enabled">SQLCMD Mode</button>
-      <button class="tool" title="Results to Grid">Results to Grid</button>
+      <button class="tool" title="Yeni sorgu">New Query</button>
+      <button class="tool" title="Script ac">Open</button>
+      <button class="tool" title="Kaydet">Save</button>
+      <span class="separator"></span>
+      <button class="tool primary" id="executeButton" title="Secili demo sorgusunu calistir">Execute</button>
+      <button class="tool" title="Durdur">Cancel</button>
+      <button class="tool" title="Parse">Parse</button>
+      <span class="separator"></span>
+      <button class="tool" aria-pressed="true" title="Query > SQLCMD Mode aktif">SQLCMD Mode</button>
+      <button class="tool" aria-pressed="true" title="Sonuclar Grid olarak gosterilir">Results to Grid</button>
+      <span class="separator"></span>
+      <span class="badge">DEV SAFE</span>
     </div>
 
     <div class="workspace">
-      <aside class="explorer" aria-label="Object Explorer">
+      <aside class="dock explorer" aria-label="Object Explorer">
         <div class="pane-title">
           <span>Object Explorer</span>
-          <span>YafesPars_Dev</span>
+          <span>Connected</span>
         </div>
         <div class="tree">
           <span class="node open selected">MIRO-HMM\\SQLEXPRESS (SQL Server 2022)</span>
@@ -473,10 +748,14 @@
                     <li><span class="node open">Tables</span></li>
                     <li><span class="node leaf">core.Tenant</span></li>
                     <li><span class="node leaf">person.Person</span></li>
+                    <li><span class="node leaf">institution.Institution</span></li>
+                    <li><span class="node leaf">risk.InsurableObject</span></li>
                     <li><span class="node leaf">policy.Contract</span></li>
                     <li><span class="node leaf">claim.Claim</span></li>
+                    <li><span class="node leaf">document.Document</span></li>
                     <li><span class="node leaf">tasking.Task</span></li>
                     <li><span class="node open">Views</span></li>
+                    <li><span class="node leaf">person.VW_CustomerSummary</span></li>
                     <li><span class="node leaf">policy.VW_PolicyDashboard</span></li>
                     <li><span class="node leaf">tasking.VW_OpenTaskDashboard</span></li>
                     <li><span class="node open">Stored Procedures</span></li>
@@ -492,34 +771,33 @@
       </aside>
 
       <main class="main">
-        <div class="tabbar">
-          <div class="tab active">02__operations_dashboard.sql</div>
-          <div class="tab">03__create_renewal_tasks.sql</div>
-          <div class="tab">04__admin_security_audit_queries.sql</div>
+        <div class="tabbar" id="tabbar" aria-label="Open query tabs"></div>
+
+        <div class="operator-strip">
+          <div class="operator-note">
+            <strong>Operator Guide</strong>
+            <span id="inlineHelp">Demo akisi hazirlaniyor.</span>
+          </div>
+          <div class="workflow" id="workflow" aria-label="Operator workflow"></div>
+          <div class="quick-form" aria-label="Demo controls">
+            <label for="tenant">Tenant</label>
+            <select id="tenant">
+              <option>DEMO-BE-BROKER</option>
+              <option>DEMO-NL-BROKER</option>
+            </select>
+            <label for="rows">Top Rows</label>
+            <input id="rows" type="number" min="10" max="1000" step="10" value="100">
+            <label for="mode">Mode</label>
+            <select id="mode">
+              <option>Dry run</option>
+              <option>Execute</option>
+            </select>
+          </div>
         </div>
 
         <div class="editor">
-          <div class="line-numbers">1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12<br>13<br>14<br>15<br>16<br>17<br>18<br>19<br>20</div>
-          <pre class="code"><span class="comment">/* Yafes Pars SSMS Workbench - Operations Dashboard */</span>
-<span class="sys">:ON ERROR EXIT</span>
-<span class="sys">:setvar</span> YAFES_SQL_DATABASE <span class="str">"YafesPars_Dev"</span>
-<span class="sys">:setvar</span> TENANT_CODE <span class="str">"DEMO-BE-BROKER"</span>
-<span class="sys">:setvar</span> TOP_ROWS <span class="str">"100"</span>
-
-<span class="kw">USE</span> [master];
-<span class="kw">GO</span>
-
-<span class="kw">IF</span> DB_ID(N<span class="str">'$(YAFES_SQL_DATABASE)'</span>) <span class="kw">IS NULL</span>
-    <span class="kw">THROW</span> 52013, <span class="str">'Target DEV database does not exist.'</span>, 1;
-<span class="kw">GO</span>
-
-<span class="kw">USE</span> [$(YAFES_SQL_DATABASE)];
-<span class="kw">GO</span>
-
-<span class="kw">SELECT TOP</span> (@TopRows) contract_number, contract_status_code,
-       contract_domain_code, start_date, end_date, company_name
-<span class="kw">FROM</span> policy.VW_PolicyDashboard
-<span class="kw">ORDER BY</span> contract_number <span class="kw">DESC</span>;</pre>
+          <div class="line-numbers" id="lineNumbers"></div>
+          <pre class="code" id="codeBlock"></pre>
         </div>
 
         <section class="split" aria-label="Results and messages">
@@ -529,157 +807,465 @@
             <div class="result-tab">Execution plan</div>
           </div>
 
-          <div class="results">
-            <p class="section-title">01 - Engine context</p>
-            <table aria-label="Engine context result grid">
-              <thead>
-                <tr>
-                  <th style="width: 18%">server_name</th>
-                  <th style="width: 17%">database_name</th>
-                  <th style="width: 16%">machine_name</th>
-                  <th style="width: 18%">login_name</th>
-                  <th>checked_at_utc</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr class="selected-row">
-                  <td>MIRO-HMM\\SQLEXPRESS</td>
-                  <td>YafesPars_Dev</td>
-                  <td>MIRO-HMM</td>
-                  <td>MIRO-HMM\\spqr_</td>
-                  <td>2026-06-02 21:39:44</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <p class="section-title">04 - Operational KPIs</p>
-            <table aria-label="Operational KPI result grid">
-              <thead>
-                <tr>
-                  <th>persons</th>
-                  <th>institutions</th>
-                  <th>risk_objects</th>
-                  <th>policies</th>
-                  <th>claims</th>
-                  <th>documents</th>
-                  <th>tasks</th>
-                  <th>active_coverages</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>12</td>
-                  <td>5</td>
-                  <td>9</td>
-                  <td>8</td>
-                  <td>3</td>
-                  <td>11</td>
-                  <td>6</td>
-                  <td>18</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <p class="section-title">08 - Policies</p>
-            <table aria-label="Policy dashboard result grid">
-              <thead>
-                <tr>
-                  <th style="width: 17%">contract_number</th>
-                  <th style="width: 14%">status</th>
-                  <th style="width: 12%">domain</th>
-                  <th style="width: 14%">start_date</th>
-                  <th style="width: 14%">end_date</th>
-                  <th style="width: 18%">company_name</th>
-                  <th>objects</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>POL-2026-0008</td>
-                  <td>ACTIVE</td>
-                  <td>AUTO</td>
-                  <td>2026-01-01</td>
-                  <td>2026-12-31</td>
-                  <td>Yafes Demo Insurance</td>
-                  <td>1</td>
-                </tr>
-                <tr>
-                  <td>POL-2026-0007</td>
-                  <td>ACTIVE</td>
-                  <td>FIRE</td>
-                  <td>2026-02-15</td>
-                  <td>2027-02-14</td>
-                  <td>Yafes Demo Insurance</td>
-                  <td>1</td>
-                </tr>
-                <tr>
-                  <td>POL-2026-0006</td>
-                  <td>IN_FORCE</td>
-                  <td>FAMILY</td>
-                  <td>2026-03-01</td>
-                  <td>2027-02-28</td>
-                  <td>Partner Mutual</td>
-                  <td>0</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <p class="section-title">12 - Open tasks</p>
-            <table aria-label="Open tasks result grid">
-              <thead>
-                <tr>
-                  <th style="width: 26%">title</th>
-                  <th style="width: 12%">entity</th>
-                  <th style="width: 18%">assigned_to_name</th>
-                  <th style="width: 12%">priority</th>
-                  <th style="width: 12%">status</th>
-                  <th>due_at_utc</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Policy renewal follow-up</td>
-                  <td>POLICY</td>
-                  <td>Demo Broker</td>
-                  <td>HIGH</td>
-                  <td>OPEN</td>
-                  <td>2026-06-28 09:00</td>
-                </tr>
-                <tr>
-                  <td>Missing inspection document</td>
-                  <td>DOCUMENT</td>
-                  <td>Claims Desk</td>
-                  <td>NORMAL</td>
-                  <td>WAITING</td>
-                  <td>2026-06-10 14:00</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <div class="results" id="results"></div>
 
           <div class="messages">
             <div class="messages-title">Messages</div>
-            <div class="messages-body">
-              <span class="ok">Command(s) completed successfully.</span><br>
-              01 - Engine context<br>
-              02 - Tenant context<br>
-              03 - Migration status<br>
-              04 - Operational KPIs<br>
-              08 - Policies<br>
-              12 - Open tasks<br>
-              <span class="warning">Demo data shown here is visual only. Actual execution remains in SSMS against SQL Server.</span>
-            </div>
+            <div class="messages-body" id="messages"></div>
           </div>
         </section>
       </main>
+
+      <aside class="dock assistant" aria-label="Operator guide">
+        <div class="pane-title">
+          <span>Operator Guide</span>
+          <span id="guideStatus">Ready</span>
+        </div>
+        <div class="guide">
+          <div class="guide-card">
+            <h2>Bugunku demo akisi</h2>
+            <div class="body">
+              <ul class="checklist">
+                <li><span class="check">✓</span><span>Once DEV guvenlik kontrolu calisir.</span></li>
+                <li><span class="check">✓</span><span>Migration ve validation sonucu gridde izlenir.</span></li>
+                <li><span class="check">✓</span><span>Operasyon paneli tenant bazinda okunur.</span></li>
+                <li><span class="check">✓</span><span>Renewal task adimi dry-run ile denenir.</span></li>
+                <li><span class="check">✓</span><span>Admin, RBAC ve audit kontrol listesi kapanir.</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="guide-card">
+            <h3>Secili adim</h3>
+            <div class="body" id="stepHelp"></div>
+          </div>
+
+          <div class="guide-card">
+            <h3>Guvenlik notu</h3>
+            <div class="body">
+              <div class="callout">Bu demo gorseldir. Gercek calisma SSMS icinde SQLCMD Mode acik olarak DEV database uzerinde yapilmalidir.</div>
+            </div>
+          </div>
+
+          <div class="guide-card">
+            <h3>Demo kontrolu</h3>
+            <div class="body">
+              <div class="demo-actions">
+                <button class="tool" id="prevButton">Onceki</button>
+                <button class="tool primary" id="nextButton">Sonraki</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
     </div>
 
     <div class="statusbar">
-      <span>Connected - YafesPars_Dev</span>
+      <span id="statusLeft">Connected - YafesPars_Dev</span>
       <span>SQLCMD Mode</span>
-      <span>Rows: 100</span>
-      <span>Ln 17, Col 1</span>
+      <span id="rowStatus">Rows: 100</span>
+      <span id="cursorStatus">Ln 1, Col 1</span>
     </div>
   </div>
+
+  <script>
+    const scenarios = [
+      {
+        file: "00__open_first_safety_check.sql",
+        title: "Guvenlik",
+        subtitle: "DEV hedefini dogrula",
+        help: "Operator once server ve database adinin DEV oldugunu dogrular. Prod, live veya prd gecerse script hata verir.",
+        code: `/* Yafes Pars SSMS Workbench - Open First */
+:ON ERROR EXIT
+:setvar YAFES_SQL_DATABASE "YafesPars_Dev"
+
+USE [master];
+GO
+
+DECLARE @TargetDatabase SYSNAME = N'$(YAFES_SQL_DATABASE)';
+
+IF @TargetDatabase NOT LIKE N'%DEV%'
+    THROW 52000, 'Target database name must contain DEV.', 1;
+
+SELECT
+    @@SERVERNAME AS server_name,
+    @TargetDatabase AS target_database,
+    DB_ID(@TargetDatabase) AS target_database_id,
+    SERVERPROPERTY('Edition') AS sql_server_edition;`,
+        metrics: [
+          ["Server", "MIRO-HMM\\SQLEXPRESS"],
+          ["Database", "YafesPars_Dev"],
+          ["Safety", "DEV OK"],
+          ["Edition", "Developer"]
+        ],
+        tables: [
+          {
+            title: "01 - Engine context",
+            columns: ["server_name", "database_name", "machine_name", "safety_status", "checked_at_utc"],
+            rows: [
+              ["MIRO-HMM\\SQLEXPRESS", "YafesPars_Dev", "MIRO-HMM", "DEV SAFE", "2026-06-02 21:52:18"]
+            ]
+          }
+        ],
+        messages: [
+          "Command(s) completed successfully.",
+          "Target DEV database exists.",
+          "Production-like server name check passed."
+        ]
+      },
+      {
+        file: "01__run_all_dev_migrations_sqlcmd.sql",
+        title: "Migration",
+        subtitle: "Schema + validation",
+        help: "Bu adim all-in-one SSMS scriptini calistirir. Backup path girilmeden gercek migration baslatilmaz.",
+        code: `/* Yafes Pars SSMS Workbench - Run DEV Migrations */
+:ON ERROR EXIT
+
+-- Query > SQLCMD Mode acik olmali
+-- Backup path: SQL Server servis hesabi tarafindan yazilabilir olmali
+
+:r ..\\execution-logs\\20260602_124216\\ssms-dev-migrations.sql`,
+        metrics: [
+          ["Migrations", "19"],
+          ["Validations", "17"],
+          ["Backup", "Required"],
+          ["Status", "Ready"]
+        ],
+        tables: [
+          {
+            title: "03 - Migration status",
+            columns: ["migration_name", "execution_status", "executed_at_utc", "executed_by"],
+            rows: [
+              ["000__create_database.sql", "SUCCESS", "2026-06-02 21:53:02", "MIRO-HMM\\spqr_"],
+              ["007__create_coverage_domain.sql", "SUCCESS", "2026-06-02 21:53:06", "MIRO-HMM\\spqr_"],
+              ["015__add_views.sql", "SUCCESS", "2026-06-02 21:53:13", "MIRO-HMM\\spqr_"],
+              ["018__seed_demo_data.sql", "SUCCESS", "2026-06-02 21:53:19", "MIRO-HMM\\spqr_"]
+            ]
+          },
+          {
+            title: "Validation summary",
+            columns: ["area", "checks", "failed", "status"],
+            rows: [
+              ["person / institution", "28", "0", "PASS"],
+              ["policy / claim / tasking", "41", "0", "PASS"],
+              ["coverage / lookup", "36", "0", "PASS"]
+            ]
+          }
+        ],
+        messages: [
+          "All migrations completed in transaction-safe order.",
+          "All validation scripts returned PASS.",
+          "Review GitHub Actions after push for container parity."
+        ]
+      },
+      {
+        file: "02__operations_dashboard.sql",
+        title: "Dashboard",
+        subtitle: "Is takip ekrani",
+        help: "Operasyon ekibi bu sekmede musteri, kurum, risk, police, hasar, dokuman ve task durumunu Results Grid uzerinden okur.",
+        code: `/* Yafes Pars SSMS Workbench - Operations Dashboard */
+:ON ERROR EXIT
+:setvar YAFES_SQL_DATABASE "YafesPars_Dev"
+:setvar TENANT_CODE "DEMO-BE-BROKER"
+:setvar TOP_ROWS "100"
+
+USE [$(YAFES_SQL_DATABASE)];
+GO
+
+SELECT TOP (@TopRows)
+    contract_number,
+    contract_status_code,
+    contract_domain_code,
+    start_date,
+    end_date,
+    company_name
+FROM policy.VW_PolicyDashboard
+ORDER BY contract_number DESC;`,
+        metrics: [
+          ["Persons", "12"],
+          ["Policies", "8"],
+          ["Claims", "3"],
+          ["Open tasks", "6"]
+        ],
+        tables: [
+          {
+            title: "04 - Operational KPIs",
+            columns: ["persons", "institutions", "risk_objects", "policies", "claims", "documents", "tasks", "active_coverages"],
+            rows: [["12", "5", "9", "8", "3", "11", "6", "18"]]
+          },
+          {
+            title: "08 - Policies",
+            columns: ["contract_number", "status", "domain", "start_date", "end_date", "company_name", "objects"],
+            rows: [
+              ["POL-2026-0008", "ACTIVE", "AUTO", "2026-01-01", "2026-12-31", "Yafes Demo Insurance", "1"],
+              ["POL-2026-0007", "ACTIVE", "FIRE", "2026-02-15", "2027-02-14", "Yafes Demo Insurance", "1"],
+              ["POL-2026-0006", "IN_FORCE", "FAMILY", "2026-03-01", "2027-02-28", "Partner Mutual", "0"]
+            ]
+          },
+          {
+            title: "12 - Open tasks",
+            columns: ["title", "entity", "assigned_to_name", "priority", "status", "due_at_utc"],
+            rows: [
+              ["Policy renewal follow-up", "POLICY", "Demo Broker", "HIGH", "OPEN", "2026-06-28 09:00"],
+              ["Missing inspection document", "DOCUMENT", "Claims Desk", "NORMAL", "WAITING", "2026-06-10 14:00"]
+            ]
+          }
+        ],
+        messages: [
+          "Tenant context loaded: DEMO-BE-BROKER.",
+          "Dashboard result sets rendered.",
+          "No console or script errors in demo mode."
+        ]
+      },
+      {
+        file: "03__create_renewal_tasks.sql",
+        title: "Renewal",
+        subtitle: "Task uretimi",
+        help: "Operator once Dry run ile aday policeleri gorur. Execute modunda ayni police icin duplicate open task olusmaz.",
+        code: `/* Yafes Pars SSMS Workbench - Renewal Task Runner */
+:ON ERROR EXIT
+:setvar YAFES_SQL_DATABASE "YafesPars_Dev"
+:setvar TENANT_CODE "DEMO-BE-BROKER"
+:setvar DAYS_AHEAD "60"
+:setvar DRY_RUN "1"
+
+EXEC tasking.SP_CreateRenewalTasks
+    @tenant_id = @TenantId,
+    @days_ahead = @DaysAhead,
+    @assigned_to_user_id = NULL,
+    @created_by_user_id = NULL,
+    @dry_run = @DryRun;`,
+        metrics: [
+          ["Days ahead", "60"],
+          ["Candidates", "4"],
+          ["Duplicates", "0"],
+          ["Mode", "Dry run"]
+        ],
+        tables: [
+          {
+            title: "Renewal candidates",
+            columns: ["contract_number", "domain", "end_date", "days_until_end", "recommended_task"],
+            rows: [
+              ["POL-2026-0008", "AUTO", "2026-06-28", "26", "Policy renewal follow-up"],
+              ["POL-2026-0005", "FIRE", "2026-07-12", "40", "Policy renewal follow-up"],
+              ["POL-2026-0003", "FAMILY", "2026-07-25", "53", "Policy renewal follow-up"]
+            ]
+          }
+        ],
+        messages: [
+          "Dry run completed.",
+          "3 renewal candidates found.",
+          "No duplicate open renewal tasks detected."
+        ]
+      },
+      {
+        file: "04__admin_security_audit_queries.sql",
+        title: "Audit",
+        subtitle: "RBAC + kalite",
+        help: "Son adimda kullanici rolleri, permission setleri, audit trigger envanteri ve acik veri kalitesi sorunlari kontrol edilir.",
+        code: `/* Yafes Pars SSMS Workbench - Admin, Security, Audit */
+:ON ERROR EXIT
+:setvar YAFES_SQL_DATABASE "YafesPars_Dev"
+:setvar TENANT_CODE "DEMO-BE-BROKER"
+
+USE [$(YAFES_SQL_DATABASE)];
+GO
+
+SELECT
+    u.email,
+    u.display_name,
+    r.role_code,
+    u.is_active
+FROM core.AppUser u
+LEFT JOIN core.UserRole ur ON ur.user_id = u.user_id
+LEFT JOIN core.Role r ON r.role_id = ur.role_id
+WHERE u.tenant_id = @TenantId
+ORDER BY u.email, r.role_code;`,
+        metrics: [
+          ["Users", "3"],
+          ["Roles", "4"],
+          ["Triggers", "11"],
+          ["Open issues", "0"]
+        ],
+        tables: [
+          {
+            title: "01 - Users and roles",
+            columns: ["email", "display_name", "role_code", "is_active"],
+            rows: [
+              ["admin@yafes.demo", "Demo Admin", "TENANT_ADMIN", "1"],
+              ["broker@yafes.demo", "Demo Broker", "BROKER", "1"],
+              ["claims@yafes.demo", "Claims Desk", "CLAIMS_HANDLER", "1"]
+            ]
+          },
+          {
+            title: "Open validation issues",
+            columns: ["check_name", "open_count", "status"],
+            rows: [
+              ["active package without item", "0", "PASS"],
+              ["active coverage without domain", "0", "PASS"],
+              ["task assignee outside tenant", "0", "PASS"]
+            ]
+          }
+        ],
+        messages: [
+          "RBAC query completed.",
+          "Audit trigger inventory loaded.",
+          "No open integrity issues in demo result set."
+        ]
+      }
+    ];
+
+    let activeIndex = 2;
+
+    const tabbar = document.getElementById("tabbar");
+    const workflow = document.getElementById("workflow");
+    const codeBlock = document.getElementById("codeBlock");
+    const lineNumbers = document.getElementById("lineNumbers");
+    const results = document.getElementById("results");
+    const messages = document.getElementById("messages");
+    const stepHelp = document.getElementById("stepHelp");
+    const inlineHelp = document.getElementById("inlineHelp");
+    const guideStatus = document.getElementById("guideStatus");
+    const statusLeft = document.getElementById("statusLeft");
+    const rowStatus = document.getElementById("rowStatus");
+    const cursorStatus = document.getElementById("cursorStatus");
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function highlightSql(sql) {
+      return escapeHtml(sql)
+        .replace(/^(:[A-Z ]+.*)$/gm, '<span class="sys">$1</span>')
+        .replace(/(--.*)$/gm, '<span class="comment">$1</span>')
+        .replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="comment">$1</span>')
+        .replace(/'([^']*)'/g, "<span class=\"str\">'$1'</span>")
+        .replace(/\b(USE|GO|DECLARE|IF|SELECT|FROM|WHERE|ORDER BY|EXEC|THROW|TOP|IS NULL|LEFT JOIN|ON|AND|OR)\b/g, '<span class="kw">$1</span>');
+    }
+
+    function renderTable(table) {
+      const head = table.columns.map(col => `<th>${escapeHtml(col)}</th>`).join("");
+      const body = table.rows.map((row, index) => {
+        const cells = row.map(cell => {
+          const text = escapeHtml(cell);
+          if (["SUCCESS", "PASS", "DEV SAFE", "ACTIVE", "OPEN"].includes(String(cell))) {
+            return `<td><span class="pill ok">${text}</span></td>`;
+          }
+          if (["HIGH", "WAITING", "Required", "Dry run"].includes(String(cell))) {
+            return `<td><span class="pill warn">${text}</span></td>`;
+          }
+          return `<td>${text}</td>`;
+        }).join("");
+        return `<tr class="${index === 0 ? "selected-row" : ""}">${cells}</tr>`;
+      }).join("");
+      return `
+        <p class="section-title"><span>${escapeHtml(table.title)}</span><span>${table.rows.length} row(s)</span></p>
+        <table>
+          <thead><tr>${head}</tr></thead>
+          <tbody>${body}</tbody>
+        </table>
+      `;
+    }
+
+    function renderScenario(index) {
+      activeIndex = index;
+      const scenario = scenarios[index];
+
+      tabbar.innerHTML = scenarios.map((item, idx) => `
+        <div class="tab ${idx === index ? "active" : ""}" data-index="${idx}">${escapeHtml(item.file)}</div>
+      `).join("");
+
+      workflow.innerHTML = scenarios.map((item, idx) => `
+        <button class="step ${idx === index ? "active" : ""} ${idx < index ? "done" : ""}" data-index="${idx}">
+          <span class="step-num">${idx + 1}</span>
+          <span>
+            <span class="step-title">${escapeHtml(item.title)}</span>
+            <span class="step-sub">${escapeHtml(item.subtitle)}</span>
+          </span>
+        </button>
+      `).join("");
+
+      const lines = scenario.code.split("\n");
+      lineNumbers.innerHTML = lines.map((_, idx) => idx + 1).join("<br>");
+      codeBlock.innerHTML = highlightSql(scenario.code);
+
+      results.innerHTML = `
+        <div class="summary-grid">
+          ${scenario.metrics.map(([label, value]) => `
+            <div class="metric">
+              <strong>${escapeHtml(value)}</strong>
+              <span>${escapeHtml(label)}</span>
+            </div>
+          `).join("")}
+        </div>
+        ${scenario.tables.map(renderTable).join("")}
+      `;
+
+      messages.innerHTML = `
+        <span class="message-ok">Command(s) completed successfully.</span><br>
+        ${scenario.messages.map(message => `${escapeHtml(message)}<br>`).join("")}
+      `;
+
+      stepHelp.innerHTML = `
+        <strong>${escapeHtml(scenario.file)}</strong><br>
+        ${escapeHtml(scenario.help)}
+      `;
+      inlineHelp.textContent = `${scenario.title}: ${scenario.help}`;
+
+      guideStatus.textContent = scenario.title;
+      statusLeft.textContent = `Connected - YafesPars_Dev - ${scenario.title}`;
+      rowStatus.textContent = `Rows: ${scenario.tables.reduce((sum, table) => sum + table.rows.length, 0)}`;
+      cursorStatus.textContent = `Ln ${Math.min(17, lines.length)}, Col 1`;
+    }
+
+    document.addEventListener("click", event => {
+      const tab = event.target.closest(".tab, .step");
+      if (tab && tab.dataset.index) {
+        renderScenario(Number(tab.dataset.index));
+      }
+    });
+
+    document.getElementById("executeButton").addEventListener("click", () => {
+      messages.innerHTML = `
+        <span class="message-ok">Demo execution refreshed.</span><br>
+        ${escapeHtml(scenarios[activeIndex].file)} tekrar calistirildi.<br>
+        Results Grid guncellendi.<br>
+      `;
+    });
+
+    document.getElementById("prevButton").addEventListener("click", () => {
+      renderScenario(Math.max(0, activeIndex - 1));
+    });
+
+    document.getElementById("nextButton").addEventListener("click", () => {
+      renderScenario(Math.min(scenarios.length - 1, activeIndex + 1));
+    });
+
+    document.getElementById("tenant").addEventListener("change", event => {
+      messages.innerHTML = `
+        <span class="message-ok">Tenant context changed.</span><br>
+        Active tenant: ${escapeHtml(event.target.value)}<br>
+        Demo result sets remain sample data.<br>
+      `;
+    });
+
+    document.getElementById("rows").addEventListener("input", event => {
+      rowStatus.textContent = `Rows: ${escapeHtml(event.target.value || "100")}`;
+    });
+
+    document.getElementById("mode").addEventListener("change", event => {
+      messages.innerHTML = `
+        <span class="message-ok">Execution mode selected.</span><br>
+        Mode: ${escapeHtml(event.target.value)}<br>
+        Renewal script should stay in Dry run until operator approval.<br>
+      `;
+    });
+
+    renderScenario(activeIndex);
+  </script>
 </body>
 </html>
