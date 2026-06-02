@@ -26,3 +26,6 @@ tracked with name, checksum, execution time, user, status, and error message.
 - `002__create_core_infrastructure.sql` creates `core.SchemaMigration`.
 - `001__validate_core_infrastructure.sql` validates schemas and migration
   tracking objects.
+- `003__create_person_domain.sql` creates person and contact tables from the
+  legacy person domain under the `person` schema and lookup tables under `ref`.
+- `002__validate_person_domain.sql` validates the person migration.

@@ -14,3 +14,15 @@ The platform is organized around these insurance core domains:
 - Audit and compliance
 
 Contract versioning is a core domain concept and must remain explicit.
+
+## Person Domain
+
+The person domain uses `person.Person` as the tenant-aware root. Natural and
+legal persons are split into `person.NaturalPerson` and `person.LegalPerson`.
+Contact data is represented by address, phone, email, social media, bank
+account, and driver license tables.
+
+Legacy join table names are normalized to PascalCase:
+
+- `Person_PersonType` becomes `person.PersonPersonType`.
+- `PersonRelation_Person` becomes `person.PersonRelationPerson`.
