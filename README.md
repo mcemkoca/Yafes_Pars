@@ -104,3 +104,5 @@ The index hardening migration adds FK-supporting indexes and selected dashboard
 indexes, with validation that detects missing FK index coverage.
 The trigger phase validates the root audit triggers created by the audit
 migration.
+The view migration adds customer, institution, risk, policy, claim, and task
+dashboard views.

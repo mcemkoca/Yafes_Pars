@@ -63,3 +63,5 @@ tracked with name, checksum, execution time, user, status, and error message.
 - `014__add_triggers.sql` registers the trigger phase; root audit triggers are
   created by `011__create_audit_domain.sql`.
 - `013__validate_triggers.sql` validates root audit trigger existence.
+- `015__add_views.sql` creates reporting and dashboard views.
+- `014__validate_views.sql` validates view existence.

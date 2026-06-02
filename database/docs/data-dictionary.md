@@ -278,3 +278,13 @@ correlation id.
 ## audit.EntityChangeSet
 
 Optional per-column change detail table linked to `audit.AuditLog`.
+
+## Reporting Views
+
+- `person.VW_CustomerSummary`
+- `institution.VW_InstitutionSummary`
+- `risk.VW_InsurableObjectSummary`
+- `policy.VW_ActivePolicy`
+- `policy.VW_PolicyDashboard`
+- `claim.VW_ClaimDashboard`
+- `tasking.VW_OpenTaskDashboard`
