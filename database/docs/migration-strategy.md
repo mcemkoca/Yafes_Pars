@@ -60,3 +60,6 @@ tracked with name, checksum, execution time, user, status, and error message.
 - `013__add_indexes.sql` creates missing FK-supporting indexes from SQL Server
   catalog metadata and adds dashboard/reporting indexes.
 - `012__validate_indexes.sql` validates FK index coverage and reporting indexes.
+- `014__add_triggers.sql` registers the trigger phase; root audit triggers are
+  created by `011__create_audit_domain.sql`.
+- `013__validate_triggers.sql` validates root audit trigger existence.

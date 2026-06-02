@@ -102,3 +102,5 @@ The constraint hardening migration adds cross-domain constraints that depend on
 previously created policy, risk, and core tables.
 The index hardening migration adds FK-supporting indexes and selected dashboard
 indexes, with validation that detects missing FK index coverage.
+The trigger phase validates the root audit triggers created by the audit
+migration.
