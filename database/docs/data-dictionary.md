@@ -208,3 +208,21 @@ Groups coverages into reusable packages by contract domain.
 ## coverage.CoveragePackageItem
 
 Maps coverages into packages with mandatory flags and sort order.
+
+## claim.Claim
+
+Tenant-aware claim root table linked to `policy.Contract`. Includes coverage,
+status, handler, incident and reported dates, closed date, paid and reserved
+amounts, payment method, audit columns, and soft delete state.
+
+## claim.ClaimParty
+
+Maps people to claims by claim party role.
+
+## claim.ClaimObject
+
+Maps claims to `risk.InsurableObject` records.
+
+## claim.ClaimCircumstance
+
+Maps claims to circumstance type records.

@@ -90,3 +90,5 @@ The policy migration creates `policy.Contract`, `policy.ContractVersion`,
 parties, insured object links, takeover metadata, and policy lookup tables.
 The coverage migration replaces legacy coverage naming with
 `coverage.Coverage`, domain mapping, and package tables.
+The claim migration creates tenant-aware claims linked to policies, coverages,
+people, and insurable objects.

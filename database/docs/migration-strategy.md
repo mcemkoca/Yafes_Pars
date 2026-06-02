@@ -42,3 +42,6 @@ tracked with name, checksum, execution time, user, status, and error message.
 - `007__create_coverage_domain.sql` creates coverage, domain mapping, package,
   package item tables, and core coverage seed rows.
 - `006__validate_coverage_domain.sql` validates the coverage migration.
+- `008__create_claim_domain.sql` creates tenant-aware claim, party, object,
+  circumstance, status, role, and payment method tables.
+- `007__validate_claim_domain.sql` validates the claim migration.

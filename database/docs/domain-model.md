@@ -52,3 +52,9 @@ The coverage domain replaces legacy `lookup_coverage` and `coverage_domain`
 tables with schema-qualified `coverage.Coverage` and
 `coverage.CoverageDomain`. Coverage packages allow reusable bundles per policy
 domain.
+
+## Claim Domain
+
+The claim domain uses `claim.Claim` as the tenant-aware root. Claims link to
+`policy.Contract`, optional `coverage.Coverage`, claim parties, claim objects,
+and circumstance types.
