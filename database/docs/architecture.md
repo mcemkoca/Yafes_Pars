@@ -21,3 +21,9 @@ role, permission, migration, and audit concerns remain explicit.
 - `audit`
 
 Detailed domain notes will be expanded as each migration is created.
+
+## Core Infrastructure
+
+The first infrastructure layer creates migration tracking, tenant identity,
+application users, roles, permissions, and role assignment tables. This provides
+the foundation for SaaS tenant isolation and RBAC-aware backend work later.

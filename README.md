@@ -80,5 +80,5 @@ Planned migration order:
 
 The repository has been reorganized into a professional database project layout.
 The initial SSMS-compatible migration base creates the database, domain schemas,
-and migration tracking table. The next phase is tenant, user, role, and
-permission infrastructure.
+migration tracking table, tenant foundation, application users, roles,
+permissions, and role assignment tables.
