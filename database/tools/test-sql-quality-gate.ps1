@@ -269,12 +269,12 @@ function Test-SsmsOperatorConventions {
     }
 }
 
-function Test-SsmsDemoControls {
+function Test-SsmsWorkbenchControls {
     $relativePath = "database/ssms/demo/index.html"
     $fullPath = Join-Path $repoRoot $relativePath
 
     if (-not (Test-Path -LiteralPath $fullPath -PathType Leaf)) {
-        Add-Result "FAIL" "ssms-demo" "$relativePath is missing"
+        Add-Result "FAIL" "ssms-workbench-ui" "$relativePath is missing"
         return
     }
 
@@ -308,10 +308,10 @@ function Test-SsmsDemoControls {
 
     foreach ($requiredText in $requiredTexts) {
         if ($content.Contains($requiredText)) {
-            Add-Result "PASS" "ssms-demo" "$relativePath contains $requiredText"
+            Add-Result "PASS" "ssms-workbench-ui" "$relativePath contains $requiredText"
         }
         else {
-            Add-Result "FAIL" "ssms-demo" "$relativePath is missing $requiredText"
+            Add-Result "FAIL" "ssms-workbench-ui" "$relativePath is missing $requiredText"
         }
     }
 }
@@ -447,7 +447,7 @@ Test-PatternScan -RelativeFolders @("database/migrations", "database/validation"
 Test-StyleConventions -RelativeFolders @("database/migrations", "database/validation")
 Test-SsmsSqlcmdDevContract
 Test-SsmsOperatorConventions
-Test-SsmsDemoControls
+Test-SsmsWorkbenchControls
 Write-Report
 
 Write-Host ""

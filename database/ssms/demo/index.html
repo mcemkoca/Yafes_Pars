@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Yafes Pars - Kullanici Dostu SSMS Demo</title>
+  <title>Yafes Pars - SSMS Operator Workbench</title>
   <style>
     :root {
       --chrome: #f3f3f3;
@@ -865,7 +865,7 @@
       line-height: 1.4;
     }
 
-    .demo-actions {
+    .flow-actions {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 6px;
@@ -942,7 +942,7 @@
       <button class="tool" id="openButton" type="button" title="Script ac">Open</button>
       <button class="tool" id="saveButton" type="button" title="Kaydet">Save</button>
       <span class="separator"></span>
-      <button class="tool primary" id="executeButton" type="button" title="Secili demo sorgusunu calistir">Execute</button>
+      <button class="tool primary" id="executeButton" type="button" title="Secili sorguyu calistir">Execute</button>
       <button class="tool" id="cancelButton" type="button" title="Durdur">Cancel</button>
       <button class="tool" id="parseButton" type="button" title="Parse">Parse</button>
       <span class="separator"></span>
@@ -971,14 +971,14 @@
         <div class="operator-strip">
           <div class="operator-note">
             <strong>Operator Guide</strong>
-            <span id="inlineHelp">Demo akisi hazirlaniyor.</span>
+            <span id="inlineHelp">Operator akisi hazirlaniyor.</span>
           </div>
           <div class="workflow" id="workflow" aria-label="Operator workflow"></div>
-          <div class="quick-form" aria-label="Demo controls">
+          <div class="quick-form" aria-label="Operator controls">
             <label for="tenant">Tenant</label>
             <select id="tenant">
-              <option>DEMO-BE-BROKER</option>
-              <option>DEMO-NL-BROKER</option>
+              <option>DEV-BE-BROKER</option>
+              <option>DEV-NL-BROKER</option>
             </select>
             <label for="rows">Top Rows</label>
             <input id="rows" type="number" min="10" max="1000" step="10" value="100">
@@ -1022,7 +1022,7 @@
         </div>
         <div class="guide">
           <div class="guide-card">
-            <h2>Bugunku demo akisi</h2>
+            <h2>Bugunku is akisi</h2>
             <div class="body">
               <ul class="checklist">
                 <li><span class="check">OK</span><span>Home dashboard kisa yollar ve saglik sinyalleri verir.</span></li>
@@ -1045,14 +1045,14 @@
           <div class="guide-card">
             <h3>Guvenlik notu</h3>
             <div class="body">
-              <div class="callout">Bu demo gorseldir. Gercek calisma SSMS icinde SQLCMD Mode acik olarak DEV database uzerinde yapilmalidir.</div>
+              <div class="callout">Calisma standardi: SSMS icinde SQLCMD Mode acik olmali ve tum islemler yalnizca DEV database uzerinde yapilmalidir.</div>
             </div>
           </div>
 
           <div class="guide-card">
-            <h3>Demo kontrolu</h3>
+            <h3>Akis kontrolu</h3>
             <div class="body">
-              <div class="demo-actions">
+              <div class="flow-actions">
                 <button class="tool" id="prevButton">Onceki</button>
                 <button class="tool primary" id="nextButton">Sonraki</button>
               </div>
@@ -1081,7 +1081,7 @@
         code: `/* Yafes Pars SSMS Workbench - Operator Dashboard Home */
 :ON ERROR EXIT
 :setvar YAFES_SQL_DATABASE "YafesPars_Dev"
-:setvar TENANT_CODE "DEMO-BE-BROKER"
+:setvar TENANT_CODE "DEV-BE-BROKER"
 
 USE [$(YAFES_SQL_DATABASE)];
 GO
@@ -1094,7 +1094,7 @@ ORDER BY shortcut_order;`,
           ["Shortcuts", "13"],
           ["Health", "4"],
           ["Mode", "Read-only"],
-          ["Tenant", "DEMO-BE"]
+          ["Tenant", "DEV-BE"]
         ],
         tables: [
           {
@@ -1115,7 +1115,7 @@ ORDER BY shortcut_order;`,
             title: "03 - Health signals",
             columns: ["signal", "value", "status", "info_tip"],
             rows: [
-              ["Latest migration", "018__seed_demo_data.sql", "OK", "Expected migration count is 19."],
+              ["Latest migration", "018 complete", "OK", "Expected migration count is 19."],
               ["Open tasks", "6", "OK", "Review if above team threshold."],
               ["Renewal candidates", "3", "ACTION", "Run renewal dry-run first."]
             ]
@@ -1131,7 +1131,7 @@ ORDER BY shortcut_order;`,
         file: "01__run_all_dev_migrations_sqlcmd.sql",
         title: "Migrate",
         subtitle: "DEV handoff",
-        help: "Migration handoff demoda migration calistirmaz. Gercek all-in-one SSMS scripti PowerShell runner ile uretilir, sonra SSMS icinde SQLCMD Mode acik olarak DEV database uzerinde calistirilir.",
+        help: "Migration handoff bu ekranda migration baslatmaz. Gercek all-in-one SSMS scripti PowerShell runner ile uretilir, sonra SSMS icinde SQLCMD Mode acik olarak DEV database uzerinde calistirilir.",
         code: `/* DEV Migration Handoff */
 :ON ERROR EXIT
 :setvar YAFES_SQL_DATABASE "YafesPars_Dev"
@@ -1193,7 +1193,7 @@ PRINT 'Then open database/execution-logs/<run-id>/ssms-dev-migrations.sql in SSM
         ],
         messages: [
           "Migration handoff loaded.",
-          "Demo does not execute migrations.",
+          "This workbench screen does not execute migrations directly.",
           "Generate ssms-dev-migrations.sql, then run it in SSMS with SQLCMD Mode enabled."
         ]
       },
@@ -1205,7 +1205,7 @@ PRINT 'Then open database/execution-logs/<run-id>/ssms-dev-migrations.sql in SSM
         code: `/* Schema Working Logic Map */
 :ON ERROR EXIT
 :setvar YAFES_SQL_DATABASE "YafesPars_Dev"
-:setvar TENANT_CODE "DEMO-BE-BROKER"
+:setvar TENANT_CODE "DEV-BE-BROKER"
 
 USE [$(YAFES_SQL_DATABASE)];
 GO
@@ -1308,11 +1308,11 @@ ORDER BY card_order;`,
         file: "13__visual_workflow_board.sql",
         title: "Visual Board",
         subtitle: "Node/edge gridleri",
-        help: "Visual workflow board gorseldeki mind-map fikrini SSMS'e uygun hale getirir: domain kartlari, alt basliklar, node/edge satirlari, template route'lari ve hazirlik bosluklari Results Grid olarak gelir.",
+        help: "Visual workflow board mind-map fikrini SSMS'e uygun hale getirir: domain kartlari, alt basliklar, node/edge satirlari, template route'lari ve hazirlik bosluklari Results Grid olarak gelir.",
         code: `/* Visual Workflow Board */
 :ON ERROR EXIT
 :setvar YAFES_SQL_DATABASE "YafesPars_Dev"
-:setvar TENANT_CODE "DEMO-BE-BROKER"
+:setvar TENANT_CODE "DEV-BE-BROKER"
 :setvar FOCUS_DOMAIN "ALL"
 
 USE [$(YAFES_SQL_DATABASE)];
@@ -1365,7 +1365,7 @@ ORDER BY route_order;`,
             title: "01 - Visual board operating context",
             columns: ["database", "tenant", "actual_tables", "source_tables", "legacy_reference", "status"],
             rows: [
-              ["YafesPars_Dev", "DEMO-BE-BROKER", "108", "108", "89", "OK"],
+              ["YafesPars_Dev", "DEV-BE-BROKER", "108", "108", "89", "OK"],
               ["INFO", "Table count", "Current migrations are source of truth", "Legacy package is comparison input", "Do not downsize blindly", "REVIEW"]
             ]
           },
@@ -1408,7 +1408,7 @@ ORDER BY route_order;`,
             columns: ["capability", "status", "implementation_rule", "next_action"],
             rows: [
               ["SSMS-native dashboard", "READY", "Use Results Grid shortcut rows", "Keep scripts read-only"],
-              ["Mind-map style groups", "READY", "Use node/card result sets", "Demo mirrors these rows"],
+              ["Mind-map style groups", "READY", "Use node/card result sets", "Workbench mirrors these rows"],
               ["Drag/drop behavior", "SSMS_ADAPTED", "Use route + preview + execute/rollback", "Use bridge templates"],
               ["89 vs 108 reconciliation", "OPEN", "Current migrations are source of truth", "Compare names before schema changes"],
               ["Every-table bridge coverage", "PARTIAL", "Prioritize daily workflows", "Add bridges by usage"]
@@ -1417,7 +1417,7 @@ ORDER BY route_order;`,
         ],
         messages: [
           "Visual workflow board loaded.",
-          "SSMS grid rows are the source; the demo is only a visual mirror.",
+          "SSMS grid rows are the source; the workbench mirrors them visually.",
           "Use 13__visual_workflow_board.sql for node, edge, route, and readiness review."
         ]
       },
@@ -1429,7 +1429,7 @@ ORDER BY route_order;`,
         code: `/* Table Catalog And Relationships */
 :ON ERROR EXIT
 :setvar YAFES_SQL_DATABASE "YafesPars_Dev"
-:setvar TENANT_CODE "DEMO-BE-BROKER"
+:setvar TENANT_CODE "DEV-BE-BROKER"
 
 USE [$(YAFES_SQL_DATABASE)];
 GO
@@ -1593,7 +1593,7 @@ EXEC person.SP_CreateNaturalPerson
             title: "02 - CREATE_NATURAL_PERSON preview",
             columns: ["tenant", "dossier", "first_name", "last_name", "birth_date", "info_tip"],
             rows: [
-              ["DEMO-BE-BROKER", "DOS-NEW-001", "New", "Customer", "1985-01-01", "Confirm lookup values before execute."]
+              ["DEV-BE-BROKER", "DOS-NEW-001", "New", "Customer", "1985-01-01", "Confirm lookup values before execute."]
             ]
           },
           {
@@ -1657,7 +1657,7 @@ ROLLBACK TRANSACTION;`,
         help: "Report pack SSMS Results Grid ile grafik-ready veri setleri uretir: chart_axis, chart_value ve text_bar kolonlari Excel/BI icin hazirdir.",
         code: `/* Graph And Report Pack */
 :ON ERROR EXIT
-:setvar TENANT_CODE "DEMO-BE-BROKER"
+:setvar TENANT_CODE "DEV-BE-BROKER"
 
 SELECT
     contract_domain_code AS chart_axis,
@@ -1777,7 +1777,7 @@ GROUP BY contract_domain_code;`,
       executionTimer: null,
       selectedScript: "",
       selectedObject: "YafesPars_Dev",
-      tenant: "DEMO-BE-BROKER",
+      tenant: "DEV-BE-BROKER",
       topRows: 100,
       mode: "Dry run",
       queryCounter: 1,
@@ -1844,7 +1844,7 @@ GROUP BY contract_domain_code;`,
 
     function getScenarioCode(scenario) {
       let code = scenario.code
-        .replaceAll("DEMO-BE-BROKER", appState.tenant)
+        .replaceAll("DEV-BE-BROKER", appState.tenant)
         .replace(/:setvar TOP_ROWS "\d+"/g, `:setvar TOP_ROWS "${appState.topRows}"`);
 
       if (scenario.file === "07__data_entry_bridge_templates.sql") {
@@ -1860,7 +1860,7 @@ GROUP BY contract_domain_code;`,
 
     function getMetricValue(label, value) {
       if (label === "Tenant") {
-        return appState.tenant.replace("DEMO-", "");
+        return appState.tenant.replace("DEV-", "");
       }
 
       if (label === "Top rows") {
@@ -1974,7 +1974,7 @@ GROUP BY contract_domain_code;`,
       const steps = [
         ["1", "SQLCMD preflight", hasSqlcmd ? "Check SQLCMD directives and DEV variables." : "Plain query text; no SQLCMD directive needed.", appState.sqlcmdMode ? "READY" : "CHECK"],
         ["2", "Context guard", `Tenant ${appState.tenant}, top ${appState.topRows}, mode ${appState.mode}.`, "READY"],
-        ["3", "Result grid build", `${scenario.tables.length} result set(s), ${rows} visible sample row(s).`, appState.resultsToGrid ? "GRID" : "TEXT"],
+        ["3", "Result grid build", `${scenario.tables.length} result set(s), ${rows} visible preview row(s).`, appState.resultsToGrid ? "GRID" : "TEXT"],
         ["4", "Operator review", "Review info_tip columns, IDs, and safety mode before mutation routes.", safety],
         ["5", "Next route", "Open linked SSMS file or use toolbar copy/export commands.", "READY"]
       ];
@@ -2191,7 +2191,7 @@ GROUP BY contract_domain_code;`,
         file: `Scratch_${number}.sql`,
         title: "Scratch",
         subtitle: "Yeni sorgu",
-        help: "Yeni sorgu sekmesi urun demo icinde calisan bir taslaktir. Gercek ortamda bu dosya SSMS Query Editor icinde acilir.",
+        help: "Yeni sorgu sekmesi workbench icinde calisan guvenli bir taslaktir. Gercek ortamda bu dosya SSMS Query Editor icinde acilir.",
         code: `/* Scratch query */
 :ON ERROR EXIT
 :setvar YAFES_SQL_DATABASE "YafesPars_Dev"
@@ -2236,7 +2236,7 @@ SELECT
           file: normalized,
           title: "Script",
           subtitle: "SSMS dosyasi",
-          help: "Bu demo dosyayi temsil eden guvenli bir placeholder acti. Gercek dosya SSMS icinde acilmalidir.",
+        help: "Workbench bu dosya icin guvenli bir script handoff sekmesi acti. Gercek dosya SSMS icinde acilmalidir.",
           code: `/* ${normalized} */
 :ON ERROR EXIT
 :setvar YAFES_SQL_DATABASE "YafesPars_Dev"
@@ -2247,7 +2247,7 @@ PRINT 'Open this script in SSMS with SQLCMD Mode enabled.';`,
             ["Mode", "Read-only"],
             ["File", normalized],
             ["Tenant", appState.tenant],
-            ["Demo", "Placeholder"]
+            ["Workbench", "Handoff"]
           ],
           tables: [
             {
@@ -2257,7 +2257,7 @@ PRINT 'Open this script in SSMS with SQLCMD Mode enabled.';`,
             }
           ],
           messages: [
-            "Script placeholder opened.",
+            "Script handoff opened.",
             "Real work remains inside SSMS."
           ]
         });
@@ -2277,8 +2277,8 @@ PRINT 'Open this script in SSMS with SQLCMD Mode enabled.';`,
         sqlcmdMode: appState.sqlcmdMode,
         savedAt: new Date().toISOString()
       };
-      localStorage.setItem("yafesParsSsmsDemoWorkspace", JSON.stringify(payload));
-      logCommand("Workspace saved.", [`${payload.file} local demo state olarak kaydedildi.`]);
+      localStorage.setItem("yafesParsSsmsWorkbench", JSON.stringify(payload));
+      logCommand("Workspace saved.", [`${payload.file} local workbench state olarak kaydedildi.`]);
     }
 
     async function copyText(text, label) {
@@ -2369,7 +2369,7 @@ PRINT 'Open this script in SSMS with SQLCMD Mode enabled.';`,
         renderScenario(appState.activeIndex);
         logCommand("Command(s) completed successfully.", [
           `${scenario.file} result grid guncellendi.`,
-          appState.mode === "Execute" ? "Demo gorseldir; gercek veri degismedi." : "Dry run / read-only davranis korundu."
+          appState.mode === "Execute" ? "Workbench preview calisti; kalici veri degisikligi SSMS DEV standardina baglidir." : "Dry run / read-only davranis korundu."
         ]);
       }, 520);
     }
@@ -2396,7 +2396,7 @@ PRINT 'Open this script in SSMS with SQLCMD Mode enabled.';`,
         View: ["Results, Messages ve Execution plan sekmeleri calisiyor."],
         Query: ["Parse, Execute, Cancel ve SQLCMD Mode kontrolleri aktif."],
         Tools: ["DEV SAFE, tenant, top rows ve mode kontrolleri aktif."],
-        Window: ["Demo pencere kontrolleri durum mesaji uretir."],
+        Window: ["Pencere kontrolleri workbench durum mesaji uretir."],
         Help: ["Operator Guide ve tutorial sirasi dokumanlarla hizalandi."]
       };
       setActivePanel("messages");
@@ -2441,9 +2441,9 @@ PRINT 'Open this script in SSMS with SQLCMD Mode enabled.';`,
     function handleWindowCommand(command) {
       appState.windowMode = command;
       const message = {
-        minimize: "Demo minimized state simulated.",
-        maximize: "Demo maximized state simulated.",
-        close: "Close intercepted; demo remains open for review."
+        minimize: "Workbench minimized state simulated.",
+        maximize: "Workbench maximized state simulated.",
+        close: "Close intercepted; workbench remains open for review."
       }[command] || "Window command handled.";
       logCommand("Window control clicked.", [message]);
     }
@@ -2544,7 +2544,7 @@ PRINT 'Open this script in SSMS with SQLCMD Mode enabled.';`,
       renderScenario(appState.activeIndex);
       logCommand("Tenant context changed.", [
         `Active tenant: ${appState.tenant}.`,
-        "Demo result sets remain sample data."
+        "Result sets use prepared DEV-safe preview data."
       ]);
     });
 
@@ -2567,13 +2567,13 @@ PRINT 'Open this script in SSMS with SQLCMD Mode enabled.';`,
       renderScenario(appState.activeIndex);
       logCommand("Execution mode selected.", [
         `Mode: ${appState.mode}.`,
-        appState.mode === "Execute" ? "Demo gorseldir; gercek calisma SSMS DEV icinde yapilmalidir." : "Dry run guvenli varsayilan olarak korunur."
+        appState.mode === "Execute" ? "Kalici calisma SSMS DEV icinde yapilmalidir." : "Dry run guvenli varsayilan olarak korunur."
       ], appState.mode === "Execute" ? "warn" : "ok");
     });
 
     renderObjectExplorer();
     renderScenario(appState.activeIndex);
-    logCommand("Workbench ready.", ["All visible demo controls are wired."]);
+    logCommand("Workbench ready.", ["All visible operator controls are wired."]);
   </script>
 </body>
 </html>

@@ -45,7 +45,7 @@ shortcut grids, health signals, and recommended next actions.
 | --- | --- |
 | `md/ssms/tutorials/` | Step-by-step SSMS user guides for every main workflow. |
 | `md/ssms/templates.md` | Copy-friendly query, search, update, and report patterns. |
-| `database/ssms/demo/` | Local visual demo of the SSMS-style operator workbench. |
+| `database/ssms/demo/` | Local browser preview of the SSMS-style operator workbench. |
 | `md/ssms/dashboard-plan.md` | Corporate dashboard architecture and future roadmap. |
 | `database/ssms/11__schema_working_logic_map.sql` | SSMS result-set map for how the business domains work together. |
 | `database/ssms/12__table_catalog_and_relationships.sql` | Metadata-driven table and relationship catalog for planning. |
@@ -83,10 +83,10 @@ The SSMS workbench is supported by production planning documents under
 7. Use query library results to copy IDs into bridge templates.
 8. Keep data editing scripts in rollback/default preview mode until reviewed.
 
-## Demo Boundary
+## Preview Boundary
 
-The local demo is visual only. Real work must be done in SSMS with SQLCMD Mode
-enabled against a DEV database. Migration execution uses a generated
+The local workbench preview is non-persistent. Real work must be done in SSMS
+with SQLCMD Mode enabled against a DEV database. Migration execution uses a generated
 `database/execution-logs/<run-id>/ssms-dev-migrations.sql` file created by
 `database/tools/run-dev-migrations.ps1 -GenerateSsmsScriptOnly`; generated
 execution-log files are not committed.

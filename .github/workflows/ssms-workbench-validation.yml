@@ -132,7 +132,7 @@ jobs:
             exit 1
           fi
 
-      - name: Validate demo JavaScript syntax
+      - name: Validate workbench JavaScript syntax
         shell: bash
         run: |
           set -euo pipefail
@@ -143,7 +143,7 @@ jobs:
           const html = fs.readFileSync('database/ssms/demo/index.html', 'utf8');
           const match = html.match(/<script>([\s\S]*)<\/script>/);
           if (!match) {
-            throw new Error('Demo script block is missing.');
+            throw new Error('Workbench script block is missing.');
           }
           new vm.Script(match[1]);
           const requiredText = [
@@ -176,7 +176,7 @@ jobs:
           ];
           for (const text of requiredText) {
             if (!html.includes(text)) {
-              throw new Error(`Demo is missing required text: ${text}`);
+              throw new Error(`Workbench is missing required text: ${text}`);
             }
           }
           NODE

@@ -34,8 +34,8 @@ come first; the .NET backend is an optional integration foundation.
 Open scripts from `database/ssms/` in SQL Server Management Studio. Enable
 `Query > SQLCMD Mode` for files that use `:setvar` or `:r`.
 
-The local demo is visual only. Real work must be done in SSMS with SQLCMD Mode
-enabled against a DEV database.
+The local workbench preview is non-persistent. Real work must be done in SSMS
+with SQLCMD Mode enabled against a DEV database.
 
 1. `00__open_first_safety_check.sql` - confirm DEV database and safe server.
 2. `05__operator_dashboard_home.sql` - keep this open as the SSMS home tab.
@@ -134,8 +134,8 @@ katmandir.
 Scriptleri `database/ssms/` altindan SSMS icinde acin. `:setvar` veya `:r`
 kullanan scriptlerde `Query > SQLCMD Mode` acik olmalidir.
 
-Local demo sadece gorseldir. Gercek calisma SSMS icinde, SQLCMD Mode acik
-olarak ve sadece DEV database uzerinde yapilmalidir.
+Local workbench preview kalici veri degisikligi yapmaz. Gercek calisma SSMS
+icinde, SQLCMD Mode acik olarak ve sadece DEV database uzerinde yapilmalidir.
 
 1. `00__open_first_safety_check.sql` - DEV veritabani ve guvenli server kontrolu.
 2. `05__operator_dashboard_home.sql` - SSMS ana dashboard sekmesi.
