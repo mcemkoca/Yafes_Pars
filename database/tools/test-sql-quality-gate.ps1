@@ -218,7 +218,9 @@ function Test-SsmsOperatorConventions {
         "database/ssms/07__data_entry_bridge_templates.sql",
         "database/ssms/08__data_editing_guardrails.sql",
         "database/ssms/09__graph_report_pack.sql",
-        "database/ssms/10__daily_operator_checklist.sql"
+        "database/ssms/10__daily_operator_checklist.sql",
+        "database/ssms/11__schema_working_logic_map.sql",
+        "database/ssms/12__table_catalog_and_relationships.sql"
     )
 
     foreach ($relativePath in $operatorFiles) {

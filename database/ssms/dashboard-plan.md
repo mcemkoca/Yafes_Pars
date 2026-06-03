@@ -23,6 +23,8 @@ operations.
 | Area | Script | Purpose |
 | --- | --- | --- |
 | Home | `05__operator_dashboard_home.sql` | Shortcuts, context, health, next actions. |
+| Architecture | `11__schema_working_logic_map.sql` | Domain groups, subheadings, control flow, and board cards. |
+| Catalog | `12__table_catalog_and_relationships.sql` | Full table catalog, root tables, and foreign-key relationship map. |
 | Daily | `10__daily_operator_checklist.sql` | PASS/REVIEW/ACTION checklist. |
 | Operations | `02__operations_dashboard.sql` | Customer, policy, claim, document, task, coverage overview. |
 | Search | `06__query_library_shortcuts.sql` | Find records and copy IDs. |
@@ -48,16 +50,20 @@ Operators open the listed script in a new SSMS tab.
 ## User-Friendly Flow
 
 1. Open dashboard home.
-2. Run daily checklist.
-3. Search record and copy IDs.
-4. Use bridge template for creates.
-5. Use guardrail template for updates.
-6. Run audit checks.
-7. Export report pack grids when needed.
+2. Review the working logic map when learning or planning changes.
+3. Open the table catalog before creating new tables or bridge flows.
+4. Run daily checklist.
+5. Search record and copy IDs.
+6. Use bridge template for creates.
+7. Use guardrail template for updates.
+8. Run audit checks.
+9. Export report pack grids when needed.
 
 ## Future Enhancements
 
 - Add stored procedures for more guided create/edit actions.
+- Add a visual planning board that consumes the same domain/card result sets
+  from `11__schema_working_logic_map.sql`.
 - Add specialized report packs by department.
 - Add SQL Agent job monitoring result sets.
 - Add standard SSMS registered-server instructions.

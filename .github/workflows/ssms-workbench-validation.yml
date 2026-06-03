@@ -50,6 +50,8 @@ jobs:
             database/ssms/08__data_editing_guardrails.sql
             database/ssms/09__graph_report_pack.sql
             database/ssms/10__daily_operator_checklist.sql
+            database/ssms/11__schema_working_logic_map.sql
+            database/ssms/12__table_catalog_and_relationships.sql
             database/ssms/README.md
             database/ssms/dashboard-plan.md
             database/ssms/tutorials/README.md
@@ -71,7 +73,9 @@ jobs:
                       database/ssms/07__data_entry_bridge_templates.sql \
                       database/ssms/08__data_editing_guardrails.sql \
                       database/ssms/09__graph_report_pack.sql \
-                      database/ssms/10__daily_operator_checklist.sql; do
+                      database/ssms/10__daily_operator_checklist.sql \
+                      database/ssms/11__schema_working_logic_map.sql \
+                      database/ssms/12__table_catalog_and_relationships.sql; do
             grep -q ":ON ERROR EXIT" "$file" || { echo "Missing SQLCMD guard: $file" >&2; exit 1; }
             grep -q "TENANT_CODE" "$file" || { echo "Missing TENANT_CODE variable: $file" >&2; exit 1; }
             grep -q "INFO TIP" "$file" || { echo "Missing INFO TIP guidance: $file" >&2; exit 1; }
@@ -115,7 +119,9 @@ jobs:
             'Corporate Operator Workbench',
             '05__operator_dashboard_home.sql',
             '07__data_entry_bridge_templates.sql',
-            '09__graph_report_pack.sql'
+            '09__graph_report_pack.sql',
+            '11__schema_working_logic_map.sql',
+            '12__table_catalog_and_relationships.sql'
           ];
           for (const text of requiredText) {
             if (!html.includes(text)) {

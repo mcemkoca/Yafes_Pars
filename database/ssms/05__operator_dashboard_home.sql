@@ -61,6 +61,8 @@ SELECT
 FROM (VALUES
     (10, N'Start', N'Open-first safety check', N'database/ssms/00__open_first_safety_check.sql', N'READ_ONLY', N'Confirms DEV database and non-production-like server names.'),
     (20, N'Start', N'Run migrations and validations', N'database/ssms/01__run_all_dev_migrations_sqlcmd.sql', N'BACKUP_REQUIRED', N'Use only after setting backup path in the generated all-in-one script.'),
+    (25, N'Architecture', N'Working logic map', N'database/ssms/11__schema_working_logic_map.sql', N'READ_ONLY', N'Domain groups, subheadings, control flow, and board cards for planning.'),
+    (26, N'Architecture', N'Table catalog and FK map', N'database/ssms/12__table_catalog_and_relationships.sql', N'READ_ONLY', N'Real SQL Server table catalog, column profile, and relationship map.'),
     (30, N'Operate', N'Operations dashboard', N'database/ssms/02__operations_dashboard.sql', N'READ_ONLY', N'Daily customer, policy, claim, task, coverage, and lookup overview.'),
     (40, N'Operate', N'Renewal task runner', N'database/ssms/03__create_renewal_tasks.sql', N'DRY_RUN_FIRST', N'Keep DRY_RUN = 1 until candidate list is approved.'),
     (50, N'Control', N'Admin/security/audit checks', N'database/ssms/04__admin_security_audit_queries.sql', N'READ_ONLY', N'RBAC, audit trigger, audit log, and integrity control checks.'),
@@ -138,10 +140,12 @@ SELECT
     info_tip
 FROM (VALUES
     (1, N'Run daily checklist', N'database/ssms/10__daily_operator_checklist.sql', N'Fastest way to confirm readiness before data entry.'),
-    (2, N'Open operations dashboard', N'database/ssms/02__operations_dashboard.sql', N'Keep this tab pinned in SSMS for daily operations.'),
-    (3, N'Use data entry bridge for creates', N'database/ssms/07__data_entry_bridge_templates.sql', N'Avoid direct INSERT unless a template explicitly documents it.'),
-    (4, N'Use editing guardrails for updates', N'database/ssms/08__data_editing_guardrails.sql', N'Preview and rollback by default; commit only after row count is correct.'),
-    (5, N'Export report pack if needed', N'database/ssms/09__graph_report_pack.sql', N'Result sets are designed for Excel/Power BI copy-out.')
+    (2, N'Review working logic map', N'database/ssms/11__schema_working_logic_map.sql', N'Use before deciding table changes or explaining the model to a new operator.'),
+    (3, N'Open table catalog and FK map', N'database/ssms/12__table_catalog_and_relationships.sql', N'Use before adding a migration or designing a drag/drop board.'),
+    (4, N'Open operations dashboard', N'database/ssms/02__operations_dashboard.sql', N'Keep this tab pinned in SSMS for daily operations.'),
+    (5, N'Use data entry bridge for creates', N'database/ssms/07__data_entry_bridge_templates.sql', N'Avoid direct INSERT unless a template explicitly documents it.'),
+    (6, N'Use editing guardrails for updates', N'database/ssms/08__data_editing_guardrails.sql', N'Preview and rollback by default; commit only after row count is correct.'),
+    (7, N'Export report pack if needed', N'database/ssms/09__graph_report_pack.sql', N'Result sets are designed for Excel/Power BI copy-out.')
 ) AS a(priority, recommended_action, open_script, info_tip)
 ORDER BY priority;
 GO

@@ -152,7 +152,7 @@
     .workspace {
       min-height: 0;
       display: grid;
-      grid-template-columns: 260px minmax(520px, 1fr) 315px;
+      grid-template-columns: 330px minmax(560px, 1fr) 320px;
       background: #fff;
     }
 
@@ -192,6 +192,27 @@
     .tree {
       line-height: 1.8;
       white-space: nowrap;
+    }
+
+    .tree-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .tree-count {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .tree-subheading {
+      display: block;
+      margin: -1px 0 2px 22px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.35;
+      white-space: normal;
     }
 
     .tree ul {
@@ -559,6 +580,105 @@
       color: #5f4700;
     }
 
+    .logic-map {
+      display: grid;
+      grid-template-columns: minmax(170px, 220px) 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+      padding: 12px;
+      border: 1px solid #2f3b52;
+      background: #111827;
+      color: #e5edf7;
+    }
+
+    .logic-center {
+      display: grid;
+      place-items: center;
+      min-height: 150px;
+      padding: 16px;
+      border: 1px solid #6d5dfc;
+      background: #1f2937;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .logic-center span {
+      display: block;
+      margin-top: 6px;
+      color: #a5b4fc;
+      font-weight: 400;
+    }
+
+    .logic-clusters {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 8px;
+    }
+
+    .logic-card,
+    .board-card {
+      min-width: 0;
+      border: 1px solid #475569;
+      background: #172033;
+      padding: 8px;
+    }
+
+    .logic-card h4,
+    .board-card h4 {
+      margin: 0 0 5px;
+      color: #f8fafc;
+      font-size: 12px;
+    }
+
+    .logic-card p,
+    .board-card p {
+      margin: 0;
+      color: #cbd5e1;
+      line-height: 1.35;
+    }
+
+    .subchips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 7px;
+    }
+
+    .subchips span {
+      border: 1px solid #64748b;
+      background: #0f172a;
+      color: #dbeafe;
+      padding: 2px 5px;
+      font-size: 11px;
+    }
+
+    .board-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .board-card {
+      background: #f8fafc;
+      border-color: #d0d7de;
+      color: #24292f;
+    }
+
+    .board-card h4 {
+      color: #0969da;
+    }
+
+    .board-card p {
+      color: #57606a;
+    }
+
+    .board-card .subchips span {
+      border-color: #bfdbfe;
+      background: #eff6ff;
+      color: #1e3a8a;
+    }
+
     .messages {
       min-height: 0;
       display: grid;
@@ -623,15 +743,15 @@
     }
 
     .check {
-      width: 14px;
-      height: 14px;
+      width: 18px;
+      height: 16px;
       display: grid;
       place-items: center;
       margin-top: 1px;
       border: 1px solid #8fbd8f;
       background: #eef8ee;
       color: var(--green);
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
     }
 
@@ -652,7 +772,7 @@
 
     .statusbar {
       display: grid;
-      grid-template-columns: 1fr auto auto auto;
+      grid-template-columns: 1fr auto auto auto auto;
       gap: 18px;
       align-items: center;
       padding: 0 10px;
@@ -736,38 +856,7 @@
           <span>Object Explorer</span>
           <span>Connected</span>
         </div>
-        <div class="tree">
-          <span class="node open selected">MIRO-HMM\\SQLEXPRESS (SQL Server 2022)</span>
-          <ul>
-            <li>
-              <span class="node open">Databases</span>
-              <ul>
-                <li>
-                  <span class="node open">YafesPars_Dev</span>
-                  <ul>
-                    <li><span class="node open">Tables</span></li>
-                    <li><span class="node leaf">core.Tenant</span></li>
-                    <li><span class="node leaf">person.Person</span></li>
-                    <li><span class="node leaf">institution.Institution</span></li>
-                    <li><span class="node leaf">risk.InsurableObject</span></li>
-                    <li><span class="node leaf">policy.Contract</span></li>
-                    <li><span class="node leaf">claim.Claim</span></li>
-                    <li><span class="node leaf">document.Document</span></li>
-                    <li><span class="node leaf">tasking.Task</span></li>
-                    <li><span class="node open">Views</span></li>
-                    <li><span class="node leaf">person.VW_CustomerSummary</span></li>
-                    <li><span class="node leaf">policy.VW_PolicyDashboard</span></li>
-                    <li><span class="node leaf">tasking.VW_OpenTaskDashboard</span></li>
-                    <li><span class="node open">Stored Procedures</span></li>
-                    <li><span class="node leaf">tasking.SP_CreateRenewalTasks</span></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-            <li><span class="node open">Security</span></li>
-            <li><span class="node open">SQL Server Agent</span></li>
-          </ul>
-        </div>
+        <div class="tree" id="objectTree"></div>
       </aside>
 
       <main class="main">
@@ -826,11 +915,12 @@
             <h2>Bugunku demo akisi</h2>
             <div class="body">
               <ul class="checklist">
-                <li><span class="check">✓</span><span>Home dashboard kisa yollar ve saglik sinyalleri verir.</span></li>
-                <li><span class="check">✓</span><span>Query library kayit bulma ve ID kopyalama icin kullanilir.</span></li>
-                <li><span class="check">✓</span><span>Data bridge create islemlerini preview-first yapar.</span></li>
-                <li><span class="check">✓</span><span>Edit guardrail rollback default ile calisir.</span></li>
-                <li><span class="check">✓</span><span>Report pack SSMS gridlerini grafik/export verisine cevirir.</span></li>
+                <li><span class="check">OK</span><span>Home dashboard kisa yollar ve saglik sinyalleri verir.</span></li>
+                <li><span class="check">OK</span><span>Working logic map alanlari ve alt basliklari gosterir.</span></li>
+                <li><span class="check">OK</span><span>Table catalog gercek tablo sayilari ve FK mantigini aciklar.</span></li>
+                <li><span class="check">OK</span><span>Data bridge create islemlerini preview-first yapar.</span></li>
+                <li><span class="check">OK</span><span>Edit guardrail rollback default ile calisir.</span></li>
+                <li><span class="check">OK</span><span>Report pack SSMS gridlerini grafik/export verisine cevirir.</span></li>
               </ul>
             </div>
           </div>
@@ -862,6 +952,7 @@
 
     <div class="statusbar">
       <span id="statusLeft">Connected - YafesPars_Dev</span>
+      <span>Home | Logic | Catalog | Bridge | Reports</span>
       <span>SQLCMD Mode</span>
       <span id="rowStatus">Rows: 100</span>
       <span id="cursorStatus">Ln 1, Col 1</span>
@@ -888,7 +979,7 @@ SELECT shortcut_order, shortcut_group, action_name, ssms_file, safety_mode, info
 FROM operator_shortcuts
 ORDER BY shortcut_order;`,
         metrics: [
-          ["Shortcuts", "10"],
+          ["Shortcuts", "12"],
           ["Health", "4"],
           ["Mode", "Read-only"],
           ["Tenant", "DEMO-BE"]
@@ -899,6 +990,8 @@ ORDER BY shortcut_order;`,
             columns: ["order", "group", "action", "ssms_file", "safety"],
             rows: [
               ["10", "Start", "Safety check", "00__open_first_safety_check.sql", "READ_ONLY"],
+              ["25", "Architecture", "Working logic map", "11__schema_working_logic_map.sql", "READ_ONLY"],
+              ["26", "Architecture", "Table catalog and FK map", "12__table_catalog_and_relationships.sql", "READ_ONLY"],
               ["30", "Operate", "Operations dashboard", "02__operations_dashboard.sql", "READ_ONLY"],
               ["70", "Edit", "Data entry bridge", "07__data_entry_bridge_templates.sql", "REVIEW_BEFORE_COMMIT"],
               ["90", "Report", "Graph/report pack", "09__graph_report_pack.sql", "READ_ONLY"]
@@ -918,6 +1011,208 @@ ORDER BY shortcut_order;`,
           "Home dashboard loaded.",
           "Shortcuts are SSMS files, not web links.",
           "Keep this tab open as the operator cockpit."
+        ]
+      },
+      {
+        file: "11__schema_working_logic_map.sql",
+        title: "Logic Map",
+        subtitle: "Alanlar ve alt basliklar",
+        help: "Working logic map kullaniciya tablo gruplarini, alt basliklari, kontrol noktalarini ve gelecek planlama kartlarini SSMS Results Grid icinde gosterir.",
+        code: `/* Schema Working Logic Map */
+:ON ERROR EXIT
+:setvar YAFES_SQL_DATABASE "YafesPars_Dev"
+:setvar TENANT_CODE "DEMO-BE-BROKER"
+
+USE [$(YAFES_SQL_DATABASE)];
+GO
+
+PRINT '01 - Domain groups and subheadings';
+SELECT domain_group, subheading, schema_name, table_count, working_logic, ssms_entry_point, info_tip
+FROM #DomainMap
+ORDER BY domain_order;
+
+PRINT '03 - Ready-made board cards for future drag/drop planning';
+SELECT board_lane, card_title, subitems, current_state, recommended_next_action
+FROM #PlanningCards
+ORDER BY card_order;`,
+        metrics: [
+          ["Domains", "11"],
+          ["Tables", "108"],
+          ["Backlog", "019+"],
+          ["Mode", "Read-only"]
+        ],
+        logicGroups: [
+          {
+            title: "Foundation",
+            text: "Tenant, RBAC, migration ledger, reference standards.",
+            chips: ["core", "ref"]
+          },
+          {
+            title: "Customer",
+            text: "Natural/legal identities, contact data, institutions.",
+            chips: ["person", "institution"]
+          },
+          {
+            title: "Insurance Core",
+            text: "Risk objects, contracts, versions, parties, coverage.",
+            chips: ["risk", "policy", "coverage"]
+          },
+          {
+            title: "Operations",
+            text: "Claims, documents, tasks, reminders, comments.",
+            chips: ["claim", "document", "tasking"]
+          },
+          {
+            title: "Control",
+            text: "Audit logs and entity change sets after guarded edits.",
+            chips: ["audit"]
+          }
+        ],
+        boardCards: [
+          {
+            title: "Risk/Object",
+            text: "Largest domain. Replaces unsafe generic Object naming with risk.InsurableObject.",
+            chips: ["33 tables", "vehicles", "real estate", "loans"]
+          },
+          {
+            title: "Policy",
+            text: "Central operating record for renewals, claims, parties, objects, and status.",
+            chips: ["17 tables", "renewals", "versions"]
+          },
+          {
+            title: "Bridge Flow",
+            text: "Search IDs, preview procedure input, execute only after review.",
+            chips: ["query", "preview", "output IDs"]
+          },
+          {
+            title: "Candidate 019+",
+            text: "Finance, import/export staging, entity notes, product templates.",
+            chips: ["planned", "forward-only", "approval"]
+          }
+        ],
+        tables: [
+          {
+            title: "01 - Domain groups and subheadings",
+            columns: ["order", "domain", "schema", "tables", "subheading", "info_tip"],
+            rows: [
+              ["10", "Core", "core", "7", "Tenant, users, RBAC, migration ledger", "Use when access or migration state is unclear."],
+              ["30", "Person", "person", "16", "Natural/legal identity, contacts, relations", "Create through stored procedures."],
+              ["50", "Risk/Object", "risk", "33", "Vehicle, real estate, loan, person risk, thing, activity", "Use risk.InsurableObject as root."],
+              ["60", "Policy", "policy", "17", "Contract, versions, parties, objects, takeovers", "Central operational hub."],
+              ["100", "Task", "tasking", "5", "Tasks, comments, reminders, priority/status", "Daily operator queue."]
+            ]
+          },
+          {
+            title: "02 - Working flow with control points",
+            columns: ["source", "target", "relationship", "control_point", "info_tip"],
+            rows: [
+              ["Core", "All domains", "Tenant and RBAC context", "TENANT_CODE", "Every script confirms context."],
+              ["Person", "Policy", "Policy holder, insured, broker", "policy.ContractParty", "Copy person_id from search."],
+              ["Risk/Object", "Policy", "Insurable object relation", "policy.ContractObject", "Use subtype tables for detail."],
+              ["Policy", "Claim", "Claim opened against policy", "claim.Claim.contract_id", "Verify policy and tenant."],
+              ["Root domains", "Audit", "Change logging", "audit.AuditLog", "Review after guarded edits."]
+            ]
+          }
+        ],
+        messages: [
+          "Working logic map loaded.",
+          "All groups include subheadings and operator info tips.",
+          "Use this before designing future 019+ migrations."
+        ]
+      },
+      {
+        file: "12__table_catalog_and_relationships.sql",
+        title: "Catalog",
+        subtitle: "Tablo ve FK haritasi",
+        help: "Table catalog SQL Server metadata uzerinden tam tablo listesini, kolon profilini, root tablolarini ve foreign-key iliski haritasini gosterir.",
+        code: `/* Table Catalog And Relationships */
+:ON ERROR EXIT
+:setvar YAFES_SQL_DATABASE "YafesPars_Dev"
+:setvar TENANT_CODE "DEMO-BE-BROKER"
+
+USE [$(YAFES_SQL_DATABASE)];
+GO
+
+PRINT '01 - Schema summary';
+SELECT s.name AS schema_name, COUNT(t.object_id) AS table_count
+FROM sys.schemas s
+LEFT JOIN sys.tables t ON t.schema_id = s.schema_id
+WHERE s.name IN ('core','ref','person','institution','risk','policy','coverage','claim','document','tasking','audit')
+GROUP BY s.name;
+
+PRINT '02 - Full table catalog';
+SELECT s.name AS schema_name, t.name AS table_name, COUNT(c.column_id) AS column_count
+FROM sys.tables t
+JOIN sys.schemas s ON s.schema_id = t.schema_id
+JOIN sys.columns c ON c.object_id = t.object_id
+GROUP BY s.name, t.name
+ORDER BY schema_name, table_name;`,
+        metrics: [
+          ["Schemas", "11"],
+          ["Tables", "108"],
+          ["Root tables", "9"],
+          ["Mode", "Read-only"]
+        ],
+        boardCards: [
+          {
+            title: "Schema Summary",
+            text: "Counts tables, views, and procedures by SQL Server schema.",
+            chips: ["core", "policy", "risk"]
+          },
+          {
+            title: "Full Table Catalog",
+            text: "Shows tenant_id, soft-delete flag, column count, and FK counts.",
+            chips: ["metadata", "columns", "FK counts"]
+          },
+          {
+            title: "Relationship Map",
+            text: "Lists parent and referenced tables so the real model is inspectable.",
+            chips: ["from", "to", "type"]
+          },
+          {
+            title: "Root Tables",
+            text: "Highlights safe starting tables for operators and planning.",
+            chips: ["Tenant", "Person", "Contract"]
+          }
+        ],
+        tables: [
+          {
+            title: "01 - Schema summary",
+            columns: ["schema", "tables", "views", "procedures", "domain_summary"],
+            rows: [
+              ["core", "7", "0", "0", "Tenant, users, RBAC, migration ledger"],
+              ["person", "16", "1", "2", "Customer identity and contact records"],
+              ["risk", "33", "0", "0", "Insurable objects and object subtypes"],
+              ["policy", "17", "1", "0", "Contracts, versions, parties, objects"],
+              ["claim", "8", "0", "0", "Claims and claim workflow"]
+            ]
+          },
+          {
+            title: "04 - Operator-safe root table list",
+            columns: ["domain", "full_table_name", "operator_use", "safe_entry_script"],
+            rows: [
+              ["Core", "core.Tenant", "Tenant context and isolation boundary", "05__operator_dashboard_home.sql"],
+              ["Person", "person.Person", "Customer identity root", "06__query_library_shortcuts.sql"],
+              ["Risk/Object", "risk.InsurableObject", "Insured object root", "06__query_library_shortcuts.sql"],
+              ["Policy", "policy.Contract", "Policy/contract root", "03__create_renewal_tasks.sql"],
+              ["Claim", "claim.Claim", "Claim file root", "06__query_library_shortcuts.sql"]
+            ]
+          },
+          {
+            title: "05 - Candidate table backlog for 019+ planning",
+            columns: ["priority", "candidate_domain", "candidate_tables", "migration_rule"],
+            rows: [
+              ["P1", "Finance/Commission", "Commission, PaymentLedger, ClaimReserve, BrokerStatement", "New forward migration 019+ only"],
+              ["P1", "Import/Export Staging", "ImportBatch, ImportRow, ImportValidationIssue, ExportJob", "New forward migration 019+ only"],
+              ["P2", "Entity Notes", "Note, NoteLink, NoteType", "New forward migration 019+ only"],
+              ["P2", "Product Templates", "ProductTemplate, RatingRule, ClauseTemplate", "New forward migration 019+ only"]
+            ]
+          }
+        ],
+        messages: [
+          "Table catalog loaded from SQL Server metadata.",
+          "Use this before creating new migrations.",
+          "No direct data changes."
         ]
       },
       {
@@ -1103,9 +1398,79 @@ GROUP BY contract_domain_code;`,
       }
     ];
 
-    let activeIndex = 2;
+    const objectExplorerGroups = [
+      {
+        schema: "core",
+        title: "Core",
+        subheading: "Tenant, users, RBAC, migration ledger",
+        tables: ["SchemaMigration", "Tenant", "AppUser", "Role", "Permission", "RolePermission", "UserRole"]
+      },
+      {
+        schema: "ref",
+        title: "Reference",
+        subheading: "Shared lookup standards",
+        tables: ["Language", "Title", "PhoneType", "SocialType", "ProfessionalStatus", "PersonType"]
+      },
+      {
+        schema: "person",
+        title: "Person",
+        subheading: "Natural/legal identity, contacts, bank accounts, relations",
+        tables: ["PersonAddressRole", "PersonRelationType", "Person", "NaturalPerson", "LegalPerson", "EconomicActivity", "EconomicActivityNacebel", "PersonPersonType", "Address", "Phone", "Email", "SocialMedia", "BankAccount", "DriverLicense", "PersonRelation", "PersonRelationPerson"]
+      },
+      {
+        schema: "institution",
+        title: "Institution",
+        subheading: "Insurers, banks, brokers, identifiers, addresses",
+        tables: ["InstitutionRole", "InstitutionIdentifierType", "InstitutionAddressRole", "Institution", "InstitutionIdentifier", "InstitutionAddress"]
+      },
+      {
+        schema: "risk",
+        title: "Risk/Object",
+        subheading: "Insurable object root, subtypes, vehicles, real estate, loans",
+        tables: ["InsurableObjectType", "VehicleType", "UsageType", "FuelType", "DriveType", "LicensePlateType", "RealEstateType", "InsuredRole", "UseTypeRealEstate", "ResidenceType", "DestinationType", "AdjacencyType", "OccupancyLevel", "ConstructionType", "RoofType", "BurglaryProtectionType", "InsurablePersonSubtype", "WorkerRiskClass", "EmployeeRiskClass", "AgeCategory", "InsurableThingSubtype", "ThingRiskCategory", "ThingMaterialType", "InsurableActivitySubtype", "ActivityRiskLevel", "InsurableObject", "InsurableVehicle", "InsurableRealEstate", "InsurableRealEstateBurglaryProtection", "InsurableLoan", "InsurablePerson", "InsurableThing", "InsurableActivity"]
+      },
+      {
+        schema: "policy",
+        title: "Policy",
+        subheading: "Contracts, versions, parties, objects, status, renewal flow",
+        tables: ["ContractDomain", "ContractStatus", "ContractVersionStatus", "Periodicity", "CollectionMethod", "DurationType", "ContractType", "ContractPartyRole", "ContractObjectStatus", "TakeoverDirection", "TakeoverSourceType", "Contract", "ContractVersion", "ContractParty", "ContractObject", "ContractVersionObject", "ContractTakeover"]
+      },
+      {
+        schema: "coverage",
+        title: "Coverage",
+        subheading: "Coverage catalog, domains, packages",
+        tables: ["Coverage", "CoverageDomain", "CoveragePackage", "CoveragePackageItem"]
+      },
+      {
+        schema: "claim",
+        title: "Claim",
+        subheading: "Claims, parties, objects, circumstances, payment method",
+        tables: ["ClaimStatus", "ClaimPartyRole", "ClaimCircumstanceType", "ClaimPaymentMethod", "Claim", "ClaimParty", "ClaimObject", "ClaimCircumstance"]
+      },
+      {
+        schema: "document",
+        title: "Document",
+        subheading: "Metadata, links, versions, external storage keys",
+        tables: ["DocumentType", "Document", "DocumentLink", "DocumentVersion"]
+      },
+      {
+        schema: "tasking",
+        title: "Tasking",
+        subheading: "Tasks, comments, reminders, priority/status",
+        tables: ["TaskStatus", "TaskPriority", "Task", "TaskComment", "TaskReminder"]
+      },
+      {
+        schema: "audit",
+        title: "Audit",
+        subheading: "Audit log and change details",
+        tables: ["AuditLog", "EntityChangeSet"]
+      }
+    ];
+
+    let activeIndex = 1;
 
     const tabbar = document.getElementById("tabbar");
+    const objectTree = document.getElementById("objectTree");
     const workflow = document.getElementById("workflow");
     const codeBlock = document.getElementById("codeBlock");
     const lineNumbers = document.getElementById("lineNumbers");
@@ -1159,6 +1524,108 @@ GROUP BY contract_domain_code;`,
       `;
     }
 
+    function renderObjectExplorer() {
+      const totalTables = objectExplorerGroups.reduce((sum, group) => sum + group.tables.length, 0);
+      const schemaItems = objectExplorerGroups.map(group => `
+        <li>
+          <span class="node open">
+            <span class="tree-heading">
+              <span>${escapeHtml(group.title)} (${escapeHtml(group.schema)})</span>
+              <span class="tree-count">${group.tables.length}</span>
+            </span>
+          </span>
+          <span class="tree-subheading">${escapeHtml(group.subheading)}</span>
+          <ul>
+            ${group.tables.map(table => `
+              <li><span class="node leaf">${escapeHtml(group.schema)}.${escapeHtml(table)}</span></li>
+            `).join("")}
+          </ul>
+        </li>
+      `).join("");
+
+      objectTree.innerHTML = `
+        <span class="node open selected">MIRO-HMM\\SQLEXPRESS (SQL Server 2022)</span>
+        <ul>
+          <li>
+            <span class="node open">Databases</span>
+            <ul>
+              <li>
+                <span class="node open">YafesPars_Dev</span>
+                <ul>
+                  <li>
+                    <span class="node open">
+                      <span class="tree-heading">
+                        <span>Tables</span>
+                        <span class="tree-count">${totalTables}</span>
+                      </span>
+                    </span>
+                    <ul>${schemaItems}</ul>
+                  </li>
+                  <li><span class="node open">Views</span></li>
+                  <li><span class="node leaf">person.VW_CustomerSummary</span></li>
+                  <li><span class="node leaf">policy.VW_PolicyDashboard</span></li>
+                  <li><span class="node leaf">tasking.VW_OpenTaskDashboard</span></li>
+                  <li><span class="node open">Stored Procedures</span></li>
+                  <li><span class="node leaf">person.SP_CreateNaturalPerson</span></li>
+                  <li><span class="node leaf">institution.SP_SearchInstitution</span></li>
+                  <li><span class="node leaf">tasking.SP_CreateRenewalTasks</span></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li><span class="node open">Security</span></li>
+          <li><span class="node open">SQL Server Agent</span></li>
+        </ul>
+      `;
+    }
+
+    function renderBoardCards(cards = []) {
+      if (!cards.length) {
+        return "";
+      }
+
+      return `
+        <div class="board-grid">
+          ${cards.map(card => `
+            <div class="board-card">
+              <h4>${escapeHtml(card.title)}</h4>
+              <p>${escapeHtml(card.text)}</p>
+              <div class="subchips">
+                ${card.chips.map(chip => `<span>${escapeHtml(chip)}</span>`).join("")}
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function renderLogicMap(scenario) {
+      if (!scenario.logicGroups) {
+        return renderBoardCards(scenario.boardCards);
+      }
+
+      return `
+        <div class="logic-map">
+          <div class="logic-center">
+            Yafes Pars
+            <span>SSMS-first database operating model</span>
+          </div>
+          <div class="logic-clusters">
+            ${scenario.logicGroups.map(group => `
+              <div class="logic-card">
+                <h4>${escapeHtml(group.title)}</h4>
+                <p>${escapeHtml(group.text)}</p>
+                <div class="subchips">
+                  ${group.chips.map(chip => `<span>${escapeHtml(chip)}</span>`).join("")}
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+        ${renderBoardCards(scenario.boardCards)}
+      `;
+    }
+
     function renderScenario(index) {
       activeIndex = index;
       const scenario = scenarios[index];
@@ -1190,6 +1657,7 @@ GROUP BY contract_domain_code;`,
             </div>
           `).join("")}
         </div>
+        ${renderLogicMap(scenario)}
         ${scenario.tables.map(renderTable).join("")}
       `;
 
@@ -1253,6 +1721,7 @@ GROUP BY contract_domain_code;`,
       `;
     });
 
+    renderObjectExplorer();
     renderScenario(activeIndex);
   </script>
 </body>

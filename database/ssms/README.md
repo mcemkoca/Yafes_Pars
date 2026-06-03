@@ -11,8 +11,10 @@ for scripts that contain `:setvar` or `:r`.
 
 1. `00__open_first_safety_check.sql`
 2. `05__operator_dashboard_home.sql`
-3. `10__daily_operator_checklist.sql`
-4. `02__operations_dashboard.sql`
+3. `11__schema_working_logic_map.sql`
+4. `12__table_catalog_and_relationships.sql`
+5. `10__daily_operator_checklist.sql`
+6. `02__operations_dashboard.sql`
 
 Keep `05__operator_dashboard_home.sql` open as the SSMS home tab. It returns
 shortcut grids, health signals, and recommended next actions.
@@ -32,15 +34,19 @@ shortcut grids, health signals, and recommended next actions.
 | `08__data_editing_guardrails.sql` | Rollback default | Guided updates with before/after grids and explicit commit switch. |
 | `09__graph_report_pack.sql` | Read-only | Chart-ready grids, text bars, and export catalog. |
 | `10__daily_operator_checklist.sql` | Read-only | Morning/end-of-day checklist with PASS/REVIEW/ACTION signals. |
+| `11__schema_working_logic_map.sql` | Read-only | Domain groups, subheadings, control points, and planning board cards. |
+| `12__table_catalog_and_relationships.sql` | Read-only | Full SQL Server table catalog, column profile, root tables, and FK map. |
 
-## Supporting Folders
+## Supporting Assets
 
-| Folder | Purpose |
+| Path | Purpose |
 | --- | --- |
 | `tutorials/` | Step-by-step SSMS user guides for every main workflow. |
 | `templates/` | Copy-friendly query, search, update, and report patterns. |
 | `demo/` | Local visual demo of the SSMS-style operator workbench. |
 | `dashboard-plan.md` | Corporate dashboard architecture and future roadmap. |
+| `11__schema_working_logic_map.sql` | SSMS result-set map for how the business domains work together. |
+| `12__table_catalog_and_relationships.sql` | Metadata-driven table and relationship catalog for planning. |
 
 ## Production Runbooks
 

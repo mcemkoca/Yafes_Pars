@@ -5,74 +5,89 @@
 [![SSMS workbench validation](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/ssms-workbench-validation.yml/badge.svg)](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/ssms-workbench-validation.yml)
 [![Backend build](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/backend-build.yml/badge.svg)](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/backend-build.yml)
 
-Yafes Pars is an SSMS-first SQL Server insurance core platform for broker and
-policy operations. The project focuses on a disciplined database foundation:
-ordered migrations, validation scripts, tenant-aware data design, auditability,
-lookup seed data, and operator-ready SSMS workbench scripts.
+Yafes Pars is an SSMS-first SQL Server insurance operations platform for broker,
+policy, claim, risk, customer, document, task, security, and audit workflows.
+The product is designed around a disciplined database core and a practical
+operator workbench inside SQL Server Management Studio.
 
-The current product surface is SQL Server Management Studio, not a web
-application. Backend/API work exists as an integration foundation and should
-remain secondary until the database core is validated against a DEV SQL Server
-target.
+This is not a web-first application. The primary user experience is SSMS Query
+Editor, Results Grid, Messages, SQLCMD Mode, guided scripts, safe bridge
+templates, and production-ready database governance.
 
-## What Is Included
+## Executive Overview
 
-- SQL Server database core for customer, institution, risk, policy, coverage,
-  claim, document, tasking, RBAC, tenant, and audit domains.
-- Ordered migration set from `000` through `018`.
-- Validation scripts for schema, constraints, indexes, triggers, stored
-  procedures, seed data, demo data, and cross-domain integrity.
-- SSMS operator workbench scripts for safety checks, migrations, dashboards,
-  query shortcuts, safe data entry bridges, guarded editing, report grids,
-  renewal task generation, tutorials, and security/audit checks.
-- Guarded PowerShell migration runner with DEV target checks, backup preflight,
-  SQL Server syntax scans, execution logs, and SSMS fallback generation.
-- Static SQL quality gate for protected migration order, SQL Server syntax,
-  destructive pattern scanning, SSMS conventions, and production documentation.
-- Azure Windows Server, SQL Server installation, SSMS deployment, backup/restore,
-  security hardening, environment matrix, and production readiness runbooks.
-- Optional .NET 8 backend/API foundation for future integration work.
-- GitHub Actions for database quality gate, SQL Server validation, SSMS
-  workbench validation, and backend build/test checks.
+Yafes Pars provides a controlled corporate foundation for insurance operations:
+tenant-aware data design, ordered SQL Server migrations, role-based access
+control, audit trails, validation packs, operator dashboards, guided data entry,
+guarded editing, report grids, and deployment runbooks.
 
-## Repository Map
+The current database scope contains 108 SQL Server tables across 11 domain
+schemas. The active migration line is protected from `000` through `018`; future
+schema work must continue as forward-only migrations from `019+`.
 
-| Path | Purpose |
+## Client Value
+
+| Value | What It Means |
 | --- | --- |
-| `database/migrations/` | Ordered forward-only SQL Server migrations. |
-| `database/validation/` | Post-migration validation and integrity checks. |
-| `database/ssms/` | SSMS-first operator dashboard, scripts, tutorials, templates, and visual demo. |
-| `database/tools/` | Guarded local and CI migration runners. |
-| `database/docs/` | Architecture, security, ERD, data dictionary, Azure/SSMS runbooks, and production readiness standards. |
-| `backend/` | Optional .NET 8 API foundation and tests. |
-| `.github/workflows/` | CI workflows for SQL Server and backend checks. |
-| `.github/` | Dependabot, CODEOWNERS, and pull request standards. |
+| SSMS-native operations | Business users and technical operators can work in the familiar SQL Server Management Studio environment. |
+| Lower operational risk | DEV checks, SQLCMD variables, rollback defaults, dry-run modes, and info tips reduce accidental changes. |
+| Clear domain model | Customers, institutions, risks, policies, coverage, claims, documents, tasks, RBAC, and audit are separated by schema. |
+| Better onboarding | Tutorials, query shortcuts, bridge templates, and working-logic maps guide users step by step. |
+| Enterprise readiness | CI validation, security policy, production runbooks, backup guidance, and release checklists are included. |
 
-## SSMS Operator Flow
+## Platform Highlights
 
-Open the scripts in `database/ssms/` from SQL Server Management Studio.
-For scripts that use `:setvar` or `:r`, enable `Query > SQLCMD Mode`.
+| Capability | Status | Client Benefit |
+| --- | --- | --- |
+| SQL Server database core | Complete through migration `018` | Stable foundation for DEV validation and controlled rollout. |
+| SSMS operator workbench | Available | Users can start from one dashboard and move through safe workflows. |
+| Working logic map | Available | Domain groups, subheadings, control points, and planning cards are visible from SSMS. |
+| Table catalog and FK map | Available | Real SQL Server metadata supports planning before new tables are added. |
+| Validation and quality gate | Available | CI checks protect syntax, order, safety, documentation, and SSMS conventions. |
+| Production readiness pack | Available | Azure Windows Server, SQL Server, SSMS deployment, backup, and security guidance are documented. |
+| .NET backend foundation | Available | Integration layer exists, but it remains secondary to the database-first product surface. |
 
-1. Run `00__open_first_safety_check.sql` to confirm the target is a DEV
-   database and the connected server does not look like production.
-2. Run `01__run_all_dev_migrations_sqlcmd.sql` after setting the database and
-   backup variables in the generated all-in-one SSMS script.
-3. Open `05__operator_dashboard_home.sql` as the SSMS home tab for shortcuts,
-   health signals, and next actions.
-4. Run `10__daily_operator_checklist.sql` before data entry.
-5. Use `02__operations_dashboard.sql` for tenant-aware Results Grid dashboards.
-6. Use `06__query_library_shortcuts.sql` to find and copy IDs into templates.
-7. Use `07__data_entry_bridge_templates.sql` for procedure-based creates.
-8. Use `08__data_editing_guardrails.sql` for rollback-by-default updates.
-9. Use `09__graph_report_pack.sql` for chart-ready grids and exports.
-10. Use `03__create_renewal_tasks.sql` in `DRY_RUN = 1` mode before inserting
-   renewal tasks.
-11. Use `04__admin_security_audit_queries.sql` for RBAC, audit, and data quality
-   checks.
+## Architecture Snapshot
+
+| Layer | Scope |
+| --- | --- |
+| Core | Tenant isolation, users, roles, permissions, and migration ledger. |
+| Reference | Languages, titles, contact types, statuses, and shared lookup standards. |
+| Customer | Natural persons, legal persons, contact details, bank accounts, licenses, and relations. |
+| Institution | Insurers, banks, brokers, company roles, identifiers, and addresses. |
+| Risk/Object | Insurable objects, vehicles, real estate, loans, persons, things, activities, and risk lookups. |
+| Policy | Contracts, versions, parties, objects, domains, statuses, takeovers, and renewal flow. |
+| Coverage | Coverage definitions, domain mapping, packages, and package items. |
+| Claim | Claims, parties, objects, circumstances, status, payment method, paid and reserved amounts. |
+| Document | Document metadata, links, versions, external storage keys, and soft-delete support. |
+| Tasking | Tasks, comments, reminders, priority, status, and daily operator queues. |
+| Audit | Audit logs and entity change sets for traceability. |
+
+## SSMS Operator Workbench
+
+Open scripts from `database/ssms/` in SQL Server Management Studio. For files
+that use `:setvar` or `:r`, enable `Query > SQLCMD Mode`.
+
+Recommended operator flow:
+
+1. `00__open_first_safety_check.sql` - confirm DEV database and safe server context.
+2. `05__operator_dashboard_home.sql` - keep this open as the SSMS home tab.
+3. `11__schema_working_logic_map.sql` - review domain groups, subheadings, and planning cards.
+4. `12__table_catalog_and_relationships.sql` - inspect the real table catalog and FK map.
+5. `10__daily_operator_checklist.sql` - run the morning and end-of-day checklist.
+6. `02__operations_dashboard.sql` - review customer, policy, claim, task, coverage, and lookup grids.
+7. `06__query_library_shortcuts.sql` - search records and copy IDs from Results Grid.
+8. `07__data_entry_bridge_templates.sql` - create data through preview-first bridge templates.
+9. `08__data_editing_guardrails.sql` - update data with before/after grids and rollback default.
+10. `09__graph_report_pack.sql` - produce chart-ready and export-ready report grids.
+11. `03__create_renewal_tasks.sql` - run renewal generation in `DRY_RUN = 1` mode first.
+12. `04__admin_security_audit_queries.sql` - review RBAC, audit, trigger, and integrity controls.
 
 Detailed SSMS tutorials are available in `database/ssms/tutorials/`.
 
-A local visual mockup of the SSMS-oriented operator experience is available at:
+## Visual Demo
+
+A local SSMS-style visual demo is available for walkthroughs and client review:
 
 ```powershell
 cd database/ssms/demo
@@ -80,6 +95,9 @@ python -m http.server 3000 --bind 127.0.0.1
 ```
 
 Then open `http://127.0.0.1:3000/`.
+
+The demo is visual only. The real operating model remains SSMS scripts,
+SQLCMD Mode, and SQL Server Results Grid.
 
 ## Migration Order
 
@@ -132,10 +150,24 @@ $env:YAFES_SQL_BACKUP_DIR = "C:\SqlBackups"
 The runner refuses non-DEV database names, production-like server names, unsafe
 SQL patterns, and missing pre-migration backup configuration.
 
+## Repository Map
+
+| Path | Purpose |
+| --- | --- |
+| `database/migrations/` | Ordered forward-only SQL Server migrations. |
+| `database/validation/` | Post-migration validation and integrity checks. |
+| `database/ssms/` | SSMS operator dashboard, query library, bridge templates, guardrails, tutorials, and visual demo. |
+| `database/tools/` | Guarded local and CI migration runners. |
+| `database/docs/` | Architecture, security, ERD, data dictionary, Azure/SSMS runbooks, and production readiness standards. |
+| `backend/` | Optional .NET 8 API foundation and tests. |
+| `.github/workflows/` | CI workflows for SQL Server and backend checks. |
+| `.github/` | Dependabot, CODEOWNERS, pull request template, and repository standards. |
+
 ## Production Readiness
 
-Production planning is documented for Azure Windows Server and SQL Server while
-preserving the SSMS operator model:
+Production planning is documented for Azure Windows Server, SQL Server, SSMS
+deployment, backup/restore, security hardening, environment separation, and
+release evidence:
 
 - `database/docs/azure-windows-server-deployment.md`
 - `database/docs/ssms-deployment-runbook.md`
@@ -151,7 +183,7 @@ deployment records.
 
 ## Backend Foundation
 
-The backend is an optional .NET 8 integration layer.
+The backend is an optional .NET 8 integration layer:
 
 ```powershell
 dotnet restore backend/src/YafesPars.Api/YafesPars.Api.csproj
@@ -167,20 +199,19 @@ Configure database access with either:
 ## Security
 
 Security policy, supported scope, and vulnerability reporting rules are defined
-in [`SECURITY.md`](SECURITY.md). Do not commit credentials, database backups,
-connection strings, or production data.
+in `SECURITY.md`. Do not commit credentials, database backups, connection
+strings, or production data.
 
 Dependency updates are managed through Dependabot for GitHub Actions and NuGet.
 
-## Current Status
+## Current Delivery Status
 
-- Database core: complete through migration `018`.
-- Validation coverage: complete for the current database scope.
-- SSMS workbench: dashboard, query library, bridge templates, editing
-  guardrails, tutorials, and report pack available under `database/ssms/`.
-- Production readiness pack: Azure Windows Server, SSMS deployment, SQL Server
-  installation, backup/restore, security hardening, environment matrix, and
-  execution log templates available under `database/docs/`.
-- Backend/API foundation: available, not the primary operator surface.
-- Real DEV SQL Server execution: must be confirmed in an environment with
-  `sqlcmd` or SSMS access to the target SQL Server instance.
+| Area | Status |
+| --- | --- |
+| Database core | Complete through protected migration `018`. |
+| Validation coverage | Complete for the current database scope. |
+| SSMS workbench | Dashboard, daily checklist, query library, bridge templates, guardrails, working logic map, table catalog, tutorials, and report pack are available. |
+| Visual demo | SSMS-style local demo available under `database/ssms/demo/`. |
+| Production pack | Azure, SQL Server, SSMS deployment, backup/restore, security, environment, readiness, and execution log documents are available. |
+| Backend/API | Optional integration foundation available; not the primary operator surface. |
+| DEV SQL Server execution | Must be confirmed in an environment with `sqlcmd` or SSMS access to the target SQL Server instance. |
