@@ -916,6 +916,7 @@
             <div class="body">
               <ul class="checklist">
                 <li><span class="check">OK</span><span>Home dashboard kisa yollar ve saglik sinyalleri verir.</span></li>
+                <li><span class="check">OK</span><span>Migration handoff gercek generated SSMS scriptine yonlendirir.</span></li>
                 <li><span class="check">OK</span><span>Working logic map alanlari ve alt basliklari gosterir.</span></li>
                 <li><span class="check">OK</span><span>Table catalog gercek tablo sayilari ve FK mantigini aciklar.</span></li>
                 <li><span class="check">OK</span><span>Data bridge create islemlerini preview-first yapar.</span></li>
@@ -990,6 +991,7 @@ ORDER BY shortcut_order;`,
             columns: ["order", "group", "action", "ssms_file", "safety"],
             rows: [
               ["10", "Start", "Safety check", "00__open_first_safety_check.sql", "READ_ONLY"],
+              ["20", "Start", "DEV migration handoff", "01__run_all_dev_migrations_sqlcmd.sql", "READ_ONLY_HANDOFF"],
               ["25", "Architecture", "Working logic map", "11__schema_working_logic_map.sql", "READ_ONLY"],
               ["26", "Architecture", "Table catalog and FK map", "12__table_catalog_and_relationships.sql", "READ_ONLY"],
               ["30", "Operate", "Operations dashboard", "02__operations_dashboard.sql", "READ_ONLY"],
@@ -1011,6 +1013,76 @@ ORDER BY shortcut_order;`,
           "Home dashboard loaded.",
           "Shortcuts are SSMS files, not web links.",
           "Keep this tab open as the operator cockpit."
+        ]
+      },
+      {
+        file: "01__run_all_dev_migrations_sqlcmd.sql",
+        title: "Migrate",
+        subtitle: "DEV handoff",
+        help: "Migration handoff demoda migration calistirmaz. Gercek all-in-one SSMS scripti PowerShell runner ile uretilir, sonra SSMS icinde SQLCMD Mode acik olarak DEV database uzerinde calistirilir.",
+        code: `/* DEV Migration Handoff */
+:ON ERROR EXIT
+:setvar YAFES_SQL_DATABASE "YafesPars_Dev"
+:setvar YAFES_SQL_BACKUP_PATH "C:\\SqlBackups\\YafesPars_Dev_PreMigration_YYYYMMDD_HHMMSS.bak"
+
+USE [master];
+GO
+
+IF N'$(YAFES_SQL_DATABASE)' NOT LIKE N'%DEV%'
+    THROW 52005, 'Target database name must contain DEV.', 1;
+
+PRINT 'Generate the real SSMS script first:';
+PRINT '.\\database\\tools\\run-dev-migrations.ps1 -GenerateSsmsScriptOnly';
+PRINT 'Then open database/execution-logs/<run-id>/ssms-dev-migrations.sql in SSMS.';`,
+        metrics: [
+          ["Mode", "Handoff"],
+          ["Run here", "No"],
+          ["Backup", "Required"],
+          ["Target", "DEV only"]
+        ],
+        boardCards: [
+          {
+            title: "Generate",
+            text: "Create the all-in-one SSMS migration file with the guarded PowerShell runner.",
+            chips: ["run-dev-migrations", "GenerateSsmsScriptOnly"]
+          },
+          {
+            title: "Verify",
+            text: "Open the generated script, enable SQLCMD Mode, check database and backup variables.",
+            chips: ["SQLCMD Mode", "DEV", "backup path"]
+          },
+          {
+            title: "Execute",
+            text: "Run the generated script only against a verified DEV database from SSMS.",
+            chips: ["migrations 000-018", "validations 001-017"]
+          }
+        ],
+        tables: [
+          {
+            title: "01 - Migration handoff status",
+            columns: ["item", "status", "expected_operator_action", "info_tip"],
+            rows: [
+              ["Checked-in 01 file", "READY", "Use as read-only preflight only", "It does not run migrations directly."],
+              ["Generated SSMS script", "REQUIRED", "Create database/execution-logs/<run-id>/ssms-dev-migrations.sql", "Generated files are not committed."],
+              ["SQLCMD Mode", "REQUIRED", "Enable Query > SQLCMD Mode in SSMS", "Required for :setvar and :r handling."],
+              ["DEV database", "REQUIRED", "Confirm name contains DEV", "Stops if target looks wrong."]
+            ]
+          },
+          {
+            title: "02 - Manual SSMS execution checklist",
+            columns: ["order", "step", "script_or_file", "safety"],
+            rows: [
+              ["1", "Generate all-in-one script", "run-dev-migrations.ps1 -GenerateSsmsScriptOnly", "READ_ONLY_GENERATION"],
+              ["2", "Open generated script", "database/execution-logs/<run-id>/ssms-dev-migrations.sql", "LOCAL_ARTIFACT"],
+              ["3", "Verify variables", "YAFES_SQL_DATABASE / YAFES_SQL_BACKUP_PATH", "BACKUP_REQUIRED"],
+              ["4", "Run in SSMS", "SQLCMD Mode enabled", "DEV_ONLY"]
+            ]
+          }
+        ],
+        messages: [
+          "Migration handoff loaded.",
+          "Demo does not execute migrations.",
+          "Generate ssms-dev-migrations.sql, then run it in SSMS with SQLCMD Mode enabled."
         ]
       },
       {
