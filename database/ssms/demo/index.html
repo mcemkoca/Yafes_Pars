@@ -1030,6 +1030,7 @@
                 <li><span class="check">OK</span><span>Working logic map alanlari ve alt basliklari gosterir.</span></li>
                 <li><span class="check">OK</span><span>Table catalog gercek tablo sayilari ve FK mantigini aciklar.</span></li>
                 <li><span class="check">OK</span><span>Visual workflow board node/edge gridleri ve template route verir.</span></li>
+                <li><span class="check">OK</span><span>Admin role matrix kullanici ve permission kontrolunu SSMS gridinde verir.</span></li>
                 <li><span class="check">OK</span><span>Data bridge create islemlerini preview-first yapar.</span></li>
                 <li><span class="check">OK</span><span>Edit guardrail rollback default ile calisir.</span></li>
                 <li><span class="check">OK</span><span>Report pack SSMS gridlerini grafik/export verisine cevirir.</span></li>
@@ -1064,7 +1065,7 @@
 
     <div class="statusbar">
       <span id="statusLeft">Connected - YafesPars_Dev</span>
-      <span>Home | Logic | Visual | Catalog | Bridge | Reports</span>
+      <span>Home | Logic | Visual | Catalog | Admin | Bridge | Reports</span>
       <span>SQLCMD Mode</span>
       <span id="rowStatus">Rows: 100</span>
       <span id="cursorStatus">Ln 1, Col 1</span>
@@ -1091,7 +1092,7 @@ SELECT shortcut_order, shortcut_group, action_name, ssms_file, safety_mode, info
 FROM operator_shortcuts
 ORDER BY shortcut_order;`,
         metrics: [
-          ["Shortcuts", "13"],
+          ["Shortcuts", "14"],
           ["Health", "4"],
           ["Mode", "Read-only"],
           ["Tenant", "DEV-BE"]
@@ -1107,6 +1108,7 @@ ORDER BY shortcut_order;`,
               ["26", "Architecture", "Table catalog and FK map", "12__table_catalog_and_relationships.sql", "READ_ONLY"],
               ["27", "Architecture", "Visual workflow board", "13__visual_workflow_board.sql", "READ_ONLY"],
               ["30", "Operate", "Operations dashboard", "02__operations_dashboard.sql", "READ_ONLY"],
+              ["55", "Control", "Role/permission matrix", "14__admin_role_permission_matrix.sql", "READ_ONLY"],
               ["70", "Edit", "Data entry bridge", "07__data_entry_bridge_templates.sql", "REVIEW_BEFORE_COMMIT"],
               ["90", "Report", "Graph/report pack", "09__graph_report_pack.sql", "READ_ONLY"]
             ]
@@ -1514,6 +1516,146 @@ ORDER BY schema_name, table_name;`,
           "Table catalog loaded from SQL Server metadata.",
           "Use this before creating new migrations.",
           "No direct data changes."
+        ]
+      },
+      {
+        file: "14__admin_role_permission_matrix.sql",
+        title: "Admin",
+        subtitle: "RBAC ve yetki matrisi",
+        help: "Admin role matrix kullaniciya hangi rolun hangi izne sahip oldugunu, kimde hangi rol oldugunu ve least-privilege kontrol noktalarini SSMS Results Grid olarak gosterir.",
+        code: `/* Admin Role Permission Matrix */
+:ON ERROR EXIT
+:setvar YAFES_SQL_DATABASE "YafesPars_Dev"
+:setvar TENANT_CODE "DEV-BE-BROKER"
+
+USE [$(YAFES_SQL_DATABASE)];
+GO
+
+DECLARE @TenantId UNIQUEIDENTIFIER;
+SELECT @TenantId = tenant_id
+FROM core.Tenant
+WHERE tenant_code = N'$(TENANT_CODE)';
+
+PRINT '02 - Expected system role coverage';
+WITH ExpectedRoles AS (
+    SELECT * FROM (VALUES
+        (10, N'SYSTEM_ADMIN', N'Platform owner'),
+        (20, N'BROKER_ADMIN', N'Broker office admin'),
+        (30, N'BROKER_USER', N'Daily broker operator'),
+        (40, N'CLAIM_HANDLER', N'Claims operator')
+    ) AS er(role_order, role_code, expected_operator_profile)
+)
+SELECT er.role_code, er.expected_operator_profile, CASE WHEN r.role_id IS NULL THEN N'MISSING' ELSE N'OK' END AS role_status
+FROM ExpectedRoles er
+LEFT JOIN core.Role r ON r.tenant_id IS NULL AND r.role_code = er.role_code
+ORDER BY role_order;
+
+PRINT '03 - Role permission matrix';
+SELECT role_code, module_code, permission_code, permission_name, access_weight, info_tip
+FROM (
+    SELECT r.role_code, p.module_code, p.permission_code, p.permission_name,
+           CASE WHEN p.permission_code LIKE N'admin.%' THEN N'ADMIN'
+                WHEN p.permission_code LIKE N'%.write' THEN N'WRITE'
+                ELSE N'READ' END AS access_weight,
+           N'Assign the smallest role that covers the operator task.' AS info_tip
+    FROM core.Role r
+    JOIN core.RolePermission rp ON rp.role_id = r.role_id
+    JOIN core.Permission p ON p.permission_code = rp.permission_code
+) AS matrix
+ORDER BY role_code, module_code, permission_code;
+
+PRINT '05 - Tenant user role assignments';
+SELECT u.email, u.display_name, r.role_code, u.is_active
+FROM core.AppUser u
+LEFT JOIN core.UserRole ur ON ur.user_id = u.user_id
+LEFT JOIN core.Role r ON r.role_id = ur.role_id
+WHERE u.tenant_id = @TenantId
+ORDER BY u.email;`,
+        metrics: [
+          ["Roles", "4"],
+          ["Permissions", "16"],
+          ["Users", "3"],
+          ["Mode", "Read-only"]
+        ],
+        boardCards: [
+          {
+            title: "Role Coverage",
+            text: "SYSTEM_ADMIN, BROKER_ADMIN, BROKER_USER, and CLAIM_HANDLER are checked before access changes.",
+            chips: ["expected roles", "status", "permission count"]
+          },
+          {
+            title: "Permission Matrix",
+            text: "Permissions are grouped by module and labelled as READ, WRITE, ADMIN, or ACTION.",
+            chips: ["module", "permission", "access weight"]
+          },
+          {
+            title: "User Assignment",
+            text: "Tenant users show active state, role list, effective permission count, and admin review status.",
+            chips: ["tenant", "users", "roles"]
+          },
+          {
+            title: "Least Privilege",
+            text: "Checklist rows identify missing admin coverage, elevated broker access, and inactive-user role risk.",
+            chips: ["review", "approval", "evidence"]
+          }
+        ],
+        tables: [
+          {
+            title: "02 - Expected system role coverage",
+            columns: ["order", "role", "profile", "permission_shape", "status", "permission_count"],
+            rows: [
+              ["10", "SYSTEM_ADMIN", "Platform owner", "All active permissions", "OK", "16"],
+              ["20", "BROKER_ADMIN", "Broker office admin", "Person/policy/claim/document/admin modules", "OK", "14"],
+              ["30", "BROKER_USER", "Daily broker operator", "Read-only customer and insurance visibility", "OK", "6"],
+              ["40", "CLAIM_HANDLER", "Claims operator", "Claim close and document handling", "OK", "5"]
+            ]
+          },
+          {
+            title: "03 - Role permission matrix",
+            columns: ["role", "module", "permission", "permission_name", "access_weight", "info_tip"],
+            rows: [
+              ["BROKER_ADMIN", "admin", "admin.user.manage", "Manage users", "ADMIN", "Assign only to approved tenant admins."],
+              ["BROKER_ADMIN", "policy", "policy.version.create", "Create policy versions", "WRITE", "Use bridge or guarded script."],
+              ["BROKER_USER", "policy", "policy.read", "Read policies", "READ", "Safe daily visibility."],
+              ["CLAIM_HANDLER", "claim", "claim.close", "Close claims", "WRITE", "Use claim closure approval trail."],
+              ["CLAIM_HANDLER", "document", "document.upload", "Upload documents", "WRITE", "Confirm document type first."]
+            ]
+          },
+          {
+            title: "05 - Tenant user role assignments",
+            columns: ["email", "display_name", "active", "roles", "permission_count", "assignment_status"],
+            rows: [
+              ["admin@yafes-demo.be", "Demo Admin", "1", "BROKER_ADMIN", "14", "ADMIN_REVIEW"],
+              ["broker@yafes-demo.be", "Demo Broker", "1", "BROKER_USER", "6", "OK"],
+              ["claims@yafes-demo.be", "Demo Claim Handler", "1", "CLAIM_HANDLER", "5", "OK"]
+            ]
+          },
+          {
+            title: "06 - Least privilege checklist",
+            columns: ["area", "expected_rule", "observed_signal", "status", "admin_action"],
+            rows: [
+              ["SYSTEM_ADMIN", "Has every active permission", "0 missing permission(s)", "OK", "Keep assignment rare and audited."],
+              ["BROKER_USER", "No write/admin permissions", "0 elevated permission(s)", "OK", "Use BROKER_ADMIN only after approval."],
+              ["CLAIM_HANDLER", "Can close claims", "claim.close present", "OK", "Confirm claim owner policy."],
+              ["Tenant admin assignment", "At least one active BROKER_ADMIN", "1 active broker admin user(s)", "OK", "Keep one named owner."],
+              ["Inactive users", "No role assignments", "0 inactive user role assignment(s)", "OK", "Review during offboarding."]
+            ]
+          },
+          {
+            title: "07 - Admin handoff scripts",
+            columns: ["order", "open_script", "purpose", "safety", "admin_rule"],
+            rows: [
+              ["10", "04__admin_security_audit_queries.sql", "RBAC, audit, trigger, integrity checks", "READ_ONLY", "Run after role matrix."],
+              ["20", "05__operator_dashboard_home.sql", "Return to cockpit", "READ_ONLY", "Keep dashboard pinned."],
+              ["30", "08__data_editing_guardrails.sql", "Rollback-default updates", "ROLLBACK_DEFAULT", "Use only after row-count review."],
+              ["40", "md/database/security-hardening.md", "Environment hardening", "DOCUMENTATION", "Use for TEST/PROD."]
+            ]
+          }
+        ],
+        messages: [
+          "Admin role permission matrix loaded.",
+          "This screen is read-only and mirrors core security tables.",
+          "Use before assigning users or preparing TEST/PROD access evidence."
         ]
       },
       {

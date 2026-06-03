@@ -51,17 +51,23 @@ assessment, clean-up decisions, and next update queue in one place.
   database name, tenant context, migration/validation counts, SSMS shortcuts,
   schema groups, table counts, and backend route inventory now come from the
   repository source instead of hand-maintained UI constants.
+- Unblocked backend and SQL Server validation in CI; the DEV migration flow now
+  runs with SQLCMD quoted identifiers and surfaces useful failure logs.
+- Verified the protected `000` through `018` migration line and `001` through
+  `017` validation line against a real SQL Server 2022 DEV container.
+- Added `database/ssms/14__admin_role_permission_matrix.sql` as the user-friendly
+  RBAC/admin matrix: expected roles, permissions, tenant user assignments,
+  least-privilege checks, and handoff rows.
 
 ### Remaining Risks And Gaps
 
 | Priority | Area | Finding | Best Fix |
 | --- | --- | --- | --- |
-| P0 | Real SQL execution | Local checks passed, but a real DEV SQL Server/SSMS execution still needs evidence. | Run full migration and validation flow against `YafesPars_DEV`, then attach the execution log. |
 | P0 | Token hygiene | A token was shared during coordination. It should be treated as exposed. | Rotate/revoke the token and use GitHub secrets or local credential manager only. |
 | P1 | Legacy reference notes | `md/trust-plan/` still contains old comparison notes from the imported package. | Keep useful schema/UX lessons, then delete notes that no longer help the SSMS-first product. |
 | P1 | Table reconciliation | The current migration source defines 108 tables, while the older visual/package reference mentioned 89 tables. | Compare table names before removing, merging, or adding any table. |
 | P1 | Workbench preview depth | The workbench controls are now wired and synchronized from the manifest, but execution is still non-persistent and uses prepared DEV preview data. | Keep real data work inside SSMS DEV; add backend-backed preview behavior only after the SSMS contract is stable. |
-| P1 | Operator permissions | SSMS scripts are safe, but final SQL logins/roles need real environment testing. | Add TEST/PROD role matrix evidence and least-privilege execution proof. |
+| P1 | Operator permissions | The SSMS RBAC matrix exists, but final SQL logins/roles still need TEST/PROD environment evidence. | Run `14__admin_role_permission_matrix.sql` in TEST/PROD-like environments and record access-review evidence. |
 | P1 | Backup and restore | Strategy exists, but no restore drill evidence is committed. | Run restore drill and record result in readiness checklist. |
 | P2 | Guided bridge coverage | Core bridge templates exist, but not every daily create/edit path has a stored procedure bridge. | Add bridge coverage by department priority. |
 | P2 | Finance model | Claim has paid/reserved fields, but no full ledger/commission model. | Design migration `019+` only after business owner confirms accounting flow. |
@@ -78,14 +84,14 @@ assessment, clean-up decisions, and next update queue in one place.
 
 ## Next Update Queue
 
-1. Run real DEV SQL Server validation and record evidence.
-2. Rotate any exposed coordination token and confirm no active token is stored in
+1. Rotate any exposed coordination token and confirm no active token is stored in
    Git.
+2. Record repeatable DEV/TEST execution evidence after each environment refresh.
 3. Compare the old 89-table package/reference against the current 108-table
    migration source and record keep/merge/remove decisions.
 4. Review `md/trust-plan/` notes and keep only the parts that still help the
    SSMS-first product.
-5. Add role/permission test evidence for operator, admin, auditor, and deployer.
+5. Add TEST/PROD role/permission evidence for operator, admin, auditor, and deployer.
 6. Add restore drill evidence to the production readiness checklist.
 7. Design migration `019+` candidates only after owner approval:
    finance/commission, import/export staging, entity notes, product templates.

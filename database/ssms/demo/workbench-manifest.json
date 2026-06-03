@@ -94,7 +94,7 @@
                         {
                             "fileName":  "05__operator_dashboard_home.sql",
                             "path":  "database/ssms/05__operator_dashboard_home.sql",
-                            "sizeBytes":  7858
+                            "sizeBytes":  8214
                         },
                         {
                             "fileName":  "06__query_library_shortcuts.sql",
@@ -135,6 +135,11 @@
                             "fileName":  "13__visual_workflow_board.sql",
                             "path":  "database/ssms/13__visual_workflow_board.sql",
                             "sizeBytes":  25132
+                        },
+                        {
+                            "fileName":  "14__admin_role_permission_matrix.sql",
+                            "path":  "database/ssms/14__admin_role_permission_matrix.sql",
+                            "sizeBytes":  12538
                         }
                     ],
     "shortcuts":  [
@@ -209,6 +214,15 @@
                           "fileName":  "04__admin_security_audit_queries.sql",
                           "safety":  "READ_ONLY",
                           "infoTip":  "RBAC, audit trigger, audit log, and integrity control checks."
+                      },
+                      {
+                          "order":  55,
+                          "group":  "Control",
+                          "action":  "Role/permission matrix",
+                          "ssmsFile":  "database/ssms/14__admin_role_permission_matrix.sql",
+                          "fileName":  "14__admin_role_permission_matrix.sql",
+                          "safety":  "READ_ONLY",
+                          "infoTip":  "User-friendly RBAC matrix, least-privilege checks, and admin handoff rows."
                       },
                       {
                           "order":  60,

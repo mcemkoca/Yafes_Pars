@@ -24,5 +24,6 @@ When in doubt, run the read-only scripts first:
 4. `13__visual_workflow_board.sql`
 5. `12__table_catalog_and_relationships.sql`
 6. `10__daily_operator_checklist.sql`
+7. `14__admin_role_permission_matrix.sql`
 
 Only then use data entry or editing scripts.

@@ -33,6 +33,7 @@ operations.
 | Edit | `08__data_editing_guardrails.sql` | Rollback-by-default updates. |
 | Reports | `09__graph_report_pack.sql` | Chart/export-ready result sets. |
 | Audit | `04__admin_security_audit_queries.sql` | RBAC, audit, trigger, and integrity checks. |
+| Admin | `14__admin_role_permission_matrix.sql` | Role coverage, permission matrix, user assignments, least-privilege checks, and handoff rows. |
 
 ## Shortcut Model
 
@@ -58,8 +59,9 @@ Operators open the listed script in a new SSMS tab.
 6. Search record and copy IDs.
 7. Use bridge template for creates.
 8. Use guardrail template for updates.
-9. Run audit checks.
-10. Export report pack grids when needed.
+9. Review role/permission matrix before access changes.
+10. Run audit checks.
+11. Export report pack grids when needed.
 
 ## Future Enhancements
 
@@ -67,6 +69,7 @@ Operators open the listed script in a new SSMS tab.
 - Extend `13__visual_workflow_board.sql` with owner-approved department routes
   after real operator usage is observed.
 - Add specialized report packs by department.
+- Add TEST/PROD access-review evidence from `14__admin_role_permission_matrix.sql`.
 - Add SQL Agent job monitoring result sets.
 - Add standard SSMS registered-server instructions.
 - Add Power BI template consuming report pack exports.

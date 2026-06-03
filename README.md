@@ -26,6 +26,7 @@ come first; the .NET backend is an optional integration foundation.
 | Working logic map | Available | Domain groups, subheadings, control points, and planning cards are visible from SSMS. |
 | Visual workflow board | Available | Mind-map style node, edge, subheading, and template-route datasets are available as SSMS Results Grid output. |
 | Table catalog and FK map | Available | Real SQL Server metadata supports table planning before new migrations. |
+| Admin role matrix | Available | User-friendly RBAC, permission, user assignment, and least-privilege grids are available in SSMS. |
 | Quality gates | Available | CI protects migration order, SQL Server syntax, destructive patterns, artifact policy, SSMS conventions, and documentation. |
 | Documentation hub | Available | Human-readable docs are organized under `md/`. |
 
@@ -50,6 +51,7 @@ with SQLCMD Mode enabled against a DEV database.
 11. `09__graph_report_pack.sql` - produce chart-ready/export-ready grids.
 12. `03__create_renewal_tasks.sql` - run renewal tasks in dry-run mode first.
 13. `04__admin_security_audit_queries.sql` - review RBAC, audit, and integrity.
+14. `14__admin_role_permission_matrix.sql` - review roles, permissions, user assignments, and least-privilege checks.
 
 ### Documentation
 
@@ -92,12 +94,12 @@ file in SSMS, enable SQLCMD Mode, verify variables, and run against DEV only.
 
 ### Next Updates
 
-1. Run full DEV SQL Server validation and attach execution evidence.
-2. Rotate any exposed coordination token and keep all credentials outside Git.
+1. Rotate any exposed coordination token and keep all credentials outside Git.
+2. Record repeatable DEV/TEST execution evidence after each environment refresh.
 3. Compare the older 89-table package/reference with the current 108-table
    migration source before any schema removal or merge decision.
 4. Review `md/trust-plan/` reference notes and keep only useful SSMS/product lessons.
-5. Add role/permission test evidence for operator, admin, auditor, and deployer.
+5. Add TEST/PROD role/permission evidence for operator, admin, auditor, and deployer.
 6. Add restore drill evidence to the production readiness checklist.
 7. Design migration `019+` candidates only after owner approval: finance,
    import/export staging, entity notes, and product templates.
@@ -126,6 +128,7 @@ katmandir.
 | Calisma mantigi haritasi | Hazir | Alanlar, alt basliklar, kontrol noktalari ve plan kartlari SSMS icinde gorunur. |
 | Visual workflow board | Hazir | Mind-map benzeri node, edge, alt baslik ve template-route verileri SSMS Results Grid olarak alinir. |
 | Tablo katalogu ve FK haritasi | Hazir | Yeni tablo/migration oncesi gercek SQL Server metadata'si incelenir. |
+| Admin rol matrisi | Hazir | RBAC, permission, kullanici rol atamalari ve least-privilege kontrolleri SSMS Results Grid olarak alinir. |
 | Kalite kapilari | Hazir | Migration sirasi, SQL Server syntax, destructive pattern, artifact policy, SSMS standartlari ve dokumanlar kontrol edilir. |
 | Dokuman merkezi | Hazir | Okunabilir proje dokumanlari `md/` altinda toplandi. |
 
@@ -150,6 +153,7 @@ icinde, SQLCMD Mode acik olarak ve sadece DEV database uzerinde yapilmalidir.
 11. `09__graph_report_pack.sql` - grafik/export hazir rapor gridleri.
 12. `03__create_renewal_tasks.sql` - once dry-run ile yenileme gorevleri.
 13. `04__admin_security_audit_queries.sql` - RBAC, audit ve veri kalite kontrolu.
+14. `14__admin_role_permission_matrix.sql` - rol, permission, kullanici atamasi ve least-privilege kontrolu.
 
 ### Dokumanlar
 
@@ -164,12 +168,12 @@ icinde, SQLCMD Mode acik olarak ve sadece DEV database uzerinde yapilmalidir.
 
 ### Sonraki Guncellemeler
 
-1. Gercek DEV SQL Server validation calistirilacak ve execution evidence eklenecek.
-2. Paylasilmis/riske girmis token varsa rotate edilecek; credential'lar Git disinda tutulacak.
+1. Paylasilmis/riske girmis token varsa rotate edilecek; credential'lar Git disinda tutulacak.
+2. Her DEV/TEST ortam yenilemesinden sonra tekrar edilebilir execution evidence kaydi tutulacak.
 3. Eski 89 tablolu paket/referans ile mevcut 108 tablolu migration kaynagi
    karsilastirilacak; silme veya birlestirme karari bundan sonra verilecek.
 4. `md/trust-plan/` referans notlari incelenecek; sadece SSMS/urun icin faydali kisimlar kalacak.
-5. Operator, admin, auditor ve deployer rolleri icin permission test kaniti eklenecek.
+5. Operator, admin, auditor ve deployer rolleri icin TEST/PROD permission kaniti eklenecek.
 6. Restore drill kaniti production readiness checklist'e eklenecek.
 7. `019+` migration adaylari is sahibi onayi ile tasarlanacak: finance,
    import/export staging, entity notes, product templates.
