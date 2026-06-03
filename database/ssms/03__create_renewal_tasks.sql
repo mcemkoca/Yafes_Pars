@@ -1,6 +1,10 @@
 /*
     Yafes Pars SSMS Workbench - Renewal Task Runner
 
+    INFO TIP:
+    Real renewal task work happens in SSMS, not the visual demo. Keep DRY_RUN = 1
+    until candidates are reviewed in Results Grid.
+
     Enable SQLCMD Mode before running.
     Set DRY_RUN to 1 to preview candidates, 0 to insert tasks.
 */

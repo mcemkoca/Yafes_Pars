@@ -15,6 +15,9 @@ GO
 USE [$(YAFES_SQL_DATABASE)];
 GO
 
+IF DB_NAME() NOT LIKE N'%DEV%'
+    THROW 52901, 'Current database name must contain DEV.', 1;
+
 DECLARE @TenantCode NVARCHAR(80) = N'$(TENANT_CODE)';
 DECLARE @TenantId UNIQUEIDENTIFIER;
 

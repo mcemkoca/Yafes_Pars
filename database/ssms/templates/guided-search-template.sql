@@ -3,6 +3,7 @@
 
     INFO TIP:
     Read-only search pattern. Use this before any edit bridge action.
+    Keep SQLCMD Mode enabled and run only against a DEV database.
 */
 :ON ERROR EXIT
 :setvar YAFES_SQL_DATABASE "YafesPars_Dev"
@@ -15,6 +16,9 @@ GO
 
 USE [$(YAFES_SQL_DATABASE)];
 GO
+
+IF DB_NAME() NOT LIKE N'%DEV%'
+    THROW 52911, 'Current database name must contain DEV.', 1;
 
 DECLARE @TenantId UNIQUEIDENTIFIER;
 DECLARE @SearchText NVARCHAR(160) = NULLIF(N'$(SEARCH_TEXT)', N'');

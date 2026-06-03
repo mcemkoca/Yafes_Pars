@@ -88,6 +88,28 @@ jobs:
             grep -q "INFO TIP" "$file" || { echo "Missing INFO TIP guidance: $file" >&2; exit 1; }
           done
 
+      - name: Validate SSMS DEV execution contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+
+          ssms_files=(database/ssms/*.sql database/ssms/templates/*.sql)
+          for file in "${ssms_files[@]}"; do
+            grep -q ":ON ERROR EXIT" "$file" || { echo "Missing SQLCMD guard: $file" >&2; exit 1; }
+            grep -q "YAFES_SQL_DATABASE" "$file" || { echo "Missing YAFES_SQL_DATABASE variable: $file" >&2; exit 1; }
+            grep -q "SQLCMD Mode" "$file" || { echo "Missing SQLCMD Mode guidance: $file" >&2; exit 1; }
+            grep -q "INFO TIP" "$file" || { echo "Missing INFO TIP guidance: $file" >&2; exit 1; }
+            grep -Eq "(Target database name must contain DEV|Current database name must contain DEV|NOT[[:space:]]+LIKE[[:space:]]+N'%DEV%')" "$file" || {
+              echo "Missing DEV database guard: $file" >&2
+              exit 1
+            }
+            if grep -Eiq '^[[:space:]]*:r[[:space:]]+.*execution-logs' "$file"; then
+              echo "Checked-in SSMS file must not reference generated execution logs directly: $file" >&2
+              exit 1
+            fi
+          done
+
       - name: Scan SSMS SQL for unsupported syntax
         shell: bash
         run: |

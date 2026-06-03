@@ -268,6 +268,45 @@ function Test-SsmsOperatorConventions {
     }
 }
 
+function Test-SsmsSqlcmdDevContract {
+    $ssmsFiles = @()
+    $ssmsRoot = Join-Path $repoRoot "database/ssms"
+    $templateRoot = Join-Path $ssmsRoot "templates"
+
+    if (Test-Path -LiteralPath $ssmsRoot -PathType Container) {
+        $ssmsFiles += @(Get-ChildItem -LiteralPath $ssmsRoot -Filter "*.sql" | Sort-Object Name)
+    }
+
+    if (Test-Path -LiteralPath $templateRoot -PathType Container) {
+        $ssmsFiles += @(Get-ChildItem -LiteralPath $templateRoot -Filter "*.sql" | Sort-Object Name)
+    }
+
+    foreach ($file in $ssmsFiles) {
+        $content = Get-Content -LiteralPath $file.FullName -Raw
+        $relativePath = Get-RelativePath $file.FullName
+
+        foreach ($requiredText in @(":ON ERROR EXIT", "YAFES_SQL_DATABASE", "SQLCMD Mode", "INFO TIP")) {
+            if ($content.Contains($requiredText)) {
+                Add-Result "PASS" "ssms-contract" "$relativePath contains $requiredText"
+            }
+            else {
+                Add-Result "FAIL" "ssms-contract" "$relativePath is missing $requiredText"
+            }
+        }
+
+        if ($content -match "(?im)(Target database name must contain DEV|Current database name must contain DEV|NOT\s+LIKE\s+N'%DEV%')") {
+            Add-Result "PASS" "ssms-contract" "$relativePath enforces DEV database context"
+        }
+        else {
+            Add-Result "FAIL" "ssms-contract" "$relativePath is missing a DEV database guard"
+        }
+
+        if ($content -match "(?im)^\s*:r\s+.*execution-logs") {
+            Add-Result "FAIL" "ssms-contract" "$relativePath references a generated execution-log script directly"
+        }
+    }
+}
+
 function Write-Report {
     if ($NoReportFile) {
         return
@@ -358,6 +397,7 @@ Test-PatternScan -RelativeFolders @("database/migrations", "database/validation"
 Test-PatternScan -RelativeFolders @("database/migrations", "database/ssms", "database/templates") -Pattern "\b(DROP\s+DATABASE|DROP\s+TABLE|TRUNCATE\s+TABLE|ALTER\s+TABLE[^\r\n;]+DROP\s+COLUMN)\b" -Scope "safety" -FailureMessage "destructive SQL pattern"
 Test-PatternScan -RelativeFolders @("database/migrations", "database/validation", "database/ssms", "database/templates") -Pattern "CREATE\s+TABLE\s+(\[?dbo\]?\.)?\[?Object\]?\b" -Scope "naming" -FailureMessage "forbidden Object table name"
 Test-StyleConventions -RelativeFolders @("database/migrations", "database/validation")
+Test-SsmsSqlcmdDevContract
 Test-SsmsOperatorConventions
 Write-Report
 

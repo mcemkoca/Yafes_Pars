@@ -17,7 +17,11 @@ Every operator query should include:
 
 - SQLCMD variable block
 - DEV database target
+- `DB_NAME() LIKE '%DEV%'` runtime guard
 - tenant resolution
 - `INFO TIP` comments or result columns
 - preview before mutation
 - rollback default for updates
+
+Templates are real SSMS starting points, not demo-only snippets. Keep SQLCMD
+Mode enabled before running or copying them into new operator scripts.

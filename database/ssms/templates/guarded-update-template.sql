@@ -4,6 +4,7 @@
     INFO TIP:
     Rollback is the default. Set COMMIT_CHANGES = 1 only after the preview
     shows exactly the row you intended.
+    Keep SQLCMD Mode enabled and run only against a DEV database.
 */
 :ON ERROR EXIT
 :setvar YAFES_SQL_DATABASE "YafesPars_Dev"
@@ -17,6 +18,9 @@ GO
 
 USE [$(YAFES_SQL_DATABASE)];
 GO
+
+IF DB_NAME() NOT LIKE N'%DEV%'
+    THROW 52923, 'Current database name must contain DEV.', 1;
 
 DECLARE @TenantId UNIQUEIDENTIFIER;
 DECLARE @CommitChanges BIT = TRY_CONVERT(BIT, N'$(COMMIT_CHANGES)');

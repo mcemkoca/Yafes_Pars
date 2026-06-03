@@ -33,6 +33,9 @@ come first; the .NET backend is an optional integration foundation.
 Open scripts from `database/ssms/` in SQL Server Management Studio. Enable
 `Query > SQLCMD Mode` for files that use `:setvar` or `:r`.
 
+The local demo is visual only. Real work must be done in SSMS with SQLCMD Mode
+enabled against a DEV database.
+
 1. `00__open_first_safety_check.sql` - confirm DEV database and safe server.
 2. `05__operator_dashboard_home.sql` - keep this open as the SSMS home tab.
 3. `11__schema_working_logic_map.sql` - review domain groups and planning cards.
@@ -76,6 +79,15 @@ $env:YAFES_SQL_BACKUP_DIR = "C:\SqlBackups"
 ./database/tools/run-dev-migrations.ps1
 ```
 
+For manual SSMS execution, generate the all-in-one script first:
+
+```powershell
+./database/tools/run-dev-migrations.ps1 -GenerateSsmsScriptOnly
+```
+
+Then open the generated `database/execution-logs/<run-id>/ssms-dev-migrations.sql`
+file in SSMS, enable SQLCMD Mode, verify variables, and run against DEV only.
+
 ### Next Updates
 
 1. Run full DEV SQL Server validation and attach execution evidence.
@@ -116,6 +128,9 @@ katmandir.
 
 Scriptleri `database/ssms/` altindan SSMS icinde acin. `:setvar` veya `:r`
 kullanan scriptlerde `Query > SQLCMD Mode` acik olmalidir.
+
+Local demo sadece gorseldir. Gercek calisma SSMS icinde, SQLCMD Mode acik
+olarak ve sadece DEV database uzerinde yapilmalidir.
 
 1. `00__open_first_safety_check.sql` - DEV veritabani ve guvenli server kontrolu.
 2. `05__operator_dashboard_home.sql` - SSMS ana dashboard sekmesi.

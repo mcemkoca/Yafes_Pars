@@ -1,6 +1,10 @@
 /*
     Yafes Pars SSMS Workbench - Operations Dashboard
 
+    INFO TIP:
+    Visual demo screens are not execution tools. Run this file in SSMS with
+    SQLCMD Mode enabled against a DEV database to get real Results Grid data.
+
     Enable SQLCMD Mode before running.
     This script is read-only and returns SSMS Results Grid sections.
 */

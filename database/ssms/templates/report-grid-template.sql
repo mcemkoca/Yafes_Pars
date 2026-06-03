@@ -4,6 +4,7 @@
     INFO TIP:
     Return chart_axis and chart_value columns so the result can be copied to
     Excel or Power BI without reshaping.
+    Keep SQLCMD Mode enabled and run only against a DEV database.
 */
 :ON ERROR EXIT
 :setvar YAFES_SQL_DATABASE "YafesPars_Dev"
@@ -14,6 +15,9 @@ GO
 
 USE [$(YAFES_SQL_DATABASE)];
 GO
+
+IF DB_NAME() NOT LIKE N'%DEV%'
+    THROW 52931, 'Current database name must contain DEV.', 1;
 
 DECLARE @TenantId UNIQUEIDENTIFIER;
 

@@ -1,6 +1,10 @@
 /*
     Yafes Pars SSMS Workbench - Admin, Security, Audit
 
+    INFO TIP:
+    Use this SSMS Results Grid pack for real RBAC, audit, trigger, and data
+    quality checks. The local demo is visual only.
+
     Enable SQLCMD Mode before running.
     This script is read-only.
 */

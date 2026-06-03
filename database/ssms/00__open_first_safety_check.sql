@@ -1,6 +1,10 @@
 /*
     Yafes Pars SSMS Workbench - Open First
 
+    INFO TIP:
+    This is the first SSMS safety gate. Run it with SQLCMD Mode enabled before
+    opening any dashboard, bridge, edit, migration, or report script.
+
     Enable SQLCMD Mode before running.
     This script does not change data.
 */

@@ -24,7 +24,7 @@ shortcut grids, health signals, and recommended next actions.
 | File | Mode | Purpose |
 | --- | --- | --- |
 | `00__open_first_safety_check.sql` | Read-only | Confirms DEV database and non-production-like server names. |
-| `01__run_all_dev_migrations_sqlcmd.sql` | Backup required | Launches the generated all-in-one migration and validation script. |
+| `01__run_all_dev_migrations_sqlcmd.sql` | Read-only handoff | Confirms DEV context and explains how to generate/open the real all-in-one SSMS migration script. |
 | `02__operations_dashboard.sql` | Read-only | Tenant-aware customer, institution, risk, policy, claim, document, task, coverage, and lookup dashboard. |
 | `03__create_renewal_tasks.sql` | Dry-run first | Runs `tasking.SP_CreateRenewalTasks`; default should remain dry-run until approved. |
 | `04__admin_security_audit_queries.sql` | Read-only | RBAC, audit, trigger, and integrity checks. |
@@ -75,9 +75,18 @@ The SSMS workbench is supported by production planning documents under
 2. Do not use production or live servers.
 3. Set `YAFES_SQL_DATABASE` at the top of each script.
 4. Ensure the database value contains `DEV`.
-5. Run the open-first safety check.
-6. Use query library results to copy IDs into bridge templates.
-7. Keep data editing scripts in rollback/default preview mode until reviewed.
+5. Enable `Query > SQLCMD Mode` before running any script with `:setvar` or `:r`.
+6. Run the open-first safety check.
+7. Use query library results to copy IDs into bridge templates.
+8. Keep data editing scripts in rollback/default preview mode until reviewed.
+
+## Demo Boundary
+
+The local demo is visual only. Real work must be done in SSMS with SQLCMD Mode
+enabled against a DEV database. Migration execution uses a generated
+`database/execution-logs/<run-id>/ssms-dev-migrations.sql` file created by
+`database/tools/run-dev-migrations.ps1 -GenerateSsmsScriptOnly`; generated
+execution-log files are not committed.
 
 ## Info Tip Standard
 
@@ -85,7 +94,7 @@ Every operator script should include:
 
 - an `INFO TIP` header
 - SQLCMD variables at the top
-- tenant context checks
+- tenant context checks for tenant-scoped scripts
 - clear result-set names
 - `info_tip` columns where helpful
 - rollback/dry-run defaults for any mutation
