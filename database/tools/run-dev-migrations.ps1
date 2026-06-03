@@ -392,6 +392,8 @@ function New-SsmsExecutionScript {
     $lines += ''
     $lines += 'SET NOCOUNT ON;'
     $lines += 'GO'
+    $lines += 'SET QUOTED_IDENTIFIER ON;'
+    $lines += 'GO'
     $lines += 'USE [master];'
     $lines += 'GO'
     $lines += "DECLARE @TargetDatabase SYSNAME = N'`$(YAFES_SQL_DATABASE)';"
@@ -449,6 +451,7 @@ function Invoke-SqlcmdFile {
         '-U', $User,
         '-P', $Password,
         '-b',
+        '-I',
         '-r', '1',
         '-i', $InputFile,
         '-o', $OutputFile
@@ -485,6 +488,7 @@ function Invoke-SqlcmdQuery {
         '-U', $User,
         '-P', $Password,
         '-b',
+        '-I',
         '-r', '1',
         '-h', '-1',
         '-W',
