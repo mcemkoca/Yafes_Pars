@@ -80,7 +80,9 @@
       display: grid;
       place-items: center;
       border: 1px solid transparent;
+      background: transparent;
       color: #333;
+      padding: 0;
     }
 
     .title-button:hover {
@@ -104,6 +106,21 @@
       margin-right: 8px;
     }
 
+    .menu-item {
+      height: 22px;
+      padding: 0 2px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: #222;
+      cursor: default;
+    }
+
+    .menu-item:hover,
+    .menu-item.active {
+      border-color: #b8b8b8;
+      background: #fff;
+    }
+
     .tool {
       min-width: 26px;
       height: 22px;
@@ -115,6 +132,18 @@
       border: 1px solid #b8b8b8;
       background: linear-gradient(#fff, #e7e7e7);
       color: #222;
+      cursor: default;
+    }
+
+    .tool:disabled {
+      color: #8a8a8a;
+      background: #ededed;
+      cursor: default;
+    }
+
+    .tool:not(:disabled):active {
+      background: #d8ecff;
+      border-color: #6ca1d3;
     }
 
     .tool.primary {
@@ -223,8 +252,17 @@
 
     .node {
       display: block;
+      width: 100%;
       padding: 1px 3px;
       border: 1px solid transparent;
+      background: transparent;
+      color: inherit;
+      text-align: left;
+    }
+
+    .node:hover {
+      border-color: #c7d8ea;
+      background: #f3f8ff;
     }
 
     .node.selected {
@@ -283,6 +321,7 @@
       background: #f8f8f8;
       color: #333;
       max-width: 260px;
+      cursor: default;
     }
 
     .tab.active {
@@ -478,6 +517,8 @@
       border: 1px solid var(--line);
       border-bottom: 0;
       background: #fafafa;
+      color: #222;
+      cursor: default;
     }
 
     .result-tab.active {
@@ -485,11 +526,48 @@
       font-weight: 600;
     }
 
-    .results {
+    .panel-stack {
+      min-height: 0;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .results,
+    .message-results,
+    .execution-plan {
+      height: 100%;
       min-height: 0;
       overflow: auto;
       padding: 9px;
       background: #fff;
+    }
+
+    .results[hidden],
+    .message-results[hidden],
+    .execution-plan[hidden] {
+      display: none;
+    }
+
+    .message-results {
+      font-family: Consolas, "Courier New", monospace;
+      line-height: 18px;
+    }
+
+    .plan-grid {
+      display: grid;
+      gap: 8px;
+    }
+
+    .plan-step {
+      border: 1px solid #d0d7de;
+      background: #f8fafc;
+      padding: 8px;
+    }
+
+    .plan-step strong {
+      display: block;
+      color: #0969da;
+      margin-bottom: 4px;
     }
 
     .summary-grid {
@@ -524,6 +602,30 @@
       gap: 10px;
       font-weight: 600;
       color: #333;
+    }
+
+    .grid-link {
+      max-width: 100%;
+      display: inline;
+      border: 0;
+      background: transparent;
+      color: #0969da;
+      padding: 0;
+      text-align: left;
+      text-decoration: underline;
+      cursor: default;
+    }
+
+    .grid-link:focus-visible,
+    .tool:focus-visible,
+    .step:focus-visible,
+    .tab:focus-visible,
+    .result-tab:focus-visible,
+    .node:focus-visible,
+    .menu-item:focus-visible,
+    .title-button:focus-visible {
+      outline: 2px solid #0078d4;
+      outline-offset: -1px;
     }
 
     table {
@@ -819,33 +921,37 @@
   <div class="window">
     <div class="titlebar">
       <strong>Microsoft SQL Server Management Studio - YafesPars_Dev - Corporate Operator Workbench</strong>
-      <div class="title-controls" aria-hidden="true">
-        <span class="title-button">_</span>
-        <span class="title-button">[]</span>
-        <span class="title-button">X</span>
+      <div class="title-controls" aria-label="Window controls">
+        <button class="title-button" type="button" data-window-command="minimize">_</button>
+        <button class="title-button" type="button" data-window-command="maximize">[]</button>
+        <button class="title-button" type="button" data-window-command="close">X</button>
       </div>
     </div>
 
     <div class="toolbar" role="toolbar" aria-label="SSMS command bar">
       <div class="menu" aria-label="Menu">
-        <span>File</span>
-        <span>Edit</span>
-        <span>View</span>
-        <span>Query</span>
-        <span>Tools</span>
-        <span>Window</span>
-        <span>Help</span>
+        <button class="menu-item" type="button" data-menu="File">File</button>
+        <button class="menu-item" type="button" data-menu="Edit">Edit</button>
+        <button class="menu-item" type="button" data-menu="View">View</button>
+        <button class="menu-item" type="button" data-menu="Query">Query</button>
+        <button class="menu-item" type="button" data-menu="Tools">Tools</button>
+        <button class="menu-item" type="button" data-menu="Window">Window</button>
+        <button class="menu-item" type="button" data-menu="Help">Help</button>
       </div>
-      <button class="tool" title="Yeni sorgu">New Query</button>
-      <button class="tool" title="Script ac">Open</button>
-      <button class="tool" title="Kaydet">Save</button>
+      <button class="tool" id="newQueryButton" type="button" title="Yeni sorgu">New Query</button>
+      <button class="tool" id="openButton" type="button" title="Script ac">Open</button>
+      <button class="tool" id="saveButton" type="button" title="Kaydet">Save</button>
       <span class="separator"></span>
-      <button class="tool primary" id="executeButton" title="Secili demo sorgusunu calistir">Execute</button>
-      <button class="tool" title="Durdur">Cancel</button>
-      <button class="tool" title="Parse">Parse</button>
+      <button class="tool primary" id="executeButton" type="button" title="Secili demo sorgusunu calistir">Execute</button>
+      <button class="tool" id="cancelButton" type="button" title="Durdur">Cancel</button>
+      <button class="tool" id="parseButton" type="button" title="Parse">Parse</button>
       <span class="separator"></span>
-      <button class="tool" aria-pressed="true" title="Query > SQLCMD Mode aktif">SQLCMD Mode</button>
-      <button class="tool" aria-pressed="true" title="Sonuclar Grid olarak gosterilir">Results to Grid</button>
+      <button class="tool" id="sqlcmdButton" type="button" aria-pressed="true" title="Query > SQLCMD Mode aktif">SQLCMD Mode</button>
+      <button class="tool" id="gridButton" type="button" aria-pressed="true" title="Sonuclar Grid olarak gosterilir">Results to Grid</button>
+      <span class="separator"></span>
+      <button class="tool" id="copySqlButton" type="button" title="SQL kopyala">Copy SQL</button>
+      <button class="tool" id="copyGridButton" type="button" title="Grid kopyala">Copy Grid</button>
+      <button class="tool" id="exportButton" type="button" title="CSV indir">Export CSV</button>
       <span class="separator"></span>
       <span class="badge">DEV SAFE</span>
     </div>
@@ -891,12 +997,16 @@
 
         <section class="split" aria-label="Results and messages">
           <div class="results-tabs">
-            <div class="result-tab active">Results</div>
-            <div class="result-tab">Messages</div>
-            <div class="result-tab">Execution plan</div>
+            <button class="result-tab active" type="button" data-panel="results">Results</button>
+            <button class="result-tab" type="button" data-panel="messages">Messages</button>
+            <button class="result-tab" type="button" data-panel="execution">Execution plan</button>
           </div>
 
-          <div class="results" id="results"></div>
+          <div class="panel-stack">
+            <div class="results" id="results"></div>
+            <div class="message-results" id="messageResults" hidden></div>
+            <div class="execution-plan" id="executionPlan" hidden></div>
+          </div>
 
           <div class="messages">
             <div class="messages-title">Messages</div>
@@ -1658,7 +1768,23 @@ GROUP BY contract_domain_code;`,
       }
     ];
 
-    let activeIndex = 1;
+    const appState = {
+      activeIndex: 1,
+      activePanel: "results",
+      sqlcmdMode: true,
+      resultsToGrid: true,
+      executing: false,
+      executionTimer: null,
+      selectedScript: "",
+      selectedObject: "YafesPars_Dev",
+      tenant: "DEMO-BE-BROKER",
+      topRows: 100,
+      mode: "Dry run",
+      queryCounter: 1,
+      windowMode: "normal",
+      commandLog: [],
+      collapsedSchemas: new Set()
+    };
 
     const tabbar = document.getElementById("tabbar");
     const objectTree = document.getElementById("objectTree");
@@ -1666,6 +1792,8 @@ GROUP BY contract_domain_code;`,
     const codeBlock = document.getElementById("codeBlock");
     const lineNumbers = document.getElementById("lineNumbers");
     const results = document.getElementById("results");
+    const messageResults = document.getElementById("messageResults");
+    const executionPlan = document.getElementById("executionPlan");
     const messages = document.getElementById("messages");
     const stepHelp = document.getElementById("stepHelp");
     const inlineHelp = document.getElementById("inlineHelp");
@@ -1673,6 +1801,15 @@ GROUP BY contract_domain_code;`,
     const statusLeft = document.getElementById("statusLeft");
     const rowStatus = document.getElementById("rowStatus");
     const cursorStatus = document.getElementById("cursorStatus");
+    const tenantSelect = document.getElementById("tenant");
+    const rowsInput = document.getElementById("rows");
+    const modeSelect = document.getElementById("mode");
+    const executeButton = document.getElementById("executeButton");
+    const cancelButton = document.getElementById("cancelButton");
+    const sqlcmdButton = document.getElementById("sqlcmdButton");
+    const gridButton = document.getElementById("gridButton");
+    const prevButton = document.getElementById("prevButton");
+    const nextButton = document.getElementById("nextButton");
 
     function escapeHtml(value) {
       return String(value)
@@ -1691,20 +1828,187 @@ GROUP BY contract_domain_code;`,
         .replace(/\b(USE|GO|DECLARE|IF|SELECT|FROM|WHERE|ORDER BY|EXEC|THROW|TOP|IS NULL|LEFT JOIN|ON|AND|OR)\b/g, '<span class="kw">$1</span>');
     }
 
+    function getScenario() {
+      return scenarios[appState.activeIndex];
+    }
+
+    function getScriptFileFromText(value) {
+      const match = String(value).match(/(?:database\/ssms\/)?([0-9]{2}__[-_a-zA-Z0-9]+\.sql)/);
+      return match ? match[1] : "";
+    }
+
+    function getScenarioIndexByFile(file) {
+      const normalized = String(file).replace(/^database\/ssms\//, "");
+      return scenarios.findIndex(item => item.file === normalized);
+    }
+
+    function getScenarioCode(scenario) {
+      let code = scenario.code
+        .replaceAll("DEMO-BE-BROKER", appState.tenant)
+        .replace(/:setvar TOP_ROWS "\d+"/g, `:setvar TOP_ROWS "${appState.topRows}"`);
+
+      if (scenario.file === "07__data_entry_bridge_templates.sql") {
+        code = code.replace(/:setvar EXECUTE_ACTION "\d+"/g, `:setvar EXECUTE_ACTION "${appState.mode === "Execute" ? "1" : "0"}"`);
+      }
+
+      if (scenario.file === "08__data_editing_guardrails.sql") {
+        code = code.replace(/:setvar COMMIT_CHANGES "\d+"/g, `:setvar COMMIT_CHANGES "${appState.mode === "Execute" ? "1" : "0"}"`);
+      }
+
+      return code;
+    }
+
+    function getMetricValue(label, value) {
+      if (label === "Tenant") {
+        return appState.tenant.replace("DEMO-", "");
+      }
+
+      if (label === "Top rows") {
+        return String(appState.topRows);
+      }
+
+      if (label === "Default" && (value === "Preview" || value === "Rollback")) {
+        return appState.mode === "Execute" ? "Execute" : value;
+      }
+
+      if (label === "Exec flag") {
+        return appState.mode === "Execute" ? "1" : "0";
+      }
+
+      return value;
+    }
+
+    function getTotalRows(scenario) {
+      return scenario.tables.reduce((sum, table) => sum + table.rows.length, 0);
+    }
+
+    function getGridText(scenario) {
+      return scenario.tables.map(table => {
+        const header = table.columns.join("\t");
+        const rows = table.rows.map(row => row.join("\t")).join("\n");
+        return `${table.title}\n${header}\n${rows}`;
+      }).join("\n\n");
+    }
+
+    function getGridCsv(scenario) {
+      const csvEscape = value => `"${String(value).replaceAll('"', '""')}"`;
+      return scenario.tables.map(table => {
+        const title = [csvEscape(table.title)].join(",");
+        const header = table.columns.map(csvEscape).join(",");
+        const rows = table.rows.map(row => row.map(csvEscape).join(",")).join("\n");
+        return `${title}\n${header}\n${rows}`;
+      }).join("\n\n");
+    }
+
+    function logCommand(title, detail = [], tone = "ok") {
+      const time = new Date().toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      appState.commandLog.unshift({
+        time,
+        title,
+        detail: Array.isArray(detail) ? detail : [detail],
+        tone
+      });
+      appState.commandLog = appState.commandLog.slice(0, 8);
+      paintMessages();
+    }
+
+    function paintMessages() {
+      const scenario = getScenario();
+      const latest = appState.commandLog[0];
+      const latestHtml = latest ? `
+        <span class="${latest.tone === "warn" ? "" : "message-ok"}">${escapeHtml(latest.title)}</span><br>
+        ${latest.detail.map(line => `${escapeHtml(line)}<br>`).join("")}
+      ` : `<span class="message-ok">Command(s) completed successfully.</span><br>`;
+
+      messages.innerHTML = `
+        ${latestHtml}
+        ${scenario.messages.map(message => `${escapeHtml(message)}<br>`).join("")}
+      `;
+
+      messageResults.innerHTML = `
+        <p class="section-title"><span>Messages</span><span>${appState.commandLog.length} event(s)</span></p>
+        <table>
+          <thead><tr><th>time</th><th>command</th><th>detail</th></tr></thead>
+          <tbody>
+            ${appState.commandLog.map((entry, index) => `
+              <tr class="${index === 0 ? "selected-row" : ""}">
+                <td>${escapeHtml(entry.time)}</td>
+                <td>${escapeHtml(entry.title)}</td>
+                <td>${escapeHtml(entry.detail.join(" | "))}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+        <p class="section-title"><span>Scenario messages</span><span>${scenario.file}</span></p>
+        ${scenario.messages.map(message => `${escapeHtml(message)}<br>`).join("")}
+      `;
+    }
+
+    function updateButtons() {
+      prevButton.disabled = appState.activeIndex === 0;
+      nextButton.disabled = appState.activeIndex === scenarios.length - 1;
+      executeButton.disabled = appState.executing;
+      cancelButton.disabled = false;
+      sqlcmdButton.setAttribute("aria-pressed", String(appState.sqlcmdMode));
+      gridButton.setAttribute("aria-pressed", String(appState.resultsToGrid));
+      gridButton.textContent = appState.resultsToGrid ? "Results to Grid" : "Results to Text";
+      executeButton.textContent = appState.executing ? "Running" : "Execute";
+    }
+
+    function setActivePanel(panel) {
+      appState.activePanel = panel;
+      document.querySelectorAll(".result-tab").forEach(tab => {
+        tab.classList.toggle("active", tab.dataset.panel === panel);
+      });
+
+      results.hidden = panel !== "results";
+      messageResults.hidden = panel !== "messages";
+      executionPlan.hidden = panel !== "execution";
+    }
+
+    function renderExecutionPlan(scenario) {
+      const code = getScenarioCode(scenario);
+      const hasSqlcmd = code.includes(":setvar") || code.includes(":ON ERROR EXIT");
+      const rows = getTotalRows(scenario);
+      const safety = scenario.metrics.find(([label]) => label === "Mode")?.[1] || "Read-only";
+      const steps = [
+        ["1", "SQLCMD preflight", hasSqlcmd ? "Check SQLCMD directives and DEV variables." : "Plain query text; no SQLCMD directive needed.", appState.sqlcmdMode ? "READY" : "CHECK"],
+        ["2", "Context guard", `Tenant ${appState.tenant}, top ${appState.topRows}, mode ${appState.mode}.`, "READY"],
+        ["3", "Result grid build", `${scenario.tables.length} result set(s), ${rows} visible sample row(s).`, appState.resultsToGrid ? "GRID" : "TEXT"],
+        ["4", "Operator review", "Review info_tip columns, IDs, and safety mode before mutation routes.", safety],
+        ["5", "Next route", "Open linked SSMS file or use toolbar copy/export commands.", "READY"]
+      ];
+
+      return `
+        <div class="plan-grid">
+          ${steps.map(([order, title, text, status]) => `
+            <div class="plan-step">
+              <strong>${escapeHtml(order)} - ${escapeHtml(title)} <span class="pill ${status === "CHECK" ? "warn" : "ok"}">${escapeHtml(status)}</span></strong>
+              <span>${escapeHtml(text)}</span>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
     function renderTable(table) {
       const head = table.columns.map(col => `<th>${escapeHtml(col)}</th>`).join("");
       const body = table.rows.map((row, index) => {
         const cells = row.map(cell => {
           const text = escapeHtml(cell);
+          const scriptFile = getScriptFileFromText(cell);
+          if (scriptFile) {
+            return `<td><button class="grid-link" type="button" data-open-file="${escapeHtml(scriptFile)}">${text}</button></td>`;
+          }
           if (["SUCCESS", "PASS", "DEV SAFE", "ACTIVE", "OPEN"].includes(String(cell))) {
             return `<td><span class="pill ok">${text}</span></td>`;
           }
-          if (["HIGH", "WAITING", "Required", "Dry run"].includes(String(cell))) {
+          if (["HIGH", "WAITING", "Required", "Dry run", "ACTION", "CHECK", "OPEN"].includes(String(cell))) {
             return `<td><span class="pill warn">${text}</span></td>`;
           }
           return `<td>${text}</td>`;
         }).join("");
-        return `<tr class="${index === 0 ? "selected-row" : ""}">${cells}</tr>`;
+        return `<tr class="${index === 0 ? "selected-row" : ""}" data-grid-row="${index}" data-table-title="${escapeHtml(table.title)}">${cells}</tr>`;
       }).join("");
       return `
         <p class="section-title"><span>${escapeHtml(table.title)}</span><span>${table.rows.length} row(s)</span></p>
@@ -1717,55 +2021,58 @@ GROUP BY contract_domain_code;`,
 
     function renderObjectExplorer() {
       const totalTables = objectExplorerGroups.reduce((sum, group) => sum + group.tables.length, 0);
-      const schemaItems = objectExplorerGroups.map(group => `
+      const schemaItems = objectExplorerGroups.map(group => {
+        const isOpen = !appState.collapsedSchemas.has(group.schema);
+        return `
         <li>
-          <span class="node open">
+          <button class="node ${isOpen ? "open" : ""} ${appState.selectedObject === group.schema ? "selected" : ""}" type="button" data-tree-kind="schema" data-schema="${escapeHtml(group.schema)}">
             <span class="tree-heading">
               <span>${escapeHtml(group.title)} (${escapeHtml(group.schema)})</span>
               <span class="tree-count">${group.tables.length}</span>
             </span>
-          </span>
+          </button>
           <span class="tree-subheading">${escapeHtml(group.subheading)}</span>
-          <ul>
+          <ul ${isOpen ? "" : "hidden"}>
             ${group.tables.map(table => `
-              <li><span class="node leaf">${escapeHtml(group.schema)}.${escapeHtml(table)}</span></li>
+              <li><button class="node leaf ${appState.selectedObject === `${group.schema}.${table}` ? "selected" : ""}" type="button" data-tree-kind="table" data-schema="${escapeHtml(group.schema)}" data-table="${escapeHtml(table)}">${escapeHtml(group.schema)}.${escapeHtml(table)}</button></li>
             `).join("")}
           </ul>
         </li>
-      `).join("");
+      `;
+      }).join("");
 
       objectTree.innerHTML = `
-        <span class="node open selected">MIRO-HMM\\SQLEXPRESS (SQL Server 2022)</span>
+        <button class="node open ${appState.selectedObject === "server" ? "selected" : ""}" type="button" data-tree-kind="server">MIRO-HMM\\SQLEXPRESS (SQL Server 2022)</button>
         <ul>
           <li>
-            <span class="node open">Databases</span>
+            <button class="node open" type="button" data-tree-kind="folder">Databases</button>
             <ul>
               <li>
-                <span class="node open">YafesPars_Dev</span>
+                <button class="node open ${appState.selectedObject === "YafesPars_Dev" ? "selected" : ""}" type="button" data-tree-kind="database">YafesPars_Dev</button>
                 <ul>
                   <li>
-                    <span class="node open">
+                    <button class="node open" type="button" data-tree-kind="folder">
                       <span class="tree-heading">
                         <span>Tables</span>
                         <span class="tree-count">${totalTables}</span>
                       </span>
-                    </span>
+                    </button>
                     <ul>${schemaItems}</ul>
                   </li>
-                  <li><span class="node open">Views</span></li>
-                  <li><span class="node leaf">person.VW_CustomerSummary</span></li>
-                  <li><span class="node leaf">policy.VW_PolicyDashboard</span></li>
-                  <li><span class="node leaf">tasking.VW_OpenTaskDashboard</span></li>
-                  <li><span class="node open">Stored Procedures</span></li>
-                  <li><span class="node leaf">person.SP_CreateNaturalPerson</span></li>
-                  <li><span class="node leaf">institution.SP_SearchInstitution</span></li>
-                  <li><span class="node leaf">tasking.SP_CreateRenewalTasks</span></li>
+                  <li><button class="node open" type="button" data-tree-kind="folder">Views</button></li>
+                  <li><button class="node leaf" type="button" data-tree-kind="object" data-object="person.VW_CustomerSummary">person.VW_CustomerSummary</button></li>
+                  <li><button class="node leaf" type="button" data-tree-kind="object" data-object="policy.VW_PolicyDashboard">policy.VW_PolicyDashboard</button></li>
+                  <li><button class="node leaf" type="button" data-tree-kind="object" data-object="tasking.VW_OpenTaskDashboard">tasking.VW_OpenTaskDashboard</button></li>
+                  <li><button class="node open" type="button" data-tree-kind="folder">Stored Procedures</button></li>
+                  <li><button class="node leaf" type="button" data-tree-kind="object" data-object="person.SP_CreateNaturalPerson">person.SP_CreateNaturalPerson</button></li>
+                  <li><button class="node leaf" type="button" data-tree-kind="object" data-object="institution.SP_SearchInstitution">institution.SP_SearchInstitution</button></li>
+                  <li><button class="node leaf" type="button" data-tree-kind="object" data-object="tasking.SP_CreateRenewalTasks">tasking.SP_CreateRenewalTasks</button></li>
                 </ul>
               </li>
             </ul>
           </li>
-          <li><span class="node open">Security</span></li>
-          <li><span class="node open">SQL Server Agent</span></li>
+          <li><button class="node open" type="button" data-tree-kind="object" data-object="Security">Security</button></li>
+          <li><button class="node open" type="button" data-tree-kind="object" data-object="SQL Server Agent">SQL Server Agent</button></li>
         </ul>
       `;
     }
@@ -1818,15 +2125,16 @@ GROUP BY contract_domain_code;`,
     }
 
     function renderScenario(index) {
-      activeIndex = index;
-      const scenario = scenarios[index];
+      appState.activeIndex = Math.max(0, Math.min(index, scenarios.length - 1));
+      const scenario = getScenario();
+      const scenarioCode = getScenarioCode(scenario);
 
       tabbar.innerHTML = scenarios.map((item, idx) => `
-        <div class="tab ${idx === index ? "active" : ""}" data-index="${idx}">${escapeHtml(item.file)}</div>
+        <button class="tab ${idx === appState.activeIndex ? "active" : ""}" type="button" data-index="${idx}">${escapeHtml(item.file)}</button>
       `).join("");
 
       workflow.innerHTML = scenarios.map((item, idx) => `
-        <button class="step ${idx === index ? "active" : ""} ${idx < index ? "done" : ""}" data-index="${idx}">
+        <button class="step ${idx === appState.activeIndex ? "active" : ""} ${idx < appState.activeIndex ? "done" : ""}" type="button" data-index="${idx}">
           <span class="step-num">${idx + 1}</span>
           <span>
             <span class="step-title">${escapeHtml(item.title)}</span>
@@ -1835,15 +2143,16 @@ GROUP BY contract_domain_code;`,
         </button>
       `).join("");
 
-      const lines = scenario.code.split("\n");
+      const lines = scenarioCode.split("\n");
       lineNumbers.innerHTML = lines.map((_, idx) => idx + 1).join("<br>");
-      codeBlock.innerHTML = highlightSql(scenario.code);
+      codeBlock.innerHTML = highlightSql(scenarioCode);
 
-      results.innerHTML = `
+      if (appState.resultsToGrid) {
+        results.innerHTML = `
         <div class="summary-grid">
           ${scenario.metrics.map(([label, value]) => `
             <div class="metric">
-              <strong>${escapeHtml(value)}</strong>
+              <strong>${escapeHtml(getMetricValue(label, value))}</strong>
               <span>${escapeHtml(label)}</span>
             </div>
           `).join("")}
@@ -1851,11 +2160,15 @@ GROUP BY contract_domain_code;`,
         ${renderLogicMap(scenario)}
         ${scenario.tables.map(renderTable).join("")}
       `;
+      }
+      else {
+        results.innerHTML = `
+          <pre class="message-results">${escapeHtml(getGridText(scenario))}</pre>
+        `;
+      }
 
-      messages.innerHTML = `
-        <span class="message-ok">Command(s) completed successfully.</span><br>
-        ${scenario.messages.map(message => `${escapeHtml(message)}<br>`).join("")}
-      `;
+      executionPlan.innerHTML = renderExecutionPlan(scenario);
+      paintMessages();
 
       stepHelp.innerHTML = `
         <strong>${escapeHtml(scenario.file)}</strong><br>
@@ -1865,55 +2178,402 @@ GROUP BY contract_domain_code;`,
 
       guideStatus.textContent = scenario.title;
       statusLeft.textContent = `Connected - YafesPars_Dev - ${scenario.title}`;
-      rowStatus.textContent = `Rows: ${scenario.tables.reduce((sum, table) => sum + table.rows.length, 0)}`;
+      rowStatus.textContent = `Rows: ${getTotalRows(scenario)} | Top: ${appState.topRows}`;
       cursorStatus.textContent = `Ln ${Math.min(17, lines.length)}, Col 1`;
+      appState.selectedScript = scenario.file;
+      setActivePanel(appState.activePanel);
+      updateButtons();
+    }
+
+    function createScratchQuery() {
+      const number = appState.queryCounter++;
+      scenarios.push({
+        file: `Scratch_${number}.sql`,
+        title: "Scratch",
+        subtitle: "Yeni sorgu",
+        help: "Yeni sorgu sekmesi urun demo icinde calisan bir taslaktir. Gercek ortamda bu dosya SSMS Query Editor icinde acilir.",
+        code: `/* Scratch query */
+:ON ERROR EXIT
+:setvar YAFES_SQL_DATABASE "YafesPars_Dev"
+:setvar TENANT_CODE "${appState.tenant}"
+
+USE [$(YAFES_SQL_DATABASE)];
+GO
+
+PRINT 'Scratch query ready';
+SELECT
+    DB_NAME() AS database_name,
+    N'$(TENANT_CODE)' AS tenant_code,
+    SYSUTCDATETIME() AS checked_at_utc;`,
+        metrics: [
+          ["Mode", "Read-only"],
+          ["Tenant", appState.tenant],
+          ["Rows", "1"],
+          ["Type", "Scratch"]
+        ],
+        tables: [
+          {
+            title: "Scratch context",
+            columns: ["database_name", "tenant_code", "checked_at_utc", "info_tip"],
+            rows: [["YafesPars_Dev", appState.tenant, "2026-06-03", "Use this as a safe draft query tab."]]
+          }
+        ],
+        messages: [
+          "Scratch query tab created.",
+          "No data changes."
+        ]
+      });
+      renderScenario(scenarios.length - 1);
+      logCommand("New Query created.", [`Scratch_${number}.sql acildi.`]);
+    }
+
+    function openScript(file) {
+      const normalized = String(file || appState.selectedScript || getScenario().file).replace(/^database\/ssms\//, "");
+      let index = getScenarioIndexByFile(normalized);
+
+      if (index === -1) {
+        scenarios.push({
+          file: normalized,
+          title: "Script",
+          subtitle: "SSMS dosyasi",
+          help: "Bu demo dosyayi temsil eden guvenli bir placeholder acti. Gercek dosya SSMS icinde acilmalidir.",
+          code: `/* ${normalized} */
+:ON ERROR EXIT
+:setvar YAFES_SQL_DATABASE "YafesPars_Dev"
+:setvar TENANT_CODE "${appState.tenant}"
+
+PRINT 'Open this script in SSMS with SQLCMD Mode enabled.';`,
+          metrics: [
+            ["Mode", "Read-only"],
+            ["File", normalized],
+            ["Tenant", appState.tenant],
+            ["Demo", "Placeholder"]
+          ],
+          tables: [
+            {
+              title: "Script handoff",
+              columns: ["file", "action", "safety", "info_tip"],
+              rows: [[normalized, "Open in SSMS", "READ_ONLY", "Enable SQLCMD Mode and verify DEV context."]]
+            }
+          ],
+          messages: [
+            "Script placeholder opened.",
+            "Real work remains inside SSMS."
+          ]
+        });
+        index = scenarios.length - 1;
+      }
+
+      renderScenario(index);
+      logCommand("Script opened.", [normalized]);
+    }
+
+    function saveWorkspace() {
+      const payload = {
+        file: getScenario().file,
+        tenant: appState.tenant,
+        topRows: appState.topRows,
+        mode: appState.mode,
+        sqlcmdMode: appState.sqlcmdMode,
+        savedAt: new Date().toISOString()
+      };
+      localStorage.setItem("yafesParsSsmsDemoWorkspace", JSON.stringify(payload));
+      logCommand("Workspace saved.", [`${payload.file} local demo state olarak kaydedildi.`]);
+    }
+
+    async function copyText(text, label) {
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+        }
+        else {
+          const textarea = document.createElement("textarea");
+          textarea.value = text;
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand("copy");
+          textarea.remove();
+        }
+        logCommand(`${label} copied.`, ["Clipboard guncellendi."]);
+      }
+      catch {
+        logCommand(`${label} copy failed.`, ["Browser clipboard izni gerekli olabilir."], "warn");
+      }
+    }
+
+    function exportCsv() {
+      const scenario = getScenario();
+      const csv = getGridCsv(scenario);
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `${scenario.file.replace(/\.sql$/i, "")}_results.csv`;
+      document.body.appendChild(link);
+      link.click();
+      URL.revokeObjectURL(link.href);
+      link.remove();
+      logCommand("CSV export prepared.", [`${scenario.file} result grid CSV olarak indirildi.`]);
+    }
+
+    function parseQuery() {
+      const code = getScenarioCode(getScenario());
+      const issues = [];
+
+      if ((code.includes(":setvar") || code.includes(":ON ERROR EXIT")) && !appState.sqlcmdMode) {
+        issues.push("SQLCMD Mode kapali; :setvar satirlari calismaz.");
+      }
+      if (!code.includes("GO")) {
+        issues.push("GO batch separator bulunmuyor.");
+      }
+      if (!/\bSELECT\b|\bEXEC\b|\bPRINT\b/.test(code)) {
+        issues.push("Calistirilabilir SELECT/EXEC/PRINT bulunmuyor.");
+      }
+
+      if (issues.length) {
+        setActivePanel("messages");
+        logCommand("Parse completed with checks.", issues, "warn");
+      }
+      else {
+        setActivePanel("execution");
+        logCommand("Parse succeeded.", ["Syntax check passed.", "Execution plan guncellendi."]);
+      }
+    }
+
+    function executeQuery() {
+      const scenario = getScenario();
+      const code = getScenarioCode(scenario);
+
+      if ((code.includes(":setvar") || code.includes(":ON ERROR EXIT")) && !appState.sqlcmdMode) {
+        setActivePanel("messages");
+        logCommand("Execution blocked.", ["SQLCMD Mode kapali. Query > SQLCMD Mode aktif olmali."], "warn");
+        return;
+      }
+
+      if (appState.executing) {
+        logCommand("Execution already running.", ["Cancel veya tamamlanmasini bekle."], "warn");
+        return;
+      }
+
+      appState.executing = true;
+      updateButtons();
+      setActivePanel("messages");
+      logCommand("Execution started.", [
+        `${scenario.file} calistiriliyor.`,
+        `Tenant: ${appState.tenant}; mode: ${appState.mode}; top rows: ${appState.topRows}.`
+      ]);
+
+      appState.executionTimer = window.setTimeout(() => {
+        appState.executing = false;
+        appState.executionTimer = null;
+        setActivePanel("results");
+        renderScenario(appState.activeIndex);
+        logCommand("Command(s) completed successfully.", [
+          `${scenario.file} result grid guncellendi.`,
+          appState.mode === "Execute" ? "Demo gorseldir; gercek veri degismedi." : "Dry run / read-only davranis korundu."
+        ]);
+      }, 520);
+    }
+
+    function cancelExecution() {
+      if (!appState.executing) {
+        logCommand("Cancel checked.", ["Calisan komut yok."]);
+        return;
+      }
+
+      window.clearTimeout(appState.executionTimer);
+      appState.executionTimer = null;
+      appState.executing = false;
+      updateButtons();
+      setActivePanel("messages");
+      logCommand("Execution cancelled.", [`${getScenario().file} durduruldu.`], "warn");
+    }
+
+    function handleMenu(menu) {
+      document.querySelectorAll(".menu-item").forEach(item => item.classList.toggle("active", item.dataset.menu === menu));
+      const menuMessages = {
+        File: ["New Query, Open, Save ve Export CSV komutlari aktif."],
+        Edit: ["Copy SQL ve Copy Grid komutlari aktif."],
+        View: ["Results, Messages ve Execution plan sekmeleri calisiyor."],
+        Query: ["Parse, Execute, Cancel ve SQLCMD Mode kontrolleri aktif."],
+        Tools: ["DEV SAFE, tenant, top rows ve mode kontrolleri aktif."],
+        Window: ["Demo pencere kontrolleri durum mesaji uretir."],
+        Help: ["Operator Guide ve tutorial sirasi dokumanlarla hizalandi."]
+      };
+      setActivePanel("messages");
+      logCommand(`${menu} menu opened.`, menuMessages[menu] || ["Menu aktif."]);
+    }
+
+    function handleTreeClick(node) {
+      const kind = node.dataset.treeKind;
+
+      if (kind === "schema") {
+        const schema = node.dataset.schema;
+        if (appState.collapsedSchemas.has(schema)) {
+          appState.collapsedSchemas.delete(schema);
+        }
+        else {
+          appState.collapsedSchemas.add(schema);
+        }
+        appState.selectedObject = schema;
+        renderObjectExplorer();
+        setActivePanel("messages");
+        logCommand("Schema toggled.", [`${schema} schema ${appState.collapsedSchemas.has(schema) ? "kapandi" : "acildi"}.`]);
+        return;
+      }
+
+      if (kind === "table") {
+        appState.selectedObject = `${node.dataset.schema}.${node.dataset.table}`;
+        appState.selectedScript = "12__table_catalog_and_relationships.sql";
+        renderObjectExplorer();
+        setActivePanel("messages");
+        logCommand("Table selected.", [
+          appState.selectedObject,
+          "Open butonu tablo kataloguna yonlendirir."
+        ]);
+        return;
+      }
+
+      appState.selectedObject = node.dataset.object || kind || "object";
+      renderObjectExplorer();
+      logCommand("Object Explorer selection changed.", [appState.selectedObject]);
+    }
+
+    function handleWindowCommand(command) {
+      appState.windowMode = command;
+      const message = {
+        minimize: "Demo minimized state simulated.",
+        maximize: "Demo maximized state simulated.",
+        close: "Close intercepted; demo remains open for review."
+      }[command] || "Window command handled.";
+      logCommand("Window control clicked.", [message]);
+    }
+
+    function markSelectedRow(row) {
+      row.parentElement.querySelectorAll("tr").forEach(item => item.classList.remove("selected-row"));
+      row.classList.add("selected-row");
+      const cells = Array.from(row.cells).map(cell => cell.innerText.trim()).filter(Boolean);
+      logCommand("Grid row selected.", [cells.slice(0, 3).join(" | ") || row.dataset.tableTitle]);
     }
 
     document.addEventListener("click", event => {
+      const fileLink = event.target.closest("[data-open-file]");
+      if (fileLink) {
+        event.preventDefault();
+        event.stopPropagation();
+        openScript(fileLink.dataset.openFile);
+        return;
+      }
+
       const tab = event.target.closest(".tab, .step");
       if (tab && tab.dataset.index) {
         renderScenario(Number(tab.dataset.index));
+        logCommand("Tab changed.", [getScenario().file]);
+        return;
+      }
+
+      const resultTab = event.target.closest(".result-tab");
+      if (resultTab && resultTab.dataset.panel) {
+        setActivePanel(resultTab.dataset.panel);
+        logCommand("Result panel changed.", [resultTab.textContent.trim()]);
+        return;
+      }
+
+      const menuItem = event.target.closest(".menu-item");
+      if (menuItem && menuItem.dataset.menu) {
+        handleMenu(menuItem.dataset.menu);
+        return;
+      }
+
+      const treeNode = event.target.closest(".node[data-tree-kind]");
+      if (treeNode) {
+        handleTreeClick(treeNode);
+        return;
+      }
+
+      const titleButton = event.target.closest("[data-window-command]");
+      if (titleButton) {
+        handleWindowCommand(titleButton.dataset.windowCommand);
+        return;
+      }
+
+      const row = event.target.closest("tr[data-grid-row]");
+      if (row) {
+        markSelectedRow(row);
       }
     });
 
-    document.getElementById("executeButton").addEventListener("click", () => {
-      messages.innerHTML = `
-        <span class="message-ok">Demo execution refreshed.</span><br>
-        ${escapeHtml(scenarios[activeIndex].file)} tekrar calistirildi.<br>
-        Results Grid guncellendi.<br>
-      `;
+    document.getElementById("newQueryButton").addEventListener("click", createScratchQuery);
+    document.getElementById("openButton").addEventListener("click", () => {
+      if (appState.selectedObject.includes(".") && appState.selectedScript === "12__table_catalog_and_relationships.sql") {
+        openScript("12__table_catalog_and_relationships.sql");
+        return;
+      }
+      openScript(appState.selectedScript || getScenario().file);
+    });
+    document.getElementById("saveButton").addEventListener("click", saveWorkspace);
+    executeButton.addEventListener("click", executeQuery);
+    cancelButton.addEventListener("click", cancelExecution);
+    document.getElementById("parseButton").addEventListener("click", parseQuery);
+    sqlcmdButton.addEventListener("click", () => {
+      appState.sqlcmdMode = !appState.sqlcmdMode;
+      updateButtons();
+      setActivePanel("messages");
+      logCommand("SQLCMD Mode toggled.", [`SQLCMD Mode: ${appState.sqlcmdMode ? "ON" : "OFF"}.`], appState.sqlcmdMode ? "ok" : "warn");
+    });
+    gridButton.addEventListener("click", () => {
+      appState.resultsToGrid = !appState.resultsToGrid;
+      renderScenario(appState.activeIndex);
+      logCommand("Results mode changed.", [appState.resultsToGrid ? "Results to Grid" : "Results to Text"]);
+    });
+    document.getElementById("copySqlButton").addEventListener("click", () => copyText(getScenarioCode(getScenario()), "SQL"));
+    document.getElementById("copyGridButton").addEventListener("click", () => copyText(getGridText(getScenario()), "Grid"));
+    document.getElementById("exportButton").addEventListener("click", exportCsv);
+
+    prevButton.addEventListener("click", () => {
+      renderScenario(appState.activeIndex - 1);
+      logCommand("Previous step opened.", [getScenario().file]);
     });
 
-    document.getElementById("prevButton").addEventListener("click", () => {
-      renderScenario(Math.max(0, activeIndex - 1));
+    nextButton.addEventListener("click", () => {
+      renderScenario(appState.activeIndex + 1);
+      logCommand("Next step opened.", [getScenario().file]);
     });
 
-    document.getElementById("nextButton").addEventListener("click", () => {
-      renderScenario(Math.min(scenarios.length - 1, activeIndex + 1));
+    tenantSelect.addEventListener("change", event => {
+      appState.tenant = event.target.value;
+      renderScenario(appState.activeIndex);
+      logCommand("Tenant context changed.", [
+        `Active tenant: ${appState.tenant}.`,
+        "Demo result sets remain sample data."
+      ]);
     });
 
-    document.getElementById("tenant").addEventListener("change", event => {
-      messages.innerHTML = `
-        <span class="message-ok">Tenant context changed.</span><br>
-        Active tenant: ${escapeHtml(event.target.value)}<br>
-        Demo result sets remain sample data.<br>
-      `;
+    rowsInput.addEventListener("input", event => {
+      const value = Number(event.target.value || 100);
+      appState.topRows = Math.max(10, Math.min(1000, value));
+      const scenarioCode = getScenarioCode(getScenario());
+      lineNumbers.innerHTML = scenarioCode.split("\n").map((_, idx) => idx + 1).join("<br>");
+      codeBlock.innerHTML = highlightSql(scenarioCode);
+      rowStatus.textContent = `Rows: ${getTotalRows(getScenario())} | Top: ${appState.topRows}`;
     });
 
-    document.getElementById("rows").addEventListener("input", event => {
-      rowStatus.textContent = `Rows: ${escapeHtml(event.target.value || "100")}`;
+    rowsInput.addEventListener("change", () => {
+      rowsInput.value = appState.topRows;
+      logCommand("Top rows changed.", [`Top rows: ${appState.topRows}.`]);
     });
 
-    document.getElementById("mode").addEventListener("change", event => {
-      messages.innerHTML = `
-        <span class="message-ok">Execution mode selected.</span><br>
-        Mode: ${escapeHtml(event.target.value)}<br>
-        Renewal script should stay in Dry run until operator approval.<br>
-      `;
+    modeSelect.addEventListener("change", event => {
+      appState.mode = event.target.value;
+      renderScenario(appState.activeIndex);
+      logCommand("Execution mode selected.", [
+        `Mode: ${appState.mode}.`,
+        appState.mode === "Execute" ? "Demo gorseldir; gercek calisma SSMS DEV icinde yapilmalidir." : "Dry run guvenli varsayilan olarak korunur."
+      ], appState.mode === "Execute" ? "warn" : "ok");
     });
 
     renderObjectExplorer();
-    renderScenario(activeIndex);
+    renderScenario(appState.activeIndex);
+    logCommand("Workbench ready.", ["All visible demo controls are wired."]);
   </script>
 </body>
 </html>

@@ -269,6 +269,53 @@ function Test-SsmsOperatorConventions {
     }
 }
 
+function Test-SsmsDemoControls {
+    $relativePath = "database/ssms/demo/index.html"
+    $fullPath = Join-Path $repoRoot $relativePath
+
+    if (-not (Test-Path -LiteralPath $fullPath -PathType Leaf)) {
+        Add-Result "FAIL" "ssms-demo" "$relativePath is missing"
+        return
+    }
+
+    $content = Get-Content -LiteralPath $fullPath -Raw
+    $requiredTexts = @(
+        "newQueryButton",
+        "openButton",
+        "saveButton",
+        "executeButton",
+        "cancelButton",
+        "parseButton",
+        "sqlcmdButton",
+        "gridButton",
+        "copySqlButton",
+        "copyGridButton",
+        "exportButton",
+        "prevButton",
+        "nextButton",
+        "data-panel=""results""",
+        "data-panel=""messages""",
+        "data-panel=""execution""",
+        "data-menu=",
+        "data-tree-kind",
+        "function executeQuery",
+        "function cancelExecution",
+        "function parseQuery",
+        "function openScript",
+        "function exportCsv",
+        "function copyText"
+    )
+
+    foreach ($requiredText in $requiredTexts) {
+        if ($content.Contains($requiredText)) {
+            Add-Result "PASS" "ssms-demo" "$relativePath contains $requiredText"
+        }
+        else {
+            Add-Result "FAIL" "ssms-demo" "$relativePath is missing $requiredText"
+        }
+    }
+}
+
 function Test-SsmsSqlcmdDevContract {
     $ssmsFiles = @()
     $ssmsRoot = Join-Path $repoRoot "database/ssms"
@@ -400,6 +447,7 @@ Test-PatternScan -RelativeFolders @("database/migrations", "database/validation"
 Test-StyleConventions -RelativeFolders @("database/migrations", "database/validation")
 Test-SsmsSqlcmdDevContract
 Test-SsmsOperatorConventions
+Test-SsmsDemoControls
 Write-Report
 
 Write-Host ""

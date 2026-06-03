@@ -58,6 +58,7 @@ jobs:
             database/ssms/10__daily_operator_checklist.sql
             database/ssms/11__schema_working_logic_map.sql
             database/ssms/12__table_catalog_and_relationships.sql
+            database/ssms/13__visual_workflow_board.sql
             md/ssms/operator-workbench.md
             md/ssms/dashboard-plan.md
             md/ssms/tutorials/README.md
@@ -82,7 +83,8 @@ jobs:
                       database/ssms/09__graph_report_pack.sql \
                       database/ssms/10__daily_operator_checklist.sql \
                       database/ssms/11__schema_working_logic_map.sql \
-                      database/ssms/12__table_catalog_and_relationships.sql; do
+                      database/ssms/12__table_catalog_and_relationships.sql \
+                      database/ssms/13__visual_workflow_board.sql; do
             grep -q ":ON ERROR EXIT" "$file" || { echo "Missing SQLCMD guard: $file" >&2; exit 1; }
             grep -q "TENANT_CODE" "$file" || { echo "Missing TENANT_CODE variable: $file" >&2; exit 1; }
             grep -q "INFO TIP" "$file" || { echo "Missing INFO TIP guidance: $file" >&2; exit 1; }
@@ -146,11 +148,31 @@ jobs:
           new vm.Script(match[1]);
           const requiredText = [
             'Corporate Operator Workbench',
+            'newQueryButton',
+            'openButton',
+            'saveButton',
+            'executeButton',
+            'cancelButton',
+            'parseButton',
+            'sqlcmdButton',
+            'gridButton',
+            'copySqlButton',
+            'copyGridButton',
+            'exportButton',
+            'data-panel="results"',
+            'data-panel="messages"',
+            'data-panel="execution"',
+            'data-tree-kind',
             '05__operator_dashboard_home.sql',
             '07__data_entry_bridge_templates.sql',
             '09__graph_report_pack.sql',
             '11__schema_working_logic_map.sql',
-            '12__table_catalog_and_relationships.sql'
+            '12__table_catalog_and_relationships.sql',
+            '13__visual_workflow_board.sql',
+            'function executeQuery',
+            'function cancelExecution',
+            'function parseQuery',
+            'function exportCsv'
           ];
           for (const text of requiredText) {
             if (!html.includes(text)) {
