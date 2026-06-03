@@ -20,6 +20,9 @@ When in doubt, run the read-only scripts first:
 
 1. `00__open_first_safety_check.sql`
 2. `05__operator_dashboard_home.sql`
-3. `10__daily_operator_checklist.sql`
+3. `11__schema_working_logic_map.sql`
+4. `13__visual_workflow_board.sql`
+5. `12__table_catalog_and_relationships.sql`
+6. `10__daily_operator_checklist.sql`
 
 Only then use data entry or editing scripts.

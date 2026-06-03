@@ -919,6 +919,7 @@
                 <li><span class="check">OK</span><span>Migration handoff gercek generated SSMS scriptine yonlendirir.</span></li>
                 <li><span class="check">OK</span><span>Working logic map alanlari ve alt basliklari gosterir.</span></li>
                 <li><span class="check">OK</span><span>Table catalog gercek tablo sayilari ve FK mantigini aciklar.</span></li>
+                <li><span class="check">OK</span><span>Visual workflow board node/edge gridleri ve template route verir.</span></li>
                 <li><span class="check">OK</span><span>Data bridge create islemlerini preview-first yapar.</span></li>
                 <li><span class="check">OK</span><span>Edit guardrail rollback default ile calisir.</span></li>
                 <li><span class="check">OK</span><span>Report pack SSMS gridlerini grafik/export verisine cevirir.</span></li>
@@ -953,7 +954,7 @@
 
     <div class="statusbar">
       <span id="statusLeft">Connected - YafesPars_Dev</span>
-      <span>Home | Logic | Catalog | Bridge | Reports</span>
+      <span>Home | Logic | Visual | Catalog | Bridge | Reports</span>
       <span>SQLCMD Mode</span>
       <span id="rowStatus">Rows: 100</span>
       <span id="cursorStatus">Ln 1, Col 1</span>
@@ -980,7 +981,7 @@ SELECT shortcut_order, shortcut_group, action_name, ssms_file, safety_mode, info
 FROM operator_shortcuts
 ORDER BY shortcut_order;`,
         metrics: [
-          ["Shortcuts", "12"],
+          ["Shortcuts", "13"],
           ["Health", "4"],
           ["Mode", "Read-only"],
           ["Tenant", "DEMO-BE"]
@@ -994,6 +995,7 @@ ORDER BY shortcut_order;`,
               ["20", "Start", "DEV migration handoff", "01__run_all_dev_migrations_sqlcmd.sql", "READ_ONLY_HANDOFF"],
               ["25", "Architecture", "Working logic map", "11__schema_working_logic_map.sql", "READ_ONLY"],
               ["26", "Architecture", "Table catalog and FK map", "12__table_catalog_and_relationships.sql", "READ_ONLY"],
+              ["27", "Architecture", "Visual workflow board", "13__visual_workflow_board.sql", "READ_ONLY"],
               ["30", "Operate", "Operations dashboard", "02__operations_dashboard.sql", "READ_ONLY"],
               ["70", "Edit", "Data entry bridge", "07__data_entry_bridge_templates.sql", "REVIEW_BEFORE_COMMIT"],
               ["90", "Report", "Graph/report pack", "09__graph_report_pack.sql", "READ_ONLY"]
@@ -1190,6 +1192,123 @@ ORDER BY card_order;`,
           "Working logic map loaded.",
           "All groups include subheadings and operator info tips.",
           "Use this before designing future 019+ migrations."
+        ]
+      },
+      {
+        file: "13__visual_workflow_board.sql",
+        title: "Visual Board",
+        subtitle: "Node/edge gridleri",
+        help: "Visual workflow board gorseldeki mind-map fikrini SSMS'e uygun hale getirir: domain kartlari, alt basliklar, node/edge satirlari, template route'lari ve hazirlik bosluklari Results Grid olarak gelir.",
+        code: `/* Visual Workflow Board */
+:ON ERROR EXIT
+:setvar YAFES_SQL_DATABASE "YafesPars_Dev"
+:setvar TENANT_CODE "DEMO-BE-BROKER"
+:setvar FOCUS_DOMAIN "ALL"
+
+USE [$(YAFES_SQL_DATABASE)];
+GO
+
+PRINT '02 - Domain board lanes and cards';
+SELECT board_lane, domain_group, schema_name, table_count, primary_tables, ssms_entry_point
+FROM #VisualDomainCards
+ORDER BY board_lane, domain_order;
+
+PRINT '04 - Mind map nodes for SSMS grid or future renderer';
+SELECT node_id, parent_node_id, node_type, display_label, open_script, info_tip
+FROM #MindMapNodes
+ORDER BY node_id;
+
+PRINT '06 - Ready template routes';
+SELECT domain_group, action_type, ssms_file, template_mode, operator_rule
+FROM #TemplateRoutes
+ORDER BY route_order;`,
+        metrics: [
+          ["Domains", "11"],
+          ["Tables", "108"],
+          ["Legacy ref", "89"],
+          ["Mode", "Read-only"]
+        ],
+        boardCards: [
+          {
+            title: "Domain Cards",
+            text: "Foundation, Customer, Insurance Core, Operations, and Control lanes are returned as SSMS rows.",
+            chips: ["11 domains", "subheadings", "info tips"]
+          },
+          {
+            title: "Mind Map Nodes",
+            text: "Root, domain, and subheading nodes can feed SSMS review, Excel, Power BI, or a future visual renderer.",
+            chips: ["ROOT", "DOMAIN", "SUBHEADING"]
+          },
+          {
+            title: "Edges",
+            text: "Control points show how tenant, lookup, person, risk, policy, claim, document, task, and audit flow together.",
+            chips: ["from", "to", "control"]
+          },
+          {
+            title: "Template Routes",
+            text: "Drag/drop is translated into safe SSMS behavior: find ID, preview bridge, execute or rollback.",
+            chips: ["query", "bridge", "guardrail"]
+          }
+        ],
+        tables: [
+          {
+            title: "01 - Visual board operating context",
+            columns: ["database", "tenant", "actual_tables", "source_tables", "legacy_reference", "status"],
+            rows: [
+              ["YafesPars_Dev", "DEMO-BE-BROKER", "108", "108", "89", "OK"],
+              ["INFO", "Table count", "Current migrations are source of truth", "Legacy package is comparison input", "Do not downsize blindly", "REVIEW"]
+            ]
+          },
+          {
+            title: "02 - Domain board lanes and cards",
+            columns: ["lane", "domain", "schema", "tables", "entry_point"],
+            rows: [
+              ["Foundation", "Core", "core", "7", "04__admin_security_audit_queries.sql"],
+              ["Customer", "Person", "person", "16", "07__data_entry_bridge_templates.sql"],
+              ["Insurance Core", "Risk/Object", "risk", "33", "06__query_library_shortcuts.sql"],
+              ["Insurance Core", "Policy", "policy", "17", "03__create_renewal_tasks.sql"],
+              ["Operations", "Claim", "claim", "8", "06__query_library_shortcuts.sql"],
+              ["Control", "Audit", "audit", "2", "04__admin_security_audit_queries.sql"]
+            ]
+          },
+          {
+            title: "03 - Domain subheading cards",
+            columns: ["domain", "subheading", "table_group", "safe_action", "template_route"],
+            rows: [
+              ["Person", "Identity roots", "Person | NaturalPerson | LegalPerson", "Find existing person first", "07__data_entry_bridge_templates.sql"],
+              ["Risk/Object", "Vehicle risk", "InsurableVehicle | VehicleType | UsageType", "Use lookup-guided template", "07__data_entry_bridge_templates.sql"],
+              ["Policy", "Parties and objects", "ContractParty | ContractObject", "Copy IDs from search grids", "07__data_entry_bridge_templates.sql"],
+              ["Claim", "Claim facts", "ClaimCircumstance | ClaimCircumstanceType", "Use guarded edits", "08__data_editing_guardrails.sql"],
+              ["Task", "Task collaboration", "TaskComment | TaskReminder", "Add through guided patterns", "07__data_entry_bridge_templates.sql"]
+            ]
+          },
+          {
+            title: "05 - Mind map edges and control points",
+            columns: ["from_node", "to_node", "relationship", "control_point", "script"],
+            rows: [
+              ["DOMAIN_core", "DOMAIN_ref", "Validated lookup choices", "Seed validation", "06__query_library_shortcuts.sql"],
+              ["DOMAIN_person", "DOMAIN_policy", "Person becomes policy party", "policy.ContractParty", "06__query_library_shortcuts.sql"],
+              ["DOMAIN_risk", "DOMAIN_policy", "Risk object attaches to contract", "policy.ContractObject", "07__data_entry_bridge_templates.sql"],
+              ["DOMAIN_policy", "DOMAIN_claim", "Claim opens against policy", "claim.Claim.contract_id", "06__query_library_shortcuts.sql"],
+              ["DOMAIN_tasking", "DOMAIN_audit", "Guarded edits create review trail", "audit.AuditLog", "04__admin_security_audit_queries.sql"]
+            ]
+          },
+          {
+            title: "07 - Visual idea readiness and gaps",
+            columns: ["capability", "status", "implementation_rule", "next_action"],
+            rows: [
+              ["SSMS-native dashboard", "READY", "Use Results Grid shortcut rows", "Keep scripts read-only"],
+              ["Mind-map style groups", "READY", "Use node/card result sets", "Demo mirrors these rows"],
+              ["Drag/drop behavior", "SSMS_ADAPTED", "Use route + preview + execute/rollback", "Use bridge templates"],
+              ["89 vs 108 reconciliation", "OPEN", "Current migrations are source of truth", "Compare names before schema changes"],
+              ["Every-table bridge coverage", "PARTIAL", "Prioritize daily workflows", "Add bridges by usage"]
+            ]
+          }
+        ],
+        messages: [
+          "Visual workflow board loaded.",
+          "SSMS grid rows are the source; the demo is only a visual mirror.",
+          "Use 13__visual_workflow_board.sql for node, edge, route, and readiness review."
         ]
       },
       {

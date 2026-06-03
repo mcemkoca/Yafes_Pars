@@ -122,6 +122,7 @@ SELECT
 FROM (VALUES
     (10, N'Where do I start today?', N'05__operator_dashboard_home.sql', N'Shortcuts and health signals', N'Keep this tab open.'),
     (20, N'How does the database fit together?', N'11__schema_working_logic_map.sql', N'Domain map and board cards', N'Use before changing schema.'),
+    (25, N'How do I see the visual board structure in SSMS?', N'13__visual_workflow_board.sql', N'Node, edge, subheading, and template-route grids', N'Use this as the SSMS-safe version of the visual/mind-map idea.'),
     (30, N'Which tables and relationships exist?', N'12__table_catalog_and_relationships.sql', N'Table catalog and FK map', N'Use before adding a migration.'),
     (40, N'How do I find IDs safely?', N'06__query_library_shortcuts.sql', N'Search grids', N'Copy IDs from Results Grid.'),
     (50, N'How do I create data?', N'07__data_entry_bridge_templates.sql', N'Preview-first create templates', N'Keep execute flag off until reviewed.'),
@@ -130,4 +131,3 @@ FROM (VALUES
 ) AS e(entry_order, operator_question, open_script, expected_result, info_tip)
 ORDER BY entry_order;
 GO
-

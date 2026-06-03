@@ -30,4 +30,11 @@ Run these scripts in order:
 2. `10__daily_operator_checklist.sql`
 3. `02__operations_dashboard.sql`
 
+When learning the model or planning table/template changes, run these before
+data entry:
+
+1. `11__schema_working_logic_map.sql`
+2. `13__visual_workflow_board.sql`
+3. `12__table_catalog_and_relationships.sql`
+
 Resolve any `ACTION` rows before data entry.
