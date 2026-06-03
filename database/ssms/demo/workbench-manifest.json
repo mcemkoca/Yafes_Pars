@@ -1,0 +1,504 @@
+{
+    "schemaVersion":  1,
+    "product":  {
+                    "name":  "Yafes Pars",
+                    "workbenchTitle":  "Microsoft SQL Server Management Studio - YafesPars_Dev - Corporate Operator Workbench",
+                    "previewTitle":  "Yafes Pars - SSMS Operator Workbench"
+                },
+    "database":  {
+                     "defaultName":  "YafesPars_Dev",
+                     "environment":  "DEV",
+                     "schemaCount":  11,
+                     "tableCount":  108,
+                     "legacyReferenceTableCount":  89
+                 },
+    "tenant":  {
+                   "defaultCode":  "DEMO-BE-BROKER",
+                   "displayName":  "Belgium Broker Tenant",
+                   "environmentLabel":  "DEV"
+               },
+    "migrations":  {
+                       "count":  19,
+                       "latest":  "018__seed_demo_data.sql",
+                       "files":  [
+                                     "000__create_database.sql",
+                                     "001__create_schemas.sql",
+                                     "002__create_core_infrastructure.sql",
+                                     "003__create_person_domain.sql",
+                                     "004__create_institution_domain.sql",
+                                     "005__create_object_domain.sql",
+                                     "006__create_contract_domain.sql",
+                                     "007__create_coverage_domain.sql",
+                                     "008__create_claim_domain.sql",
+                                     "009__create_document_domain.sql",
+                                     "010__create_task_domain.sql",
+                                     "011__create_audit_domain.sql",
+                                     "012__add_constraints.sql",
+                                     "013__add_indexes.sql",
+                                     "014__add_triggers.sql",
+                                     "015__add_views.sql",
+                                     "016__add_stored_procedures.sql",
+                                     "017__seed_lookup_data.sql",
+                                     "018__seed_demo_data.sql"
+                                 ]
+                   },
+    "validations":  {
+                        "count":  17,
+                        "latest":  "017__validate_demo_data.sql",
+                        "files":  [
+                                      "001__validate_core_infrastructure.sql",
+                                      "002__validate_person_domain.sql",
+                                      "003__validate_institution_domain.sql",
+                                      "004__validate_risk_domain.sql",
+                                      "005__validate_policy_domain.sql",
+                                      "006__validate_coverage_domain.sql",
+                                      "007__validate_claim_domain.sql",
+                                      "008__validate_document_domain.sql",
+                                      "009__validate_task_domain.sql",
+                                      "010__validate_audit_domain.sql",
+                                      "011__validate_constraints_exist.sql",
+                                      "012__validate_indexes.sql",
+                                      "013__validate_triggers.sql",
+                                      "014__validate_views.sql",
+                                      "015__validate_stored_procedures.sql",
+                                      "016__validate_seed_data.sql",
+                                      "017__validate_demo_data.sql"
+                                  ]
+                    },
+    "ssmsScripts":  [
+                        {
+                            "fileName":  "00__open_first_safety_check.sql",
+                            "path":  "database/ssms/00__open_first_safety_check.sql",
+                            "sizeBytes":  1728
+                        },
+                        {
+                            "fileName":  "01__run_all_dev_migrations_sqlcmd.sql",
+                            "path":  "database/ssms/01__run_all_dev_migrations_sqlcmd.sql",
+                            "sizeBytes":  2568
+                        },
+                        {
+                            "fileName":  "02__operations_dashboard.sql",
+                            "path":  "database/ssms/02__operations_dashboard.sql",
+                            "sizeBytes":  8210
+                        },
+                        {
+                            "fileName":  "03__create_renewal_tasks.sql",
+                            "path":  "database/ssms/03__create_renewal_tasks.sql",
+                            "sizeBytes":  1996
+                        },
+                        {
+                            "fileName":  "04__admin_security_audit_queries.sql",
+                            "path":  "database/ssms/04__admin_security_audit_queries.sql",
+                            "sizeBytes":  3887
+                        },
+                        {
+                            "fileName":  "05__operator_dashboard_home.sql",
+                            "path":  "database/ssms/05__operator_dashboard_home.sql",
+                            "sizeBytes":  7858
+                        },
+                        {
+                            "fileName":  "06__query_library_shortcuts.sql",
+                            "path":  "database/ssms/06__query_library_shortcuts.sql",
+                            "sizeBytes":  3878
+                        },
+                        {
+                            "fileName":  "07__data_entry_bridge_templates.sql",
+                            "path":  "database/ssms/07__data_entry_bridge_templates.sql",
+                            "sizeBytes":  12329
+                        },
+                        {
+                            "fileName":  "08__data_editing_guardrails.sql",
+                            "path":  "database/ssms/08__data_editing_guardrails.sql",
+                            "sizeBytes":  6982
+                        },
+                        {
+                            "fileName":  "09__graph_report_pack.sql",
+                            "path":  "database/ssms/09__graph_report_pack.sql",
+                            "sizeBytes":  5435
+                        },
+                        {
+                            "fileName":  "10__daily_operator_checklist.sql",
+                            "path":  "database/ssms/10__daily_operator_checklist.sql",
+                            "sizeBytes":  5178
+                        },
+                        {
+                            "fileName":  "11__schema_working_logic_map.sql",
+                            "path":  "database/ssms/11__schema_working_logic_map.sql",
+                            "sizeBytes":  11314
+                        },
+                        {
+                            "fileName":  "12__table_catalog_and_relationships.sql",
+                            "path":  "database/ssms/12__table_catalog_and_relationships.sql",
+                            "sizeBytes":  8722
+                        },
+                        {
+                            "fileName":  "13__visual_workflow_board.sql",
+                            "path":  "database/ssms/13__visual_workflow_board.sql",
+                            "sizeBytes":  25132
+                        }
+                    ],
+    "shortcuts":  [
+                      {
+                          "order":  10,
+                          "group":  "Start",
+                          "action":  "Open-first safety check",
+                          "ssmsFile":  "database/ssms/00__open_first_safety_check.sql",
+                          "fileName":  "00__open_first_safety_check.sql",
+                          "safety":  "READ_ONLY",
+                          "infoTip":  "Confirms DEV database and non-production-like server names."
+                      },
+                      {
+                          "order":  20,
+                          "group":  "Start",
+                          "action":  "Run migrations and validations",
+                          "ssmsFile":  "database/ssms/01__run_all_dev_migrations_sqlcmd.sql",
+                          "fileName":  "01__run_all_dev_migrations_sqlcmd.sql",
+                          "safety":  "BACKUP_REQUIRED",
+                          "infoTip":  "Use only after setting backup path in the generated all-in-one script."
+                      },
+                      {
+                          "order":  25,
+                          "group":  "Architecture",
+                          "action":  "Working logic map",
+                          "ssmsFile":  "database/ssms/11__schema_working_logic_map.sql",
+                          "fileName":  "11__schema_working_logic_map.sql",
+                          "safety":  "READ_ONLY",
+                          "infoTip":  "Domain groups, subheadings, control flow, and board cards for planning."
+                      },
+                      {
+                          "order":  26,
+                          "group":  "Architecture",
+                          "action":  "Table catalog and FK map",
+                          "ssmsFile":  "database/ssms/12__table_catalog_and_relationships.sql",
+                          "fileName":  "12__table_catalog_and_relationships.sql",
+                          "safety":  "READ_ONLY",
+                          "infoTip":  "Real SQL Server table catalog, column profile, and relationship map."
+                      },
+                      {
+                          "order":  27,
+                          "group":  "Architecture",
+                          "action":  "Visual workflow board",
+                          "ssmsFile":  "database/ssms/13__visual_workflow_board.sql",
+                          "fileName":  "13__visual_workflow_board.sql",
+                          "safety":  "READ_ONLY",
+                          "infoTip":  "SSMS grid-based node, edge, subheading, and template-route board."
+                      },
+                      {
+                          "order":  30,
+                          "group":  "Operate",
+                          "action":  "Operations dashboard",
+                          "ssmsFile":  "database/ssms/02__operations_dashboard.sql",
+                          "fileName":  "02__operations_dashboard.sql",
+                          "safety":  "READ_ONLY",
+                          "infoTip":  "Daily customer, policy, claim, task, coverage, and lookup overview."
+                      },
+                      {
+                          "order":  40,
+                          "group":  "Operate",
+                          "action":  "Renewal task runner",
+                          "ssmsFile":  "database/ssms/03__create_renewal_tasks.sql",
+                          "fileName":  "03__create_renewal_tasks.sql",
+                          "safety":  "DRY_RUN_FIRST",
+                          "infoTip":  "Keep DRY_RUN = 1 until candidate list is approved."
+                      },
+                      {
+                          "order":  50,
+                          "group":  "Control",
+                          "action":  "Admin/security/audit checks",
+                          "ssmsFile":  "database/ssms/04__admin_security_audit_queries.sql",
+                          "fileName":  "04__admin_security_audit_queries.sql",
+                          "safety":  "READ_ONLY",
+                          "infoTip":  "RBAC, audit trigger, audit log, and integrity control checks."
+                      },
+                      {
+                          "order":  60,
+                          "group":  "Operate",
+                          "action":  "Query library shortcuts",
+                          "ssmsFile":  "database/ssms/06__query_library_shortcuts.sql",
+                          "fileName":  "06__query_library_shortcuts.sql",
+                          "safety":  "READ_ONLY",
+                          "infoTip":  "Common search and inspection queries for operators."
+                      },
+                      {
+                          "order":  70,
+                          "group":  "Edit",
+                          "action":  "Data entry bridge templates",
+                          "ssmsFile":  "database/ssms/07__data_entry_bridge_templates.sql",
+                          "fileName":  "07__data_entry_bridge_templates.sql",
+                          "safety":  "REVIEW_BEFORE_COMMIT",
+                          "infoTip":  "Procedure-based create templates with previews and output IDs."
+                      },
+                      {
+                          "order":  80,
+                          "group":  "Edit",
+                          "action":  "Data editing guardrails",
+                          "ssmsFile":  "database/ssms/08__data_editing_guardrails.sql",
+                          "fileName":  "08__data_editing_guardrails.sql",
+                          "safety":  "ROLLBACK_DEFAULT",
+                          "infoTip":  "Update patterns that preview changes and roll back by default."
+                      },
+                      {
+                          "order":  90,
+                          "group":  "Report",
+                          "action":  "Graph/report pack",
+                          "ssmsFile":  "database/ssms/09__graph_report_pack.sql",
+                          "fileName":  "09__graph_report_pack.sql",
+                          "safety":  "READ_ONLY",
+                          "infoTip":  "Grid-friendly trend, bar, and export-ready report datasets."
+                      },
+                      {
+                          "order":  100,
+                          "group":  "Control",
+                          "action":  "Daily operator checklist",
+                          "ssmsFile":  "database/ssms/10__daily_operator_checklist.sql",
+                          "fileName":  "10__daily_operator_checklist.sql",
+                          "safety":  "READ_ONLY",
+                          "infoTip":  "Morning and end-of-day checklist result sets."
+                      }
+                  ],
+    "schemas":  [
+                    {
+                        "order":  10,
+                        "schema":  "core",
+                        "title":  "Core",
+                        "lane":  "Foundation",
+                        "subheading":  "Tenant, users, RBAC, migration ledger",
+                        "entryPoint":  "04__admin_security_audit_queries.sql",
+                        "tableCount":  7,
+                        "tables":  [
+                                       "AppUser",
+                                       "Permission",
+                                       "Role",
+                                       "RolePermission",
+                                       "SchemaMigration",
+                                       "Tenant",
+                                       "UserRole"
+                                   ]
+                    },
+                    {
+                        "order":  20,
+                        "schema":  "ref",
+                        "title":  "Reference",
+                        "lane":  "Foundation",
+                        "subheading":  "Shared lookup standards",
+                        "entryPoint":  "06__query_library_shortcuts.sql",
+                        "tableCount":  6,
+                        "tables":  [
+                                       "Language",
+                                       "PersonType",
+                                       "PhoneType",
+                                       "ProfessionalStatus",
+                                       "SocialType",
+                                       "Title"
+                                   ]
+                    },
+                    {
+                        "order":  30,
+                        "schema":  "person",
+                        "title":  "Person",
+                        "lane":  "Customer",
+                        "subheading":  "Natural/legal identity, contacts, bank accounts, relations",
+                        "entryPoint":  "07__data_entry_bridge_templates.sql",
+                        "tableCount":  16,
+                        "tables":  [
+                                       "Address",
+                                       "BankAccount",
+                                       "DriverLicense",
+                                       "EconomicActivity",
+                                       "EconomicActivityNacebel",
+                                       "Email",
+                                       "LegalPerson",
+                                       "NaturalPerson",
+                                       "Person",
+                                       "PersonAddressRole",
+                                       "PersonPersonType",
+                                       "PersonRelation",
+                                       "PersonRelationPerson",
+                                       "PersonRelationType",
+                                       "Phone",
+                                       "SocialMedia"
+                                   ]
+                    },
+                    {
+                        "order":  40,
+                        "schema":  "institution",
+                        "title":  "Institution",
+                        "lane":  "Customer",
+                        "subheading":  "Insurers, banks, brokers, identifiers, addresses",
+                        "entryPoint":  "06__query_library_shortcuts.sql",
+                        "tableCount":  6,
+                        "tables":  [
+                                       "Institution",
+                                       "InstitutionAddress",
+                                       "InstitutionAddressRole",
+                                       "InstitutionIdentifier",
+                                       "InstitutionIdentifierType",
+                                       "InstitutionRole"
+                                   ]
+                    },
+                    {
+                        "order":  50,
+                        "schema":  "risk",
+                        "title":  "Risk/Object",
+                        "lane":  "Insurance Core",
+                        "subheading":  "Insurable object root, subtypes, vehicles, real estate, loans",
+                        "entryPoint":  "06__query_library_shortcuts.sql",
+                        "tableCount":  33,
+                        "tables":  [
+                                       "ActivityRiskLevel",
+                                       "AdjacencyType",
+                                       "AgeCategory",
+                                       "BurglaryProtectionType",
+                                       "ConstructionType",
+                                       "DestinationType",
+                                       "DriveType",
+                                       "EmployeeRiskClass",
+                                       "FuelType",
+                                       "InsurableActivity",
+                                       "InsurableActivitySubtype",
+                                       "InsurableLoan",
+                                       "InsurableObject",
+                                       "InsurableObjectType",
+                                       "InsurablePerson",
+                                       "InsurablePersonSubtype",
+                                       "InsurableRealEstate",
+                                       "InsurableRealEstateBurglaryProtection",
+                                       "InsurableThing",
+                                       "InsurableThingSubtype",
+                                       "InsurableVehicle",
+                                       "InsuredRole",
+                                       "LicensePlateType",
+                                       "OccupancyLevel",
+                                       "RealEstateType",
+                                       "ResidenceType",
+                                       "RoofType",
+                                       "ThingMaterialType",
+                                       "ThingRiskCategory",
+                                       "UsageType",
+                                       "UseTypeRealEstate",
+                                       "VehicleType",
+                                       "WorkerRiskClass"
+                                   ]
+                    },
+                    {
+                        "order":  60,
+                        "schema":  "policy",
+                        "title":  "Policy",
+                        "lane":  "Insurance Core",
+                        "subheading":  "Contracts, versions, parties, objects, status, renewal flow",
+                        "entryPoint":  "03__create_renewal_tasks.sql",
+                        "tableCount":  17,
+                        "tables":  [
+                                       "CollectionMethod",
+                                       "Contract",
+                                       "ContractDomain",
+                                       "ContractObject",
+                                       "ContractObjectStatus",
+                                       "ContractParty",
+                                       "ContractPartyRole",
+                                       "ContractStatus",
+                                       "ContractTakeover",
+                                       "ContractType",
+                                       "ContractVersion",
+                                       "ContractVersionObject",
+                                       "ContractVersionStatus",
+                                       "DurationType",
+                                       "Periodicity",
+                                       "TakeoverDirection",
+                                       "TakeoverSourceType"
+                                   ]
+                    },
+                    {
+                        "order":  70,
+                        "schema":  "coverage",
+                        "title":  "Coverage",
+                        "lane":  "Insurance Core",
+                        "subheading":  "Coverage catalog, domains, packages",
+                        "entryPoint":  "09__graph_report_pack.sql",
+                        "tableCount":  4,
+                        "tables":  [
+                                       "Coverage",
+                                       "CoverageDomain",
+                                       "CoveragePackage",
+                                       "CoveragePackageItem"
+                                   ]
+                    },
+                    {
+                        "order":  80,
+                        "schema":  "claim",
+                        "title":  "Claim",
+                        "lane":  "Operations",
+                        "subheading":  "Claims, parties, objects, circumstances, payment method",
+                        "entryPoint":  "06__query_library_shortcuts.sql",
+                        "tableCount":  8,
+                        "tables":  [
+                                       "Claim",
+                                       "ClaimCircumstance",
+                                       "ClaimCircumstanceType",
+                                       "ClaimObject",
+                                       "ClaimParty",
+                                       "ClaimPartyRole",
+                                       "ClaimPaymentMethod",
+                                       "ClaimStatus"
+                                   ]
+                    },
+                    {
+                        "order":  90,
+                        "schema":  "document",
+                        "title":  "Document",
+                        "lane":  "Operations",
+                        "subheading":  "Metadata, links, versions, external storage keys",
+                        "entryPoint":  "08__data_editing_guardrails.sql",
+                        "tableCount":  4,
+                        "tables":  [
+                                       "Document",
+                                       "DocumentLink",
+                                       "DocumentType",
+                                       "DocumentVersion"
+                                   ]
+                    },
+                    {
+                        "order":  100,
+                        "schema":  "tasking",
+                        "title":  "Tasking",
+                        "lane":  "Operations",
+                        "subheading":  "Tasks, comments, reminders, priority/status",
+                        "entryPoint":  "10__daily_operator_checklist.sql",
+                        "tableCount":  5,
+                        "tables":  [
+                                       "Task",
+                                       "TaskComment",
+                                       "TaskPriority",
+                                       "TaskReminder",
+                                       "TaskStatus"
+                                   ]
+                    },
+                    {
+                        "order":  110,
+                        "schema":  "audit",
+                        "title":  "Audit",
+                        "lane":  "Control",
+                        "subheading":  "Audit log and change details",
+                        "entryPoint":  "04__admin_security_audit_queries.sql",
+                        "tableCount":  2,
+                        "tables":  [
+                                       "AuditLog",
+                                       "EntityChangeSet"
+                                   ]
+                    }
+                ],
+    "backend":  {
+                    "apiRoutes":  [
+                                      "/api/claims",
+                                      "/api/coverage",
+                                      "/api/documents",
+                                      "/api/institutions",
+                                      "/api/persons",
+                                      "/api/policies",
+                                      "/api/risks",
+                                      "/api/settings/lookups",
+                                      "/api/tasks",
+                                      "/api/tenants"
+                                  ]
+                }
+}

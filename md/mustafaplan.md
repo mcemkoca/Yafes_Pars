@@ -47,6 +47,10 @@ assessment, clean-up decisions, and next update queue in one place.
 - Started the productization phase for the SSMS workbench preview: toolbar buttons, menu
   commands, result tabs, Object Explorer nodes, copy/export commands, parse,
   execute, cancel, and state feedback are now wired instead of decorative.
+- Synced the workbench preview with a generated infrastructure manifest:
+  database name, tenant context, migration/validation counts, SSMS shortcuts,
+  schema groups, table counts, and backend route inventory now come from the
+  repository source instead of hand-maintained UI constants.
 
 ### Remaining Risks And Gaps
 
@@ -56,7 +60,7 @@ assessment, clean-up decisions, and next update queue in one place.
 | P0 | Token hygiene | A token was shared during coordination. It should be treated as exposed. | Rotate/revoke the token and use GitHub secrets or local credential manager only. |
 | P1 | Legacy reference notes | `md/trust-plan/` still contains old comparison notes from the imported package. | Keep useful schema/UX lessons, then delete notes that no longer help the SSMS-first product. |
 | P1 | Table reconciliation | The current migration source defines 108 tables, while the older visual/package reference mentioned 89 tables. | Compare table names before removing, merging, or adding any table. |
-| P1 | Workbench preview depth | The workbench controls are now wired, but execution is still non-persistent and uses prepared DEV preview data. | Keep real data work inside SSMS DEV; add backend-backed preview behavior only after the SSMS contract is stable. |
+| P1 | Workbench preview depth | The workbench controls are now wired and synchronized from the manifest, but execution is still non-persistent and uses prepared DEV preview data. | Keep real data work inside SSMS DEV; add backend-backed preview behavior only after the SSMS contract is stable. |
 | P1 | Operator permissions | SSMS scripts are safe, but final SQL logins/roles need real environment testing. | Add TEST/PROD role matrix evidence and least-privilege execution proof. |
 | P1 | Backup and restore | Strategy exists, but no restore drill evidence is committed. | Run restore drill and record result in readiness checklist. |
 | P2 | Guided bridge coverage | Core bridge templates exist, but not every daily create/edit path has a stored procedure bridge. | Add bridge coverage by department priority. |

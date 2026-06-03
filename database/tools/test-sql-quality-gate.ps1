@@ -316,6 +316,101 @@ function Test-SsmsWorkbenchControls {
     }
 }
 
+function Test-SsmsWorkbenchManifest {
+    $manifestRelativePath = "database/ssms/demo/workbench-manifest.json"
+    $manifestPath = Join-Path $repoRoot $manifestRelativePath
+    $generatorRelativePath = "database/tools/update-ssms-workbench-manifest.ps1"
+    $generatorPath = Join-Path $repoRoot $generatorRelativePath
+    $htmlRelativePath = "database/ssms/demo/index.html"
+    $htmlPath = Join-Path $repoRoot $htmlRelativePath
+
+    if (Test-Path -LiteralPath $generatorPath -PathType Leaf) {
+        Add-Result "PASS" "ssms-workbench-manifest" "$generatorRelativePath exists"
+    }
+    else {
+        Add-Result "FAIL" "ssms-workbench-manifest" "$generatorRelativePath is missing"
+    }
+
+    if (-not (Test-Path -LiteralPath $manifestPath -PathType Leaf)) {
+        Add-Result "FAIL" "ssms-workbench-manifest" "$manifestRelativePath is missing"
+        return
+    }
+
+    Add-Result "PASS" "ssms-workbench-manifest" "$manifestRelativePath exists"
+
+    try {
+        $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
+        Add-Result "PASS" "ssms-workbench-manifest" "$manifestRelativePath is valid JSON"
+    }
+    catch {
+        Add-Result "FAIL" "ssms-workbench-manifest" "$manifestRelativePath is not valid JSON: $($_.Exception.Message)"
+        return
+    }
+
+    $migrationFiles = @(Get-ChildItem -LiteralPath (Join-Path $repoRoot "database/migrations") -Filter "*.sql" | Sort-Object Name)
+    $validationFiles = @(Get-ChildItem -LiteralPath (Join-Path $repoRoot "database/validation") -Filter "*.sql" | Sort-Object Name)
+    $ssmsScripts = @(Get-ChildItem -LiteralPath (Join-Path $repoRoot "database/ssms") -Filter "*.sql" | Sort-Object Name)
+
+    $tableNames = @{}
+    $schemaNames = @{}
+    $tableRegex = [regex]'CREATE\s+TABLE\s+([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)'
+    foreach ($file in $migrationFiles) {
+        $content = Get-Content -LiteralPath $file.FullName -Raw
+        foreach ($match in $tableRegex.Matches($content)) {
+            $schemaName = $match.Groups[1].Value
+            $tableName = $match.Groups[2].Value
+            $tableNames["$schemaName.$tableName"] = $true
+            $schemaNames[$schemaName] = $true
+        }
+    }
+
+    $checks = @(
+        [pscustomobject]@{ Label = "database.tableCount"; Actual = [int]$manifest.database.tableCount; Expected = $tableNames.Count },
+        [pscustomobject]@{ Label = "database.schemaCount"; Actual = [int]$manifest.database.schemaCount; Expected = $schemaNames.Count },
+        [pscustomobject]@{ Label = "migrations.count"; Actual = [int]$manifest.migrations.count; Expected = $migrationFiles.Count },
+        [pscustomobject]@{ Label = "validations.count"; Actual = [int]$manifest.validations.count; Expected = $validationFiles.Count },
+        [pscustomobject]@{ Label = "ssmsScripts.count"; Actual = @($manifest.ssmsScripts).Count; Expected = $ssmsScripts.Count }
+    )
+
+    foreach ($check in $checks) {
+        if ($check.Actual -eq $check.Expected) {
+            Add-Result "PASS" "ssms-workbench-manifest" "$($check.Label) matches source count $($check.Expected)"
+        }
+        else {
+            Add-Result "FAIL" "ssms-workbench-manifest" "$($check.Label) is $($check.Actual), expected $($check.Expected)"
+        }
+    }
+
+    $dashboardPath = Join-Path $repoRoot "database/ssms/05__operator_dashboard_home.sql"
+    $dashboardContent = Get-Content -LiteralPath $dashboardPath -Raw
+    $shortcutMatches = [regex]::Matches($dashboardContent, "\(\s*(\d+),\s*N'((?:[^']|'')*)',\s*N'((?:[^']|'')*)',\s*N'((?:[^']|'')*)',\s*N'((?:[^']|'')*)',\s*N'((?:[^']|'')*)'\s*\)")
+    if (@($manifest.shortcuts).Count -eq $shortcutMatches.Count) {
+        Add-Result "PASS" "ssms-workbench-manifest" "shortcut count matches operator dashboard"
+    }
+    else {
+        Add-Result "FAIL" "ssms-workbench-manifest" "shortcut count is $(@($manifest.shortcuts).Count), expected $($shortcutMatches.Count)"
+    }
+
+    if (@($manifest.backend.apiRoutes).Count -gt 0) {
+        Add-Result "PASS" "ssms-workbench-manifest" "backend API routes are represented"
+    }
+    else {
+        Add-Result "FAIL" "ssms-workbench-manifest" "backend API routes are missing"
+    }
+
+    if (Test-Path -LiteralPath $htmlPath -PathType Leaf) {
+        $html = Get-Content -LiteralPath $htmlPath -Raw
+        foreach ($requiredText in @("workbench-manifest.json", "loadInfrastructureManifest", "applyInfrastructureManifest", "updateScenariosFromManifest")) {
+            if ($html.Contains($requiredText)) {
+                Add-Result "PASS" "ssms-workbench-manifest" "$htmlRelativePath contains $requiredText"
+            }
+            else {
+                Add-Result "FAIL" "ssms-workbench-manifest" "$htmlRelativePath is missing $requiredText"
+            }
+        }
+    }
+}
+
 function Test-SsmsSqlcmdDevContract {
     $ssmsFiles = @()
     $ssmsRoot = Join-Path $repoRoot "database/ssms"
@@ -447,6 +542,7 @@ Test-PatternScan -RelativeFolders @("database/migrations", "database/validation"
 Test-StyleConventions -RelativeFolders @("database/migrations", "database/validation")
 Test-SsmsSqlcmdDevContract
 Test-SsmsOperatorConventions
+Test-SsmsWorkbenchManifest
 Test-SsmsWorkbenchControls
 Write-Report
 

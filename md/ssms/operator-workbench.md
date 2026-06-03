@@ -50,6 +50,8 @@ shortcut grids, health signals, and recommended next actions.
 | `database/ssms/11__schema_working_logic_map.sql` | SSMS result-set map for how the business domains work together. |
 | `database/ssms/12__table_catalog_and_relationships.sql` | Metadata-driven table and relationship catalog for planning. |
 | `database/ssms/13__visual_workflow_board.sql` | Node/edge and template-route grids that mirror the visual planning demo. |
+| `database/ssms/demo/workbench-manifest.json` | Generated bridge between the real SSMS/database source files and the local workbench preview. |
+| `database/tools/update-ssms-workbench-manifest.ps1` | Regenerates the preview manifest from migrations, validations, SSMS scripts, shortcut rows, schemas, tables, and backend API routes. |
 
 ## Production Runbooks
 
@@ -90,6 +92,12 @@ with SQLCMD Mode enabled against a DEV database. Migration execution uses a gene
 `database/execution-logs/<run-id>/ssms-dev-migrations.sql` file created by
 `database/tools/run-dev-migrations.ps1 -GenerateSsmsScriptOnly`; generated
 execution-log files are not committed.
+
+The preview reads `database/ssms/demo/workbench-manifest.json` at startup. Run
+`database/tools/update-ssms-workbench-manifest.ps1` after changing migrations,
+validation scripts, SSMS scripts, shortcut rows, schema/table structure, or
+backend read endpoints so the visible workbench stays aligned with the SSMS
+infrastructure.
 
 ## Info Tip Standard
 

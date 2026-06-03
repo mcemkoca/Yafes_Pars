@@ -920,7 +920,7 @@
 <body>
   <div class="window">
     <div class="titlebar">
-      <strong>Microsoft SQL Server Management Studio - YafesPars_Dev - Corporate Operator Workbench</strong>
+      <strong id="windowTitle">Microsoft SQL Server Management Studio - YafesPars_Dev - Corporate Operator Workbench</strong>
       <div class="title-controls" aria-label="Window controls">
         <button class="title-button" type="button" data-window-command="minimize">_</button>
         <button class="title-button" type="button" data-window-command="maximize">[]</button>
@@ -977,8 +977,8 @@
           <div class="quick-form" aria-label="Operator controls">
             <label for="tenant">Tenant</label>
             <select id="tenant">
-              <option>DEV-BE-BROKER</option>
-              <option>DEV-NL-BROKER</option>
+              <option value="DEV-BE-BROKER">Belgium Broker Tenant (DEV)</option>
+              <option value="DEV-NL-BROKER">Netherlands Broker Tenant (DEV)</option>
             </select>
             <label for="rows">Top Rows</label>
             <input id="rows" type="number" min="10" max="1000" step="10" value="100">
@@ -1699,7 +1699,7 @@ GROUP BY contract_domain_code;`,
       }
     ];
 
-    const objectExplorerGroups = [
+    let objectExplorerGroups = [
       {
         schema: "core",
         title: "Core",
@@ -1769,8 +1769,9 @@ GROUP BY contract_domain_code;`,
     ];
 
     const appState = {
-      activeIndex: 1,
+      activeIndex: 0,
       activePanel: "results",
+      databaseName: "YafesPars_Dev",
       sqlcmdMode: true,
       resultsToGrid: true,
       executing: false,
@@ -1786,6 +1787,9 @@ GROUP BY contract_domain_code;`,
       collapsedSchemas: new Set()
     };
 
+    let infrastructureManifest = null;
+
+    const windowTitle = document.getElementById("windowTitle");
     const tabbar = document.getElementById("tabbar");
     const objectTree = document.getElementById("objectTree");
     const workflow = document.getElementById("workflow");
@@ -1811,12 +1815,228 @@ GROUP BY contract_domain_code;`,
     const prevButton = document.getElementById("prevButton");
     const nextButton = document.getElementById("nextButton");
 
+    async function loadInfrastructureManifest() {
+      try {
+        const response = await fetch("workbench-manifest.json", { cache: "no-store" });
+        if (!response.ok) {
+          throw new Error(`Manifest HTTP ${response.status}`);
+        }
+
+        return await response.json();
+      }
+      catch (error) {
+        console.warn("Workbench manifest could not be loaded.", error);
+        return null;
+      }
+    }
+
     function escapeHtml(value) {
       return String(value)
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;");
+    }
+
+    function getTenantLabel() {
+      const tenant = infrastructureManifest?.tenant;
+      if (tenant?.displayName) {
+        const suffix = tenant.environmentLabel ? ` (${tenant.environmentLabel})` : "";
+        return `${tenant.displayName}${suffix}`;
+      }
+
+      return appState.tenant
+        .replace(/^DEV-/, "")
+        .replace(/^DEMO-/, "");
+    }
+
+    function getLatestCompleteLabel(fileName) {
+      const match = String(fileName || "").match(/^(\d{3})__/);
+      return match ? `${match[1]} complete` : "current";
+    }
+
+    function setMetric(scenario, label, value) {
+      if (!scenario?.metrics) {
+        return;
+      }
+
+      const metric = scenario.metrics.find(([metricLabel]) => metricLabel === label);
+      if (metric) {
+        metric[1] = String(value);
+      }
+    }
+
+    function findTable(scenario, title) {
+      return scenario?.tables?.find(table => table.title === title);
+    }
+
+    function findScenarioByFile(fileName) {
+      return scenarios.find(scenario => scenario.file === fileName);
+    }
+
+    function updateScenariosFromManifest(manifest) {
+      const database = manifest.database || {};
+      const shortcuts = Array.isArray(manifest.shortcuts) ? manifest.shortcuts : [];
+      const schemas = Array.isArray(manifest.schemas) ? manifest.schemas : [];
+      const tableCount = String(database.tableCount || objectExplorerGroups.reduce((sum, group) => sum + group.tables.length, 0));
+      const schemaCount = String(database.schemaCount || schemas.length || objectExplorerGroups.length);
+      const legacyCount = String(database.legacyReferenceTableCount || 89);
+
+      const home = findScenarioByFile("05__operator_dashboard_home.sql");
+      setMetric(home, "Shortcuts", shortcuts.length || 13);
+      setMetric(home, "Tenant", getTenantLabel());
+      const shortcutTable = findTable(home, "01 - Operator shortcuts");
+      if (shortcutTable && shortcuts.length) {
+        shortcutTable.rows = shortcuts.map(shortcut => [
+          String(shortcut.order),
+          shortcut.group,
+          shortcut.action,
+          shortcut.fileName,
+          shortcut.safety
+        ]);
+      }
+      const healthTable = findTable(home, "03 - Health signals");
+      if (healthTable) {
+        healthTable.rows[0] = [
+          "Latest migration",
+          getLatestCompleteLabel(manifest.migrations?.latest),
+          "OK",
+          `Expected migration count is ${manifest.migrations?.count || 19}.`
+        ];
+      }
+
+      const migrate = findScenarioByFile("01__run_all_dev_migrations_sqlcmd.sql");
+      const migrationStatus = findTable(migrate, "01 - Migration handoff status");
+      if (migrationStatus) {
+        migrationStatus.rows[0] = [
+          "Checked-in 01 file",
+          "READY",
+          `Protected migration line has ${manifest.migrations?.count || 19} script(s)`,
+          `Latest protected prefix: ${getLatestCompleteLabel(manifest.migrations?.latest)}.`
+        ];
+      }
+
+      const logic = findScenarioByFile("11__schema_working_logic_map.sql");
+      setMetric(logic, "Domains", schemaCount);
+      setMetric(logic, "Tables", tableCount);
+      const logicTable = findTable(logic, "01 - Domain groups and subheadings");
+      if (logicTable && schemas.length) {
+        logicTable.rows = schemas.map(schema => [
+          String(schema.order),
+          schema.title,
+          schema.schema,
+          String(schema.tableCount),
+          schema.subheading,
+          `Open ${schema.entryPoint} for this area.`
+        ]);
+      }
+      if (logic && schemas.length) {
+        const lanes = [...new Set(schemas.map(schema => schema.lane))];
+        logic.logicGroups = lanes.map(lane => {
+          const laneSchemas = schemas.filter(schema => schema.lane === lane);
+          return {
+            title: lane,
+            text: laneSchemas.map(schema => schema.subheading).join(" / "),
+            chips: laneSchemas.map(schema => schema.schema)
+          };
+        });
+      }
+
+      const visual = findScenarioByFile("13__visual_workflow_board.sql");
+      setMetric(visual, "Domains", schemaCount);
+      setMetric(visual, "Tables", tableCount);
+      setMetric(visual, "Legacy ref", legacyCount);
+      const visualContext = findTable(visual, "01 - Visual board operating context");
+      if (visualContext) {
+        visualContext.rows[0] = [
+          appState.databaseName,
+          getTenantLabel(),
+          tableCount,
+          tableCount,
+          legacyCount,
+          "OK"
+        ];
+      }
+      const visualDomains = findTable(visual, "02 - Domain board lanes and cards");
+      if (visualDomains && schemas.length) {
+        visualDomains.rows = schemas.map(schema => [
+          schema.lane,
+          schema.title,
+          schema.schema,
+          String(schema.tableCount),
+          schema.entryPoint
+        ]);
+      }
+      const visualSubheadings = findTable(visual, "03 - Domain subheading cards");
+      if (visualSubheadings && schemas.length) {
+        visualSubheadings.rows = schemas.map(schema => [
+          schema.title,
+          schema.subheading,
+          (schema.tables || []).slice(0, 3).join(" | "),
+          "Open entry script first",
+          schema.entryPoint
+        ]);
+      }
+
+      const catalog = findScenarioByFile("12__table_catalog_and_relationships.sql");
+      setMetric(catalog, "Schemas", schemaCount);
+      setMetric(catalog, "Tables", tableCount);
+      const schemaSummary = findTable(catalog, "01 - Schema summary");
+      if (schemaSummary && schemas.length) {
+        schemaSummary.rows = schemas.map(schema => [
+          schema.schema,
+          String(schema.tableCount),
+          "metadata",
+          "metadata",
+          schema.subheading
+        ]);
+      }
+
+      const bridge = findScenarioByFile("07__data_entry_bridge_templates.sql");
+      const bridgePreview = findTable(bridge, "02 - CREATE_NATURAL_PERSON preview");
+      if (bridgePreview?.rows?.[0]) {
+        bridgePreview.rows[0][0] = getTenantLabel();
+      }
+    }
+
+    function applyInfrastructureManifest(manifest) {
+      infrastructureManifest = manifest;
+
+      if (manifest.product?.previewTitle) {
+        document.title = manifest.product.previewTitle;
+      }
+
+      if (manifest.database?.defaultName) {
+        appState.databaseName = manifest.database.defaultName;
+      }
+
+      if (appState.selectedObject === "YafesPars_Dev") {
+        appState.selectedObject = appState.databaseName;
+      }
+
+      if (manifest.tenant?.defaultCode) {
+        appState.tenant = manifest.tenant.defaultCode;
+      }
+
+      if (manifest.product?.workbenchTitle) {
+        windowTitle.textContent = manifest.product.workbenchTitle;
+      }
+
+      tenantSelect.innerHTML = `
+        <option value="${escapeHtml(appState.tenant)}">${escapeHtml(getTenantLabel())}</option>
+      `;
+      tenantSelect.value = appState.tenant;
+
+      if (Array.isArray(manifest.schemas) && manifest.schemas.length) {
+        objectExplorerGroups = manifest.schemas.map(schema => ({
+          schema: schema.schema,
+          title: schema.title,
+          subheading: schema.subheading,
+          tables: schema.tables || []
+        }));
+      }
+
+      updateScenariosFromManifest(manifest);
     }
 
     function highlightSql(sql) {
@@ -1844,6 +2064,7 @@ GROUP BY contract_domain_code;`,
 
     function getScenarioCode(scenario) {
       let code = scenario.code
+        .replaceAll("YafesPars_Dev", appState.databaseName)
         .replaceAll("DEV-BE-BROKER", appState.tenant)
         .replace(/:setvar TOP_ROWS "\d+"/g, `:setvar TOP_ROWS "${appState.topRows}"`);
 
@@ -1860,7 +2081,7 @@ GROUP BY contract_domain_code;`,
 
     function getMetricValue(label, value) {
       if (label === "Tenant") {
-        return appState.tenant.replace("DEV-", "");
+        return getTenantLabel();
       }
 
       if (label === "Top rows") {
@@ -2048,7 +2269,7 @@ GROUP BY contract_domain_code;`,
             <button class="node open" type="button" data-tree-kind="folder">Databases</button>
             <ul>
               <li>
-                <button class="node open ${appState.selectedObject === "YafesPars_Dev" ? "selected" : ""}" type="button" data-tree-kind="database">YafesPars_Dev</button>
+                <button class="node open ${appState.selectedObject === appState.databaseName ? "selected" : ""}" type="button" data-tree-kind="database">${escapeHtml(appState.databaseName)}</button>
                 <ul>
                   <li>
                     <button class="node open" type="button" data-tree-kind="folder">
@@ -2177,7 +2398,7 @@ GROUP BY contract_domain_code;`,
       inlineHelp.textContent = `${scenario.title}: ${scenario.help}`;
 
       guideStatus.textContent = scenario.title;
-      statusLeft.textContent = `Connected - YafesPars_Dev - ${scenario.title}`;
+      statusLeft.textContent = `Connected - ${appState.databaseName} - ${scenario.title}`;
       rowStatus.textContent = `Rows: ${getTotalRows(scenario)} | Top: ${appState.topRows}`;
       cursorStatus.textContent = `Ln ${Math.min(17, lines.length)}, Col 1`;
       appState.selectedScript = scenario.file;
@@ -2194,7 +2415,7 @@ GROUP BY contract_domain_code;`,
         help: "Yeni sorgu sekmesi workbench icinde calisan guvenli bir taslaktir. Gercek ortamda bu dosya SSMS Query Editor icinde acilir.",
         code: `/* Scratch query */
 :ON ERROR EXIT
-:setvar YAFES_SQL_DATABASE "YafesPars_Dev"
+:setvar YAFES_SQL_DATABASE "${appState.databaseName}"
 :setvar TENANT_CODE "${appState.tenant}"
 
 USE [$(YAFES_SQL_DATABASE)];
@@ -2215,7 +2436,7 @@ SELECT
           {
             title: "Scratch context",
             columns: ["database_name", "tenant_code", "checked_at_utc", "info_tip"],
-            rows: [["YafesPars_Dev", appState.tenant, "2026-06-03", "Use this as a safe draft query tab."]]
+            rows: [[appState.databaseName, getTenantLabel(), "2026-06-03", "Use this as a safe draft query tab."]]
           }
         ],
         messages: [
@@ -2239,7 +2460,7 @@ SELECT
         help: "Workbench bu dosya icin guvenli bir script handoff sekmesi acti. Gercek dosya SSMS icinde acilmalidir.",
           code: `/* ${normalized} */
 :ON ERROR EXIT
-:setvar YAFES_SQL_DATABASE "YafesPars_Dev"
+:setvar YAFES_SQL_DATABASE "${appState.databaseName}"
 :setvar TENANT_CODE "${appState.tenant}"
 
 PRINT 'Open this script in SSMS with SQLCMD Mode enabled.';`,
@@ -2433,6 +2654,13 @@ PRINT 'Open this script in SSMS with SQLCMD Mode enabled.';`,
         return;
       }
 
+      if (kind === "database") {
+        appState.selectedObject = appState.databaseName;
+        renderObjectExplorer();
+        logCommand("Database selected.", [appState.databaseName]);
+        return;
+      }
+
       appState.selectedObject = node.dataset.object || kind || "object";
       renderObjectExplorer();
       logCommand("Object Explorer selection changed.", [appState.selectedObject]);
@@ -2571,9 +2799,21 @@ PRINT 'Open this script in SSMS with SQLCMD Mode enabled.';`,
       ], appState.mode === "Execute" ? "warn" : "ok");
     });
 
-    renderObjectExplorer();
-    renderScenario(appState.activeIndex);
-    logCommand("Workbench ready.", ["All visible operator controls are wired."]);
+    async function bootWorkbench() {
+      const manifest = await loadInfrastructureManifest();
+      if (manifest) {
+        applyInfrastructureManifest(manifest);
+      }
+
+      renderObjectExplorer();
+      renderScenario(appState.activeIndex);
+      logCommand("Workbench ready.", [
+        manifest ? "Infrastructure manifest loaded." : "Fallback workbench configuration loaded.",
+        "All visible operator controls are wired."
+      ]);
+    }
+
+    bootWorkbench();
   </script>
 </body>
 </html>

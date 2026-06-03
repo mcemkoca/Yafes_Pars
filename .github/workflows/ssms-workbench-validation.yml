@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "database/ssms/**"
+      - "database/tools/update-ssms-workbench-manifest.ps1"
       - "md/ssms/**"
       - "md/database/**"
       - "md/mustafaplan.md"
@@ -15,6 +16,7 @@ on:
       - "feature/**"
     paths:
       - "database/ssms/**"
+      - "database/tools/update-ssms-workbench-manifest.ps1"
       - "md/ssms/**"
       - "md/database/**"
       - "md/mustafaplan.md"
@@ -65,6 +67,8 @@ jobs:
             md/ssms/templates.md
             md/mustafaplan.md
             database/ssms/demo/index.html
+            database/ssms/demo/workbench-manifest.json
+            database/tools/update-ssms-workbench-manifest.ps1
           )
 
           for file in "${required_files[@]}"; do
@@ -148,6 +152,10 @@ jobs:
           new vm.Script(match[1]);
           const requiredText = [
             'Corporate Operator Workbench',
+            'workbench-manifest.json',
+            'loadInfrastructureManifest',
+            'applyInfrastructureManifest',
+            'updateScenariosFromManifest',
             'newQueryButton',
             'openButton',
             'saveButton',
@@ -178,5 +186,42 @@ jobs:
             if (!html.includes(text)) {
               throw new Error(`Workbench is missing required text: ${text}`);
             }
+          }
+
+          const manifest = JSON.parse(fs.readFileSync('database/ssms/demo/workbench-manifest.json', 'utf8'));
+          const migrationFiles = fs.readdirSync('database/migrations').filter(file => file.endsWith('.sql')).sort();
+          const validationFiles = fs.readdirSync('database/validation').filter(file => file.endsWith('.sql')).sort();
+          const ssmsScripts = fs.readdirSync('database/ssms').filter(file => file.endsWith('.sql')).sort();
+          const tableNames = new Set();
+          const schemaNames = new Set();
+          for (const file of migrationFiles) {
+            const sql = fs.readFileSync(`database/migrations/${file}`, 'utf8');
+            for (const match of sql.matchAll(/CREATE\s+TABLE\s+([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)/g)) {
+              schemaNames.add(match[1]);
+              tableNames.add(`${match[1]}.${match[2]}`);
+            }
+          }
+
+          const checks = [
+            ['database.tableCount', manifest.database.tableCount, tableNames.size],
+            ['database.schemaCount', manifest.database.schemaCount, schemaNames.size],
+            ['migrations.count', manifest.migrations.count, migrationFiles.length],
+            ['validations.count', manifest.validations.count, validationFiles.length],
+            ['ssmsScripts.count', manifest.ssmsScripts.length, ssmsScripts.length]
+          ];
+
+          for (const [label, actual, expected] of checks) {
+            if (actual !== expected) {
+              throw new Error(`${label} is ${actual}, expected ${expected}. Regenerate workbench-manifest.json.`);
+            }
+          }
+
+          const dashboard = fs.readFileSync('database/ssms/05__operator_dashboard_home.sql', 'utf8');
+          const shortcutRows = [...dashboard.matchAll(/\(\s*(\d+),\s*N'((?:[^']|'')*)',\s*N'((?:[^']|'')*)',\s*N'((?:[^']|'')*)',\s*N'((?:[^']|'')*)',\s*N'((?:[^']|'')*)'\s*\)/g)];
+          if (manifest.shortcuts.length !== shortcutRows.length) {
+            throw new Error(`shortcut count is ${manifest.shortcuts.length}, expected ${shortcutRows.length}.`);
+          }
+          if (!manifest.shortcuts.some(shortcut => shortcut.fileName === '13__visual_workflow_board.sql')) {
+            throw new Error('Visual workflow board shortcut is missing from manifest.');
           }
           NODE
