@@ -459,7 +459,12 @@ function Invoke-SqlcmdFile {
 
     & $SqlcmdPath @arguments
     if ($LASTEXITCODE -ne 0) {
-        throw ('sqlcmd failed for {0}. Log: {1}' -f (Split-Path -Leaf $InputFile), $OutputFile)
+        $logTail = ''
+        if (Test-Path -Path $OutputFile) {
+            $logTail = (Get-Content -Path $OutputFile -Tail 80) -join [Environment]::NewLine
+        }
+
+        throw ("sqlcmd failed for {0}. Log: {1}{2}{3}" -f (Split-Path -Leaf $InputFile), $OutputFile, [Environment]::NewLine, $logTail)
     }
 }
 
@@ -493,7 +498,12 @@ function Invoke-SqlcmdQuery {
 
     & $SqlcmdPath @arguments
     if ($LASTEXITCODE -ne 0) {
-        throw ('sqlcmd query failed. Log: {0}' -f $OutputFile)
+        $logTail = ''
+        if (Test-Path -Path $OutputFile) {
+            $logTail = (Get-Content -Path $OutputFile -Tail 80) -join [Environment]::NewLine
+        }
+
+        throw ("sqlcmd query failed. Log: {0}{1}{2}" -f $OutputFile, [Environment]::NewLine, $logTail)
     }
 }
 
