@@ -4,6 +4,9 @@ on:
   pull_request:
     paths:
       - "database/ssms/**"
+      - "md/ssms/**"
+      - "md/database/**"
+      - "md/mustafaplan.md"
       - "README.md"
       - ".github/workflows/ssms-workbench-validation.yml"
   push:
@@ -12,6 +15,9 @@ on:
       - "feature/**"
     paths:
       - "database/ssms/**"
+      - "md/ssms/**"
+      - "md/database/**"
+      - "md/mustafaplan.md"
       - "README.md"
       - ".github/workflows/ssms-workbench-validation.yml"
   workflow_dispatch:
@@ -52,10 +58,11 @@ jobs:
             database/ssms/10__daily_operator_checklist.sql
             database/ssms/11__schema_working_logic_map.sql
             database/ssms/12__table_catalog_and_relationships.sql
-            database/ssms/README.md
-            database/ssms/dashboard-plan.md
-            database/ssms/tutorials/README.md
-            database/ssms/templates/README.md
+            md/ssms/operator-workbench.md
+            md/ssms/dashboard-plan.md
+            md/ssms/tutorials/README.md
+            md/ssms/templates.md
+            md/mustafaplan.md
             database/ssms/demo/index.html
           )
 

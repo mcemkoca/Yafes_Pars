@@ -170,6 +170,32 @@ function Test-PatternScan {
     }
 }
 
+function Test-TrackedArtifactPolicy {
+    $trackedFiles = @(& git -C $repoRoot ls-files)
+    $blocked = New-Object System.Collections.Generic.List[string]
+
+    foreach ($path in $trackedFiles) {
+        $normalized = $path -replace "\\", "/"
+
+        if ($normalized -match '(^|/)\.env($|\.)' -and $normalized -notmatch '(^|/)\.env\.example$') {
+            $blocked.Add("$normalized is an environment/secret file") | Out-Null
+            continue
+        }
+
+        if ($normalized -match '\.(zip|7z|rar|bak|bacpac|dacpac|mdf|ldf|ndf|trn|vhd|vhdx|iso)$') {
+            $blocked.Add("$normalized is a packaged, backup, database, or VM artifact") | Out-Null
+        }
+    }
+
+    foreach ($item in $blocked) {
+        Add-Result "FAIL" "artifact-policy" $item
+    }
+
+    if ($blocked.Count -eq 0) {
+        Add-Result "PASS" "artifact-policy" "no tracked secrets, packages, database backups, or VM artifacts"
+    }
+}
+
 function Test-StyleConventions {
     param([Parameter(Mandatory = $true)][string[]]$RelativeFolders)
 
@@ -311,18 +337,21 @@ $expectedValidations = @(
 )
 
 $requiredDocs = @(
-    "database/docs/azure-windows-server-deployment.md",
-    "database/docs/ssms-deployment-runbook.md",
-    "database/docs/sql-server-installation-checklist.md",
-    "database/docs/backup-restore-strategy.md",
-    "database/docs/security-hardening.md",
-    "database/docs/migration-execution-log-template.md",
-    "database/docs/environment-matrix.md",
-    "database/docs/production-readiness-checklist.md",
-    "database/docs/repository-development-plan.md"
+    "md/README.md",
+    "md/mustafaplan.md",
+    "md/database/azure-windows-server-deployment.md",
+    "md/database/ssms-deployment-runbook.md",
+    "md/database/sql-server-installation-checklist.md",
+    "md/database/backup-restore-strategy.md",
+    "md/database/security-hardening.md",
+    "md/database/migration-execution-log-template.md",
+    "md/database/environment-matrix.md",
+    "md/database/production-readiness-checklist.md",
+    "md/database/repository-development-plan.md"
 )
 
 Test-RequiredFiles -RelativePaths $requiredDocs -Scope "docs"
+Test-TrackedArtifactPolicy
 Test-OrderedSqlSet -Folder (Join-Path $repoRoot "database/migrations") -ExpectedNames $expectedMigrations -Scope "migrations"
 Test-OrderedSqlSet -Folder (Join-Path $repoRoot "database/validation") -ExpectedNames $expectedValidations -Scope "validation"
 Test-PatternScan -RelativeFolders @("database/migrations", "database/validation", "database/ssms", "database/templates") -Pattern "\b(AUTO_INCREMENT|SERIAL|jsonb|uuid_generate|RETURNING|LIMIT\s+[0-9]+)\b" -Scope "syntax" -FailureMessage "unsupported non-SQL Server syntax"
