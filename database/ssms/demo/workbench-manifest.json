@@ -104,7 +104,7 @@
                         {
                             "fileName":  "07__data_entry_bridge_templates.sql",
                             "path":  "database/ssms/07__data_entry_bridge_templates.sql",
-                            "sizeBytes":  25566
+                            "sizeBytes":  34031
                         },
                         {
                             "fileName":  "08__data_editing_guardrails.sql",
@@ -149,7 +149,7 @@
                         {
                             "fileName":  "16__delivery_gap_register.sql",
                             "path":  "database/ssms/16__delivery_gap_register.sql",
-                            "sizeBytes":  16062
+                            "sizeBytes":  16711
                         }
                     ],
     "shortcuts":  [

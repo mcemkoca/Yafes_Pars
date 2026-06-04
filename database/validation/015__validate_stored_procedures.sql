@@ -43,6 +43,15 @@ IF OBJECT_ID(N'audit.SP_GetEntityAuditTrail', N'P') IS NULL
 IF OBJECT_ID(N'tasking.SP_CreateRenewalTasks', N'P') IS NULL
     THROW 51512, 'Missing procedure: tasking.SP_CreateRenewalTasks', 1;
 
+IF OBJECT_ID(N'tasking.SP_CreateTask', N'P') IS NULL
+    THROW 51524, 'Missing procedure: tasking.SP_CreateTask', 1;
+
+IF OBJECT_ID(N'tasking.SP_AddTaskComment', N'P') IS NULL
+    THROW 51525, 'Missing procedure: tasking.SP_AddTaskComment', 1;
+
+IF OBJECT_ID(N'tasking.SP_AddTaskReminder', N'P') IS NULL
+    THROW 51526, 'Missing procedure: tasking.SP_AddTaskReminder', 1;
+
 IF OBJECT_DEFINITION(OBJECT_ID(N'policy.SP_AddContractParty')) NOT LIKE N'%Person not found for tenant%'
     THROW 51516, 'Missing tenant guard: policy.SP_AddContractParty person check', 1;
 
@@ -63,6 +72,18 @@ IF OBJECT_DEFINITION(OBJECT_ID(N'risk.SP_CreateVehicleObject')) NOT LIKE N'%fina
 
 IF OBJECT_DEFINITION(OBJECT_ID(N'risk.SP_CreateVehicleObject')) NOT LIKE N'%already exists for this license plate or chassis number%'
     THROW 51523, 'Missing duplicate guard: risk.SP_CreateVehicleObject vehicle identity check', 1;
+
+IF OBJECT_DEFINITION(OBJECT_ID(N'tasking.SP_CreateTask')) NOT LIKE N'%assigned_to_user_id does not belong to the tenant%'
+    THROW 51527, 'Missing tenant guard: tasking.SP_CreateTask assignee check', 1;
+
+IF OBJECT_DEFINITION(OBJECT_ID(N'tasking.SP_CreateTask')) NOT LIKE N'%related CLAIM was not found for tenant%'
+    THROW 51528, 'Missing tenant guard: tasking.SP_CreateTask related claim check', 1;
+
+IF OBJECT_DEFINITION(OBJECT_ID(N'tasking.SP_AddTaskComment')) NOT LIKE N'%task_id was not found for tenant%'
+    THROW 51529, 'Missing tenant guard: tasking.SP_AddTaskComment task check', 1;
+
+IF OBJECT_DEFINITION(OBJECT_ID(N'tasking.SP_AddTaskReminder')) NOT LIKE N'%task_id was not found for tenant or is already DONE%'
+    THROW 51530, 'Missing tenant guard: tasking.SP_AddTaskReminder task check', 1;
 
 IF NOT EXISTS (
     SELECT 1

@@ -106,8 +106,8 @@ WITH Signals AS (
         30,
         N'Procedure bridge coverage',
         CONVERT(NVARCHAR(40), COUNT_BIG(*)),
-        N'11 required procedures',
-        CASE WHEN COUNT_BIG(*) >= 11 THEN N'OK' ELSE N'REVIEW' END,
+        N'14 required procedures',
+        CASE WHEN COUNT_BIG(*) >= 14 THEN N'OK' ELSE N'REVIEW' END,
         N'INFO TIP: Bridge scripts should call stored procedures instead of direct table INSERTs.'
     FROM sys.procedures p
     JOIN sys.schemas s
@@ -123,7 +123,10 @@ WITH Signals AS (
         N'policy.SP_AddContractParty',
         N'policy.SP_AddContractObject',
         N'claim.SP_CreateClaim',
-        N'claim.SP_CloseClaim'
+        N'claim.SP_CloseClaim',
+        N'tasking.SP_CreateTask',
+        N'tasking.SP_AddTaskComment',
+        N'tasking.SP_AddTaskReminder'
     )
     UNION ALL
     SELECT
@@ -193,7 +196,10 @@ VALUES
     (50, N'policy.SP_AddContractParty', N'Policy party link', N'ADD_POLICY_PARTY', N'INFO TIP: The procedure validates tenant ownership of the person and policy.'),
     (60, N'policy.SP_AddContractObject', N'Policy object link', N'ADD_POLICY_OBJECT', N'INFO TIP: Use output object IDs from vehicle/object bridge.'),
     (70, N'claim.SP_CreateClaim', N'Claim opening', N'CREATE_CLAIM', N'INFO TIP: Handler email resolves to tenant-owned person_id.'),
-    (80, N'claim.SP_CloseClaim', N'Claim closure', N'CLOSE_CLAIM', N'INFO TIP: Amount, method, updater, and tenant checks run inside the procedure.');
+    (80, N'claim.SP_CloseClaim', N'Claim closure', N'CLOSE_CLAIM', N'INFO TIP: Amount, method, updater, and tenant checks run inside the procedure.'),
+    (90, N'tasking.SP_CreateTask', N'Task creation', N'CREATE_TASK', N'INFO TIP: Creates a tenant-owned task with optional related entity validation.'),
+    (100, N'tasking.SP_AddTaskComment', N'Task collaboration', N'ADD_TASK_COMMENT', N'INFO TIP: Adds a comment only after task tenant ownership is confirmed.'),
+    (110, N'tasking.SP_AddTaskReminder', N'Task reminder', N'ADD_TASK_REMINDER', N'INFO TIP: Adds a future IN_APP, EMAIL, or SMS reminder to an open task.');
 
 PRINT '03 - Procedure-backed bridge readiness';
 SELECT
@@ -223,7 +229,7 @@ FROM (VALUES
     (N'P1', N'TEST/PROD restore drill', N'WAITING_ENVIRONMENT', N'Run restore drill and record VERIFYONLY, restored DB validation, and dashboard check.', N'md/database/restore-drill-evidence-template.md', N'DBA signs restore evidence.', N'INFO TIP: DEV restore evidence is not a substitute for target environment proof.'),
     (N'P2', N'Finance ledger and commission', N'OWNER_DECISION_REQUIRED', N'Design accounting flow before adding migration 019+ tables.', N'database/ssms/12__table_catalog_and_relationships.sql', N'Business owner approves ledger entities and ownership.', N'INFO TIP: Claim paid/reserved fields exist, but full ledger/commission model is intentionally not invented yet.'),
     (N'P2', N'Import/export staging', N'OWNER_DECISION_REQUIRED', N'Confirm source file formats, validation issue ownership, and export consumers before 019+.', N'database/ssms/12__table_catalog_and_relationships.sql', N'Import contract and validation ownership are approved.', N'INFO TIP: Add staging with forward-only migration after business rules are known.'),
-    (N'P2', N'Department bridge coverage', N'PRIORITY_REQUIRED', N'Add stored-procedure-backed bridge actions by real department frequency.', N'database/ssms/07__data_entry_bridge_templates.sql', N'Owner ranks next high-frequency workflow.', N'INFO TIP: Core daily create/link/close workflows are covered; edge actions should be prioritized.'),
+    (N'P2', N'Department bridge coverage', N'PARTIAL_REMAINING', N'Task creation, task comments, and task reminders are now covered; add the next edge workflow by real department frequency.', N'database/ssms/07__data_entry_bridge_templates.sql', N'Owner ranks next high-frequency non-task workflow.', N'INFO TIP: Core daily create/link/close/task workflows are covered; edge actions should be prioritized.'),
     (N'P3', N'SQL Agent jobs', N'WAITING_INFRASTRUCTURE', N'Promote monitoring blueprints to approved jobs after owners, schedules, and alerts are confirmed.', N'database/ssms/15__monitoring_and_job_readiness.sql', N'DBA approves job names, owners, schedules, and output location.', N'INFO TIP: The current script observes jobs and gives handoff rows; it does not create jobs.')
 ) AS g(priority, area, current_status, ssms_owner_action, open_script_or_doc, stop_condition, info_tip)
 ORDER BY
@@ -269,7 +275,7 @@ SELECT
     info_tip
 FROM (VALUES
     (10, N'Control', N'database/ssms/16__delivery_gap_register.sql', N'READ_ONLY', N'Run this after PR/commit review to keep open items visible.', N'INFO TIP: This is the source screen for unfinished delivery items.'),
-    (20, N'Daily data entry', N'database/ssms/07__data_entry_bridge_templates.sql', N'PREVIEW_FIRST', N'Continue core bridge workflows for person, vehicle object, policy, policy links, and claim close.', N'INFO TIP: Keep EXECUTE_ACTION = 0 until preview grids are correct.'),
+    (20, N'Daily data entry', N'database/ssms/07__data_entry_bridge_templates.sql', N'PREVIEW_FIRST', N'Continue core bridge workflows for person, vehicle object, policy, policy links, claims, and tasks.', N'INFO TIP: Keep EXECUTE_ACTION = 0 until preview grids are correct.'),
     (30, N'Access evidence', N'database/ssms/14__admin_role_permission_matrix.sql', N'READ_ONLY', N'Use result sets as access-review source evidence.', N'INFO TIP: TEST/PROD sign-off still belongs to the environment owner.'),
     (40, N'Monitoring evidence', N'database/ssms/15__monitoring_and_job_readiness.sql', N'READ_ONLY', N'Review observed SQL Agent state and DBA handoff rows.', N'INFO TIP: Do not create jobs from SSMS until DBA runbook is approved.'),
     (50, N'019+ planning', N'database/ssms/12__table_catalog_and_relationships.sql', N'READ_ONLY', N'Review real table catalog before finance/import/product/entity-note design.', N'INFO TIP: New schema changes must be forward-only migration 019+ after owner approval.')

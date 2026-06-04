@@ -848,6 +848,338 @@ BEGIN
 END;
 GO
 
+CREATE OR ALTER PROCEDURE tasking.SP_CreateTask
+    @tenant_id UNIQUEIDENTIFIER,
+    @title NVARCHAR(200),
+    @description NVARCHAR(MAX) = NULL,
+    @related_entity_type NVARCHAR(60) = NULL,
+    @related_entity_id UNIQUEIDENTIFIER = NULL,
+    @assigned_to_user_id UNIQUEIDENTIFIER = NULL,
+    @created_by_user_id UNIQUEIDENTIFIER = NULL,
+    @task_priority_code NVARCHAR(20) = N'NORMAL',
+    @task_status_code NVARCHAR(30) = N'OPEN',
+    @due_at_utc DATETIME2(0) = NULL,
+    @created_task_id UNIQUEIDENTIFIER OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    SET @title = NULLIF(LTRIM(RTRIM(@title)), N'');
+    SET @related_entity_type = NULLIF(UPPER(LTRIM(RTRIM(@related_entity_type))), N'');
+    SET @task_priority_code = COALESCE(NULLIF(UPPER(LTRIM(RTRIM(@task_priority_code))), N''), N'NORMAL');
+    SET @task_status_code = COALESCE(NULLIF(UPPER(LTRIM(RTRIM(@task_status_code))), N''), N'OPEN');
+
+    IF @tenant_id IS NULL
+        THROW 51630, 'tenant_id is required.', 1;
+
+    IF @title IS NULL
+        THROW 51631, 'title is required.', 1;
+
+    IF @related_entity_type IS NULL AND @related_entity_id IS NOT NULL
+        THROW 51632, 'related_entity_type is required when related_entity_id is provided.', 1;
+
+    IF @related_entity_type IS NOT NULL AND @related_entity_id IS NULL
+        THROW 51633, 'related_entity_id is required when related_entity_type is provided.', 1;
+
+    IF @related_entity_type IS NOT NULL
+       AND @related_entity_type NOT IN (N'PERSON', N'INSTITUTION', N'POLICY', N'CLAIM', N'RISK_OBJECT', N'DOCUMENT')
+        THROW 51634, 'related_entity_type is not supported.', 1;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM tasking.TaskPriority
+        WHERE task_priority_code = @task_priority_code
+          AND is_active = 1
+    )
+        THROW 51635, 'task_priority_code was not found or is inactive.', 1;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM tasking.TaskStatus
+        WHERE task_status_code = @task_status_code
+          AND is_active = 1
+    )
+        THROW 51636, 'task_status_code was not found or is inactive.', 1;
+
+    IF @task_status_code = N'DONE'
+        THROW 51637, 'Use editing guardrails to complete an existing task; create starts as OPEN/IN_PROGRESS/WAITING.', 1;
+
+    IF @assigned_to_user_id IS NOT NULL
+       AND NOT EXISTS (
+            SELECT 1
+            FROM core.AppUser
+            WHERE user_id = @assigned_to_user_id
+              AND tenant_id = @tenant_id
+              AND is_active = 1
+       )
+        THROW 51638, 'assigned_to_user_id does not belong to the tenant.', 1;
+
+    IF @created_by_user_id IS NOT NULL
+       AND NOT EXISTS (
+            SELECT 1
+            FROM core.AppUser
+            WHERE user_id = @created_by_user_id
+              AND tenant_id = @tenant_id
+              AND is_active = 1
+       )
+        THROW 51639, 'created_by_user_id does not belong to the tenant.', 1;
+
+    IF @related_entity_type = N'PERSON'
+       AND NOT EXISTS (
+            SELECT 1
+            FROM person.Person
+            WHERE person_id = @related_entity_id
+              AND tenant_id = @tenant_id
+              AND is_deleted = 0
+       )
+        THROW 51640, 'related PERSON was not found for tenant.', 1;
+
+    IF @related_entity_type = N'INSTITUTION'
+       AND NOT EXISTS (
+            SELECT 1
+            FROM institution.Institution
+            WHERE institution_id = @related_entity_id
+              AND tenant_id = @tenant_id
+              AND is_deleted = 0
+       )
+        THROW 51641, 'related INSTITUTION was not found for tenant.', 1;
+
+    IF @related_entity_type = N'POLICY'
+       AND NOT EXISTS (
+            SELECT 1
+            FROM policy.Contract
+            WHERE contract_id = @related_entity_id
+              AND tenant_id = @tenant_id
+              AND is_deleted = 0
+       )
+        THROW 51642, 'related POLICY was not found for tenant.', 1;
+
+    IF @related_entity_type = N'CLAIM'
+       AND NOT EXISTS (
+            SELECT 1
+            FROM claim.Claim
+            WHERE claim_id = @related_entity_id
+              AND tenant_id = @tenant_id
+              AND is_deleted = 0
+       )
+        THROW 51643, 'related CLAIM was not found for tenant.', 1;
+
+    IF @related_entity_type = N'RISK_OBJECT'
+       AND NOT EXISTS (
+            SELECT 1
+            FROM risk.InsurableObject
+            WHERE insurable_object_id = @related_entity_id
+              AND tenant_id = @tenant_id
+              AND is_deleted = 0
+       )
+        THROW 51644, 'related RISK_OBJECT was not found for tenant.', 1;
+
+    IF @related_entity_type = N'DOCUMENT'
+       AND NOT EXISTS (
+            SELECT 1
+            FROM document.Document
+            WHERE document_id = @related_entity_id
+              AND tenant_id = @tenant_id
+              AND is_deleted = 0
+       )
+        THROW 51645, 'related DOCUMENT was not found for tenant.', 1;
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        DECLARE @CreatedTask TABLE (
+            task_id UNIQUEIDENTIFIER NOT NULL
+        );
+
+        INSERT INTO tasking.Task (
+            tenant_id,
+            title,
+            description,
+            related_entity_type,
+            related_entity_id,
+            assigned_to_user_id,
+            created_by_user_id,
+            task_priority_code,
+            task_status_code,
+            due_at_utc
+        )
+        OUTPUT inserted.task_id
+        INTO @CreatedTask (task_id)
+        VALUES (
+            @tenant_id,
+            @title,
+            @description,
+            @related_entity_type,
+            @related_entity_id,
+            @assigned_to_user_id,
+            @created_by_user_id,
+            @task_priority_code,
+            @task_status_code,
+            @due_at_utc
+        );
+
+        SELECT @created_task_id = task_id
+        FROM @CreatedTask;
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+
+        THROW;
+    END CATCH
+END;
+GO
+
+CREATE OR ALTER PROCEDURE tasking.SP_AddTaskComment
+    @tenant_id UNIQUEIDENTIFIER,
+    @task_id UNIQUEIDENTIFIER,
+    @comment_text NVARCHAR(MAX),
+    @created_by_user_id UNIQUEIDENTIFIER = NULL,
+    @created_task_comment_id UNIQUEIDENTIFIER OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    SET @comment_text = NULLIF(LTRIM(RTRIM(@comment_text)), N'');
+
+    IF @tenant_id IS NULL
+        THROW 51650, 'tenant_id is required.', 1;
+
+    IF @task_id IS NULL
+        THROW 51651, 'task_id is required.', 1;
+
+    IF @comment_text IS NULL
+        THROW 51652, 'comment_text is required.', 1;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM tasking.Task
+        WHERE task_id = @task_id
+          AND tenant_id = @tenant_id
+          AND is_deleted = 0
+    )
+        THROW 51653, 'task_id was not found for tenant.', 1;
+
+    IF @created_by_user_id IS NOT NULL
+       AND NOT EXISTS (
+            SELECT 1
+            FROM core.AppUser
+            WHERE user_id = @created_by_user_id
+              AND tenant_id = @tenant_id
+              AND is_active = 1
+       )
+        THROW 51654, 'created_by_user_id does not belong to the tenant.', 1;
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        DECLARE @CreatedTaskComment TABLE (
+            task_comment_id UNIQUEIDENTIFIER NOT NULL
+        );
+
+        INSERT INTO tasking.TaskComment (
+            task_id,
+            comment_text,
+            created_by_user_id
+        )
+        OUTPUT inserted.task_comment_id
+        INTO @CreatedTaskComment (task_comment_id)
+        VALUES (
+            @task_id,
+            @comment_text,
+            @created_by_user_id
+        );
+
+        SELECT @created_task_comment_id = task_comment_id
+        FROM @CreatedTaskComment;
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+
+        THROW;
+    END CATCH
+END;
+GO
+
+CREATE OR ALTER PROCEDURE tasking.SP_AddTaskReminder
+    @tenant_id UNIQUEIDENTIFIER,
+    @task_id UNIQUEIDENTIFIER,
+    @remind_at_utc DATETIME2(0),
+    @channel_code NVARCHAR(30) = N'IN_APP',
+    @created_task_reminder_id UNIQUEIDENTIFIER OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    SET @channel_code = COALESCE(NULLIF(UPPER(LTRIM(RTRIM(@channel_code))), N''), N'IN_APP');
+
+    IF @tenant_id IS NULL
+        THROW 51660, 'tenant_id is required.', 1;
+
+    IF @task_id IS NULL
+        THROW 51661, 'task_id is required.', 1;
+
+    IF @remind_at_utc IS NULL
+        THROW 51662, 'remind_at_utc is required.', 1;
+
+    IF @remind_at_utc < DATEADD(MINUTE, -5, SYSUTCDATETIME())
+        THROW 51663, 'remind_at_utc cannot be in the past.', 1;
+
+    IF @channel_code NOT IN (N'IN_APP', N'EMAIL', N'SMS')
+        THROW 51664, 'channel_code must be IN_APP, EMAIL, or SMS.', 1;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM tasking.Task
+        WHERE task_id = @task_id
+          AND tenant_id = @tenant_id
+          AND is_deleted = 0
+          AND task_status_code <> N'DONE'
+    )
+        THROW 51665, 'task_id was not found for tenant or is already DONE.', 1;
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        DECLARE @CreatedTaskReminder TABLE (
+            task_reminder_id UNIQUEIDENTIFIER NOT NULL
+        );
+
+        INSERT INTO tasking.TaskReminder (
+            task_id,
+            remind_at_utc,
+            channel_code
+        )
+        OUTPUT inserted.task_reminder_id
+        INTO @CreatedTaskReminder (task_reminder_id)
+        VALUES (
+            @task_id,
+            @remind_at_utc,
+            @channel_code
+        );
+
+        SELECT @created_task_reminder_id = task_reminder_id
+        FROM @CreatedTaskReminder;
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+
+        THROW;
+    END CATCH
+END;
+GO
+
 CREATE OR ALTER PROCEDURE tasking.SP_CreateRenewalTasks
     @tenant_id UNIQUEIDENTIFIER,
     @days_ahead INT = 60,

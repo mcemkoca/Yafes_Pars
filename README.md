@@ -48,7 +48,7 @@ with SQLCMD Mode enabled against a DEV database.
 6. `10__daily_operator_checklist.sql` - run daily readiness checks.
 7. `02__operations_dashboard.sql` - review operational result grids.
 8. `06__query_library_shortcuts.sql` - search records and copy IDs from Results Grid.
-9. `07__data_entry_bridge_templates.sql` - create person, vehicle risk object, policy, links, and claims with preview-first bridges.
+9. `07__data_entry_bridge_templates.sql` - create person, vehicle risk object, policy, links, claims, and tasks with preview-first bridges.
 10. `08__data_editing_guardrails.sql` - update data with rollback-first guardrails.
 11. `09__graph_report_pack.sql` - produce chart-ready/export-ready grids.
 12. `03__create_renewal_tasks.sql` - run renewal tasks in dry-run mode first.
@@ -153,7 +153,7 @@ icinde, SQLCMD Mode acik olarak ve sadece DEV database uzerinde yapilmalidir.
 6. `10__daily_operator_checklist.sql` - gunluk hazirlik kontrolleri.
 7. `02__operations_dashboard.sql` - operasyonel Results Grid ozetleri.
 8. `06__query_library_shortcuts.sql` - kayit arama ve ID kopyalama.
-9. `07__data_entry_bridge_templates.sql` - kisi, arac risk objesi, police, link ve hasar icin preview-first veri olusturma.
+9. `07__data_entry_bridge_templates.sql` - kisi, arac risk objesi, police, link, hasar ve task icin preview-first veri olusturma.
 10. `08__data_editing_guardrails.sql` - rollback-first veri guncelleme.
 11. `09__graph_report_pack.sql` - grafik/export hazir rapor gridleri.
 12. `03__create_renewal_tasks.sql` - once dry-run ile yenileme gorevleri.

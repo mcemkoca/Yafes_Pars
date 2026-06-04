@@ -99,6 +99,25 @@
 :setvar CLOSE_CLAIM_RESERVED_AMOUNT ""
 :setvar CLOSE_CLAIM_PAYMENT_METHOD_CODE ""
 
+-- CREATE_TASK values
+:setvar TASK_TITLE "Follow up customer file"
+:setvar TASK_DESCRIPTION "Created from SSMS bridge template."
+:setvar TASK_RELATED_ENTITY_TYPE ""
+:setvar TASK_RELATED_ENTITY_ID ""
+:setvar TASK_ASSIGNED_TO_USER_EMAIL "broker.operator@yafes.local"
+:setvar TASK_PRIORITY_CODE "NORMAL"
+:setvar TASK_STATUS_CODE "OPEN"
+:setvar TASK_DUE_AT_UTC "2026-06-15T10:00:00"
+
+-- ADD_TASK_COMMENT values
+:setvar TASK_COMMENT_TASK_ID ""
+:setvar TASK_COMMENT_TEXT "Reviewed in SSMS bridge."
+
+-- ADD_TASK_REMINDER values
+:setvar TASK_REMINDER_TASK_ID ""
+:setvar TASK_REMINDER_AT_UTC "2026-06-15T09:00:00"
+:setvar TASK_REMINDER_CHANNEL_CODE "IN_APP"
+
 SET NOCOUNT ON;
 GO
 
@@ -149,7 +168,10 @@ IF @ActionName NOT IN (
     N'ADD_POLICY_OBJECT',
     N'CREATE_VEHICLE_OBJECT',
     N'CREATE_CLAIM',
-    N'CLOSE_CLAIM'
+    N'CLOSE_CLAIM',
+    N'CREATE_TASK',
+    N'ADD_TASK_COMMENT',
+    N'ADD_TASK_REMINDER'
 )
     THROW 52302, 'Unknown ACTION_NAME.', 1;
 
@@ -167,7 +189,10 @@ FROM (VALUES
     (N'ADD_POLICY_OBJECT', N'policy.SP_AddContractObject', N'PREVIEW_FIRST', N'Links a tenant-owned risk object to a tenant-owned policy.'),
     (N'CREATE_VEHICLE_OBJECT', N'risk.SP_CreateVehicleObject', N'PREVIEW_FIRST', N'Creates a tenant-owned vehicle risk object before policy linking.'),
     (N'CREATE_CLAIM', N'claim.SP_CreateClaim', N'PREVIEW_FIRST', N'Creates an open claim and resolves handler email to handler person_id.'),
-    (N'CLOSE_CLAIM', N'claim.SP_CloseClaim', N'PREVIEW_FIRST', N'Closes a tenant-owned claim with amount and payment checks.')
+    (N'CLOSE_CLAIM', N'claim.SP_CloseClaim', N'PREVIEW_FIRST', N'Closes a tenant-owned claim with amount and payment checks.'),
+    (N'CREATE_TASK', N'tasking.SP_CreateTask', N'PREVIEW_FIRST', N'Creates a tenant-owned follow-up task with optional related entity validation.'),
+    (N'ADD_TASK_COMMENT', N'tasking.SP_AddTaskComment', N'PREVIEW_FIRST', N'Adds an operator comment to a tenant-owned task.'),
+    (N'ADD_TASK_REMINDER', N'tasking.SP_AddTaskReminder', N'PREVIEW_FIRST', N'Adds a future reminder to a tenant-owned open task.')
 ) AS a(action_name, procedure_name, default_mode, info_tip)
 ORDER BY action_name;
 
@@ -563,5 +588,145 @@ BEGIN
     SELECT
         @CloseClaimId AS closed_claim_id,
         N'Closed claim. Use audit trail to review the change.' AS info_tip;
+END;
+
+IF @ActionName = N'CREATE_TASK'
+BEGIN
+    DECLARE @TaskRelatedEntityType NVARCHAR(60) = NULLIF(UPPER(N'$(TASK_RELATED_ENTITY_TYPE)'), N'');
+    DECLARE @TaskRelatedEntityId UNIQUEIDENTIFIER = TRY_CONVERT(UNIQUEIDENTIFIER, NULLIF(N'$(TASK_RELATED_ENTITY_ID)', N''));
+    DECLARE @TaskDescription NVARCHAR(MAX) = NULLIF(N'$(TASK_DESCRIPTION)', N'');
+    DECLARE @TaskAssignedToUserId UNIQUEIDENTIFIER;
+    DECLARE @TaskDueAtUtc DATETIME2(0) = TRY_CONVERT(DATETIME2(0), NULLIF(N'$(TASK_DUE_AT_UTC)', N''));
+
+    SELECT @TaskAssignedToUserId = user_id
+    FROM core.AppUser
+    WHERE tenant_id = @TenantId
+      AND email = NULLIF(N'$(TASK_ASSIGNED_TO_USER_EMAIL)', N'')
+      AND is_active = 1;
+
+    PRINT '02 - CREATE_TASK preview';
+    SELECT
+        @TenantId AS tenant_id,
+        N'$(TASK_TITLE)' AS title,
+        @TaskDescription AS description,
+        @TaskRelatedEntityType AS related_entity_type,
+        @TaskRelatedEntityId AS related_entity_id,
+        @TaskAssignedToUserId AS assigned_to_user_id,
+        @CreatedByUserId AS created_by_user_id,
+        N'$(TASK_PRIORITY_CODE)' AS task_priority_code,
+        N'$(TASK_STATUS_CODE)' AS task_status_code,
+        @TaskDueAtUtc AS due_at_utc,
+        N'INFO TIP: related_entity_type may be PERSON, INSTITUTION, POLICY, CLAIM, RISK_OBJECT, or DOCUMENT.' AS info_tip;
+
+    PRINT '03 - Task lookup and ownership validation';
+    SELECT
+        CASE WHEN EXISTS (SELECT 1 FROM tasking.TaskPriority WHERE task_priority_code = N'$(TASK_PRIORITY_CODE)' AND is_active = 1) THEN N'OK' ELSE N'MISSING' END AS priority_status,
+        CASE WHEN EXISTS (SELECT 1 FROM tasking.TaskStatus WHERE task_status_code = N'$(TASK_STATUS_CODE)' AND is_active = 1) THEN N'OK' ELSE N'MISSING' END AS task_status_status,
+        CASE WHEN NULLIF(N'$(TASK_ASSIGNED_TO_USER_EMAIL)', N'') IS NULL OR @TaskAssignedToUserId IS NOT NULL THEN N'OK' ELSE N'MISSING' END AS assigned_user_status,
+        CASE
+            WHEN @TaskRelatedEntityType IS NULL AND @TaskRelatedEntityId IS NULL THEN N'OK'
+            WHEN @TaskRelatedEntityType = N'PERSON' AND EXISTS (SELECT 1 FROM person.Person WHERE person_id = @TaskRelatedEntityId AND tenant_id = @TenantId AND is_deleted = 0) THEN N'OK'
+            WHEN @TaskRelatedEntityType = N'INSTITUTION' AND EXISTS (SELECT 1 FROM institution.Institution WHERE institution_id = @TaskRelatedEntityId AND tenant_id = @TenantId AND is_deleted = 0) THEN N'OK'
+            WHEN @TaskRelatedEntityType = N'POLICY' AND EXISTS (SELECT 1 FROM policy.Contract WHERE contract_id = @TaskRelatedEntityId AND tenant_id = @TenantId AND is_deleted = 0) THEN N'OK'
+            WHEN @TaskRelatedEntityType = N'CLAIM' AND EXISTS (SELECT 1 FROM claim.Claim WHERE claim_id = @TaskRelatedEntityId AND tenant_id = @TenantId AND is_deleted = 0) THEN N'OK'
+            WHEN @TaskRelatedEntityType = N'RISK_OBJECT' AND EXISTS (SELECT 1 FROM risk.InsurableObject WHERE insurable_object_id = @TaskRelatedEntityId AND tenant_id = @TenantId AND is_deleted = 0) THEN N'OK'
+            WHEN @TaskRelatedEntityType = N'DOCUMENT' AND EXISTS (SELECT 1 FROM document.Document WHERE document_id = @TaskRelatedEntityId AND tenant_id = @TenantId AND is_deleted = 0) THEN N'OK'
+            ELSE N'MISSING'
+        END AS related_entity_status,
+        N'INFO TIP: All statuses must be OK before EXECUTE_ACTION = 1.' AS info_tip;
+
+    IF @ExecuteAction = 0
+        RETURN;
+
+    DECLARE @CreatedTaskId UNIQUEIDENTIFIER;
+
+    EXEC tasking.SP_CreateTask
+        @tenant_id = @TenantId,
+        @title = N'$(TASK_TITLE)',
+        @description = @TaskDescription,
+        @related_entity_type = @TaskRelatedEntityType,
+        @related_entity_id = @TaskRelatedEntityId,
+        @assigned_to_user_id = @TaskAssignedToUserId,
+        @created_by_user_id = @CreatedByUserId,
+        @task_priority_code = N'$(TASK_PRIORITY_CODE)',
+        @task_status_code = N'$(TASK_STATUS_CODE)',
+        @due_at_utc = @TaskDueAtUtc,
+        @created_task_id = @CreatedTaskId OUTPUT;
+
+    SELECT
+        @CreatedTaskId AS created_task_id,
+        N'Created task. Copy this ID into ADD_TASK_COMMENT or ADD_TASK_REMINDER.' AS info_tip;
+END;
+
+IF @ActionName = N'ADD_TASK_COMMENT'
+BEGIN
+    DECLARE @TaskCommentTaskId UNIQUEIDENTIFIER = TRY_CONVERT(UNIQUEIDENTIFIER, NULLIF(N'$(TASK_COMMENT_TASK_ID)', N''));
+
+    PRINT '02 - ADD_TASK_COMMENT preview';
+    SELECT
+        @TenantId AS tenant_id,
+        @TaskCommentTaskId AS task_id,
+        N'$(TASK_COMMENT_TEXT)' AS comment_text,
+        @CreatedByUserId AS created_by_user_id,
+        N'INFO TIP: Use Query Library or CREATE_TASK output to copy task_id.' AS info_tip;
+
+    PRINT '03 - Task comment validation';
+    SELECT
+        CASE WHEN EXISTS (SELECT 1 FROM tasking.Task WHERE task_id = @TaskCommentTaskId AND tenant_id = @TenantId AND is_deleted = 0) THEN N'OK' ELSE N'MISSING' END AS task_status,
+        CASE WHEN NULLIF(N'$(TASK_COMMENT_TEXT)', N'') IS NULL THEN N'MISSING' ELSE N'OK' END AS comment_text_status,
+        N'INFO TIP: Both statuses must be OK before EXECUTE_ACTION = 1.' AS info_tip;
+
+    IF @ExecuteAction = 0
+        RETURN;
+
+    DECLARE @CreatedTaskCommentId UNIQUEIDENTIFIER;
+
+    EXEC tasking.SP_AddTaskComment
+        @tenant_id = @TenantId,
+        @task_id = @TaskCommentTaskId,
+        @comment_text = N'$(TASK_COMMENT_TEXT)',
+        @created_by_user_id = @CreatedByUserId,
+        @created_task_comment_id = @CreatedTaskCommentId OUTPUT;
+
+    SELECT
+        @CreatedTaskCommentId AS created_task_comment_id,
+        N'Added task comment.' AS info_tip;
+END;
+
+IF @ActionName = N'ADD_TASK_REMINDER'
+BEGIN
+    DECLARE @TaskReminderTaskId UNIQUEIDENTIFIER = TRY_CONVERT(UNIQUEIDENTIFIER, NULLIF(N'$(TASK_REMINDER_TASK_ID)', N''));
+    DECLARE @TaskReminderAtUtc DATETIME2(0) = TRY_CONVERT(DATETIME2(0), NULLIF(N'$(TASK_REMINDER_AT_UTC)', N''));
+
+    PRINT '02 - ADD_TASK_REMINDER preview';
+    SELECT
+        @TenantId AS tenant_id,
+        @TaskReminderTaskId AS task_id,
+        @TaskReminderAtUtc AS remind_at_utc,
+        N'$(TASK_REMINDER_CHANNEL_CODE)' AS channel_code,
+        N'INFO TIP: Reminder time must be now or future. Channel must be IN_APP, EMAIL, or SMS.' AS info_tip;
+
+    PRINT '03 - Task reminder validation';
+    SELECT
+        CASE WHEN EXISTS (SELECT 1 FROM tasking.Task WHERE task_id = @TaskReminderTaskId AND tenant_id = @TenantId AND is_deleted = 0 AND task_status_code <> N'DONE') THEN N'OK' ELSE N'MISSING' END AS task_status,
+        CASE WHEN @TaskReminderAtUtc IS NOT NULL AND @TaskReminderAtUtc >= DATEADD(MINUTE, -5, SYSUTCDATETIME()) THEN N'OK' ELSE N'PAST_OR_MISSING' END AS reminder_time_status,
+        CASE WHEN N'$(TASK_REMINDER_CHANNEL_CODE)' IN (N'IN_APP', N'EMAIL', N'SMS') THEN N'OK' ELSE N'MISSING' END AS channel_status,
+        N'INFO TIP: All statuses must be OK before EXECUTE_ACTION = 1.' AS info_tip;
+
+    IF @ExecuteAction = 0
+        RETURN;
+
+    DECLARE @CreatedTaskReminderId UNIQUEIDENTIFIER;
+
+    EXEC tasking.SP_AddTaskReminder
+        @tenant_id = @TenantId,
+        @task_id = @TaskReminderTaskId,
+        @remind_at_utc = @TaskReminderAtUtc,
+        @channel_code = N'$(TASK_REMINDER_CHANNEL_CODE)',
+        @created_task_reminder_id = @CreatedTaskReminderId OUTPUT;
+
+    SELECT
+        @CreatedTaskReminderId AS created_task_reminder_id,
+        N'Added task reminder.' AS info_tip;
 END;
 GO

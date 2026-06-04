@@ -1744,7 +1744,7 @@ EXEC risk.SP_CreateVehicleObject
     @chassis_number = N'$(VEHICLE_CHASSIS_NUMBER)',
     @created_insurable_object_id = @CreatedInsurableObjectId OUTPUT;`,
         metrics: [
-          ["Actions", "8"],
+          ["Actions", "11"],
           ["Default", "Preview"],
           ["Exec flag", "0"],
           ["Output IDs", "Yes"]
@@ -1773,7 +1773,24 @@ EXEC risk.SP_CreateVehicleObject
               ["CREATE_POLICY", "Create policy", "Lookup preview first"],
               ["ADD_POLICY_OBJECT", "Link risk object to policy", "Tenant ownership validation"],
               ["CREATE_CLAIM", "Create claim", "Contract ID required"],
-              ["CLOSE_CLAIM", "Close claim", "Amount and payment checks"]
+              ["CLOSE_CLAIM", "Close claim", "Amount and payment checks"],
+              ["CREATE_TASK", "Create task", "Optional related entity validation"],
+              ["ADD_TASK_COMMENT", "Add task comment", "Tenant-owned task required"],
+              ["ADD_TASK_REMINDER", "Add task reminder", "Future reminder and channel validation"]
+            ]
+          },
+          {
+            title: "04 - CREATE_TASK preview",
+            columns: ["tenant", "title", "related_type", "assigned_to", "priority", "status"],
+            rows: [
+              ["DEV-BE-BROKER", "Follow up customer file", "CLAIM", "broker.operator@yafes.local", "NORMAL", "OPEN"]
+            ]
+          },
+          {
+            title: "05 - Task lookup and ownership validation",
+            columns: ["priority", "task_status", "assigned_user", "related_entity", "info_tip"],
+            rows: [
+              ["OK", "OK", "OK", "OK", "All statuses must be OK before EXECUTE_ACTION = 1."]
             ]
           }
         ],
@@ -1889,7 +1906,7 @@ SELECT signal_name, observed_value, expected_value, signal_status, info_tip
 FROM (VALUES
   (10, N'Domain table count', N'108', N'108', N'OK', N'INFO TIP: Active migrations are the source of truth.'),
   (20, N'Migration ledger count', CONVERT(NVARCHAR(40), @MigrationCount), N'17 tracked ledger rows; 19 source files', CASE WHEN @MigrationCount >= 17 THEN N'OK' ELSE N'REVIEW' END, N'INFO TIP: 000 and 001 run before the ledger exists.'),
-  (30, N'Procedure bridge coverage', N'11', N'11 required procedures', N'OK', N'INFO TIP: Bridge scripts call stored procedures.')
+  (30, N'Procedure bridge coverage', N'14', N'14 required procedures', N'OK', N'INFO TIP: Bridge scripts call stored procedures.')
 ) AS s(signal_order, signal_name, observed_value, expected_value, signal_status, info_tip)
 ORDER BY signal_order;
 
@@ -1945,7 +1962,7 @@ ORDER BY commit_order;`,
             rows: [
               ["Domain table count", "108", "108", "OK", "Active migrations are the source of truth."],
               ["Migration ledger count", "17", "17 tracked ledger rows; 19 source files", "OK", "000 and 001 run before the ledger exists."],
-              ["Procedure bridge coverage", "11", "11 required procedures", "OK", "Use stored procedures instead of direct inserts."],
+              ["Procedure bridge coverage", "14", "14 required procedures", "OK", "Use stored procedures instead of direct inserts."],
               ["Finance ledger tables", "0", "0 until approved", "OWNER_DECISION", "Do not invent accounting tables yet."],
               ["Import/export staging tables", "0", "0 until approved", "OWNER_DECISION", "Confirm file format and validation ownership first."]
             ]
@@ -1959,7 +1976,7 @@ ORDER BY commit_order;`,
               ["P1", "TEST/PROD access evidence", "WAITING_ENVIRONMENT", "Run role/permission review and sign-off.", "14__admin_role_permission_matrix.sql"],
               ["P1", "TEST/PROD restore drill", "WAITING_ENVIRONMENT", "Record VERIFYONLY and restored validation evidence.", "restore-drill-evidence-template.md"],
               ["P2", "Finance ledger and commission", "OWNER_DECISION_REQUIRED", "Approve accounting flow before 019+.", "12__table_catalog_and_relationships.sql"],
-              ["P2", "Department bridge coverage", "PRIORITY_REQUIRED", "Rank next high-frequency workflow.", "07__data_entry_bridge_templates.sql"],
+              ["P2", "Department bridge coverage", "PARTIAL_REMAINING", "Task bridge covered; rank next non-task workflow.", "07__data_entry_bridge_templates.sql"],
               ["P3", "SQL Agent jobs", "WAITING_INFRASTRUCTURE", "Approve job owners and schedules.", "15__monitoring_and_job_readiness.sql"]
             ]
           },

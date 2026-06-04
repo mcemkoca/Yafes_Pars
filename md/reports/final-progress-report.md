@@ -88,6 +88,8 @@ Behavior:
   matrix, tenant user assignments, least-privilege checks, and admin handoff.
 - Extended `07__data_entry_bridge_templates.sql` with `CREATE_VEHICLE_OBJECT`,
   `ADD_POLICY_OBJECT`, and `CLOSE_CLAIM` preview-first actions.
+- Extended task bridge coverage with `CREATE_TASK`, `ADD_TASK_COMMENT`, and
+  `ADD_TASK_REMINDER` preview-first actions backed by stored procedures.
 - Added `15__monitoring_and_job_readiness.sql` for DEV database health,
   backlog, backup visibility, SQL Agent observed jobs, and DBA handoff grids.
 - Added `16__delivery_gap_register.sql` for commit review closure, unfinished

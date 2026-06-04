@@ -271,7 +271,7 @@ function Test-SsmsOperatorConventions {
         }
 
         if ($relativePath -eq "database/ssms/07__data_entry_bridge_templates.sql") {
-            foreach ($requiredText in @("CREATE_VEHICLE_OBJECT", "risk.SP_CreateVehicleObject", "duplicate_vehicle_status")) {
+            foreach ($requiredText in @("CREATE_VEHICLE_OBJECT", "risk.SP_CreateVehicleObject", "duplicate_vehicle_status", "CREATE_TASK", "tasking.SP_CreateTask", "related_entity_status", "ADD_TASK_COMMENT", "ADD_TASK_REMINDER")) {
                 if ($content.Contains($requiredText)) {
                     Add-Result "PASS" "ssms" "$relativePath contains $requiredText"
                 }
@@ -313,6 +313,9 @@ function Test-SsmsWorkbenchControls {
         "data-menu=",
         "data-tree-kind",
         "CREATE_VEHICLE_OBJECT",
+        "CREATE_TASK",
+        "ADD_TASK_COMMENT",
+        "ADD_TASK_REMINDER",
         "14__admin_role_permission_matrix.sql",
         "16__delivery_gap_register.sql",
         "function executeQuery",

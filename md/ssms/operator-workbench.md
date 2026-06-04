@@ -34,7 +34,7 @@ shortcut grids, health signals, and recommended next actions.
 | `04__admin_security_audit_queries.sql` | Read-only | RBAC, audit, trigger, and integrity checks. |
 | `05__operator_dashboard_home.sql` | Read-only | SSMS home dashboard with shortcuts, health, context, and next actions. |
 | `06__query_library_shortcuts.sql` | Read-only | Search and inspection library for operators. |
-| `07__data_entry_bridge_templates.sql` | Preview first | Procedure-based create actions for person, vehicle risk object, policy, links, and claims with preview and output IDs. |
+| `07__data_entry_bridge_templates.sql` | Preview first | Procedure-based create actions for person, vehicle risk object, policy, links, claims, tasks, task comments, and task reminders with preview and output IDs. |
 | `08__data_editing_guardrails.sql` | Rollback default | Guided updates with before/after grids and explicit commit switch. |
 | `09__graph_report_pack.sql` | Read-only | Chart-ready grids, text bars, and export catalog. |
 | `10__daily_operator_checklist.sql` | Read-only | Morning/end-of-day checklist with PASS/REVIEW/ACTION signals. |

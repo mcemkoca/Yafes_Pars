@@ -22,6 +22,9 @@ database/ssms/07__data_entry_bridge_templates.sql
 - `ADD_POLICY_OBJECT`
 - `CREATE_CLAIM`
 - `CLOSE_CLAIM`
+- `CREATE_TASK`
+- `ADD_TASK_COMMENT`
+- `ADD_TASK_REMINDER`
 
 ## Safe Create Flow
 
@@ -41,3 +44,5 @@ database/ssms/07__data_entry_bridge_templates.sql
 - Do not run multiple create actions by editing the script body; use `ACTION_NAME`.
 - For vehicle policies, create or search the vehicle first, then copy
   `created_insurable_object_id` into `ADD_POLICY_OBJECT`.
+- For task follow-up, create the task first, then copy `created_task_id` into
+  `ADD_TASK_COMMENT` or `ADD_TASK_REMINDER`.
