@@ -40,6 +40,14 @@ and SSMS-first Yafes Pars deployment.
 - Stored procedure bridges must validate tenant ownership for every supplied
   person, institution, policy, claim, object, and operator user ID.
 
+## API Surface
+
+- Keep health and authentication discovery endpoints separate from domain data.
+- Require JWT/Bearer authorization on domain read endpoints before exposing any
+  tenant, person, policy, claim, document, task, coverage, or lookup data.
+- Treat missing authority or audience configuration as a deployment blocker
+  outside local DEV.
+
 ## Tenant Isolation
 
 Business root tables must include `tenant_id`. Query templates and dashboard

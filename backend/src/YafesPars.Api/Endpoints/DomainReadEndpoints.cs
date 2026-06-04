@@ -7,7 +7,9 @@ public static class DomainReadEndpoints
 {
     public static IEndpointRouteBuilder MapDomainReadEndpoints(this IEndpointRouteBuilder app)
     {
-        var api = app.MapGroup("/api").WithTags("Domain reads");
+        var api = app.MapGroup("/api")
+            .WithTags("Domain reads")
+            .RequireAuthorization();
 
         api.MapGet("/tenants", QueryTenantsAsync);
         api.MapGet("/persons", QueryPersonsAsync);

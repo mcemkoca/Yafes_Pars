@@ -129,6 +129,7 @@ katmandir.
 | Tablo katalogu ve FK haritasi | Hazir | Yeni tablo/migration oncesi gercek SQL Server metadata'si incelenir. |
 | Admin rol matrisi | Hazir | RBAC, permission, kullanici rol atamalari ve least-privilege kontrolleri SSMS Results Grid olarak alinir. |
 | Monitoring ve job readiness | Hazir | DEV health, backlog, backup gorunurlugu ve SQL Agent handoff gridleri SSMS icinden alinir. |
+| Backend API authorization | Hazir | Domain read endpointleri JWT/Bearer authorization zorunlulugu ile korunur; auth config ve health ayrik tutulur. |
 | Kalite kapilari | Hazir | Migration sirasi, SQL Server syntax, destructive pattern, artifact policy, SSMS standartlari ve dokumanlar kontrol edilir. |
 | Dokuman merkezi | Hazir | Okunabilir proje dokumanlari `md/` altinda toplandi. |
 

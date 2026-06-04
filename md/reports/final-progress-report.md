@@ -107,6 +107,7 @@ Behavior:
 - Added API, Application, Domain, Infrastructure, and Tests projects.
 - Added Swagger/OpenAPI setup.
 - Added JWT-ready authentication wiring.
+- Enforced authorization metadata on all domain read endpoints.
 - Added DB connectivity health endpoint.
 - Added read/search endpoints for tenants, persons, institutions, risks,
   policies, claims, documents, tasks, coverage, and lookup health.
