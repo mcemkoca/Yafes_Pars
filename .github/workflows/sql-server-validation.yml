@@ -33,7 +33,7 @@ jobs:
     timeout-minutes: 30
 
     env:
-      YAFES_SQL_SERVER: localhost,1433
+      YAFES_SQL_SERVER: localhost,14333
       YAFES_SQL_DATABASE: YafesPars_DEV
       YAFES_SQL_USER: sa
       YAFES_SQL_BACKUP_DIR: /tmp/yafes-sql-backups
@@ -64,11 +64,9 @@ jobs:
           set -euo pipefail
           password="Yafes_CI_$(openssl rand -hex 12)!A1"
           container_name="yafes-sqlserver-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-          host_port="$(shuf -i 20000-45000 -n 1)"
           echo "::add-mask::$password"
           echo "YAFES_SQL_PASSWORD=$password" >> "$GITHUB_ENV"
           echo "YAFES_SQL_CONTAINER=$container_name" >> "$GITHUB_ENV"
-          echo "YAFES_SQL_SERVER=localhost,$host_port" >> "$GITHUB_ENV"
           mkdir -p "$YAFES_SQL_BACKUP_DIR"
           chmod 777 "$YAFES_SQL_BACKUP_DIR"
 
@@ -78,7 +76,7 @@ jobs:
             --env MSSQL_PID=Developer \
             --env MSSQL_SA_PASSWORD="$password" \
             --volume "$YAFES_SQL_BACKUP_DIR:$YAFES_SQL_BACKUP_DIR" \
-            --publish "127.0.0.1:${host_port}:1433" \
+            --publish "127.0.0.1:14333:1433" \
             mcr.microsoft.com/mssql/server:2022-latest
 
       - name: Wait for SQL Server
@@ -86,7 +84,7 @@ jobs:
         run: |
           set -euo pipefail
           for i in {1..60}; do
-            if sqlcmd -S "$YAFES_SQL_SERVER" -U "$YAFES_SQL_USER" -P "$YAFES_SQL_PASSWORD" -C -Q "SELECT 1" >/dev/null 2>&1; then
+            if sqlcmd -S "$YAFES_SQL_SERVER" -U "$YAFES_SQL_USER" -P "$YAFES_SQL_PASSWORD" -C -l 5 -Q "SELECT 1" >/dev/null 2>&1; then
               exit 0
             fi
             sleep 2
