@@ -11,6 +11,7 @@ environment.
 - [ ] SQL Server validation workflow passes.
 - [ ] SSMS workbench validation workflow passes.
 - [ ] README links to deployment, security, backup, and runbook documents.
+- [ ] Table reconciliation `89 vs 108` is accepted or has an approved exception.
 - [ ] No secrets, tokens, connection strings, backups, or production data are in
   the repository.
 
@@ -22,6 +23,7 @@ environment.
 - [ ] `018__seed_demo_data.sql` is excluded from PROD.
 - [ ] Tenant-aware query and mutation paths are reviewed.
 - [ ] RBAC seed data is reviewed.
+- [ ] Access review evidence template is completed for the target environment.
 - [ ] Audit triggers are reviewed.
 
 ## Operations
@@ -30,6 +32,7 @@ environment.
 - [ ] SQL Server installation checklist is complete.
 - [ ] Backup and restore strategy is approved.
 - [ ] Restore drill has been completed.
+- [ ] Restore drill evidence template is completed.
 - [ ] SSMS deployment runbook has been rehearsed in TEST.
 - [ ] Migration execution log template is used for TEST and PROD.
 - [ ] Monitoring owner is assigned.

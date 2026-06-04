@@ -22,7 +22,7 @@ database-first Yafes Pars repository.
 - `database/ssms/`
 - `UML/`
 - `ERD/`
-- `md/trust-plan/`
+- `md/trust-plan/` as sanitized comparison notes only
 
 ## C. Azure Windows Server Target Architecture
 
@@ -68,6 +68,9 @@ index/statistics work after real data volume is known.
 - Add backup and restore strategy.
 - Add security hardening guide.
 - Add migration execution log template.
+- Add access review evidence template.
+- Add restore drill evidence template.
+- Add table reconciliation record.
 - Add environment matrix.
 - Add production readiness checklist.
 - Add static SQL quality gate script and CI workflow.

@@ -28,3 +28,12 @@ Production lookup seed data and optional demo data must remain separate.
 The database folder now contains ordered migrations from `000` through `018`,
 validation scripts for each major phase, guarded rollback scripts, and reusable
 SQL templates. Human-readable database documentation lives in `md/database/`.
+
+## Evidence Documents
+
+- `table-reconciliation-89-vs-108.md`: explains why the current model has 108
+  tables while the old legacy reference had 89.
+- `access-review-evidence-template.md`: records role, permission, user, and
+  least-privilege review evidence.
+- `restore-drill-evidence-template.md`: records backup restore proof, timing,
+  and validation results.

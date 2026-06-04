@@ -96,15 +96,12 @@ file in SSMS, enable SQLCMD Mode, verify variables, and run against DEV only.
 
 1. Rotate any exposed coordination token and keep all credentials outside Git.
 2. Record repeatable DEV/TEST execution evidence after each environment refresh.
-3. Compare the older 89-table package/reference with the current 108-table
-   migration source before any schema removal or merge decision.
-4. Review `md/trust-plan/` reference notes and keep only useful SSMS/product lessons.
-5. Add TEST/PROD role/permission evidence for operator, admin, auditor, and deployer.
-6. Add restore drill evidence to the production readiness checklist.
-7. Design migration `019+` candidates only after owner approval: finance,
+3. Add TEST/PROD role/permission evidence for operator, admin, auditor, and deployer.
+4. Add restore drill evidence to the production readiness checklist.
+5. Design migration `019+` candidates only after owner approval: finance,
    import/export staging, entity notes, and product templates.
-8. Extend bridge templates for high-frequency operator actions.
-9. Add SQL Agent and monitoring result sets after DEV/TEST infrastructure exists.
+6. Extend bridge templates for high-frequency operator actions.
+7. Add SQL Agent and monitoring result sets after DEV/TEST infrastructure exists.
 
 ## Turkce
 
@@ -170,15 +167,12 @@ icinde, SQLCMD Mode acik olarak ve sadece DEV database uzerinde yapilmalidir.
 
 1. Paylasilmis/riske girmis token varsa rotate edilecek; credential'lar Git disinda tutulacak.
 2. Her DEV/TEST ortam yenilemesinden sonra tekrar edilebilir execution evidence kaydi tutulacak.
-3. Eski 89 tablolu paket/referans ile mevcut 108 tablolu migration kaynagi
-   karsilastirilacak; silme veya birlestirme karari bundan sonra verilecek.
-4. `md/trust-plan/` referans notlari incelenecek; sadece SSMS/urun icin faydali kisimlar kalacak.
-5. Operator, admin, auditor ve deployer rolleri icin TEST/PROD permission kaniti eklenecek.
-6. Restore drill kaniti production readiness checklist'e eklenecek.
-7. `019+` migration adaylari is sahibi onayi ile tasarlanacak: finance,
+3. Operator, admin, auditor ve deployer rolleri icin TEST/PROD permission kaniti eklenecek.
+4. Restore drill kaniti production readiness checklist'e eklenecek.
+5. `019+` migration adaylari is sahibi onayi ile tasarlanacak: finance,
    import/export staging, entity notes, product templates.
-8. Sik kullanilan operator aksiyonlari icin bridge template kapsami artirilacak.
-9. DEV/TEST altyapisi netlesince SQL Agent ve monitoring result setleri eklenecek.
+6. Sik kullanilan operator aksiyonlari icin bridge template kapsami artirilacak.
+7. DEV/TEST altyapisi netlesince SQL Agent ve monitoring result setleri eklenecek.
 
 ## Security
 

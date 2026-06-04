@@ -50,6 +50,8 @@ Run a restore drill before production launch and after major release changes:
 4. Open the SSMS operator dashboard.
 5. Record restore start time, finish time, and validation status.
 
+Record the result with `md/database/restore-drill-evidence-template.md`.
+
 ## Pre-Deployment Backup
 
 Before a production migration:

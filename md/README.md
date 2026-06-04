@@ -13,7 +13,7 @@ stay in their conventional locations because GitHub and tooling read them there.
 | `md/ssms/` | SSMS operator workbench docs, tutorials, templates, and dashboard plan. |
 | `md/backend/` | Optional .NET backend foundation notes. |
 | `md/reports/` | Progress and delivery reports. |
-| `md/trust-plan/` | Legacy reference material from earlier planning/packages. Do not treat as production source. |
+| `md/trust-plan/` | Sanitized legacy comparison notes only. Do not treat as production source. |
 
 ## Documentation Style
 

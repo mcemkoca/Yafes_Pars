@@ -58,14 +58,20 @@ assessment, clean-up decisions, and next update queue in one place.
 - Added `database/ssms/14__admin_role_permission_matrix.sql` as the user-friendly
   RBAC/admin matrix: expected roles, permissions, tenant user assignments,
   least-privilege checks, and handoff rows.
+- Added `md/database/table-reconciliation-89-vs-108.md`; the legacy 89-table
+  source is now recorded as comparison input, and the active 108-table migration
+  model remains the source of truth.
+- Sanitized `md/trust-plan/` by removing old web-first app, VM/VHDX, package,
+  and duplicated planning notes while keeping only comparison research and a
+  short legacy reference summary.
+- Added access-review and restore-drill evidence templates, then linked them
+  from readiness, backup, and security docs.
 
 ### Remaining Risks And Gaps
 
 | Priority | Area | Finding | Best Fix |
 | --- | --- | --- | --- |
 | P0 | Token hygiene | A token was shared during coordination. It should be treated as exposed. | Rotate/revoke the token and use GitHub secrets or local credential manager only. |
-| P1 | Legacy reference notes | `md/trust-plan/` still contains old comparison notes from the imported package. | Keep useful schema/UX lessons, then delete notes that no longer help the SSMS-first product. |
-| P1 | Table reconciliation | The current migration source defines 108 tables, while the older visual/package reference mentioned 89 tables. | Compare table names before removing, merging, or adding any table. |
 | P1 | Workbench preview depth | The workbench controls are now wired and synchronized from the manifest, but execution is still non-persistent and uses prepared DEV preview data. | Keep real data work inside SSMS DEV; add backend-backed preview behavior only after the SSMS contract is stable. |
 | P1 | Operator permissions | The SSMS RBAC matrix exists, but final SQL logins/roles still need TEST/PROD environment evidence. | Run `14__admin_role_permission_matrix.sql` in TEST/PROD-like environments and record access-review evidence. |
 | P1 | Backup and restore | Strategy exists, but no restore drill evidence is committed. | Run restore drill and record result in readiness checklist. |
@@ -87,16 +93,12 @@ assessment, clean-up decisions, and next update queue in one place.
 1. Rotate any exposed coordination token and confirm no active token is stored in
    Git.
 2. Record repeatable DEV/TEST execution evidence after each environment refresh.
-3. Compare the old 89-table package/reference against the current 108-table
-   migration source and record keep/merge/remove decisions.
-4. Review `md/trust-plan/` notes and keep only the parts that still help the
-   SSMS-first product.
-5. Add TEST/PROD role/permission evidence for operator, admin, auditor, and deployer.
-6. Add restore drill evidence to the production readiness checklist.
-7. Design migration `019+` candidates only after owner approval:
+3. Add TEST/PROD role/permission evidence for operator, admin, auditor, and deployer.
+4. Add restore drill evidence to the production readiness checklist.
+5. Design migration `019+` candidates only after owner approval:
    finance/commission, import/export staging, entity notes, product templates.
-8. Add more bridge templates for high-frequency operator actions.
-9. Add SQL Agent/monitoring result sets once the DEV/TEST SQL Server instance is
+6. Add more bridge templates for high-frequency operator actions.
+7. Add SQL Agent/monitoring result sets once the DEV/TEST SQL Server instance is
    stable.
 
 ## Working Agreement

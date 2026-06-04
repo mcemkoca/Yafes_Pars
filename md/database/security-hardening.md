@@ -56,6 +56,12 @@ The platform uses:
 Production roles should be reviewed before go-live and after each release that
 changes permissions.
 
+Record review evidence with
+`md/database/access-review-evidence-template.md`. In DEV, use
+`database/ssms/14__admin_role_permission_matrix.sql` as the operator-friendly
+matrix before collecting formal TEST/PROD evidence through the approved
+environment procedure.
+
 ## Audit
 
 Audit triggers write key root table changes to `audit.AuditLog`. Production

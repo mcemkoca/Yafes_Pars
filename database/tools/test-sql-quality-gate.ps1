@@ -529,6 +529,9 @@ $requiredDocs = @(
     "md/database/backup-restore-strategy.md",
     "md/database/security-hardening.md",
     "md/database/migration-execution-log-template.md",
+    "md/database/access-review-evidence-template.md",
+    "md/database/restore-drill-evidence-template.md",
+    "md/database/table-reconciliation-89-vs-108.md",
     "md/database/environment-matrix.md",
     "md/database/production-readiness-checklist.md",
     "md/database/repository-development-plan.md"
