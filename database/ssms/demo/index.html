@@ -1711,32 +1711,55 @@ ORDER BY start_date DESC;`,
         file: "07__data_entry_bridge_templates.sql",
         title: "Bridge",
         subtitle: "Preview-first veri giris",
-        help: "Data bridge create islemlerini stored procedure uzerinden yapar. EXECUTE_ACTION = 0 iken sadece onizleme verir.",
+        help: "Data bridge create islemlerini stored procedure uzerinden yapar. Arac risk objesi once uretilir, output ID sonra policy object linkine kopyalanir.",
         code: `/* Data Entry Bridge Templates */
-:setvar ACTION_NAME "CREATE_NATURAL_PERSON"
+:setvar ACTION_NAME "CREATE_VEHICLE_OBJECT"
 :setvar EXECUTE_ACTION "0"
-:setvar PERSON_DOSSIER "DOS-NEW-001"
-:setvar PERSON_FIRST_NAME "New"
-:setvar PERSON_LAST_NAME "Customer"
+:setvar VEHICLE_DESCRIPTION "2026 Volvo XC40"
+:setvar VEHICLE_LICENSE_PLATE "1-SSMS-001"
+:setvar VEHICLE_CHASSIS_NUMBER "YV1NEWSSMS0000001"
+:setvar VEHICLE_TYPE_CODE "CAR"
+:setvar VEHICLE_USAGE_TYPE_CODE "PRIVATE"
+:setvar VEHICLE_PLATE_TYPE_CODE "NORMAL"
+:setvar VEHICLE_BRAND "Volvo"
+:setvar VEHICLE_MODEL "XC40"
+:setvar VEHICLE_BUILD_YEAR "2026"
 
-EXEC person.SP_CreateNaturalPerson
+EXEC risk.SP_CreateVehicleObject
     @tenant_id = @TenantId,
-    @dossier = N'$(PERSON_DOSSIER)',
-    @first_name = N'$(PERSON_FIRST_NAME)',
-    @last_name = N'$(PERSON_LAST_NAME)',
-    @created_person_id = @CreatedPersonId OUTPUT;`,
+    @description = N'$(VEHICLE_DESCRIPTION)',
+    @status_code = N'ACTIVE',
+    @start_date = '2026-01-01',
+    @vehicle_type_code = N'$(VEHICLE_TYPE_CODE)',
+    @usage_type_code = N'$(VEHICLE_USAGE_TYPE_CODE)',
+    @plate_type_code = N'$(VEHICLE_PLATE_TYPE_CODE)',
+    @brand = N'$(VEHICLE_BRAND)',
+    @model = N'$(VEHICLE_MODEL)',
+    @build_year = 2026,
+    @first_commissioning_date = '2026-01-01',
+    @registration_date = '2026-01-02',
+    @license_plate = N'$(VEHICLE_LICENSE_PLATE)',
+    @chassis_number = N'$(VEHICLE_CHASSIS_NUMBER)',
+    @created_insurable_object_id = @CreatedInsurableObjectId OUTPUT;`,
         metrics: [
-          ["Actions", "5"],
+          ["Actions", "8"],
           ["Default", "Preview"],
           ["Exec flag", "0"],
           ["Output IDs", "Yes"]
         ],
         tables: [
           {
-            title: "02 - CREATE_NATURAL_PERSON preview",
-            columns: ["tenant", "dossier", "first_name", "last_name", "birth_date", "info_tip"],
+            title: "02 - CREATE_VEHICLE_OBJECT preview",
+            columns: ["tenant", "description", "license_plate", "vehicle_type", "usage_type", "info_tip"],
             rows: [
-              ["DEV-BE-BROKER", "DOS-NEW-001", "New", "Customer", "1985-01-01", "Confirm lookup values before execute."]
+              ["DEV-BE-BROKER", "2026 Volvo XC40", "1-SSMS-001", "CAR", "PRIVATE", "Create vehicle first, then copy output ID into ADD_POLICY_OBJECT."]
+            ]
+          },
+          {
+            title: "03 - Vehicle lookup and duplicate validation",
+            columns: ["vehicle_type", "usage_type", "plate_type", "fuel_type", "duplicate_vehicle"],
+            rows: [
+              ["OK", "OK", "OK", "OK", "OK"]
             ]
           },
           {
@@ -1744,15 +1767,18 @@ EXEC person.SP_CreateNaturalPerson
             columns: ["action_name", "purpose", "safety"],
             rows: [
               ["CREATE_NATURAL_PERSON", "Create customer", "EXECUTE_ACTION required"],
+              ["CREATE_VEHICLE_OBJECT", "Create vehicle risk object", "Lookup and duplicate preview first"],
               ["CREATE_POLICY", "Create policy", "Lookup preview first"],
-              ["CREATE_CLAIM", "Create claim", "Contract ID required"]
+              ["ADD_POLICY_OBJECT", "Link risk object to policy", "Tenant ownership validation"],
+              ["CREATE_CLAIM", "Create claim", "Contract ID required"],
+              ["CLOSE_CLAIM", "Close claim", "Amount and payment checks"]
             ]
           }
         ],
         messages: [
           "Preview mode only.",
           "Set EXECUTE_ACTION = 1 after review.",
-          "Stored procedures protect tenant and key rules."
+          "Stored procedures protect tenant, lookup, duplicate, and key rules."
         ]
       },
       {

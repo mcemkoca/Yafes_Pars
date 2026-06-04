@@ -76,8 +76,9 @@ assessment, clean-up decisions, and next update queue in one place.
 - Hardened stored procedure bridges with tenant ownership checks for policy
   parties, policy objects, claim handlers, creator users, and claim close
   updater users.
-- Extended `07__data_entry_bridge_templates.sql` with `ADD_POLICY_OBJECT` and
-  `CLOSE_CLAIM`, plus correct claim-handler email to `person_id` resolution.
+- Extended `07__data_entry_bridge_templates.sql` with `CREATE_VEHICLE_OBJECT`,
+  `ADD_POLICY_OBJECT`, and `CLOSE_CLAIM`, plus correct claim-handler email to
+  `person_id` resolution.
 - Updated `08__data_editing_guardrails.sql` so blank/default IDs show
   `NO_TARGET` preview rows instead of failing during safe rollback mode.
 - Added `database/ssms/15__monitoring_and_job_readiness.sql` for DEV health,
@@ -95,7 +96,7 @@ assessment, clean-up decisions, and next update queue in one place.
 | P1 | Workbench preview depth | The workbench controls are now wired and synchronized from the manifest, but execution is still non-persistent and uses prepared DEV preview data. | Keep real data work inside SSMS DEV; add backend-backed preview behavior only after the SSMS contract is stable. |
 | P1 | Operator permissions | DEV access-review evidence exists, but final SQL logins/roles still need TEST/PROD environment evidence. | Run approved TEST/PROD access review and record sign-off. |
 | P1 | Backup and restore | DEV restore drill evidence exists, but TEST/PROD restore drill evidence is still environment-dependent. | Run restore drill on approved TEST/PROD infrastructure and record sign-off. |
-| P2 | Guided bridge coverage | Core create/close/link bridges now cover natural person, policy, version, party, object, claim create, and claim close; department-specific edge cases remain. | Add bridge coverage by department priority. |
+| P2 | Guided bridge coverage | Core create/close/link bridges now cover natural person, vehicle object, policy, version, party, policy object link, claim create, and claim close; department-specific edge cases remain. | Add bridge coverage by department priority. |
 | P2 | Finance model | Claim has paid/reserved fields, but no full ledger/commission model. | Design migration `019+` only after business owner confirms accounting flow. |
 | P2 | Import/export | Bulk onboarding needs staging, validation issue, and export job tables. | Design `019+` staging tables and SSMS validation grids. |
 | P3 | Monitoring | SSMS monitoring and job-readiness result sets exist, but approved SQL Agent jobs and TEST/PROD schedules are still environment-dependent. | Create approved jobs after DEV/TEST owners and schedules are confirmed. |

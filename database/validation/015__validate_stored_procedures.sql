@@ -16,6 +16,9 @@ IF OBJECT_ID(N'institution.SP_SearchInstitution', N'P') IS NULL
 IF OBJECT_ID(N'risk.SP_SearchVehicle', N'P') IS NULL
     THROW 51504, 'Missing procedure: risk.SP_SearchVehicle', 1;
 
+IF OBJECT_ID(N'risk.SP_CreateVehicleObject', N'P') IS NULL
+    THROW 51520, 'Missing procedure: risk.SP_CreateVehicleObject', 1;
+
 IF OBJECT_ID(N'policy.SP_CreateContract', N'P') IS NULL
     THROW 51505, 'Missing procedure: policy.SP_CreateContract', 1;
 
@@ -51,6 +54,15 @@ IF OBJECT_DEFINITION(OBJECT_ID(N'claim.SP_CreateClaim')) NOT LIKE N'%claims_hand
 
 IF OBJECT_DEFINITION(OBJECT_ID(N'claim.SP_CloseClaim')) NOT LIKE N'%updated_by_user_id does not belong to the tenant%'
     THROW 51519, 'Missing tenant guard: claim.SP_CloseClaim updater check', 1;
+
+IF OBJECT_DEFINITION(OBJECT_ID(N'risk.SP_CreateVehicleObject')) NOT LIKE N'%created_by_user_id does not belong to the tenant%'
+    THROW 51521, 'Missing tenant guard: risk.SP_CreateVehicleObject creator check', 1;
+
+IF OBJECT_DEFINITION(OBJECT_ID(N'risk.SP_CreateVehicleObject')) NOT LIKE N'%finance_institution_id does not belong to the tenant%'
+    THROW 51522, 'Missing tenant guard: risk.SP_CreateVehicleObject finance institution check', 1;
+
+IF OBJECT_DEFINITION(OBJECT_ID(N'risk.SP_CreateVehicleObject')) NOT LIKE N'%already exists for this license plate or chassis number%'
+    THROW 51523, 'Missing duplicate guard: risk.SP_CreateVehicleObject vehicle identity check', 1;
 
 IF NOT EXISTS (
     SELECT 1

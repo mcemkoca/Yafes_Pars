@@ -104,7 +104,7 @@
                         {
                             "fileName":  "07__data_entry_bridge_templates.sql",
                             "path":  "database/ssms/07__data_entry_bridge_templates.sql",
-                            "sizeBytes":  18455
+                            "sizeBytes":  25566
                         },
                         {
                             "fileName":  "08__data_editing_guardrails.sql",

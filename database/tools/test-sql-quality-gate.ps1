@@ -268,6 +268,17 @@ function Test-SsmsOperatorConventions {
                 Add-Result "FAIL" "ssms" "$relativePath is missing $requiredText"
             }
         }
+
+        if ($relativePath -eq "database/ssms/07__data_entry_bridge_templates.sql") {
+            foreach ($requiredText in @("CREATE_VEHICLE_OBJECT", "risk.SP_CreateVehicleObject", "duplicate_vehicle_status")) {
+                if ($content.Contains($requiredText)) {
+                    Add-Result "PASS" "ssms" "$relativePath contains $requiredText"
+                }
+                else {
+                    Add-Result "FAIL" "ssms" "$relativePath is missing $requiredText"
+                }
+            }
+        }
     }
 }
 
@@ -300,6 +311,7 @@ function Test-SsmsWorkbenchControls {
         "data-panel=""execution""",
         "data-menu=",
         "data-tree-kind",
+        "CREATE_VEHICLE_OBJECT",
         "14__admin_role_permission_matrix.sql",
         "function executeQuery",
         "function cancelExecution",

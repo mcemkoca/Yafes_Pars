@@ -58,6 +58,30 @@
 :setvar CONTRACT_OBJECT_STATUS_CODE "ACTIVE"
 :setvar OBJECT_IS_PRIMARY "0"
 
+-- CREATE_VEHICLE_OBJECT values
+:setvar VEHICLE_DESCRIPTION "2026 Volvo XC40"
+:setvar VEHICLE_STATUS_CODE "ACTIVE"
+:setvar VEHICLE_START_DATE "2026-01-01"
+:setvar VEHICLE_END_DATE ""
+:setvar VEHICLE_TYPE_CODE "CAR"
+:setvar VEHICLE_USAGE_TYPE_CODE "PRIVATE"
+:setvar VEHICLE_PLATE_TYPE_CODE "NORMAL"
+:setvar VEHICLE_BRAND "Volvo"
+:setvar VEHICLE_MODEL "XC40"
+:setvar VEHICLE_CHASSIS_NUMBER "YV1NEWSSMS0000001"
+:setvar VEHICLE_BUILD_YEAR "2026"
+:setvar VEHICLE_FIRST_COMMISSIONING_DATE "2026-01-01"
+:setvar VEHICLE_REGISTRATION_DATE "2026-01-02"
+:setvar VEHICLE_LICENSE_PLATE "1-SSMS-001"
+:setvar VEHICLE_FUEL_TYPE_CODE "ELECTRIC"
+:setvar VEHICLE_DRIVE_TYPE_CODE "AWD"
+:setvar VEHICLE_IS_FINANCED "0"
+:setvar VEHICLE_FINANCE_INSTITUTION_ID ""
+:setvar VEHICLE_INSURED_VALUE_EX_VAT ""
+:setvar VEHICLE_INSURED_VALUE_INC_VAT ""
+:setvar VEHICLE_CATALOG_VALUE_EX_VAT ""
+:setvar VEHICLE_CATALOG_VALUE_INC_VAT ""
+
 -- CREATE_CLAIM values
 :setvar CLAIM_NUMBER "CLM-NEW-001"
 :setvar CLAIM_CONTRACT_ID ""
@@ -123,6 +147,7 @@ IF @ActionName NOT IN (
     N'CREATE_POLICY_VERSION',
     N'ADD_POLICY_PARTY',
     N'ADD_POLICY_OBJECT',
+    N'CREATE_VEHICLE_OBJECT',
     N'CREATE_CLAIM',
     N'CLOSE_CLAIM'
 )
@@ -140,6 +165,7 @@ FROM (VALUES
     (N'CREATE_POLICY_VERSION', N'policy.SP_CreateContractVersion', N'PREVIEW_FIRST', N'Adds a version to an existing tenant-owned policy.'),
     (N'ADD_POLICY_PARTY', N'policy.SP_AddContractParty', N'PREVIEW_FIRST', N'Links a tenant-owned person to a tenant-owned policy.'),
     (N'ADD_POLICY_OBJECT', N'policy.SP_AddContractObject', N'PREVIEW_FIRST', N'Links a tenant-owned risk object to a tenant-owned policy.'),
+    (N'CREATE_VEHICLE_OBJECT', N'risk.SP_CreateVehicleObject', N'PREVIEW_FIRST', N'Creates a tenant-owned vehicle risk object before policy linking.'),
     (N'CREATE_CLAIM', N'claim.SP_CreateClaim', N'PREVIEW_FIRST', N'Creates an open claim and resolves handler email to handler person_id.'),
     (N'CLOSE_CLAIM', N'claim.SP_CloseClaim', N'PREVIEW_FIRST', N'Closes a tenant-owned claim with amount and payment checks.')
 ) AS a(action_name, procedure_name, default_mode, info_tip)
@@ -348,6 +374,101 @@ BEGIN
         @ObjectContractId AS contract_id,
         @InsurableObjectId AS insurable_object_id,
         N'Added policy object.' AS info_tip;
+END;
+
+IF @ActionName = N'CREATE_VEHICLE_OBJECT'
+BEGIN
+    DECLARE @VehicleStartDate DATE = TRY_CONVERT(DATE, N'$(VEHICLE_START_DATE)');
+    DECLARE @VehicleEndDate DATE = TRY_CONVERT(DATE, NULLIF(N'$(VEHICLE_END_DATE)', N''));
+    DECLARE @VehicleBuildYear INT = TRY_CONVERT(INT, N'$(VEHICLE_BUILD_YEAR)');
+    DECLARE @VehicleFirstCommissioningDate DATE = TRY_CONVERT(DATE, N'$(VEHICLE_FIRST_COMMISSIONING_DATE)');
+    DECLARE @VehicleRegistrationDate DATE = TRY_CONVERT(DATE, N'$(VEHICLE_REGISTRATION_DATE)');
+    DECLARE @VehicleIsFinanced BIT = COALESCE(TRY_CONVERT(BIT, N'$(VEHICLE_IS_FINANCED)'), 0);
+    DECLARE @VehicleFinanceInstitutionId UNIQUEIDENTIFIER = TRY_CONVERT(UNIQUEIDENTIFIER, NULLIF(N'$(VEHICLE_FINANCE_INSTITUTION_ID)', N''));
+    DECLARE @VehicleFuelTypeCode NVARCHAR(40) = NULLIF(N'$(VEHICLE_FUEL_TYPE_CODE)', N'');
+    DECLARE @VehicleDriveTypeCode NVARCHAR(20) = NULLIF(N'$(VEHICLE_DRIVE_TYPE_CODE)', N'');
+    DECLARE @VehicleInsuredValueExVat DECIMAL(18,2) = TRY_CONVERT(DECIMAL(18,2), NULLIF(N'$(VEHICLE_INSURED_VALUE_EX_VAT)', N''));
+    DECLARE @VehicleInsuredValueIncVat DECIMAL(18,2) = TRY_CONVERT(DECIMAL(18,2), NULLIF(N'$(VEHICLE_INSURED_VALUE_INC_VAT)', N''));
+    DECLARE @VehicleCatalogValueExVat DECIMAL(18,2) = TRY_CONVERT(DECIMAL(18,2), NULLIF(N'$(VEHICLE_CATALOG_VALUE_EX_VAT)', N''));
+    DECLARE @VehicleCatalogValueIncVat DECIMAL(18,2) = TRY_CONVERT(DECIMAL(18,2), NULLIF(N'$(VEHICLE_CATALOG_VALUE_INC_VAT)', N''));
+
+    PRINT '02 - CREATE_VEHICLE_OBJECT preview';
+    SELECT
+        @TenantId AS tenant_id,
+        N'$(VEHICLE_DESCRIPTION)' AS description,
+        N'$(VEHICLE_STATUS_CODE)' AS status_code,
+        @VehicleStartDate AS start_date,
+        @VehicleEndDate AS end_date,
+        N'$(VEHICLE_TYPE_CODE)' AS vehicle_type_code,
+        N'$(VEHICLE_USAGE_TYPE_CODE)' AS usage_type_code,
+        N'$(VEHICLE_PLATE_TYPE_CODE)' AS plate_type_code,
+        N'$(VEHICLE_BRAND)' AS brand,
+        N'$(VEHICLE_MODEL)' AS model,
+        N'$(VEHICLE_CHASSIS_NUMBER)' AS chassis_number,
+        @VehicleBuildYear AS build_year,
+        @VehicleFirstCommissioningDate AS first_commissioning_date,
+        @VehicleRegistrationDate AS registration_date,
+        N'$(VEHICLE_LICENSE_PLATE)' AS license_plate,
+        @VehicleFuelTypeCode AS fuel_type_code,
+        @VehicleDriveTypeCode AS drive_type_code,
+        @VehicleIsFinanced AS is_financed,
+        @VehicleFinanceInstitutionId AS finance_institution_id,
+        N'INFO TIP: Create the vehicle first, then copy created_insurable_object_id into ADD_POLICY_OBJECT.' AS info_tip;
+
+    PRINT '03 - Vehicle lookup and duplicate validation';
+    SELECT
+        CASE WHEN N'$(VEHICLE_STATUS_CODE)' IN (N'ACTIVE', N'INACTIVE', N'ARCHIVED', N'PENDING') THEN N'OK' ELSE N'MISSING' END AS object_status_code,
+        CASE WHEN EXISTS (SELECT 1 FROM risk.VehicleType WHERE vehicle_type_code = N'$(VEHICLE_TYPE_CODE)' AND is_active = 1) THEN N'OK' ELSE N'MISSING' END AS vehicle_type_status,
+        CASE WHEN EXISTS (SELECT 1 FROM risk.UsageType WHERE usage_type_code = N'$(VEHICLE_USAGE_TYPE_CODE)' AND is_active = 1) THEN N'OK' ELSE N'MISSING' END AS usage_type_status,
+        CASE WHEN EXISTS (SELECT 1 FROM risk.LicensePlateType WHERE plate_type_code = N'$(VEHICLE_PLATE_TYPE_CODE)' AND is_active = 1) THEN N'OK' ELSE N'MISSING' END AS plate_type_status,
+        CASE WHEN NULLIF(N'$(VEHICLE_FUEL_TYPE_CODE)', N'') IS NULL OR EXISTS (SELECT 1 FROM risk.FuelType WHERE fuel_type_code = N'$(VEHICLE_FUEL_TYPE_CODE)' AND is_active = 1) THEN N'OK' ELSE N'MISSING' END AS fuel_type_status,
+        CASE WHEN NULLIF(N'$(VEHICLE_DRIVE_TYPE_CODE)', N'') IS NULL OR EXISTS (SELECT 1 FROM risk.DriveType WHERE drive_type_code = N'$(VEHICLE_DRIVE_TYPE_CODE)' AND is_active = 1) THEN N'OK' ELSE N'MISSING' END AS drive_type_status,
+        CASE WHEN NOT EXISTS (
+            SELECT 1
+            FROM risk.InsurableObject io
+            INNER JOIN risk.InsurableVehicle iv
+                ON iv.insurable_object_id = io.insurable_object_id
+            WHERE io.tenant_id = @TenantId
+              AND io.is_deleted = 0
+              AND (iv.license_plate = N'$(VEHICLE_LICENSE_PLATE)' OR iv.chassis_number = N'$(VEHICLE_CHASSIS_NUMBER)')
+        ) THEN N'OK' ELSE N'DUPLICATE' END AS duplicate_vehicle_status,
+        N'INFO TIP: All lookup statuses must be OK and duplicate_vehicle_status must be OK before EXECUTE_ACTION = 1.' AS info_tip;
+
+    IF @ExecuteAction = 0
+        RETURN;
+
+    DECLARE @CreatedInsurableObjectId UNIQUEIDENTIFIER;
+
+    EXEC risk.SP_CreateVehicleObject
+        @tenant_id = @TenantId,
+        @description = N'$(VEHICLE_DESCRIPTION)',
+        @status_code = N'$(VEHICLE_STATUS_CODE)',
+        @start_date = @VehicleStartDate,
+        @end_date = @VehicleEndDate,
+        @vehicle_type_code = N'$(VEHICLE_TYPE_CODE)',
+        @usage_type_code = N'$(VEHICLE_USAGE_TYPE_CODE)',
+        @plate_type_code = N'$(VEHICLE_PLATE_TYPE_CODE)',
+        @brand = N'$(VEHICLE_BRAND)',
+        @model = N'$(VEHICLE_MODEL)',
+        @chassis_number = N'$(VEHICLE_CHASSIS_NUMBER)',
+        @build_year = @VehicleBuildYear,
+        @first_commissioning_date = @VehicleFirstCommissioningDate,
+        @registration_date = @VehicleRegistrationDate,
+        @license_plate = N'$(VEHICLE_LICENSE_PLATE)',
+        @fuel_type_code = @VehicleFuelTypeCode,
+        @drive_type_code = @VehicleDriveTypeCode,
+        @finance_institution_id = @VehicleFinanceInstitutionId,
+        @is_financed = @VehicleIsFinanced,
+        @insured_value_ex_vat = @VehicleInsuredValueExVat,
+        @insured_value_inc_vat = @VehicleInsuredValueIncVat,
+        @catalog_value_ex_vat = @VehicleCatalogValueExVat,
+        @catalog_value_inc_vat = @VehicleCatalogValueIncVat,
+        @created_by_user_id = @CreatedByUserId,
+        @created_insurable_object_id = @CreatedInsurableObjectId OUTPUT;
+
+    SELECT
+        @CreatedInsurableObjectId AS created_insurable_object_id,
+        N'Created vehicle risk object. Copy this ID into ADD_POLICY_OBJECT.' AS info_tip;
 END;
 
 IF @ActionName = N'CREATE_CLAIM'

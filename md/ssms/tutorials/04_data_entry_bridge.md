@@ -18,7 +18,10 @@ database/ssms/07__data_entry_bridge_templates.sql
 - `CREATE_POLICY`
 - `CREATE_POLICY_VERSION`
 - `ADD_POLICY_PARTY`
+- `CREATE_VEHICLE_OBJECT`
+- `ADD_POLICY_OBJECT`
 - `CREATE_CLAIM`
+- `CLOSE_CLAIM`
 
 ## Safe Create Flow
 
@@ -36,3 +39,5 @@ database/ssms/07__data_entry_bridge_templates.sql
 - Procedure-based creates enforce tenant and key rules better than ad hoc inserts.
 - If a lookup validation says `MISSING`, do not execute.
 - Do not run multiple create actions by editing the script body; use `ACTION_NAME`.
+- For vehicle policies, create or search the vehicle first, then copy
+  `created_insurable_object_id` into `ADD_POLICY_OBJECT`.

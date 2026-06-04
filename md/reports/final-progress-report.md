@@ -86,8 +86,8 @@ Behavior:
   integrity checks.
 - Added `14__admin_role_permission_matrix.sql` for role coverage, permission
   matrix, tenant user assignments, least-privilege checks, and admin handoff.
-- Extended `07__data_entry_bridge_templates.sql` with `ADD_POLICY_OBJECT` and
-  `CLOSE_CLAIM` preview-first actions.
+- Extended `07__data_entry_bridge_templates.sql` with `CREATE_VEHICLE_OBJECT`,
+  `ADD_POLICY_OBJECT`, and `CLOSE_CLAIM` preview-first actions.
 - Added `15__monitoring_and_job_readiness.sql` for DEV database health,
   backlog, backup visibility, SQL Agent observed jobs, and DBA handoff grids.
 - Primary interface target is SSMS Query Editor and SQL Server engine behavior,

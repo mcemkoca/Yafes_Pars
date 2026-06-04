@@ -185,6 +185,202 @@ BEGIN
 END;
 GO
 
+CREATE OR ALTER PROCEDURE risk.SP_CreateVehicleObject
+    @tenant_id UNIQUEIDENTIFIER,
+    @description NVARCHAR(255),
+    @status_code NVARCHAR(30),
+    @start_date DATE,
+    @end_date DATE = NULL,
+    @vehicle_type_code NVARCHAR(60),
+    @usage_type_code NVARCHAR(40),
+    @plate_type_code NVARCHAR(40),
+    @brand NVARCHAR(100),
+    @model NVARCHAR(100),
+    @chassis_number NVARCHAR(40),
+    @build_year INT,
+    @first_commissioning_date DATE,
+    @registration_date DATE,
+    @license_plate NVARCHAR(20),
+    @fuel_type_code NVARCHAR(40) = NULL,
+    @drive_type_code NVARCHAR(20) = NULL,
+    @finance_institution_id UNIQUEIDENTIFIER = NULL,
+    @is_financed BIT = 0,
+    @insured_value_ex_vat DECIMAL(18,2) = NULL,
+    @insured_value_inc_vat DECIMAL(18,2) = NULL,
+    @catalog_value_ex_vat DECIMAL(18,2) = NULL,
+    @catalog_value_inc_vat DECIMAL(18,2) = NULL,
+    @created_by_user_id UNIQUEIDENTIFIER = NULL,
+    @created_insurable_object_id UNIQUEIDENTIFIER OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    IF @tenant_id IS NULL
+        THROW 51640, 'tenant_id is required.', 1;
+
+    IF NULLIF(LTRIM(RTRIM(@description)), N'') IS NULL
+        THROW 51641, 'description is required.', 1;
+
+    IF @status_code NOT IN (N'ACTIVE', N'INACTIVE', N'ARCHIVED', N'PENDING')
+        THROW 51642, 'status_code is not valid for risk.InsurableObject.', 1;
+
+    IF @start_date IS NULL
+        THROW 51643, 'start_date is required.', 1;
+
+    IF @end_date IS NOT NULL AND @end_date < @start_date
+        THROW 51644, 'end_date must be greater than or equal to start_date.', 1;
+
+    IF @build_year IS NULL OR @build_year < 1886
+        THROW 51645, 'build_year must be 1886 or later.', 1;
+
+    IF @first_commissioning_date IS NULL OR @registration_date IS NULL
+        THROW 51646, 'first_commissioning_date and registration_date are required.', 1;
+
+    IF NULLIF(LTRIM(RTRIM(@license_plate)), N'') IS NULL
+       OR NULLIF(LTRIM(RTRIM(@chassis_number)), N'') IS NULL
+       OR NULLIF(LTRIM(RTRIM(@brand)), N'') IS NULL
+       OR NULLIF(LTRIM(RTRIM(@model)), N'') IS NULL
+        THROW 51647, 'license_plate, chassis_number, brand, and model are required.', 1;
+
+    IF @is_financed = 0 AND @finance_institution_id IS NOT NULL
+        THROW 51648, 'finance_institution_id is allowed only when is_financed = 1.', 1;
+
+    IF @is_financed = 1
+       AND NOT EXISTS (
+            SELECT 1
+            FROM institution.Institution
+            WHERE institution_id = @finance_institution_id
+              AND tenant_id = @tenant_id
+              AND is_deleted = 0
+       )
+        THROW 51649, 'finance_institution_id does not belong to the tenant.', 1;
+
+    IF @created_by_user_id IS NOT NULL
+       AND NOT EXISTS (
+            SELECT 1
+            FROM core.AppUser
+            WHERE user_id = @created_by_user_id
+              AND tenant_id = @tenant_id
+              AND is_active = 1
+       )
+        THROW 51650, 'created_by_user_id does not belong to the tenant.', 1;
+
+    IF NOT EXISTS (SELECT 1 FROM risk.InsurableObjectType WHERE object_type_code = N'VEHICLE' AND is_active = 1)
+        THROW 51651, 'VEHICLE object type is not active.', 1;
+
+    IF NOT EXISTS (SELECT 1 FROM risk.VehicleType WHERE vehicle_type_code = @vehicle_type_code AND is_active = 1)
+        THROW 51652, 'vehicle_type_code is not active.', 1;
+
+    IF NOT EXISTS (SELECT 1 FROM risk.UsageType WHERE usage_type_code = @usage_type_code AND is_active = 1)
+        THROW 51653, 'usage_type_code is not active.', 1;
+
+    IF NOT EXISTS (SELECT 1 FROM risk.LicensePlateType WHERE plate_type_code = @plate_type_code AND is_active = 1)
+        THROW 51654, 'plate_type_code is not active.', 1;
+
+    IF @fuel_type_code IS NOT NULL
+       AND NOT EXISTS (SELECT 1 FROM risk.FuelType WHERE fuel_type_code = @fuel_type_code AND is_active = 1)
+        THROW 51655, 'fuel_type_code is not active.', 1;
+
+    IF @drive_type_code IS NOT NULL
+       AND NOT EXISTS (SELECT 1 FROM risk.DriveType WHERE drive_type_code = @drive_type_code AND is_active = 1)
+        THROW 51656, 'drive_type_code is not active.', 1;
+
+    IF EXISTS (
+        SELECT 1
+        FROM risk.InsurableObject io
+        INNER JOIN risk.InsurableVehicle iv
+            ON iv.insurable_object_id = io.insurable_object_id
+        WHERE io.tenant_id = @tenant_id
+          AND io.is_deleted = 0
+          AND (iv.license_plate = @license_plate OR iv.chassis_number = @chassis_number)
+    )
+        THROW 51657, 'A tenant-owned vehicle already exists for this license plate or chassis number.', 1;
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        DECLARE @CreatedObject TABLE (
+            insurable_object_id UNIQUEIDENTIFIER NOT NULL
+        );
+
+        INSERT INTO risk.InsurableObject (
+            tenant_id,
+            object_type_code,
+            description,
+            status_code,
+            start_date,
+            end_date,
+            created_by_user_id
+        )
+        OUTPUT inserted.insurable_object_id INTO @CreatedObject (insurable_object_id)
+        VALUES (
+            @tenant_id,
+            N'VEHICLE',
+            @description,
+            @status_code,
+            @start_date,
+            @end_date,
+            @created_by_user_id
+        );
+
+        SELECT @created_insurable_object_id = insurable_object_id
+        FROM @CreatedObject;
+
+        INSERT INTO risk.InsurableVehicle (
+            insurable_object_id,
+            vehicle_type_code,
+            usage_type_code,
+            plate_type_code,
+            brand,
+            model,
+            chassis_number,
+            build_year,
+            first_commissioning_date,
+            registration_date,
+            license_plate,
+            fuel_type_code,
+            drive_type_code,
+            finance_institution_id,
+            is_financed,
+            insured_value_ex_vat,
+            insured_value_inc_vat,
+            catalog_value_ex_vat,
+            catalog_value_inc_vat
+        )
+        VALUES (
+            @created_insurable_object_id,
+            @vehicle_type_code,
+            @usage_type_code,
+            @plate_type_code,
+            @brand,
+            @model,
+            @chassis_number,
+            @build_year,
+            @first_commissioning_date,
+            @registration_date,
+            @license_plate,
+            @fuel_type_code,
+            @drive_type_code,
+            @finance_institution_id,
+            @is_financed,
+            @insured_value_ex_vat,
+            @insured_value_inc_vat,
+            @catalog_value_ex_vat,
+            @catalog_value_inc_vat
+        );
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+
+        THROW;
+    END CATCH
+END;
+GO
+
 CREATE OR ALTER PROCEDURE policy.SP_CreateContract
     @tenant_id UNIQUEIDENTIFIER,
     @contract_number NVARCHAR(40),
