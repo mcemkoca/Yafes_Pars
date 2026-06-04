@@ -10,10 +10,10 @@
 */
 :ON ERROR EXIT
 :setvar YAFES_SQL_DATABASE "YafesPars_Dev"
-:setvar TENANT_CODE "DEMO-BE-BROKER"
+:setvar TENANT_CODE "DEV-BE-BROKER"
 :setvar ACTION_NAME "UPDATE_TASK_STATUS"
 :setvar COMMIT_CHANGES "0"
-:setvar UPDATED_BY_USER_EMAIL "admin@yafes.demo"
+:setvar UPDATED_BY_USER_EMAIL "ops.admin@yafes.local"
 
 -- UPDATE_TASK_STATUS
 :setvar TASK_ID ""

@@ -11,7 +11,7 @@
 */
 :ON ERROR EXIT
 :setvar YAFES_SQL_DATABASE "YafesPars_Dev"
-:setvar TENANT_CODE "DEMO-BE-BROKER"
+:setvar TENANT_CODE "DEV-BE-BROKER"
 :setvar FOCUS_DOMAIN "ALL"
 
 SET NOCOUNT ON;
@@ -357,7 +357,7 @@ SELECT
     info_tip
 FROM (VALUES
     (10, N'SSMS-native dashboard', N'READY', N'Use Results Grid shortcut rows from 05 and this file.', N'Keep scripts read-only unless action requires bridge/guardrail.', N'Fits real SSMS behavior.'),
-    (20, N'Mind-map style groups', N'READY', N'Use result sets 02, 03, 04, and 05 as node/card data.', N'Demo should mirror these rows visually.', N'Visual renderer is optional; SSMS grid remains source.'),
+    (20, N'Mind-map style groups', N'READY', N'Use result sets 02, 03, 04, and 05 as node/card data.', N'Preview should mirror these rows visually.', N'Visual renderer is optional; SSMS grid remains source.'),
     (30, N'Prepared table cards', N'READY', N'Use table catalog 12 and domain card rows here.', N'Add owner-approved 019+ candidates only after table comparison.', N'Current source model has 108 tables.'),
     (40, N'Drag/drop behavior', N'SSMS_ADAPTED', N'Replace native drag/drop with choose-route, preview, execute/rollback workflow.', N'Use query library plus bridge templates.', N'SSMS cannot safely behave like a web canvas for data changes.'),
     (50, N'89 vs 108 table reconciliation', N'OPEN', N'Treat old 89-table package as reference and current migrations as source of truth.', N'Compare names before removing or adding any table.', N'Do not downsize the model only to match an old visual count.'),

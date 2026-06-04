@@ -2,7 +2,7 @@
     Yafes Pars SSMS Workbench - Operations Dashboard
 
     INFO TIP:
-    Visual demo screens are not execution tools. Run this file in SSMS with
+    Visual preview screens are not execution tools. Run this file in SSMS with
     SQLCMD Mode enabled against a DEV database to get real Results Grid data.
 
     Enable SQLCMD Mode before running.
@@ -10,7 +10,7 @@
 */
 :ON ERROR EXIT
 :setvar YAFES_SQL_DATABASE "YafesPars_Dev"
-:setvar TENANT_CODE "DEMO-BE-BROKER"
+:setvar TENANT_CODE "DEV-BE-BROKER"
 :setvar TOP_ROWS "100"
 
 SET NOCOUNT ON;

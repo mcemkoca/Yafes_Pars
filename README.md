@@ -95,9 +95,9 @@ file in SSMS, enable SQLCMD Mode, verify variables, and run against DEV only.
 ### Next Updates
 
 1. Rotate any exposed coordination token and keep all credentials outside Git.
-2. Record repeatable DEV/TEST execution evidence after each environment refresh.
+2. Record repeatable TEST/PROD execution evidence after target environment refresh.
 3. Add TEST/PROD role/permission evidence for operator, admin, auditor, and deployer.
-4. Add restore drill evidence to the production readiness checklist.
+4. Add TEST/PROD restore drill evidence to the production readiness checklist.
 5. Design migration `019+` candidates only after owner approval: finance,
    import/export staging, entity notes, and product templates.
 6. Extend bridge templates for high-frequency operator actions.
@@ -166,9 +166,9 @@ icinde, SQLCMD Mode acik olarak ve sadece DEV database uzerinde yapilmalidir.
 ### Sonraki Guncellemeler
 
 1. Paylasilmis/riske girmis token varsa rotate edilecek; credential'lar Git disinda tutulacak.
-2. Her DEV/TEST ortam yenilemesinden sonra tekrar edilebilir execution evidence kaydi tutulacak.
+2. TEST/PROD ortam yenilemesinden sonra tekrar edilebilir execution evidence kaydi tutulacak.
 3. Operator, admin, auditor ve deployer rolleri icin TEST/PROD permission kaniti eklenecek.
-4. Restore drill kaniti production readiness checklist'e eklenecek.
+4. TEST/PROD restore drill kaniti production readiness checklist'e eklenecek.
 5. `019+` migration adaylari is sahibi onayi ile tasarlanacak: finance,
    import/export staging, entity notes, product templates.
 6. Sik kullanilan operator aksiyonlari icin bridge template kapsami artirilacak.

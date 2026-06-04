@@ -3,14 +3,14 @@
 
     INFO TIP:
     Use this SSMS Results Grid pack for real RBAC, audit, trigger, and data
-    quality checks. The local demo is visual only.
+    quality checks. The local preview is visual only.
 
     Enable SQLCMD Mode before running.
     This script is read-only.
 */
 :ON ERROR EXIT
 :setvar YAFES_SQL_DATABASE "YafesPars_Dev"
-:setvar TENANT_CODE "DEMO-BE-BROKER"
+:setvar TENANT_CODE "DEV-BE-BROKER"
 
 SET NOCOUNT ON;
 GO

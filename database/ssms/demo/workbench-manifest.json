@@ -13,7 +13,7 @@
                      "legacyReferenceTableCount":  89
                  },
     "tenant":  {
-                   "defaultCode":  "DEMO-BE-BROKER",
+                   "defaultCode":  "DEV-BE-BROKER",
                    "displayName":  "Belgium Broker Tenant",
                    "environmentLabel":  "DEV"
                },
@@ -79,67 +79,67 @@
                         {
                             "fileName":  "02__operations_dashboard.sql",
                             "path":  "database/ssms/02__operations_dashboard.sql",
-                            "sizeBytes":  8210
+                            "sizeBytes":  8212
                         },
                         {
                             "fileName":  "03__create_renewal_tasks.sql",
                             "path":  "database/ssms/03__create_renewal_tasks.sql",
-                            "sizeBytes":  1996
+                            "sizeBytes":  1998
                         },
                         {
                             "fileName":  "04__admin_security_audit_queries.sql",
                             "path":  "database/ssms/04__admin_security_audit_queries.sql",
-                            "sizeBytes":  3887
+                            "sizeBytes":  3889
                         },
                         {
                             "fileName":  "05__operator_dashboard_home.sql",
                             "path":  "database/ssms/05__operator_dashboard_home.sql",
-                            "sizeBytes":  8214
+                            "sizeBytes":  8213
                         },
                         {
                             "fileName":  "06__query_library_shortcuts.sql",
                             "path":  "database/ssms/06__query_library_shortcuts.sql",
-                            "sizeBytes":  3878
+                            "sizeBytes":  3877
                         },
                         {
                             "fileName":  "07__data_entry_bridge_templates.sql",
                             "path":  "database/ssms/07__data_entry_bridge_templates.sql",
-                            "sizeBytes":  12329
+                            "sizeBytes":  12333
                         },
                         {
                             "fileName":  "08__data_editing_guardrails.sql",
                             "path":  "database/ssms/08__data_editing_guardrails.sql",
-                            "sizeBytes":  6982
+                            "sizeBytes":  6986
                         },
                         {
                             "fileName":  "09__graph_report_pack.sql",
                             "path":  "database/ssms/09__graph_report_pack.sql",
-                            "sizeBytes":  5435
+                            "sizeBytes":  5434
                         },
                         {
                             "fileName":  "10__daily_operator_checklist.sql",
                             "path":  "database/ssms/10__daily_operator_checklist.sql",
-                            "sizeBytes":  5178
+                            "sizeBytes":  5177
                         },
                         {
                             "fileName":  "11__schema_working_logic_map.sql",
                             "path":  "database/ssms/11__schema_working_logic_map.sql",
-                            "sizeBytes":  11314
+                            "sizeBytes":  11316
                         },
                         {
                             "fileName":  "12__table_catalog_and_relationships.sql",
                             "path":  "database/ssms/12__table_catalog_and_relationships.sql",
-                            "sizeBytes":  8722
+                            "sizeBytes":  8721
                         },
                         {
                             "fileName":  "13__visual_workflow_board.sql",
                             "path":  "database/ssms/13__visual_workflow_board.sql",
-                            "sizeBytes":  25132
+                            "sizeBytes":  25134
                         },
                         {
                             "fileName":  "14__admin_role_permission_matrix.sql",
                             "path":  "database/ssms/14__admin_role_permission_matrix.sql",
-                            "sizeBytes":  12538
+                            "sizeBytes":  12856
                         }
                     ],
     "shortcuts":  [

@@ -52,9 +52,9 @@ BEGIN TRY
         )
         VALUES (
             @TenantId,
-            N'DEMO-BE-BROKER',
-            N'Yafes Demo Broker BV',
-            N'Yafes Demo Broker',
+            N'DEV-BE-BROKER',
+            N'Yafes Broker Operations BV',
+            N'Yafes Broker Operations',
             N'BE0123456789',
             'BE',
             'nl'
@@ -63,62 +63,62 @@ BEGIN TRY
 
     IF NOT EXISTS (SELECT 1 FROM person.Person WHERE person_id = @Person1)
         INSERT INTO person.Person (person_id, tenant_id, person_kind, dossier, language_code, nationality)
-        VALUES (@Person1, @TenantId, N'NATURAL', N'DEMO-P-001', 'nl', N'Belgian');
+        VALUES (@Person1, @TenantId, N'NATURAL', N'DEV-P-001', 'nl', N'Belgian');
     IF NOT EXISTS (SELECT 1 FROM person.NaturalPerson WHERE person_id = @Person1)
         INSERT INTO person.NaturalPerson (person_id, first_name, last_name, birth_date, title_code)
         VALUES (@Person1, N'Jan', N'Peeters', '1982-04-12', N'MR');
 
     IF NOT EXISTS (SELECT 1 FROM person.Person WHERE person_id = @Person2)
         INSERT INTO person.Person (person_id, tenant_id, person_kind, dossier, language_code, nationality)
-        VALUES (@Person2, @TenantId, N'NATURAL', N'DEMO-P-002', 'fr', N'Belgian');
+        VALUES (@Person2, @TenantId, N'NATURAL', N'DEV-P-002', 'fr', N'Belgian');
     IF NOT EXISTS (SELECT 1 FROM person.NaturalPerson WHERE person_id = @Person2)
         INSERT INTO person.NaturalPerson (person_id, first_name, last_name, birth_date, title_code)
         VALUES (@Person2, N'Marie', N'Dubois', '1976-08-21', N'MRS');
 
     IF NOT EXISTS (SELECT 1 FROM person.Person WHERE person_id = @Person3)
         INSERT INTO person.Person (person_id, tenant_id, person_kind, dossier, language_code, nationality)
-        VALUES (@Person3, @TenantId, N'NATURAL', N'DEMO-P-003', 'nl', N'Belgian');
+        VALUES (@Person3, @TenantId, N'NATURAL', N'DEV-P-003', 'nl', N'Belgian');
     IF NOT EXISTS (SELECT 1 FROM person.NaturalPerson WHERE person_id = @Person3)
         INSERT INTO person.NaturalPerson (person_id, first_name, last_name, birth_date, title_code)
         VALUES (@Person3, N'Anke', N'Janssens', '1990-01-08', N'MRS');
 
     IF NOT EXISTS (SELECT 1 FROM person.Person WHERE person_id = @Person4)
         INSERT INTO person.Person (person_id, tenant_id, person_kind, dossier, language_code, nationality)
-        VALUES (@Person4, @TenantId, N'NATURAL', N'DEMO-P-004', 'fr', N'Belgian');
+        VALUES (@Person4, @TenantId, N'NATURAL', N'DEV-P-004', 'fr', N'Belgian');
     IF NOT EXISTS (SELECT 1 FROM person.NaturalPerson WHERE person_id = @Person4)
         INSERT INTO person.NaturalPerson (person_id, first_name, last_name, birth_date, title_code)
         VALUES (@Person4, N'Luc', N'Martin', '1969-11-03', N'MR');
 
     IF NOT EXISTS (SELECT 1 FROM person.Person WHERE person_id = @Person5)
         INSERT INTO person.Person (person_id, tenant_id, person_kind, dossier, language_code, nationality)
-        VALUES (@Person5, @TenantId, N'NATURAL', N'DEMO-P-005', 'nl', N'Belgian');
+        VALUES (@Person5, @TenantId, N'NATURAL', N'DEV-P-005', 'nl', N'Belgian');
     IF NOT EXISTS (SELECT 1 FROM person.NaturalPerson WHERE person_id = @Person5)
         INSERT INTO person.NaturalPerson (person_id, first_name, last_name, birth_date, title_code)
         VALUES (@Person5, N'Sofie', N'Vermeulen', '1987-06-19', N'MRS');
 
     IF NOT EXISTS (SELECT 1 FROM person.Person WHERE person_id = @Legal1)
         INSERT INTO person.Person (person_id, tenant_id, person_kind, dossier, language_code, nationality)
-        VALUES (@Legal1, @TenantId, N'LEGAL', N'DEMO-L-001', 'nl', N'Belgian');
+        VALUES (@Legal1, @TenantId, N'LEGAL', N'DEV-L-001', 'nl', N'Belgian');
     IF NOT EXISTS (SELECT 1 FROM person.LegalPerson WHERE person_id = @Legal1)
         INSERT INTO person.LegalPerson (person_id, incorporation_date, legal_form)
         VALUES (@Legal1, '2014-02-01', N'BV');
 
     IF NOT EXISTS (SELECT 1 FROM person.Person WHERE person_id = @Legal2)
         INSERT INTO person.Person (person_id, tenant_id, person_kind, dossier, language_code, nationality)
-        VALUES (@Legal2, @TenantId, N'LEGAL', N'DEMO-L-002', 'fr', N'Belgian');
+        VALUES (@Legal2, @TenantId, N'LEGAL', N'DEV-L-002', 'fr', N'Belgian');
     IF NOT EXISTS (SELECT 1 FROM person.LegalPerson WHERE person_id = @Legal2)
         INSERT INTO person.LegalPerson (person_id, incorporation_date, legal_form)
         VALUES (@Legal2, '2019-09-15', N'SRL');
 
     IF NOT EXISTS (SELECT 1 FROM core.AppUser WHERE user_id = @UserAdmin)
         INSERT INTO core.AppUser (user_id, tenant_id, email, display_name, person_id)
-        VALUES (@UserAdmin, @TenantId, N'admin@yafes-demo.be', N'Demo Admin', @Person1);
+        VALUES (@UserAdmin, @TenantId, N'ops.admin@yafes.local', N'Operations Admin', @Person1);
     IF NOT EXISTS (SELECT 1 FROM core.AppUser WHERE user_id = @UserBroker)
         INSERT INTO core.AppUser (user_id, tenant_id, email, display_name, person_id)
-        VALUES (@UserBroker, @TenantId, N'broker@yafes-demo.be', N'Demo Broker', @Person3);
+        VALUES (@UserBroker, @TenantId, N'broker.operator@yafes.local', N'Broker Operator', @Person3);
     IF NOT EXISTS (SELECT 1 FROM core.AppUser WHERE user_id = @UserClaim)
         INSERT INTO core.AppUser (user_id, tenant_id, email, display_name, person_id)
-        VALUES (@UserClaim, @TenantId, N'claims@yafes-demo.be', N'Demo Claim Handler', @Person5);
+        VALUES (@UserClaim, @TenantId, N'claims.owner@yafes.local', N'Claims Specialist', @Person5);
 
     INSERT INTO core.UserRole (user_id, role_id)
     SELECT @UserAdmin, r.role_id
@@ -268,19 +268,19 @@ BEGIN TRY
 
     IF NOT EXISTS (SELECT 1 FROM document.Document WHERE document_id = '10000000-0000-0000-0000-000000007001')
         INSERT INTO document.Document (document_id, tenant_id, owner_entity_type, owner_entity_id, document_type_code, file_name, file_extension, mime_type, file_size_bytes, storage_provider, storage_key, uploaded_by_user_id)
-        VALUES ('10000000-0000-0000-0000-000000007001', @TenantId, N'PERSON', @Person1, N'ID_CARD', N'jan-peeters-id.pdf', N'.pdf', N'application/pdf', 125000, N'demo', N'demo/person/jan-peeters-id.pdf', @UserBroker);
+        VALUES ('10000000-0000-0000-0000-000000007001', @TenantId, N'PERSON', @Person1, N'ID_CARD', N'jan-peeters-id.pdf', N'.pdf', N'application/pdf', 125000, N'dev', N'dev/person/jan-peeters-id.pdf', @UserBroker);
     IF NOT EXISTS (SELECT 1 FROM document.Document WHERE document_id = '10000000-0000-0000-0000-000000007002')
         INSERT INTO document.Document (document_id, tenant_id, owner_entity_type, owner_entity_id, document_type_code, file_name, file_extension, mime_type, file_size_bytes, storage_provider, storage_key, uploaded_by_user_id)
-        VALUES ('10000000-0000-0000-0000-000000007002', @TenantId, N'POLICY', @Contract1, N'POLICY_DOCUMENT', N'POL-2026-0001.pdf', N'.pdf', N'application/pdf', 245000, N'demo', N'demo/policy/POL-2026-0001.pdf', @UserBroker);
+        VALUES ('10000000-0000-0000-0000-000000007002', @TenantId, N'POLICY', @Contract1, N'POLICY_DOCUMENT', N'POL-2026-0001.pdf', N'.pdf', N'application/pdf', 245000, N'dev', N'dev/policy/POL-2026-0001.pdf', @UserBroker);
     IF NOT EXISTS (SELECT 1 FROM document.Document WHERE document_id = '10000000-0000-0000-0000-000000007003')
         INSERT INTO document.Document (document_id, tenant_id, owner_entity_type, owner_entity_id, document_type_code, file_name, file_extension, mime_type, file_size_bytes, storage_provider, storage_key, uploaded_by_user_id)
-        VALUES ('10000000-0000-0000-0000-000000007003', @TenantId, N'CLAIM', @Claim1, N'CLAIM_REPORT', N'CLM-2026-0001-report.pdf', N'.pdf', N'application/pdf', 180000, N'demo', N'demo/claim/CLM-2026-0001-report.pdf', @UserClaim);
+        VALUES ('10000000-0000-0000-0000-000000007003', @TenantId, N'CLAIM', @Claim1, N'CLAIM_REPORT', N'CLM-2026-0001-report.pdf', N'.pdf', N'application/pdf', 180000, N'dev', N'dev/claim/CLM-2026-0001-report.pdf', @UserClaim);
     IF NOT EXISTS (SELECT 1 FROM document.Document WHERE document_id = '10000000-0000-0000-0000-000000007004')
         INSERT INTO document.Document (document_id, tenant_id, owner_entity_type, owner_entity_id, document_type_code, file_name, file_extension, mime_type, file_size_bytes, storage_provider, storage_key, uploaded_by_user_id)
-        VALUES ('10000000-0000-0000-0000-000000007004', @TenantId, N'RISK_OBJECT', @Vehicle1, N'GREEN_CARD', N'green-card-1ABC123.pdf', N'.pdf', N'application/pdf', 97000, N'demo', N'demo/risk/green-card-1ABC123.pdf', @UserBroker);
+        VALUES ('10000000-0000-0000-0000-000000007004', @TenantId, N'RISK_OBJECT', @Vehicle1, N'GREEN_CARD', N'green-card-1ABC123.pdf', N'.pdf', N'application/pdf', 97000, N'dev', N'dev/risk/green-card-1ABC123.pdf', @UserBroker);
     IF NOT EXISTS (SELECT 1 FROM document.Document WHERE document_id = '10000000-0000-0000-0000-000000007005')
         INSERT INTO document.Document (document_id, tenant_id, owner_entity_type, owner_entity_id, document_type_code, file_name, file_extension, mime_type, file_size_bytes, storage_provider, storage_key, uploaded_by_user_id)
-        VALUES ('10000000-0000-0000-0000-000000007005', @TenantId, N'INSTITUTION', @Inst1, N'SIGNED_CONTRACT', N'ag-broker-agreement.pdf', N'.pdf', N'application/pdf', 310000, N'demo', N'demo/institution/ag-broker-agreement.pdf', @UserAdmin);
+        VALUES ('10000000-0000-0000-0000-000000007005', @TenantId, N'INSTITUTION', @Inst1, N'SIGNED_CONTRACT', N'ag-broker-agreement.pdf', N'.pdf', N'application/pdf', 310000, N'dev', N'dev/institution/ag-broker-agreement.pdf', @UserAdmin);
 
     IF NOT EXISTS (
         SELECT 1
@@ -299,7 +299,7 @@ BEGIN TRY
     END;
 
     COMMIT TRANSACTION;
-    PRINT 'Optional demo data migration completed successfully.';
+    PRINT 'Optional DEV sample data migration completed successfully.';
 END TRY
 BEGIN CATCH
     IF @@TRANCOUNT > 0

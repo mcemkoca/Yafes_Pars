@@ -18,7 +18,7 @@ environment.
 ## Database
 
 - [ ] Schemas, constraints, indexes, triggers, views, procedures, seed data, and
-  demo data validations pass in DEV.
+  DEV sample data validations pass in DEV.
 - [ ] TEST rehearsal has been completed without manual script edits.
 - [ ] `018__seed_demo_data.sql` is excluded from PROD.
 - [ ] Tenant-aware query and mutation paths are reviewed.
@@ -33,6 +33,7 @@ environment.
 - [ ] Backup and restore strategy is approved.
 - [ ] Restore drill has been completed.
 - [ ] Restore drill evidence template is completed.
+- [ ] DEV restore evidence has been reviewed as a baseline.
 - [ ] SSMS deployment runbook has been rehearsed in TEST.
 - [ ] Migration execution log template is used for TEST and PROD.
 - [ ] Monitoring owner is assigned.

@@ -7,7 +7,7 @@
 */
 :ON ERROR EXIT
 :setvar YAFES_SQL_DATABASE "YafesPars_Dev"
-:setvar TENANT_CODE "DEMO-BE-BROKER"
+:setvar TENANT_CODE "DEV-BE-BROKER"
 :setvar SEARCH_TEXT ""
 :setvar TOP_ROWS "100"
 

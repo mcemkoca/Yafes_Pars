@@ -2,7 +2,7 @@
     Yafes Pars SSMS Workbench - Renewal Task Runner
 
     INFO TIP:
-    Real renewal task work happens in SSMS, not the visual demo. Keep DRY_RUN = 1
+    Real renewal task work happens in SSMS, not the visual preview. Keep DRY_RUN = 1
     until candidates are reviewed in Results Grid.
 
     Enable SQLCMD Mode before running.
@@ -10,7 +10,7 @@
 */
 :ON ERROR EXIT
 :setvar YAFES_SQL_DATABASE "YafesPars_Dev"
-:setvar TENANT_CODE "DEMO-BE-BROKER"
+:setvar TENANT_CODE "DEV-BE-BROKER"
 :setvar DAYS_AHEAD "60"
 :setvar DRY_RUN "1"
 

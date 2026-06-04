@@ -12,7 +12,7 @@ Branch: `feature/complete-db-validation-backend-frontend-foundation`
 - Hardened validation scripts for person, institution, risk, policy, coverage,
   claim, document, tasking, audit, cross-domain constraints, stored procedures,
   and seed data.
-- Updated optional demo data for active policy party/object/version consistency.
+- Updated optional DEV sample data for active policy party/object/version consistency.
 - Updated SSMS fallback script generation.
 
 ## Validation Result
@@ -20,19 +20,15 @@ Branch: `feature/complete-db-validation-backend-frontend-foundation`
 - Static SQL Server compatibility checks: PASSED.
 - Destructive migration pattern scan: PASSED.
 - PowerShell runner parse checks: PASSED.
-- Real SQL Server DEV execution: NOT RUN.
+- Real SQL Server DEV execution: PASSED in SQL Server 2022 container.
+- DEV restore drill: PASSED.
+- DEV access review evidence: PASSED.
 
-Reason real execution did not run:
+Evidence reports:
 
-- `sqlcmd` is not installed in this workstation.
-- `YAFES_SQL_SERVER`, `YAFES_SQL_DATABASE`, `YAFES_SQL_USER`, and
-  `YAFES_SQL_PASSWORD` are not set.
-- No DEV target could be verified.
-- No pre-migration backup could be created.
-
-Execution report:
-
-- `database/execution-logs/20260602_124216/final-report.md`
+- `md/reports/dev-validation-evidence-2026-06-04.md`
+- `md/reports/restore-drill-evidence-dev-2026-06-04.md`
+- `md/reports/access-review-evidence-dev-2026-06-04.md`
 
 ## Seed Completion Summary
 
@@ -82,6 +78,8 @@ Behavior:
   `tasking.SP_CreateRenewalTasks`.
 - Added `04__admin_security_audit_queries.sql` for RBAC, audit, and data
   integrity checks.
+- Added `14__admin_role_permission_matrix.sql` for role coverage, permission
+  matrix, tenant user assignments, least-privilege checks, and admin handoff.
 - Primary interface target is SSMS Query Editor and SQL Server engine behavior,
   not a web site.
 
@@ -90,7 +88,8 @@ Behavior:
 - Added `.github/workflows/sql-server-validation.yml`.
 - Added `.github/workflows/backend-build.yml`.
 - Removed the frontend workflow because the requested target is SSMS-first.
-- CI has not run locally; it will run after push on GitHub.
+- GitHub Actions now validates backend build, SQL Server validation, database
+  quality gate, and SSMS workbench validation.
 
 ## Backend/API Status
 
@@ -101,7 +100,7 @@ Behavior:
 - Added DB connectivity health endpoint.
 - Added read/search endpoints for tenants, persons, institutions, risks,
   policies, claims, documents, tasks, coverage, and lookup health.
-- Local backend build: NOT RUN because the .NET SDK is not installed locally.
+- Backend build is confirmed in CI.
 
 ## Frontend/Web Status
 
@@ -111,19 +110,19 @@ Behavior:
 
 ## Remaining Risks
 
-- Real DEV database validation is still required with `sqlcmd` or SSMS.
-- SQL Server CI must be observed after push to confirm container/runtime
-  compatibility.
-- Backend build must be confirmed on a machine or CI runner with .NET 8 SDK.
+- Exposed coordination tokens must be revoked/rotated.
+- TEST/PROD execution evidence must be collected on approved infrastructure.
+- TEST/PROD access-review evidence must be collected with named operators and
+  sign-off.
+- TEST/PROD restore drill evidence must be collected before go-live.
+- Future `019+` migrations need owner approval before finance, import/export,
+  entity notes, or product-template tables are added.
 
 ## Next Recommended Work
 
 1. Revoke/rotate any exposed GitHub token.
-2. Open `database/ssms/00__open_first_safety_check.sql` in SSMS and verify the
-   DEV database target.
-3. Run `database/ssms/01__run_all_dev_migrations_sqlcmd.sql` in SSMS SQLCMD
-   Mode after setting the database and backup variables.
-4. Review GitHub Actions results after push.
-5. Use `database/ssms/02__operations_dashboard.sql`,
-   `03__create_renewal_tasks.sql`, and
-   `04__admin_security_audit_queries.sql` as the SSMS operator surface.
+2. Collect TEST/PROD execution evidence with the approved SQL Server target.
+3. Collect TEST/PROD access-review evidence using the approved environment
+   procedure.
+4. Run TEST/PROD restore drill and record evidence.
+5. Prioritize `019+` design candidates only after owner approval.

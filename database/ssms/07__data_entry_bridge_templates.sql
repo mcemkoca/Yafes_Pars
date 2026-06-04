@@ -10,12 +10,12 @@
 */
 :ON ERROR EXIT
 :setvar YAFES_SQL_DATABASE "YafesPars_Dev"
-:setvar TENANT_CODE "DEMO-BE-BROKER"
+:setvar TENANT_CODE "DEV-BE-BROKER"
 :setvar ACTION_NAME "CREATE_NATURAL_PERSON"
 :setvar EXECUTE_ACTION "0"
 
 -- Common operator values
-:setvar CREATED_BY_USER_EMAIL "admin@yafes.demo"
+:setvar CREATED_BY_USER_EMAIL "ops.admin@yafes.local"
 
 -- CREATE_NATURAL_PERSON values
 :setvar PERSON_DOSSIER "DOS-NEW-001"

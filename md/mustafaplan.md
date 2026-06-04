@@ -66,6 +66,13 @@ assessment, clean-up decisions, and next update queue in one place.
   short legacy reference summary.
 - Added access-review and restore-drill evidence templates, then linked them
   from readiness, backup, and security docs.
+- Recorded DEV validation evidence in `md/reports/dev-validation-evidence-2026-06-04.md`.
+- Recorded DEV access-review evidence in
+  `md/reports/access-review-evidence-dev-2026-06-04.md`.
+- Ran a DEV restore drill through SQL Server backup, `RESTORE VERIFYONLY`,
+  restore to `YafesPars_RESTORE_DEV`, restored validations, dashboard check,
+  and admin matrix check; evidence is in
+  `md/reports/restore-drill-evidence-dev-2026-06-04.md`.
 
 ### Remaining Risks And Gaps
 
@@ -73,8 +80,8 @@ assessment, clean-up decisions, and next update queue in one place.
 | --- | --- | --- | --- |
 | P0 | Token hygiene | A token was shared during coordination. It should be treated as exposed. | Rotate/revoke the token and use GitHub secrets or local credential manager only. |
 | P1 | Workbench preview depth | The workbench controls are now wired and synchronized from the manifest, but execution is still non-persistent and uses prepared DEV preview data. | Keep real data work inside SSMS DEV; add backend-backed preview behavior only after the SSMS contract is stable. |
-| P1 | Operator permissions | The SSMS RBAC matrix exists, but final SQL logins/roles still need TEST/PROD environment evidence. | Run `14__admin_role_permission_matrix.sql` in TEST/PROD-like environments and record access-review evidence. |
-| P1 | Backup and restore | Strategy exists, but no restore drill evidence is committed. | Run restore drill and record result in readiness checklist. |
+| P1 | Operator permissions | DEV access-review evidence exists, but final SQL logins/roles still need TEST/PROD environment evidence. | Run approved TEST/PROD access review and record sign-off. |
+| P1 | Backup and restore | DEV restore drill evidence exists, but TEST/PROD restore drill evidence is still environment-dependent. | Run restore drill on approved TEST/PROD infrastructure and record sign-off. |
 | P2 | Guided bridge coverage | Core bridge templates exist, but not every daily create/edit path has a stored procedure bridge. | Add bridge coverage by department priority. |
 | P2 | Finance model | Claim has paid/reserved fields, but no full ledger/commission model. | Design migration `019+` only after business owner confirms accounting flow. |
 | P2 | Import/export | Bulk onboarding needs staging, validation issue, and export job tables. | Design `019+` staging tables and SSMS validation grids. |
@@ -92,9 +99,9 @@ assessment, clean-up decisions, and next update queue in one place.
 
 1. Rotate any exposed coordination token and confirm no active token is stored in
    Git.
-2. Record repeatable DEV/TEST execution evidence after each environment refresh.
+2. Add TEST/PROD execution evidence after the target environments are refreshed.
 3. Add TEST/PROD role/permission evidence for operator, admin, auditor, and deployer.
-4. Add restore drill evidence to the production readiness checklist.
+4. Add TEST/PROD restore drill evidence to the production readiness checklist.
 5. Design migration `019+` candidates only after owner approval:
    finance/commission, import/export staging, entity notes, product templates.
 6. Add more bridge templates for high-frequency operator actions.

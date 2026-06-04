@@ -10,7 +10,7 @@
 */
 :ON ERROR EXIT
 :setvar YAFES_SQL_DATABASE "YafesPars_Dev"
-:setvar TENANT_CODE "DEMO-BE-BROKER"
+:setvar TENANT_CODE "DEV-BE-BROKER"
 
 SET NOCOUNT ON;
 GO
@@ -108,7 +108,7 @@ FROM (VALUES
     (120, N'Backlog', N'Finance/Commission', N'Commission | Ledger | Payment | Reserve | Statement', N'Candidate 019+', N'Design with accounting owner before migration.', N'Do not invent financial ledger columns without approval.'),
     (130, N'Backlog', N'Entity Notes', N'Note | NoteLink | NoteType', N'Candidate 019+', N'Decide whether task comments already cover enough.', N'Notes should not duplicate audit or task comments.'),
     (140, N'Backlog', N'Import/Export Staging', N'ImportBatch | ImportRow | ExportJob | ValidationIssue', N'Candidate 019+', N'Design after operator import workflow is known.', N'Good fit for bulk customer/policy onboarding.'),
-    (150, N'Backlog', N'Product Templates', N'ProductTemplate | RatingRule | ClauseTemplate', N'Candidate 019+', N'Design after coverage package behavior is tested.', N'Keep product rules separate from demo-only UI concepts.')
+    (150, N'Backlog', N'Product Templates', N'ProductTemplate | RatingRule | ClauseTemplate', N'Candidate 019+', N'Design after coverage package behavior is tested.', N'Keep product rules separate from preview-only UI concepts.')
 ) AS b(card_order, board_lane, card_title, subitems, current_state, recommended_next_action, info_tip)
 ORDER BY card_order;
 
