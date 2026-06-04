@@ -94,7 +94,7 @@
                         {
                             "fileName":  "05__operator_dashboard_home.sql",
                             "path":  "database/ssms/05__operator_dashboard_home.sql",
-                            "sizeBytes":  8213
+                            "sizeBytes":  8568
                         },
                         {
                             "fileName":  "06__query_library_shortcuts.sql",
@@ -104,12 +104,12 @@
                         {
                             "fileName":  "07__data_entry_bridge_templates.sql",
                             "path":  "database/ssms/07__data_entry_bridge_templates.sql",
-                            "sizeBytes":  12333
+                            "sizeBytes":  18455
                         },
                         {
                             "fileName":  "08__data_editing_guardrails.sql",
                             "path":  "database/ssms/08__data_editing_guardrails.sql",
-                            "sizeBytes":  6986
+                            "sizeBytes":  9545
                         },
                         {
                             "fileName":  "09__graph_report_pack.sql",
@@ -140,6 +140,11 @@
                             "fileName":  "14__admin_role_permission_matrix.sql",
                             "path":  "database/ssms/14__admin_role_permission_matrix.sql",
                             "sizeBytes":  12856
+                        },
+                        {
+                            "fileName":  "15__monitoring_and_job_readiness.sql",
+                            "path":  "database/ssms/15__monitoring_and_job_readiness.sql",
+                            "sizeBytes":  13356
                         }
                     ],
     "shortcuts":  [
@@ -268,6 +273,15 @@
                           "fileName":  "10__daily_operator_checklist.sql",
                           "safety":  "READ_ONLY",
                           "infoTip":  "Morning and end-of-day checklist result sets."
+                      },
+                      {
+                          "order":  110,
+                          "group":  "Control",
+                          "action":  "Monitoring and job readiness",
+                          "ssmsFile":  "database/ssms/15__monitoring_and_job_readiness.sql",
+                          "fileName":  "15__monitoring_and_job_readiness.sql",
+                          "safety":  "READ_ONLY",
+                          "infoTip":  "DEV health, backlog, backup, and SQL Agent readiness grids."
                       }
                   ],
     "schemas":  [

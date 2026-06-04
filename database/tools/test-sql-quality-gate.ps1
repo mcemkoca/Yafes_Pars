@@ -248,7 +248,8 @@ function Test-SsmsOperatorConventions {
         "database/ssms/11__schema_working_logic_map.sql",
         "database/ssms/12__table_catalog_and_relationships.sql",
         "database/ssms/13__visual_workflow_board.sql",
-        "database/ssms/14__admin_role_permission_matrix.sql"
+        "database/ssms/14__admin_role_permission_matrix.sql",
+        "database/ssms/15__monitoring_and_job_readiness.sql"
     )
 
     foreach ($relativePath in $operatorFiles) {

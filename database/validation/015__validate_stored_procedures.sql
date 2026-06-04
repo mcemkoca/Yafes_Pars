@@ -40,6 +40,18 @@ IF OBJECT_ID(N'audit.SP_GetEntityAuditTrail', N'P') IS NULL
 IF OBJECT_ID(N'tasking.SP_CreateRenewalTasks', N'P') IS NULL
     THROW 51512, 'Missing procedure: tasking.SP_CreateRenewalTasks', 1;
 
+IF OBJECT_DEFINITION(OBJECT_ID(N'policy.SP_AddContractParty')) NOT LIKE N'%Person not found for tenant%'
+    THROW 51516, 'Missing tenant guard: policy.SP_AddContractParty person check', 1;
+
+IF OBJECT_DEFINITION(OBJECT_ID(N'policy.SP_AddContractObject')) NOT LIKE N'%Insurable object not found for tenant%'
+    THROW 51517, 'Missing tenant guard: policy.SP_AddContractObject object check', 1;
+
+IF OBJECT_DEFINITION(OBJECT_ID(N'claim.SP_CreateClaim')) NOT LIKE N'%claims_handler_id does not belong to the tenant%'
+    THROW 51518, 'Missing tenant guard: claim.SP_CreateClaim handler check', 1;
+
+IF OBJECT_DEFINITION(OBJECT_ID(N'claim.SP_CloseClaim')) NOT LIKE N'%updated_by_user_id does not belong to the tenant%'
+    THROW 51519, 'Missing tenant guard: claim.SP_CloseClaim updater check', 1;
+
 IF NOT EXISTS (
     SELECT 1
     FROM sys.parameters

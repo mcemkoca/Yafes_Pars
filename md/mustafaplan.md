@@ -73,6 +73,19 @@ assessment, clean-up decisions, and next update queue in one place.
   restore to `YafesPars_RESTORE_DEV`, restored validations, dashboard check,
   and admin matrix check; evidence is in
   `md/reports/restore-drill-evidence-dev-2026-06-04.md`.
+- Hardened stored procedure bridges with tenant ownership checks for policy
+  parties, policy objects, claim handlers, creator users, and claim close
+  updater users.
+- Extended `07__data_entry_bridge_templates.sql` with `ADD_POLICY_OBJECT` and
+  `CLOSE_CLAIM`, plus correct claim-handler email to `person_id` resolution.
+- Updated `08__data_editing_guardrails.sql` so blank/default IDs show
+  `NO_TARGET` preview rows instead of failing during safe rollback mode.
+- Added `database/ssms/15__monitoring_and_job_readiness.sql` for DEV health,
+  backlog, backup visibility, SQL Agent observed jobs, and DBA handoff grids.
+- Added monitoring tutorial coverage in
+  `md/ssms/tutorials/09_monitoring_and_jobs.md`.
+- Verified migrations, validations, `07`, `08`, and `15` against SQL Server
+  2022 in an ephemeral container.
 
 ### Remaining Risks And Gaps
 
@@ -82,10 +95,10 @@ assessment, clean-up decisions, and next update queue in one place.
 | P1 | Workbench preview depth | The workbench controls are now wired and synchronized from the manifest, but execution is still non-persistent and uses prepared DEV preview data. | Keep real data work inside SSMS DEV; add backend-backed preview behavior only after the SSMS contract is stable. |
 | P1 | Operator permissions | DEV access-review evidence exists, but final SQL logins/roles still need TEST/PROD environment evidence. | Run approved TEST/PROD access review and record sign-off. |
 | P1 | Backup and restore | DEV restore drill evidence exists, but TEST/PROD restore drill evidence is still environment-dependent. | Run restore drill on approved TEST/PROD infrastructure and record sign-off. |
-| P2 | Guided bridge coverage | Core bridge templates exist, but not every daily create/edit path has a stored procedure bridge. | Add bridge coverage by department priority. |
+| P2 | Guided bridge coverage | Core create/close/link bridges now cover natural person, policy, version, party, object, claim create, and claim close; department-specific edge cases remain. | Add bridge coverage by department priority. |
 | P2 | Finance model | Claim has paid/reserved fields, but no full ledger/commission model. | Design migration `019+` only after business owner confirms accounting flow. |
 | P2 | Import/export | Bulk onboarding needs staging, validation issue, and export job tables. | Design `019+` staging tables and SSMS validation grids. |
-| P3 | Monitoring | SQL Agent job and operational monitoring docs are planned, not proven. | Add job-monitor result sets after DEV/TEST environment is available. |
+| P3 | Monitoring | SSMS monitoring and job-readiness result sets exist, but approved SQL Agent jobs and TEST/PROD schedules are still environment-dependent. | Create approved jobs after DEV/TEST owners and schedules are confirmed. |
 
 ## Clean Structure Rule
 
@@ -104,9 +117,9 @@ assessment, clean-up decisions, and next update queue in one place.
 4. Add TEST/PROD restore drill evidence to the production readiness checklist.
 5. Design migration `019+` candidates only after owner approval:
    finance/commission, import/export staging, entity notes, product templates.
-6. Add more bridge templates for high-frequency operator actions.
-7. Add SQL Agent/monitoring result sets once the DEV/TEST SQL Server instance is
-   stable.
+6. Add more bridge templates for department-specific high-frequency actions.
+7. Turn monitoring result sets into approved SQL Agent jobs once DEV/TEST
+   owners and schedules are confirmed.
 
 ## Working Agreement
 

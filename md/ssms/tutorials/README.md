@@ -13,6 +13,7 @@ Management Studio.
 6. `06_reports_and_graphs.md` - report grids, text bars, and export guidance.
 7. `07_security_audit.md` - RBAC, audit, and data quality checks.
 8. `08_troubleshooting.md` - common SSMS errors and fixes.
+9. `09_monitoring_and_jobs.md` - monitoring grids and SQL Agent handoff.
 
 ## Operator Rule
 
@@ -25,5 +26,6 @@ When in doubt, run the read-only scripts first:
 5. `12__table_catalog_and_relationships.sql`
 6. `10__daily_operator_checklist.sql`
 7. `14__admin_role_permission_matrix.sql`
+8. `15__monitoring_and_job_readiness.sql`
 
 Only then use data entry or editing scripts.

@@ -37,6 +37,9 @@ environment.
 - [ ] SSMS deployment runbook has been rehearsed in TEST.
 - [ ] Migration execution log template is used for TEST and PROD.
 - [ ] Monitoring owner is assigned.
+- [ ] `15__monitoring_and_job_readiness.sql` has been reviewed in the target
+  environment.
+- [ ] SQL Agent jobs, if used, have approved owners, schedules, and alert paths.
 
 ## Security
 

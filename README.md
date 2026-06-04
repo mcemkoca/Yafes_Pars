@@ -27,6 +27,7 @@ come first; the .NET backend is an optional integration foundation.
 | Visual workflow board | Available | Mind-map style node, edge, subheading, and template-route datasets are available as SSMS Results Grid output. |
 | Table catalog and FK map | Available | Real SQL Server metadata supports table planning before new migrations. |
 | Admin role matrix | Available | User-friendly RBAC, permission, user assignment, and least-privilege grids are available in SSMS. |
+| Monitoring and job readiness | Available | DEV health, backlog, backup visibility, and SQL Agent handoff grids are available in SSMS. |
 | Quality gates | Available | CI protects migration order, SQL Server syntax, destructive patterns, artifact policy, SSMS conventions, and documentation. |
 | Documentation hub | Available | Human-readable docs are organized under `md/`. |
 
@@ -52,6 +53,7 @@ with SQLCMD Mode enabled against a DEV database.
 12. `03__create_renewal_tasks.sql` - run renewal tasks in dry-run mode first.
 13. `04__admin_security_audit_queries.sql` - review RBAC, audit, and integrity.
 14. `14__admin_role_permission_matrix.sql` - review roles, permissions, user assignments, and least-privilege checks.
+15. `15__monitoring_and_job_readiness.sql` - review DEV health, backlog, backup visibility, and SQL Agent readiness.
 
 ### Documentation
 
@@ -100,8 +102,8 @@ file in SSMS, enable SQLCMD Mode, verify variables, and run against DEV only.
 4. Add TEST/PROD restore drill evidence to the production readiness checklist.
 5. Design migration `019+` candidates only after owner approval: finance,
    import/export staging, entity notes, and product templates.
-6. Extend bridge templates for high-frequency operator actions.
-7. Add SQL Agent and monitoring result sets after DEV/TEST infrastructure exists.
+6. Continue extending bridge templates after operator workflow priority is confirmed.
+7. Turn monitoring/job-readiness grids into approved SQL Agent jobs after DEV/TEST infrastructure exists.
 
 ## Turkce
 
@@ -126,6 +128,7 @@ katmandir.
 | Visual workflow board | Hazir | Mind-map benzeri node, edge, alt baslik ve template-route verileri SSMS Results Grid olarak alinir. |
 | Tablo katalogu ve FK haritasi | Hazir | Yeni tablo/migration oncesi gercek SQL Server metadata'si incelenir. |
 | Admin rol matrisi | Hazir | RBAC, permission, kullanici rol atamalari ve least-privilege kontrolleri SSMS Results Grid olarak alinir. |
+| Monitoring ve job readiness | Hazir | DEV health, backlog, backup gorunurlugu ve SQL Agent handoff gridleri SSMS icinden alinir. |
 | Kalite kapilari | Hazir | Migration sirasi, SQL Server syntax, destructive pattern, artifact policy, SSMS standartlari ve dokumanlar kontrol edilir. |
 | Dokuman merkezi | Hazir | Okunabilir proje dokumanlari `md/` altinda toplandi. |
 
@@ -151,6 +154,7 @@ icinde, SQLCMD Mode acik olarak ve sadece DEV database uzerinde yapilmalidir.
 12. `03__create_renewal_tasks.sql` - once dry-run ile yenileme gorevleri.
 13. `04__admin_security_audit_queries.sql` - RBAC, audit ve veri kalite kontrolu.
 14. `14__admin_role_permission_matrix.sql` - rol, permission, kullanici atamasi ve least-privilege kontrolu.
+15. `15__monitoring_and_job_readiness.sql` - DEV health, backlog, backup gorunurlugu ve SQL Agent hazirlik kontrolu.
 
 ### Dokumanlar
 
@@ -171,8 +175,8 @@ icinde, SQLCMD Mode acik olarak ve sadece DEV database uzerinde yapilmalidir.
 4. TEST/PROD restore drill kaniti production readiness checklist'e eklenecek.
 5. `019+` migration adaylari is sahibi onayi ile tasarlanacak: finance,
    import/export staging, entity notes, product templates.
-6. Sik kullanilan operator aksiyonlari icin bridge template kapsami artirilacak.
-7. DEV/TEST altyapisi netlesince SQL Agent ve monitoring result setleri eklenecek.
+6. Operator onceligi netlesen yeni aksiyonlar icin bridge template kapsami artirilacak.
+7. Monitoring/job-readiness gridleri DEV/TEST altyapisi netlesince onayli SQL Agent job'larina donusturulecek.
 
 ## Security
 

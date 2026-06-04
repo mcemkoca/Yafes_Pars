@@ -34,6 +34,7 @@ operations.
 | Reports | `09__graph_report_pack.sql` | Chart/export-ready result sets. |
 | Audit | `04__admin_security_audit_queries.sql` | RBAC, audit, trigger, and integrity checks. |
 | Admin | `14__admin_role_permission_matrix.sql` | Role coverage, permission matrix, user assignments, least-privilege checks, and handoff rows. |
+| Monitoring | `15__monitoring_and_job_readiness.sql` | DEV health, backlog, backup visibility, SQL Agent observed jobs, and DBA handoff rows. |
 
 ## Shortcut Model
 
@@ -61,7 +62,8 @@ Operators open the listed script in a new SSMS tab.
 8. Use guardrail template for updates.
 9. Review role/permission matrix before access changes.
 10. Run audit checks.
-11. Export report pack grids when needed.
+11. Review monitoring and SQL Agent readiness before DBA handoff.
+12. Export report pack grids when needed.
 
 ## Future Enhancements
 
@@ -70,7 +72,8 @@ Operators open the listed script in a new SSMS tab.
   after real operator usage is observed.
 - Add specialized report packs by department.
 - Add TEST/PROD access-review evidence from `14__admin_role_permission_matrix.sql`.
-- Add SQL Agent job monitoring result sets.
+- Convert monitoring result sets into approved SQL Agent jobs after DEV/TEST
+  owners and schedules are confirmed.
 - Add standard SSMS registered-server instructions.
 - Add Power BI template consuming report pack exports.
 - Extend the production readiness checklist with real restore drill evidence,

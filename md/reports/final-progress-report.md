@@ -14,6 +14,8 @@ Branch: `feature/complete-db-validation-backend-frontend-foundation`
   and seed data.
 - Updated optional DEV sample data for active policy party/object/version consistency.
 - Updated SSMS fallback script generation.
+- Hardened stored procedure bridge tenant ownership checks for policy party,
+  policy object, claim handler, creator user, and claim close updater paths.
 
 ## Validation Result
 
@@ -21,6 +23,8 @@ Branch: `feature/complete-db-validation-backend-frontend-foundation`
 - Destructive migration pattern scan: PASSED.
 - PowerShell runner parse checks: PASSED.
 - Real SQL Server DEV execution: PASSED in SQL Server 2022 container.
+- SSMS bridge, guardrail, and monitoring scripts: PASSED in SQL Server 2022
+  container.
 - DEV restore drill: PASSED.
 - DEV access review evidence: PASSED.
 
@@ -48,6 +52,8 @@ Evidence reports:
 ## Stored Procedures Added
 
 - `tasking.SP_CreateRenewalTasks`
+- Existing policy and claim bridge procedures were hardened with tenant-owned
+  person/object/handler/user checks.
 
 Behavior:
 
@@ -80,6 +86,10 @@ Behavior:
   integrity checks.
 - Added `14__admin_role_permission_matrix.sql` for role coverage, permission
   matrix, tenant user assignments, least-privilege checks, and admin handoff.
+- Extended `07__data_entry_bridge_templates.sql` with `ADD_POLICY_OBJECT` and
+  `CLOSE_CLAIM` preview-first actions.
+- Added `15__monitoring_and_job_readiness.sql` for DEV database health,
+  backlog, backup visibility, SQL Agent observed jobs, and DBA handoff grids.
 - Primary interface target is SSMS Query Editor and SQL Server engine behavior,
   not a web site.
 
@@ -115,6 +125,7 @@ Behavior:
 - TEST/PROD access-review evidence must be collected with named operators and
   sign-off.
 - TEST/PROD restore drill evidence must be collected before go-live.
+- SQL Agent jobs still require approved DEV/TEST owners and schedules.
 - Future `019+` migrations need owner approval before finance, import/export,
   entity notes, or product-template tables are added.
 
@@ -126,3 +137,5 @@ Behavior:
    procedure.
 4. Run TEST/PROD restore drill and record evidence.
 5. Prioritize `019+` design candidates only after owner approval.
+6. Convert monitoring/job-readiness grids into approved SQL Agent jobs after
+   DEV/TEST infrastructure owners confirm schedules.

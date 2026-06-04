@@ -58,7 +58,9 @@ regular restore drills.
 
 Monitor SQL Server availability, backup age, SQL Agent jobs, disk space, error
 logs, failed logins, and validation results. Review maintenance windows for
-index/statistics work after real data volume is known.
+index/statistics work after real data volume is known. Use
+`database/ssms/15__monitoring_and_job_readiness.sql` as the SSMS read-only
+handoff before approved SQL Agent jobs are created.
 
 ## I. Repo File And Documentation Update List
 
@@ -74,6 +76,7 @@ index/statistics work after real data volume is known.
 - Add environment matrix.
 - Add production readiness checklist.
 - Add static SQL quality gate script and CI workflow.
+- Add SSMS monitoring and SQL Agent readiness result sets.
 
 ## J. New SQL Script Recommendations
 
@@ -81,6 +84,8 @@ index/statistics work after real data volume is known.
 - Add matching validation scripts for every new domain or shared behavior.
 - Add SSMS bridge scripts for new guided operator actions.
 - Add report pack scripts for new executive or operational dashboards.
+- Convert monitoring result sets into approved SQL Agent jobs after DEV/TEST
+  owners, schedules, and alert paths are confirmed.
 
 ## K. Production Readiness Checklist
 

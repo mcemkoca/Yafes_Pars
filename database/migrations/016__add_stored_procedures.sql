@@ -23,6 +23,19 @@ BEGIN
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
 
+    IF @tenant_id IS NULL
+        THROW 51630, 'tenant_id is required.', 1;
+
+    IF @created_by_user_id IS NOT NULL
+       AND NOT EXISTS (
+            SELECT 1
+            FROM core.AppUser
+            WHERE user_id = @created_by_user_id
+              AND tenant_id = @tenant_id
+              AND is_active = 1
+       )
+        THROW 51631, 'created_by_user_id does not belong to the tenant.', 1;
+
     BEGIN TRY
         BEGIN TRANSACTION;
 
@@ -189,6 +202,39 @@ BEGIN
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
 
+    IF @tenant_id IS NULL
+        THROW 51632, 'tenant_id is required.', 1;
+
+    IF @company_id IS NOT NULL
+       AND NOT EXISTS (
+            SELECT 1
+            FROM institution.Institution
+            WHERE institution_id = @company_id
+              AND tenant_id = @tenant_id
+              AND is_deleted = 0
+       )
+        THROW 51633, 'company_id does not belong to the tenant.', 1;
+
+    IF @handling_company_id IS NOT NULL
+       AND NOT EXISTS (
+            SELECT 1
+            FROM institution.Institution
+            WHERE institution_id = @handling_company_id
+              AND tenant_id = @tenant_id
+              AND is_deleted = 0
+       )
+        THROW 51634, 'handling_company_id does not belong to the tenant.', 1;
+
+    IF @created_by_user_id IS NOT NULL
+       AND NOT EXISTS (
+            SELECT 1
+            FROM core.AppUser
+            WHERE user_id = @created_by_user_id
+              AND tenant_id = @tenant_id
+              AND is_active = 1
+       )
+        THROW 51635, 'created_by_user_id does not belong to the tenant.', 1;
+
     BEGIN TRY
         BEGIN TRANSACTION;
 
@@ -252,6 +298,16 @@ AS
 BEGIN
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
+
+    IF @created_by_user_id IS NOT NULL
+       AND NOT EXISTS (
+            SELECT 1
+            FROM core.AppUser
+            WHERE user_id = @created_by_user_id
+              AND tenant_id = @tenant_id
+              AND is_active = 1
+       )
+        THROW 51636, 'created_by_user_id does not belong to the tenant.', 1;
 
     BEGIN TRY
         BEGIN TRANSACTION;
@@ -330,6 +386,15 @@ BEGIN
         )
             THROW 51603, 'Contract not found for tenant.', 1;
 
+        IF NOT EXISTS (
+            SELECT 1
+            FROM person.Person
+            WHERE person_id = @person_id
+              AND tenant_id = @tenant_id
+              AND is_deleted = 0
+        )
+            THROW 51605, 'Person not found for tenant.', 1;
+
         INSERT INTO policy.ContractParty (
             contract_id,
             person_id,
@@ -377,6 +442,15 @@ BEGIN
         )
             THROW 51604, 'Contract not found for tenant.', 1;
 
+        IF NOT EXISTS (
+            SELECT 1
+            FROM risk.InsurableObject
+            WHERE insurable_object_id = @insurable_object_id
+              AND tenant_id = @tenant_id
+              AND is_deleted = 0
+        )
+            THROW 51606, 'Insurable object not found for tenant.', 1;
+
         INSERT INTO policy.ContractObject (
             contract_id,
             insurable_object_id,
@@ -417,6 +491,35 @@ AS
 BEGIN
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM policy.Contract
+        WHERE contract_id = @contract_id
+          AND tenant_id = @tenant_id
+          AND is_deleted = 0
+    )
+        THROW 51607, 'Contract not found for tenant.', 1;
+
+    IF @claims_handler_id IS NOT NULL
+       AND NOT EXISTS (
+            SELECT 1
+            FROM person.Person
+            WHERE person_id = @claims_handler_id
+              AND tenant_id = @tenant_id
+              AND is_deleted = 0
+       )
+        THROW 51608, 'claims_handler_id does not belong to the tenant.', 1;
+
+    IF @created_by_user_id IS NOT NULL
+       AND NOT EXISTS (
+            SELECT 1
+            FROM core.AppUser
+            WHERE user_id = @created_by_user_id
+              AND tenant_id = @tenant_id
+              AND is_active = 1
+       )
+        THROW 51609, 'created_by_user_id does not belong to the tenant.', 1;
 
     BEGIN TRY
         BEGIN TRANSACTION;
@@ -477,6 +580,16 @@ AS
 BEGIN
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
+
+    IF @updated_by_user_id IS NOT NULL
+       AND NOT EXISTS (
+            SELECT 1
+            FROM core.AppUser
+            WHERE user_id = @updated_by_user_id
+              AND tenant_id = @tenant_id
+              AND is_active = 1
+       )
+        THROW 51610, 'updated_by_user_id does not belong to the tenant.', 1;
 
     BEGIN TRY
         BEGIN TRANSACTION;

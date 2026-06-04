@@ -37,6 +37,8 @@ and SSMS-first Yafes Pars deployment.
 - Keep tenant-aware tables protected from broad ad hoc updates.
 - Use stored procedure bridges for guided create operations.
 - Use rollback-by-default scripts for manual data correction.
+- Stored procedure bridges must validate tenant ownership for every supplied
+  person, institution, policy, claim, object, and operator user ID.
 
 ## Tenant Isolation
 
@@ -61,6 +63,13 @@ Record review evidence with
 `database/ssms/14__admin_role_permission_matrix.sql` as the operator-friendly
 matrix before collecting formal TEST/PROD evidence through the approved
 environment procedure.
+
+## Monitoring
+
+Use `database/ssms/15__monitoring_and_job_readiness.sql` as the SSMS read-only
+monitoring handoff. It reviews DEV health, backlog pressure, backup visibility,
+and observed Yafes SQL Agent jobs. TEST/PROD jobs must still be created only by
+an approved DBA with named owners, schedules, and alert paths.
 
 ## Audit
 

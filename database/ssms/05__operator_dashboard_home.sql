@@ -72,7 +72,8 @@ FROM (VALUES
     (70, N'Edit', N'Data entry bridge templates', N'database/ssms/07__data_entry_bridge_templates.sql', N'REVIEW_BEFORE_COMMIT', N'Procedure-based create templates with previews and output IDs.'),
     (80, N'Edit', N'Data editing guardrails', N'database/ssms/08__data_editing_guardrails.sql', N'ROLLBACK_DEFAULT', N'Update patterns that preview changes and roll back by default.'),
     (90, N'Report', N'Graph/report pack', N'database/ssms/09__graph_report_pack.sql', N'READ_ONLY', N'Grid-friendly trend, bar, and export-ready report datasets.'),
-    (100, N'Control', N'Daily operator checklist', N'database/ssms/10__daily_operator_checklist.sql', N'READ_ONLY', N'Morning and end-of-day checklist result sets.')
+    (100, N'Control', N'Daily operator checklist', N'database/ssms/10__daily_operator_checklist.sql', N'READ_ONLY', N'Morning and end-of-day checklist result sets.'),
+    (110, N'Control', N'Monitoring and job readiness', N'database/ssms/15__monitoring_and_job_readiness.sql', N'READ_ONLY', N'DEV health, backlog, backup, and SQL Agent readiness grids.')
 ) AS s(shortcut_order, shortcut_group, action_name, ssms_file, safety_mode, info_tip)
 ORDER BY shortcut_order;
 
@@ -149,7 +150,8 @@ FROM (VALUES
     (6, N'Open operations dashboard', N'database/ssms/02__operations_dashboard.sql', N'Keep this tab pinned in SSMS for daily operations.'),
     (7, N'Use data entry bridge for creates', N'database/ssms/07__data_entry_bridge_templates.sql', N'Avoid direct INSERT unless a template explicitly documents it.'),
     (8, N'Use editing guardrails for updates', N'database/ssms/08__data_editing_guardrails.sql', N'Preview and rollback by default; commit only after row count is correct.'),
-    (9, N'Export report pack if needed', N'database/ssms/09__graph_report_pack.sql', N'Result sets are designed for Excel/Power BI copy-out.')
+    (9, N'Export report pack if needed', N'database/ssms/09__graph_report_pack.sql', N'Result sets are designed for Excel/Power BI copy-out.'),
+    (10, N'Review monitoring and job readiness', N'database/ssms/15__monitoring_and_job_readiness.sql', N'Use before DBA handoff or environment evidence planning.')
 ) AS a(priority, recommended_action, open_script, info_tip)
 ORDER BY priority;
 GO
