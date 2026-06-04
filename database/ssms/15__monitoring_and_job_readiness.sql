@@ -85,7 +85,7 @@ SELECT
     (SELECT COUNT_BIG(*) FROM core.SchemaMigration) AS migration_ledger_count,
     (SELECT MAX(migration_name) FROM core.SchemaMigration) AS latest_migration,
     CASE
-        WHEN (SELECT COUNT_BIG(*) FROM core.SchemaMigration) >= 19 THEN N'OK'
+        WHEN (SELECT COUNT_BIG(*) FROM core.SchemaMigration) >= 17 THEN N'OK'
         ELSE N'REVIEW'
     END AS readiness_status,
     N'INFO TIP: Query Store OFF can be acceptable in DEV, but TEST/PROD should decide this explicitly.' AS info_tip;

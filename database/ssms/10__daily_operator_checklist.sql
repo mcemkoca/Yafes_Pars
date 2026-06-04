@@ -53,9 +53,9 @@ FROM (
         20,
         N'System',
         N'Migration count',
-        CASE WHEN COUNT_BIG(*) >= 19 THEN N'PASS' ELSE N'ACTION' END,
+        CASE WHEN COUNT_BIG(*) >= 17 THEN N'PASS' ELSE N'ACTION' END,
         CONVERT(NVARCHAR(40), COUNT_BIG(*)),
-        N'Expected 19 migrations through 018.'
+        N'Expected ledger count is 17 tracked migrations; 000 and 001 run before the ledger exists.'
     FROM core.SchemaMigration
     UNION ALL
     SELECT

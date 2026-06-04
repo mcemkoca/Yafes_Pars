@@ -1066,7 +1066,7 @@
 
     <div class="statusbar">
       <span id="statusLeft">Connected - YafesPars_Dev</span>
-      <span>Home | Logic | Visual | Catalog | Admin | Bridge | Reports</span>
+      <span>Home | Logic | Visual | Catalog | Admin | Bridge | Reports | Delivery</span>
       <span>SQLCMD Mode</span>
       <span id="rowStatus">Rows: 100</span>
       <span id="cursorStatus">Ln 1, Col 1</span>
@@ -1093,7 +1093,7 @@ SELECT shortcut_order, shortcut_group, action_name, ssms_file, safety_mode, info
 FROM operator_shortcuts
 ORDER BY shortcut_order;`,
         metrics: [
-          ["Shortcuts", "14"],
+          ["Shortcuts", "16"],
           ["Health", "4"],
           ["Mode", "Read-only"],
           ["Tenant", "DEV-BE"]
@@ -1111,14 +1111,16 @@ ORDER BY shortcut_order;`,
               ["30", "Operate", "Operations dashboard", "02__operations_dashboard.sql", "READ_ONLY"],
               ["55", "Control", "Role/permission matrix", "14__admin_role_permission_matrix.sql", "READ_ONLY"],
               ["70", "Edit", "Data entry bridge", "07__data_entry_bridge_templates.sql", "REVIEW_BEFORE_COMMIT"],
-              ["90", "Report", "Graph/report pack", "09__graph_report_pack.sql", "READ_ONLY"]
+              ["90", "Report", "Graph/report pack", "09__graph_report_pack.sql", "READ_ONLY"],
+              ["110", "Control", "Monitoring and job readiness", "15__monitoring_and_job_readiness.sql", "READ_ONLY"],
+              ["120", "Control", "Delivery gap register", "16__delivery_gap_register.sql", "READ_ONLY"]
             ]
           },
           {
             title: "03 - Health signals",
             columns: ["signal", "value", "status", "info_tip"],
             rows: [
-              ["Latest migration", "018 complete", "OK", "Expected migration count is 19."],
+              ["Latest migration", "018 complete", "OK", "Expected ledger count is 17; source files are 19 through 018."],
               ["Open tasks", "6", "OK", "Review if above team threshold."],
               ["Renewal candidates", "3", "ACTION", "Run renewal dry-run first."]
             ]
@@ -1865,6 +1867,131 @@ GROUP BY contract_domain_code;`,
           "Use chart_axis/chart_value for external charts.",
           "No data changes."
         ]
+      },
+      {
+        file: "16__delivery_gap_register.sql",
+        title: "Delivery",
+        subtitle: "Bitmeyen is register",
+        help: "Delivery gap register commit inceleme sonucunu, kapanan/supersede edilen isleri, ortam kaniti bekleyen maddeleri ve siradaki SSMS aksiyonlarini Results Grid olarak gosterir.",
+        code: `/* Delivery Gap Register */
+:ON ERROR EXIT
+:setvar YAFES_SQL_DATABASE "YafesPars_Dev"
+:setvar TENANT_CODE "DEV-BE-BROKER"
+:setvar REVIEW_OWNER "Mustafa"
+
+USE [$(YAFES_SQL_DATABASE)];
+GO
+
+DECLARE @MigrationCount INT = (SELECT COUNT_BIG(*) FROM core.SchemaMigration);
+
+PRINT '02 - Current implementation signals';
+SELECT signal_name, observed_value, expected_value, signal_status, info_tip
+FROM (VALUES
+  (10, N'Domain table count', N'108', N'108', N'OK', N'INFO TIP: Active migrations are the source of truth.'),
+  (20, N'Migration ledger count', CONVERT(NVARCHAR(40), @MigrationCount), N'17 tracked ledger rows; 19 source files', CASE WHEN @MigrationCount >= 17 THEN N'OK' ELSE N'REVIEW' END, N'INFO TIP: 000 and 001 run before the ledger exists.'),
+  (30, N'Procedure bridge coverage', N'11', N'11 required procedures', N'OK', N'INFO TIP: Bridge scripts call stored procedures.')
+) AS s(signal_order, signal_name, observed_value, expected_value, signal_status, info_tip)
+ORDER BY signal_order;
+
+PRINT '04 - Delivery gap register';
+SELECT priority, area, current_status, ssms_owner_action, open_script_or_doc
+FROM (VALUES
+  (N'P0', N'Token hygiene', N'EXTERNAL_ACTION_REQUIRED', N'Rotate or revoke shared coordination token.', N'GitHub security settings'),
+  (N'P1', N'TEST/PROD access evidence', N'WAITING_ENVIRONMENT', N'Run role/permission review and sign-off.', N'14__admin_role_permission_matrix.sql'),
+  (N'P2', N'Finance ledger and commission', N'OWNER_DECISION_REQUIRED', N'Approve accounting flow before 019+.', N'12__table_catalog_and_relationships.sql')
+) AS g(priority, area, current_status, ssms_owner_action, open_script_or_doc)
+ORDER BY priority, area;
+
+PRINT '05 - Listed commit review closure';
+SELECT commit_order, commit_ref, commit_title, closure_status, ssms_evidence
+FROM (VALUES
+  (10, N'da97249', N'feat: add backend API foundation', N'KEPT_AS_SUPPORTING_LAYER', N'Backend route inventory is in the manifest.'),
+  (20, N'8388c8a', N'feat: add frontend admin panel foundation', N'SUPERSEDED', N'Active operator files are under database/ssms.'),
+  (40, N'528edbd', N'refactor: replace web panel with ssms workbench', N'CLOSED', N'05 through 16 SSMS workbench files.')
+) AS c(commit_order, commit_ref, commit_title, closure_status, ssms_evidence)
+ORDER BY commit_order;`,
+        metrics: [
+          ["Commit rows", "17"],
+          ["Open gaps", "8"],
+          ["Mode", "Read-only"],
+          ["Next", "019+"]
+        ],
+        boardCards: [
+          {
+            title: "Commit Closure",
+            text: "Backend support, removed frontend direction, SSMS workbench, visual board, governance, and CI commits are classified.",
+            chips: ["closed", "superseded", "partial external"]
+          },
+          {
+            title: "Open Gaps",
+            text: "Token rotation, TEST/PROD evidence, restore drill, finance, import/export, bridge coverage, and SQL Agent promotion stay visible.",
+            chips: ["P0", "P1", "P2", "P3"]
+          },
+          {
+            title: "SSMS Evidence",
+            text: "Each remaining item points to the SSMS script or markdown evidence template that should be opened next.",
+            chips: ["14", "15", "16", "019+"]
+          },
+          {
+            title: "Owner Decisions",
+            text: "Finance/import/product/entity-note tables are not created until owner-approved migration 019+ design is confirmed.",
+            chips: ["forward-only", "approval", "no direct INSERT"]
+          }
+        ],
+        tables: [
+          {
+            title: "02 - Current implementation signals",
+            columns: ["signal", "observed", "expected", "status", "info_tip"],
+            rows: [
+              ["Domain table count", "108", "108", "OK", "Active migrations are the source of truth."],
+              ["Migration ledger count", "17", "17 tracked ledger rows; 19 source files", "OK", "000 and 001 run before the ledger exists."],
+              ["Procedure bridge coverage", "11", "11 required procedures", "OK", "Use stored procedures instead of direct inserts."],
+              ["Finance ledger tables", "0", "0 until approved", "OWNER_DECISION", "Do not invent accounting tables yet."],
+              ["Import/export staging tables", "0", "0 until approved", "OWNER_DECISION", "Confirm file format and validation ownership first."]
+            ]
+          },
+          {
+            title: "04 - Delivery gap register",
+            columns: ["priority", "area", "status", "owner_action", "open_script"],
+            rows: [
+              ["P0", "Token hygiene", "EXTERNAL_ACTION_REQUIRED", "Rotate or revoke shared coordination token.", "GitHub security settings"],
+              ["P1", "TEST/PROD execution evidence", "WAITING_ENVIRONMENT", "Run approved migration/validation evidence.", "migration-execution-log-template.md"],
+              ["P1", "TEST/PROD access evidence", "WAITING_ENVIRONMENT", "Run role/permission review and sign-off.", "14__admin_role_permission_matrix.sql"],
+              ["P1", "TEST/PROD restore drill", "WAITING_ENVIRONMENT", "Record VERIFYONLY and restored validation evidence.", "restore-drill-evidence-template.md"],
+              ["P2", "Finance ledger and commission", "OWNER_DECISION_REQUIRED", "Approve accounting flow before 019+.", "12__table_catalog_and_relationships.sql"],
+              ["P2", "Department bridge coverage", "PRIORITY_REQUIRED", "Rank next high-frequency workflow.", "07__data_entry_bridge_templates.sql"],
+              ["P3", "SQL Agent jobs", "WAITING_INFRASTRUCTURE", "Approve job owners and schedules.", "15__monitoring_and_job_readiness.sql"]
+            ]
+          },
+          {
+            title: "05 - Listed commit review closure",
+            columns: ["commit", "title", "position", "status", "evidence"],
+            rows: [
+              ["da97249", "backend API foundation", "Optional support layer", "KEPT_AS_SUPPORTING_LAYER", "Manifest route inventory"],
+              ["8388c8a", "frontend admin panel foundation", "Superseded by SSMS-first workbench", "SUPERSEDED", "database/ssms"],
+              ["528edbd", "replace web panel with ssms workbench", "Current baseline", "CLOSED", "05 through 16 SSMS files"],
+              ["d99167b", "production readiness gate", "DEV ready, TEST/PROD evidence pending", "PARTIAL_EXTERNAL", "P1 gap rows"],
+              ["1280f20", "logic map and table catalog", "Active planning base", "CLOSED_WITH_BACKLOG", "11, 12, 13, 16"],
+              ["becf7e8", "product language", "Active with preview boundary", "CLOSED", "README and operator docs"]
+            ]
+          },
+          {
+            title: "06 - Recommended next SSMS actions",
+            columns: ["order", "group", "open_script", "mode", "recommended_action"],
+            rows: [
+              ["10", "Control", "16__delivery_gap_register.sql", "READ_ONLY", "Run after PR/commit review."],
+              ["20", "Daily data entry", "07__data_entry_bridge_templates.sql", "PREVIEW_FIRST", "Continue core bridge workflows."],
+              ["30", "Access evidence", "14__admin_role_permission_matrix.sql", "READ_ONLY", "Use result sets as review evidence."],
+              ["40", "Monitoring evidence", "15__monitoring_and_job_readiness.sql", "READ_ONLY", "Review observed SQL Agent state."],
+              ["50", "019+ planning", "12__table_catalog_and_relationships.sql", "READ_ONLY", "Review real table catalog before new schema."]
+            ]
+          }
+        ],
+        messages: [
+          "Delivery gap register loaded.",
+          "Commit list reviewed against current SSMS-first product direction.",
+          "Remaining items are tracked as environment evidence, owner decisions, or next SSMS actions."
+        ]
       }
     ];
 
@@ -2052,7 +2179,7 @@ GROUP BY contract_domain_code;`,
       const legacyCount = String(database.legacyReferenceTableCount || 89);
 
       const home = findScenarioByFile("05__operator_dashboard_home.sql");
-      setMetric(home, "Shortcuts", shortcuts.length || 13);
+      setMetric(home, "Shortcuts", shortcuts.length || 16);
       setMetric(home, "Tenant", getTenantLabel());
       const shortcutTable = findTable(home, "01 - Operator shortcuts");
       if (shortcutTable && shortcuts.length) {

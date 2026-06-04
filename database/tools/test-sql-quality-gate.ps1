@@ -249,7 +249,8 @@ function Test-SsmsOperatorConventions {
         "database/ssms/12__table_catalog_and_relationships.sql",
         "database/ssms/13__visual_workflow_board.sql",
         "database/ssms/14__admin_role_permission_matrix.sql",
-        "database/ssms/15__monitoring_and_job_readiness.sql"
+        "database/ssms/15__monitoring_and_job_readiness.sql",
+        "database/ssms/16__delivery_gap_register.sql"
     )
 
     foreach ($relativePath in $operatorFiles) {
@@ -313,6 +314,7 @@ function Test-SsmsWorkbenchControls {
         "data-tree-kind",
         "CREATE_VEHICLE_OBJECT",
         "14__admin_role_permission_matrix.sql",
+        "16__delivery_gap_register.sql",
         "function executeQuery",
         "function cancelExecution",
         "function parseQuery",
@@ -402,8 +404,15 @@ function Test-SsmsWorkbenchManifest {
     if (@($manifest.shortcuts).Count -eq $shortcutMatches.Count) {
         Add-Result "PASS" "ssms-workbench-manifest" "shortcut count matches operator dashboard"
     }
+            else {
+                Add-Result "FAIL" "ssms-workbench-manifest" "shortcut count is $(@($manifest.shortcuts).Count), expected $($shortcutMatches.Count)"
+            }
+
+    if (@($manifest.shortcuts | Where-Object { $_.fileName -eq "16__delivery_gap_register.sql" }).Count -gt 0) {
+        Add-Result "PASS" "ssms-workbench-manifest" "delivery gap register shortcut is represented"
+    }
     else {
-        Add-Result "FAIL" "ssms-workbench-manifest" "shortcut count is $(@($manifest.shortcuts).Count), expected $($shortcutMatches.Count)"
+        Add-Result "FAIL" "ssms-workbench-manifest" "delivery gap register shortcut is missing"
     }
 
     if (@($manifest.backend.apiRoutes).Count -gt 0) {

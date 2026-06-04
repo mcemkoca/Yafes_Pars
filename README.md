@@ -28,6 +28,7 @@ come first; the .NET backend is an optional integration foundation.
 | Table catalog and FK map | Available | Real SQL Server metadata supports table planning before new migrations. |
 | Admin role matrix | Available | User-friendly RBAC, permission, user assignment, and least-privilege grids are available in SSMS. |
 | Monitoring and job readiness | Available | DEV health, backlog, backup visibility, and SQL Agent handoff grids are available in SSMS. |
+| Delivery gap register | Available | Commit review closure, unfinished delivery gaps, owner blockers, and next SSMS actions are visible in one read-only grid set. |
 | Quality gates | Available | CI protects migration order, SQL Server syntax, destructive patterns, artifact policy, SSMS conventions, and documentation. |
 | Documentation hub | Available | Human-readable docs are organized under `md/`. |
 
@@ -54,6 +55,7 @@ with SQLCMD Mode enabled against a DEV database.
 13. `04__admin_security_audit_queries.sql` - review RBAC, audit, and integrity.
 14. `14__admin_role_permission_matrix.sql` - review roles, permissions, user assignments, and least-privilege checks.
 15. `15__monitoring_and_job_readiness.sql` - review DEV health, backlog, backup visibility, and SQL Agent readiness.
+16. `16__delivery_gap_register.sql` - review commit closure, unfinished delivery gaps, and next SSMS actions.
 
 ### Documentation
 
@@ -97,13 +99,14 @@ file in SSMS, enable SQLCMD Mode, verify variables, and run against DEV only.
 ### Next Updates
 
 1. Rotate any exposed coordination token and keep all credentials outside Git.
-2. Record repeatable TEST/PROD execution evidence after target environment refresh.
-3. Add TEST/PROD role/permission evidence for operator, admin, auditor, and deployer.
-4. Add TEST/PROD restore drill evidence to the production readiness checklist.
-5. Design migration `019+` candidates only after owner approval: finance,
+2. Run `16__delivery_gap_register.sql` after PR/commit review to keep unfinished work visible in SSMS.
+3. Record repeatable TEST/PROD execution evidence after target environment refresh.
+4. Add TEST/PROD role/permission evidence for operator, admin, auditor, and deployer.
+5. Add TEST/PROD restore drill evidence to the production readiness checklist.
+6. Design migration `019+` candidates only after owner approval: finance,
    import/export staging, entity notes, and product templates.
-6. Continue extending bridge templates for lower-frequency department workflows after operator priority is confirmed.
-7. Turn monitoring/job-readiness grids into approved SQL Agent jobs after DEV/TEST infrastructure exists.
+7. Continue extending bridge templates for lower-frequency department workflows after operator priority is confirmed.
+8. Turn monitoring/job-readiness grids into approved SQL Agent jobs after DEV/TEST infrastructure exists.
 
 ## Turkce
 
@@ -129,6 +132,7 @@ katmandir.
 | Tablo katalogu ve FK haritasi | Hazir | Yeni tablo/migration oncesi gercek SQL Server metadata'si incelenir. |
 | Admin rol matrisi | Hazir | RBAC, permission, kullanici rol atamalari ve least-privilege kontrolleri SSMS Results Grid olarak alinir. |
 | Monitoring ve job readiness | Hazir | DEV health, backlog, backup gorunurlugu ve SQL Agent handoff gridleri SSMS icinden alinir. |
+| Delivery gap register | Hazir | Commit kapanis durumu, bitmeyen teslimat bosluklari, is sahibi blokajlari ve siradaki SSMS aksiyonlari tek read-only grid setinde gorunur. |
 | Backend API authorization | Hazir | Domain read endpointleri JWT/Bearer authorization zorunlulugu ile korunur; auth config ve health ayrik tutulur. |
 | Kalite kapilari | Hazir | Migration sirasi, SQL Server syntax, destructive pattern, artifact policy, SSMS standartlari ve dokumanlar kontrol edilir. |
 | Dokuman merkezi | Hazir | Okunabilir proje dokumanlari `md/` altinda toplandi. |
@@ -156,6 +160,7 @@ icinde, SQLCMD Mode acik olarak ve sadece DEV database uzerinde yapilmalidir.
 13. `04__admin_security_audit_queries.sql` - RBAC, audit ve veri kalite kontrolu.
 14. `14__admin_role_permission_matrix.sql` - rol, permission, kullanici atamasi ve least-privilege kontrolu.
 15. `15__monitoring_and_job_readiness.sql` - DEV health, backlog, backup gorunurlugu ve SQL Agent hazirlik kontrolu.
+16. `16__delivery_gap_register.sql` - commit kapanis durumu, bitmeyen isler ve siradaki SSMS aksiyonlari.
 
 ### Dokumanlar
 
@@ -171,13 +176,14 @@ icinde, SQLCMD Mode acik olarak ve sadece DEV database uzerinde yapilmalidir.
 ### Sonraki Guncellemeler
 
 1. Paylasilmis/riske girmis token varsa rotate edilecek; credential'lar Git disinda tutulacak.
-2. TEST/PROD ortam yenilemesinden sonra tekrar edilebilir execution evidence kaydi tutulacak.
-3. Operator, admin, auditor ve deployer rolleri icin TEST/PROD permission kaniti eklenecek.
-4. TEST/PROD restore drill kaniti production readiness checklist'e eklenecek.
-5. `019+` migration adaylari is sahibi onayi ile tasarlanacak: finance,
+2. PR/commit review sonrasinda `16__delivery_gap_register.sql` calistirilip bitmeyen isler SSMS icinde gorunur tutulacak.
+3. TEST/PROD ortam yenilemesinden sonra tekrar edilebilir execution evidence kaydi tutulacak.
+4. Operator, admin, auditor ve deployer rolleri icin TEST/PROD permission kaniti eklenecek.
+5. TEST/PROD restore drill kaniti production readiness checklist'e eklenecek.
+6. `019+` migration adaylari is sahibi onayi ile tasarlanacak: finance,
    import/export staging, entity notes, product templates.
-6. Daha dusuk frekansli departman aksiyonlari icin bridge template kapsami artirilacak.
-7. Monitoring/job-readiness gridleri DEV/TEST altyapisi netlesince onayli SQL Agent job'larina donusturulecek.
+7. Daha dusuk frekansli departman aksiyonlari icin bridge template kapsami artirilacak.
+8. Monitoring/job-readiness gridleri DEV/TEST altyapisi netlesince onayli SQL Agent job'larina donusturulecek.
 
 ## Security
 

@@ -18,6 +18,7 @@ for scripts that contain `:setvar` or `:r`.
 7. `02__operations_dashboard.sql`
 8. `14__admin_role_permission_matrix.sql`
 9. `15__monitoring_and_job_readiness.sql`
+10. `16__delivery_gap_register.sql`
 
 Keep `05__operator_dashboard_home.sql` open as the SSMS home tab. It returns
 shortcut grids, health signals, and recommended next actions.
@@ -42,6 +43,7 @@ shortcut grids, health signals, and recommended next actions.
 | `13__visual_workflow_board.sql` | Read-only | SSMS-safe node, edge, subheading, template-route, and readiness grids for the visual board idea. |
 | `14__admin_role_permission_matrix.sql` | Read-only | User-friendly role, permission, tenant user assignment, least-privilege, and admin handoff grids. |
 | `15__monitoring_and_job_readiness.sql` | Read-only | DEV database health, backlog signals, backup visibility, SQL Agent observed jobs, and DBA handoff grids. |
+| `16__delivery_gap_register.sql` | Read-only | Commit review closure, open delivery gaps, owner blockers, and next SSMS actions. |
 
 ## Supporting Assets
 
@@ -56,6 +58,7 @@ shortcut grids, health signals, and recommended next actions.
 | `database/ssms/13__visual_workflow_board.sql` | Node/edge and template-route grids that mirror the visual planning demo. |
 | `database/ssms/14__admin_role_permission_matrix.sql` | Admin RBAC matrix and access-review checklist for SSMS operators. |
 | `database/ssms/15__monitoring_and_job_readiness.sql` | Monitoring and SQL Agent readiness grids for DBA/operations handoff. |
+| `database/ssms/16__delivery_gap_register.sql` | Read-only register for unfinished commit/PR delivery items and next SSMS actions. |
 | `database/ssms/demo/workbench-manifest.json` | Generated bridge between the real SSMS/database source files and the local workbench preview. |
 | `database/tools/update-ssms-workbench-manifest.ps1` | Regenerates the preview manifest from migrations, validations, SSMS scripts, shortcut rows, schemas, tables, and backend API routes. |
 

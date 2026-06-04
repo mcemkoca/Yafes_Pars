@@ -94,7 +94,7 @@
                         {
                             "fileName":  "05__operator_dashboard_home.sql",
                             "path":  "database/ssms/05__operator_dashboard_home.sql",
-                            "sizeBytes":  8568
+                            "sizeBytes":  9004
                         },
                         {
                             "fileName":  "06__query_library_shortcuts.sql",
@@ -119,7 +119,7 @@
                         {
                             "fileName":  "10__daily_operator_checklist.sql",
                             "path":  "database/ssms/10__daily_operator_checklist.sql",
-                            "sizeBytes":  5177
+                            "sizeBytes":  5231
                         },
                         {
                             "fileName":  "11__schema_working_logic_map.sql",
@@ -145,6 +145,11 @@
                             "fileName":  "15__monitoring_and_job_readiness.sql",
                             "path":  "database/ssms/15__monitoring_and_job_readiness.sql",
                             "sizeBytes":  13356
+                        },
+                        {
+                            "fileName":  "16__delivery_gap_register.sql",
+                            "path":  "database/ssms/16__delivery_gap_register.sql",
+                            "sizeBytes":  16062
                         }
                     ],
     "shortcuts":  [
@@ -282,6 +287,15 @@
                           "fileName":  "15__monitoring_and_job_readiness.sql",
                           "safety":  "READ_ONLY",
                           "infoTip":  "DEV health, backlog, backup, and SQL Agent readiness grids."
+                      },
+                      {
+                          "order":  120,
+                          "group":  "Control",
+                          "action":  "Delivery gap register",
+                          "ssmsFile":  "database/ssms/16__delivery_gap_register.sql",
+                          "fileName":  "16__delivery_gap_register.sql",
+                          "safety":  "READ_ONLY",
+                          "infoTip":  "Commit review closure, open delivery gaps, and next SSMS actions."
                       }
                   ],
     "schemas":  [

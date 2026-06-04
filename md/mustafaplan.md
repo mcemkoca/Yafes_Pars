@@ -87,6 +87,11 @@ assessment, clean-up decisions, and next update queue in one place.
   `md/ssms/tutorials/09_monitoring_and_jobs.md`.
 - Verified migrations, validations, `07`, `08`, and `15` against SQL Server
   2022 in an ephemeral container.
+- Added `database/ssms/16__delivery_gap_register.sql` so commit review closure,
+  unfinished delivery gaps, owner blockers, and next SSMS actions are visible as
+  read-only SSMS Results Grid output.
+- Added delivery gap tutorial coverage in
+  `md/ssms/tutorials/10_delivery_gap_register.md`.
 
 ### Remaining Risks And Gaps
 
@@ -94,8 +99,8 @@ assessment, clean-up decisions, and next update queue in one place.
 | --- | --- | --- | --- |
 | P0 | Token hygiene | A token was shared during coordination. It should be treated as exposed. | Rotate/revoke the token and use GitHub secrets or local credential manager only. |
 | P1 | Workbench preview depth | The workbench controls are now wired and synchronized from the manifest, but execution is still non-persistent and uses prepared DEV preview data. | Keep real data work inside SSMS DEV; add backend-backed preview behavior only after the SSMS contract is stable. |
-| P1 | Operator permissions | DEV access-review evidence exists, but final SQL logins/roles still need TEST/PROD environment evidence. | Run approved TEST/PROD access review and record sign-off. |
-| P1 | Backup and restore | DEV restore drill evidence exists, but TEST/PROD restore drill evidence is still environment-dependent. | Run restore drill on approved TEST/PROD infrastructure and record sign-off. |
+| P1 | Operator permissions | DEV access-review evidence exists, but final SQL logins/roles still need TEST/PROD environment evidence. | Run approved TEST/PROD access review, record sign-off, and track status through `16__delivery_gap_register.sql`. |
+| P1 | Backup and restore | DEV restore drill evidence exists, but TEST/PROD restore drill evidence is still environment-dependent. | Run restore drill on approved TEST/PROD infrastructure, record sign-off, and track status through `16__delivery_gap_register.sql`. |
 | P2 | Guided bridge coverage | Core create/close/link bridges now cover natural person, vehicle object, policy, version, party, policy object link, claim create, and claim close; department-specific edge cases remain. | Add bridge coverage by department priority. |
 | P2 | Finance model | Claim has paid/reserved fields, but no full ledger/commission model. | Design migration `019+` only after business owner confirms accounting flow. |
 | P2 | Import/export | Bulk onboarding needs staging, validation issue, and export job tables. | Design `019+` staging tables and SSMS validation grids. |
@@ -113,13 +118,15 @@ assessment, clean-up decisions, and next update queue in one place.
 
 1. Rotate any exposed coordination token and confirm no active token is stored in
    Git.
-2. Add TEST/PROD execution evidence after the target environments are refreshed.
-3. Add TEST/PROD role/permission evidence for operator, admin, auditor, and deployer.
-4. Add TEST/PROD restore drill evidence to the production readiness checklist.
-5. Design migration `019+` candidates only after owner approval:
+2. Run `database/ssms/16__delivery_gap_register.sql` after every PR/commit review
+   and keep the open gap rows current.
+3. Add TEST/PROD execution evidence after the target environments are refreshed.
+4. Add TEST/PROD role/permission evidence for operator, admin, auditor, and deployer.
+5. Add TEST/PROD restore drill evidence to the production readiness checklist.
+6. Design migration `019+` candidates only after owner approval:
    finance/commission, import/export staging, entity notes, product templates.
-6. Add more bridge templates for department-specific high-frequency actions.
-7. Turn monitoring result sets into approved SQL Agent jobs once DEV/TEST
+7. Add more bridge templates for department-specific high-frequency actions.
+8. Turn monitoring result sets into approved SQL Agent jobs once DEV/TEST
    owners and schedules are confirmed.
 
 ## Working Agreement

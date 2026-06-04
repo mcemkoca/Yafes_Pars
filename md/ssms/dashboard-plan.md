@@ -35,6 +35,7 @@ operations.
 | Audit | `04__admin_security_audit_queries.sql` | RBAC, audit, trigger, and integrity checks. |
 | Admin | `14__admin_role_permission_matrix.sql` | Role coverage, permission matrix, user assignments, least-privilege checks, and handoff rows. |
 | Monitoring | `15__monitoring_and_job_readiness.sql` | DEV health, backlog, backup visibility, SQL Agent observed jobs, and DBA handoff rows. |
+| Delivery | `16__delivery_gap_register.sql` | Commit review closure, unfinished delivery gaps, owner blockers, and next SSMS actions. |
 
 ## Shortcut Model
 
@@ -63,7 +64,8 @@ Operators open the listed script in a new SSMS tab.
 9. Review role/permission matrix before access changes.
 10. Run audit checks.
 11. Review monitoring and SQL Agent readiness before DBA handoff.
-12. Export report pack grids when needed.
+12. Review the delivery gap register after PR/commit or customer review.
+13. Export report pack grids when needed.
 
 ## Future Enhancements
 
@@ -72,6 +74,8 @@ Operators open the listed script in a new SSMS tab.
   after real operator usage is observed.
 - Add specialized report packs by department.
 - Add TEST/PROD access-review evidence from `14__admin_role_permission_matrix.sql`.
+- Use `16__delivery_gap_register.sql` as the visible SSMS control point for
+  open P0-P3 delivery items.
 - Convert monitoring result sets into approved SQL Agent jobs after DEV/TEST
   owners and schedules are confirmed.
 - Add standard SSMS registered-server instructions.

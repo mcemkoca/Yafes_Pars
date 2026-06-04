@@ -90,6 +90,8 @@ Behavior:
   `ADD_POLICY_OBJECT`, and `CLOSE_CLAIM` preview-first actions.
 - Added `15__monitoring_and_job_readiness.sql` for DEV database health,
   backlog, backup visibility, SQL Agent observed jobs, and DBA handoff grids.
+- Added `16__delivery_gap_register.sql` for commit review closure, unfinished
+  delivery gaps, owner blockers, and next SSMS actions.
 - Primary interface target is SSMS Query Editor and SQL Server engine behavior,
   not a web site.
 
@@ -129,14 +131,18 @@ Behavior:
 - SQL Agent jobs still require approved DEV/TEST owners and schedules.
 - Future `019+` migrations need owner approval before finance, import/export,
   entity notes, or product-template tables are added.
+- Open P0-P3 delivery gaps should be reviewed from
+  `16__delivery_gap_register.sql` after each PR/commit review.
 
 ## Next Recommended Work
 
 1. Revoke/rotate any exposed GitHub token.
-2. Collect TEST/PROD execution evidence with the approved SQL Server target.
-3. Collect TEST/PROD access-review evidence using the approved environment
+2. Run `16__delivery_gap_register.sql` after commit/PR review and keep open
+   gap rows current.
+3. Collect TEST/PROD execution evidence with the approved SQL Server target.
+4. Collect TEST/PROD access-review evidence using the approved environment
    procedure.
-4. Run TEST/PROD restore drill and record evidence.
-5. Prioritize `019+` design candidates only after owner approval.
+5. Run TEST/PROD restore drill and record evidence.
+6. Prioritize `019+` design candidates only after owner approval.
 6. Convert monitoring/job-readiness grids into approved SQL Agent jobs after
    DEV/TEST infrastructure owners confirm schedules.
