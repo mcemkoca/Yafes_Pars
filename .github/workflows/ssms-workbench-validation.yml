@@ -181,7 +181,6 @@ jobs:
             '12__table_catalog_and_relationships.sql',
             '13__visual_workflow_board.sql',
             '14__admin_role_permission_matrix.sql',
-            '15__monitoring_and_job_readiness.sql',
             'function executeQuery',
             'function cancelExecution',
             'function parseQuery',
