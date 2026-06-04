@@ -15,6 +15,7 @@ Management Studio.
 8. `08_troubleshooting.md` - common SSMS errors and fixes.
 9. `09_monitoring_and_jobs.md` - monitoring grids and SQL Agent handoff.
 10. `10_delivery_gap_register.md` - commit review closure and unfinished delivery items.
+11. `11_remaining_work_cockpit.md` - owner evidence, 019+ decisions, bridge ranking, and DBA handoff.
 
 ## Operator Rule
 
@@ -29,5 +30,6 @@ When in doubt, run the read-only scripts first:
 7. `14__admin_role_permission_matrix.sql`
 8. `15__monitoring_and_job_readiness.sql`
 9. `16__delivery_gap_register.sql`
+10. `17__remaining_work_cockpit.sql`
 
 Only then use data entry or editing scripts.

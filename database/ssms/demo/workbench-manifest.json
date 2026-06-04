@@ -94,7 +94,7 @@
                         {
                             "fileName":  "05__operator_dashboard_home.sql",
                             "path":  "database/ssms/05__operator_dashboard_home.sql",
-                            "sizeBytes":  9004
+                            "sizeBytes":  9394
                         },
                         {
                             "fileName":  "06__query_library_shortcuts.sql",
@@ -149,7 +149,12 @@
                         {
                             "fileName":  "16__delivery_gap_register.sql",
                             "path":  "database/ssms/16__delivery_gap_register.sql",
-                            "sizeBytes":  16711
+                            "sizeBytes":  16977
+                        },
+                        {
+                            "fileName":  "17__remaining_work_cockpit.sql",
+                            "path":  "database/ssms/17__remaining_work_cockpit.sql",
+                            "sizeBytes":  14496
                         }
                     ],
     "shortcuts":  [
@@ -296,6 +301,15 @@
                           "fileName":  "16__delivery_gap_register.sql",
                           "safety":  "READ_ONLY",
                           "infoTip":  "Commit review closure, open delivery gaps, and next SSMS actions."
+                      },
+                      {
+                          "order":  130,
+                          "group":  "Control",
+                          "action":  "Remaining work cockpit",
+                          "ssmsFile":  "database/ssms/17__remaining_work_cockpit.sql",
+                          "fileName":  "17__remaining_work_cockpit.sql",
+                          "safety":  "READ_ONLY",
+                          "infoTip":  "Owner decisions, evidence handoff, 019+ intake, edge bridge ranking, and SQL Agent promotion."
                       }
                   ],
     "schemas":  [

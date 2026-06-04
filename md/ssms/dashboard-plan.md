@@ -36,6 +36,7 @@ operations.
 | Admin | `14__admin_role_permission_matrix.sql` | Role coverage, permission matrix, user assignments, least-privilege checks, and handoff rows. |
 | Monitoring | `15__monitoring_and_job_readiness.sql` | DEV health, backlog, backup visibility, SQL Agent observed jobs, and DBA handoff rows. |
 | Delivery | `16__delivery_gap_register.sql` | Commit review closure, unfinished delivery gaps, owner blockers, and next SSMS actions. |
+| Closure | `17__remaining_work_cockpit.sql` | Owner evidence, 019+ decision intake, bridge ranking, SQL Agent promotion, and release closure gates. |
 
 ## Shortcut Model
 
@@ -65,7 +66,8 @@ Operators open the listed script in a new SSMS tab.
 10. Run audit checks.
 11. Review monitoring and SQL Agent readiness before DBA handoff.
 12. Review the delivery gap register after PR/commit or customer review.
-13. Export report pack grids when needed.
+13. Open the remaining work cockpit to assign owner evidence, 019+ decisions, edge bridge ranking, and DBA handoff.
+14. Export report pack grids when needed.
 
 ## Future Enhancements
 
@@ -76,6 +78,8 @@ Operators open the listed script in a new SSMS tab.
 - Add TEST/PROD access-review evidence from `14__admin_role_permission_matrix.sql`.
 - Use `16__delivery_gap_register.sql` as the visible SSMS control point for
   open P0-P3 delivery items.
+- Use `17__remaining_work_cockpit.sql` to convert open P0-P3 items into
+  evidence, owner decision, bridge ranking, and DBA handoff workstreams.
 - Convert monitoring result sets into approved SQL Agent jobs after DEV/TEST
   owners and schedules are confirmed.
 - Add standard SSMS registered-server instructions.

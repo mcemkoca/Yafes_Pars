@@ -1924,7 +1924,7 @@ SELECT commit_order, commit_ref, commit_title, closure_status, ssms_evidence
 FROM (VALUES
   (10, N'da97249', N'feat: add backend API foundation', N'KEPT_AS_SUPPORTING_LAYER', N'Backend route inventory is in the manifest.'),
   (20, N'8388c8a', N'feat: add frontend admin panel foundation', N'SUPERSEDED', N'Active operator files are under database/ssms.'),
-  (40, N'528edbd', N'refactor: replace web panel with ssms workbench', N'CLOSED', N'05 through 16 SSMS workbench files.')
+  (40, N'528edbd', N'refactor: replace web panel with ssms workbench', N'CLOSED', N'05 through 17 SSMS workbench files.')
 ) AS c(commit_order, commit_ref, commit_title, closure_status, ssms_evidence)
 ORDER BY commit_order;`,
         metrics: [
@@ -1947,7 +1947,7 @@ ORDER BY commit_order;`,
           {
             title: "SSMS Evidence",
             text: "Each remaining item points to the SSMS script or markdown evidence template that should be opened next.",
-            chips: ["14", "15", "16", "019+"]
+            chips: ["14", "15", "16", "17", "019+"]
           },
           {
             title: "Owner Decisions",
@@ -1986,7 +1986,7 @@ ORDER BY commit_order;`,
             rows: [
               ["da97249", "backend API foundation", "Optional support layer", "KEPT_AS_SUPPORTING_LAYER", "Manifest route inventory"],
               ["8388c8a", "frontend admin panel foundation", "Superseded by SSMS-first workbench", "SUPERSEDED", "database/ssms"],
-              ["528edbd", "replace web panel with ssms workbench", "Current baseline", "CLOSED", "05 through 16 SSMS files"],
+              ["528edbd", "replace web panel with ssms workbench", "Current baseline", "CLOSED", "05 through 17 SSMS files"],
               ["d99167b", "production readiness gate", "DEV ready, TEST/PROD evidence pending", "PARTIAL_EXTERNAL", "P1 gap rows"],
               ["1280f20", "logic map and table catalog", "Active planning base", "CLOSED_WITH_BACKLOG", "11, 12, 13, 16"],
               ["becf7e8", "product language", "Active with preview boundary", "CLOSED", "README and operator docs"]
@@ -2000,7 +2000,8 @@ ORDER BY commit_order;`,
               ["20", "Daily data entry", "07__data_entry_bridge_templates.sql", "PREVIEW_FIRST", "Continue core bridge workflows."],
               ["30", "Access evidence", "14__admin_role_permission_matrix.sql", "READ_ONLY", "Use result sets as review evidence."],
               ["40", "Monitoring evidence", "15__monitoring_and_job_readiness.sql", "READ_ONLY", "Review observed SQL Agent state."],
-              ["50", "019+ planning", "12__table_catalog_and_relationships.sql", "READ_ONLY", "Review real table catalog before new schema."]
+              ["50", "019+ planning", "12__table_catalog_and_relationships.sql", "READ_ONLY", "Review real table catalog before new schema."],
+              ["60", "Remaining work cockpit", "17__remaining_work_cockpit.sql", "READ_ONLY", "Assign owner evidence, 019+ decisions, and DBA handoff."]
             ]
           }
         ],
@@ -2008,6 +2009,111 @@ ORDER BY commit_order;`,
           "Delivery gap register loaded.",
           "Commit list reviewed against current SSMS-first product direction.",
           "Remaining items are tracked as environment evidence, owner decisions, or next SSMS actions."
+        ]
+      },
+      {
+        file: "17__remaining_work_cockpit.sql",
+        title: "Closure",
+        subtitle: "Kalan is cockpit",
+        help: "Remaining work cockpit owner evidence, 019+ karar girisi, edge bridge siralamasi, DBA handoff ve release gate gridlerini tek SSMS ekraninda toparlar.",
+        code: `/* Remaining Work Cockpit */
+:ON ERROR EXIT
+:setvar YAFES_SQL_DATABASE "YafesPars_DEV"
+:setvar TENANT_CODE "DEV-BE-BROKER"
+:setvar REVIEW_OWNER "Mustafa"
+
+USE [$(YAFES_SQL_DATABASE)];
+GO
+
+IF DB_NAME() NOT LIKE N'%DEV%'
+    THROW 52499, 'Current database name must contain DEV.', 1;
+
+PRINT '02 - Workstream closure board';
+SELECT priority, workstream, current_state, closure_owner, next_ssms_or_owner_action
+FROM (VALUES
+  (N'P0', N'Token hygiene', N'OWNER_ACTION_REQUIRED', N'GitHub/account owner', N'Rotate or revoke shared token outside the repository.'),
+  (N'P1', N'TEST/PROD migration evidence', N'READY_FOR_ENV_OWNER', N'DBA/deployer', N'Run approved migration and validation process.'),
+  (N'P2', N'Finance ledger and commission', N'OWNER_DECISION_REQUIRED', N'Business/accounting owner', N'Answer the 019+ decision intake before schema design.'),
+  (N'P3', N'SQL Agent jobs', N'DBA_HANDOFF_READY', N'DBA/infrastructure owner', N'Approve job owners, schedules, alerts, and output paths.')
+) AS w(priority, workstream, current_state, closure_owner, next_ssms_or_owner_action)
+ORDER BY priority, workstream;
+
+PRINT '04 - Owner decision intake for 019+ candidates';
+SELECT candidate_area, business_question, candidate_tables, recommended_output
+FROM (VALUES
+  (N'Finance/Commission', N'Which events create payable commission or ledger movement?', N'Commission | PaymentLedger | ClaimReserve | BrokerStatement', N'Owner-approved 019+ entity contract.'),
+  (N'Import/Export Staging', N'Which files enter the system and who fixes invalid rows?', N'ImportBatch | ImportRow | ImportValidationIssue | ExportJob', N'Import contract plus validation grid design.'),
+  (N'Product Templates', N'Who owns product/rating templates?', N'ProductTemplate | RatingRule | ClauseTemplate', N'Product owner workflow.'),
+  (N'Entity Notes', N'Do task comments and audit already cover notes?', N'Note | NoteLink | NoteType', N'Implement, defer, or reject notes.')
+) AS d(candidate_area, business_question, candidate_tables, recommended_output)
+ORDER BY candidate_area;`,
+        metrics: [
+          ["Workstreams", "8"],
+          ["Evidence rows", "6"],
+          ["019+ decisions", "4"],
+          ["Release gates", "5"]
+        ],
+        boardCards: [
+          {
+            title: "Evidence Handoff",
+            text: "TEST/PROD migration, access review, and restore evidence rows identify owner, artifact, and done condition.",
+            chips: ["P1", "TEST", "PROD"]
+          },
+          {
+            title: "019+ Intake",
+            text: "Finance, import/export, product templates, and entity notes stay decision-first before migration design.",
+            chips: ["owner approval", "forward-only", "no invented tables"]
+          },
+          {
+            title: "Bridge Ranking",
+            text: "Lower-frequency department actions are ranked before adding new procedure-backed templates.",
+            chips: ["claims", "documents", "policy"]
+          },
+          {
+            title: "DBA Handoff",
+            text: "SQL Agent promotion is prepared as job blueprints, schedules, owner decisions, and blockers.",
+            chips: ["jobs", "alerts", "output path"]
+          }
+        ],
+        tables: [
+          {
+            title: "02 - Workstream closure board",
+            columns: ["priority", "workstream", "state", "owner", "next_action"],
+            rows: [
+              ["P0", "Token hygiene", "OWNER_ACTION_REQUIRED", "GitHub/account owner", "Rotate or revoke shared token."],
+              ["P1", "TEST/PROD migration evidence", "READY_FOR_ENV_OWNER", "DBA/deployer", "Run approved migration and validation process."],
+              ["P1", "TEST/PROD restore drill", "READY_FOR_DBA", "DBA", "Run backup verification and restore drill."],
+              ["P2", "Finance ledger and commission", "OWNER_DECISION_REQUIRED", "Business/accounting owner", "Answer 019+ decision intake."],
+              ["P2", "Department bridge edge workflows", "RANKING_REQUIRED", "Department owner", "Rank next non-task workflow."],
+              ["P3", "SQL Agent jobs", "DBA_HANDOFF_READY", "DBA/infrastructure owner", "Approve jobs, schedules, alerts, and output paths."]
+            ]
+          },
+          {
+            title: "04 - Owner decision intake for 019+ candidates",
+            columns: ["candidate", "question", "tables", "output"],
+            rows: [
+              ["Finance/Commission", "Which events create payable commission or ledger movement?", "Commission | PaymentLedger | ClaimReserve | BrokerStatement", "Owner-approved 019+ entity contract"],
+              ["Import/Export Staging", "Which files enter the system and who fixes invalid rows?", "ImportBatch | ImportRow | ImportValidationIssue | ExportJob", "Import contract plus validation grid design"],
+              ["Product Templates", "Who owns product/rating templates?", "ProductTemplate | RatingRule | ClauseTemplate", "Product owner workflow"],
+              ["Entity Notes", "Do task comments and audit already cover notes?", "Note | NoteLink | NoteType", "Implement, defer, or reject notes"]
+            ]
+          },
+          {
+            title: "07 - Closure gates before release",
+            columns: ["gate", "control", "pass_condition", "fail_condition"],
+            rows: [
+              ["Local quality gate", "test-sql-quality-gate.ps1", "0 failures and 0 warnings", "Manifest drift or missing SSMS script"],
+              ["Clean SQL Server validation", "SQL Server validation", "All migrations and validations pass", "Any SQL Server failure"],
+              ["SSMS demo synchronization", "index.html + manifest", "Script list and shortcuts match", "Stale scenario text"],
+              ["Owner decision closure", "16 and 17", "Signed evidence or approved deferral", "Unsigned P0/P1 rows"],
+              ["019+ design readiness", "12 plus cockpit section 04", "Approved entity contract", "Tables designed without owner"]
+            ]
+          }
+        ],
+        messages: [
+          "Remaining work cockpit loaded.",
+          "Open items are grouped by evidence, owner decision, bridge ranking, and DBA handoff.",
+          "No schema, job, token, or production data changes are made."
         ]
       }
     ];

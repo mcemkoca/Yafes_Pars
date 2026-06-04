@@ -63,6 +63,7 @@ jobs:
             database/ssms/14__admin_role_permission_matrix.sql
             database/ssms/15__monitoring_and_job_readiness.sql
             database/ssms/16__delivery_gap_register.sql
+            database/ssms/17__remaining_work_cockpit.sql
             md/ssms/operator-workbench.md
             md/ssms/dashboard-plan.md
             md/ssms/tutorials/README.md
@@ -93,7 +94,8 @@ jobs:
                       database/ssms/13__visual_workflow_board.sql \
                       database/ssms/14__admin_role_permission_matrix.sql \
                       database/ssms/15__monitoring_and_job_readiness.sql \
-                      database/ssms/16__delivery_gap_register.sql; do
+                      database/ssms/16__delivery_gap_register.sql \
+                      database/ssms/17__remaining_work_cockpit.sql; do
             grep -q ":ON ERROR EXIT" "$file" || { echo "Missing SQLCMD guard: $file" >&2; exit 1; }
             grep -q "TENANT_CODE" "$file" || { echo "Missing TENANT_CODE variable: $file" >&2; exit 1; }
             grep -q "INFO TIP" "$file" || { echo "Missing INFO TIP guidance: $file" >&2; exit 1; }
@@ -184,6 +186,7 @@ jobs:
             '13__visual_workflow_board.sql',
             '14__admin_role_permission_matrix.sql',
             '16__delivery_gap_register.sql',
+            '17__remaining_work_cockpit.sql',
             'CREATE_TASK',
             'ADD_TASK_COMMENT',
             'ADD_TASK_REMINDER',
@@ -242,5 +245,8 @@ jobs:
           }
           if (!manifest.shortcuts.some(shortcut => shortcut.fileName === '16__delivery_gap_register.sql')) {
             throw new Error('Delivery gap register shortcut is missing from manifest.');
+          }
+          if (!manifest.shortcuts.some(shortcut => shortcut.fileName === '17__remaining_work_cockpit.sql')) {
+            throw new Error('Remaining work cockpit shortcut is missing from manifest.');
           }
           NODE

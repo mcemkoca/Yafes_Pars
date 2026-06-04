@@ -94,6 +94,8 @@ Behavior:
   backlog, backup visibility, SQL Agent observed jobs, and DBA handoff grids.
 - Added `16__delivery_gap_register.sql` for commit review closure, unfinished
   delivery gaps, owner blockers, and next SSMS actions.
+- Added `17__remaining_work_cockpit.sql` for owner evidence handoff, 019+
+  decision intake, next bridge ranking, SQL Agent promotion, and release gates.
 - Primary interface target is SSMS Query Editor and SQL Server engine behavior,
   not a web site.
 
@@ -135,16 +137,20 @@ Behavior:
   entity notes, or product-template tables are added.
 - Open P0-P3 delivery gaps should be reviewed from
   `16__delivery_gap_register.sql` after each PR/commit review.
+- Remaining owner actions should be assigned from
+  `17__remaining_work_cockpit.sql` before schema or job creation.
 
 ## Next Recommended Work
 
 1. Revoke/rotate any exposed GitHub token.
 2. Run `16__delivery_gap_register.sql` after commit/PR review and keep open
    gap rows current.
-3. Collect TEST/PROD execution evidence with the approved SQL Server target.
-4. Collect TEST/PROD access-review evidence using the approved environment
+3. Run `17__remaining_work_cockpit.sql` to assign evidence, 019+ decision,
+   bridge ranking, and DBA handoff actions.
+4. Collect TEST/PROD execution evidence with the approved SQL Server target.
+5. Collect TEST/PROD access-review evidence using the approved environment
    procedure.
-5. Run TEST/PROD restore drill and record evidence.
-6. Prioritize `019+` design candidates only after owner approval.
-6. Convert monitoring/job-readiness grids into approved SQL Agent jobs after
+6. Run TEST/PROD restore drill and record evidence.
+7. Prioritize `019+` design candidates only after owner approval.
+8. Convert monitoring/job-readiness grids into approved SQL Agent jobs after
    DEV/TEST infrastructure owners confirm schedules.

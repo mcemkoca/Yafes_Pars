@@ -248,7 +248,7 @@ FROM (VALUES
     (10, N'da97249', N'feat: add backend API foundation', N'Optional integration layer remains useful, but SSMS is the primary product surface.', N'KEPT_AS_SUPPORTING_LAYER', N'Backend route inventory is included in the workbench manifest.'),
     (20, N'8388c8a', N'feat: add frontend admin panel foundation', N'Web admin panel direction was superseded by SSMS-first workbench.', N'SUPERSEDED', N'Active operator files are under database/ssms.'),
     (30, N'dcf3b85', N'docs: add final progress report', N'Delivery reporting was centralized under md/reports.', N'CLOSED', N'md/reports/final-progress-report.md'),
-    (40, N'528edbd', N'refactor: replace web panel with ssms workbench', N'Current product baseline.', N'CLOSED', N'05 through 16 SSMS workbench files.'),
+    (40, N'528edbd', N'refactor: replace web panel with ssms workbench', N'Current product baseline.', N'CLOSED', N'05 through 17 SSMS workbench files.'),
     (50, N'2890826', N'docs: add ssms visual demo', N'Preview retained only as a non-persistent SSMS-style visual aid.', N'CLOSED_WITH_BOUNDARY', N'database/ssms/demo/index.html'),
     (60, N'fd35cd3', N'docs: improve ssms visual demo usability', N'Superseded by productized controls and manifest synchronization.', N'CLOSED', N'Workbench buttons, tabs, and manifest checks are wired.'),
     (70, N'4a9ca3a', N'chore: professionalize repository governance', N'Governance remains active through policies and quality gates.', N'CLOSED', N'SECURITY.md and CI checks.'),
@@ -278,7 +278,8 @@ FROM (VALUES
     (20, N'Daily data entry', N'database/ssms/07__data_entry_bridge_templates.sql', N'PREVIEW_FIRST', N'Continue core bridge workflows for person, vehicle object, policy, policy links, claims, and tasks.', N'INFO TIP: Keep EXECUTE_ACTION = 0 until preview grids are correct.'),
     (30, N'Access evidence', N'database/ssms/14__admin_role_permission_matrix.sql', N'READ_ONLY', N'Use result sets as access-review source evidence.', N'INFO TIP: TEST/PROD sign-off still belongs to the environment owner.'),
     (40, N'Monitoring evidence', N'database/ssms/15__monitoring_and_job_readiness.sql', N'READ_ONLY', N'Review observed SQL Agent state and DBA handoff rows.', N'INFO TIP: Do not create jobs from SSMS until DBA runbook is approved.'),
-    (50, N'019+ planning', N'database/ssms/12__table_catalog_and_relationships.sql', N'READ_ONLY', N'Review real table catalog before finance/import/product/entity-note design.', N'INFO TIP: New schema changes must be forward-only migration 019+ after owner approval.')
+    (50, N'019+ planning', N'database/ssms/12__table_catalog_and_relationships.sql', N'READ_ONLY', N'Review real table catalog before finance/import/product/entity-note design.', N'INFO TIP: New schema changes must be forward-only migration 019+ after owner approval.'),
+    (60, N'Remaining work cockpit', N'database/ssms/17__remaining_work_cockpit.sql', N'READ_ONLY', N'Convert open gaps into owner evidence, 019+ decisions, bridge ranking, and DBA handoff actions.', N'INFO TIP: This is the next control point after this register.')
 ) AS a(action_order, action_group, open_script_or_doc, action_mode, recommended_action, info_tip)
 ORDER BY action_order;
 GO

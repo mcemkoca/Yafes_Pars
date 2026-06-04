@@ -74,7 +74,8 @@ FROM (VALUES
     (90, N'Report', N'Graph/report pack', N'database/ssms/09__graph_report_pack.sql', N'READ_ONLY', N'Grid-friendly trend, bar, and export-ready report datasets.'),
     (100, N'Control', N'Daily operator checklist', N'database/ssms/10__daily_operator_checklist.sql', N'READ_ONLY', N'Morning and end-of-day checklist result sets.'),
     (110, N'Control', N'Monitoring and job readiness', N'database/ssms/15__monitoring_and_job_readiness.sql', N'READ_ONLY', N'DEV health, backlog, backup, and SQL Agent readiness grids.'),
-    (120, N'Control', N'Delivery gap register', N'database/ssms/16__delivery_gap_register.sql', N'READ_ONLY', N'Commit review closure, open delivery gaps, and next SSMS actions.')
+    (120, N'Control', N'Delivery gap register', N'database/ssms/16__delivery_gap_register.sql', N'READ_ONLY', N'Commit review closure, open delivery gaps, and next SSMS actions.'),
+    (130, N'Control', N'Remaining work cockpit', N'database/ssms/17__remaining_work_cockpit.sql', N'READ_ONLY', N'Owner decisions, evidence handoff, 019+ intake, edge bridge ranking, and SQL Agent promotion.')
 ) AS s(shortcut_order, shortcut_group, action_name, ssms_file, safety_mode, info_tip)
 ORDER BY shortcut_order;
 
@@ -153,7 +154,8 @@ FROM (VALUES
     (8, N'Use editing guardrails for updates', N'database/ssms/08__data_editing_guardrails.sql', N'Preview and rollback by default; commit only after row count is correct.'),
     (9, N'Export report pack if needed', N'database/ssms/09__graph_report_pack.sql', N'Result sets are designed for Excel/Power BI copy-out.'),
     (10, N'Review monitoring and job readiness', N'database/ssms/15__monitoring_and_job_readiness.sql', N'Use before DBA handoff or environment evidence planning.'),
-    (11, N'Review unfinished delivery gaps', N'database/ssms/16__delivery_gap_register.sql', N'Use after PR or commit review to decide the next SSMS work item.')
+    (11, N'Review unfinished delivery gaps', N'database/ssms/16__delivery_gap_register.sql', N'Use after PR or commit review to decide the next SSMS work item.'),
+    (12, N'Open remaining work cockpit', N'database/ssms/17__remaining_work_cockpit.sql', N'Use to turn open gaps into owner evidence, 019+ decisions, and DBA handoff actions.')
 ) AS a(priority, recommended_action, open_script, info_tip)
 ORDER BY priority;
 GO

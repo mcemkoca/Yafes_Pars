@@ -250,7 +250,8 @@ function Test-SsmsOperatorConventions {
         "database/ssms/13__visual_workflow_board.sql",
         "database/ssms/14__admin_role_permission_matrix.sql",
         "database/ssms/15__monitoring_and_job_readiness.sql",
-        "database/ssms/16__delivery_gap_register.sql"
+        "database/ssms/16__delivery_gap_register.sql",
+        "database/ssms/17__remaining_work_cockpit.sql"
     )
 
     foreach ($relativePath in $operatorFiles) {
@@ -318,6 +319,7 @@ function Test-SsmsWorkbenchControls {
         "ADD_TASK_REMINDER",
         "14__admin_role_permission_matrix.sql",
         "16__delivery_gap_register.sql",
+        "17__remaining_work_cockpit.sql",
         "function executeQuery",
         "function cancelExecution",
         "function parseQuery",
@@ -416,6 +418,13 @@ function Test-SsmsWorkbenchManifest {
     }
     else {
         Add-Result "FAIL" "ssms-workbench-manifest" "delivery gap register shortcut is missing"
+    }
+
+    if (@($manifest.shortcuts | Where-Object { $_.fileName -eq "17__remaining_work_cockpit.sql" }).Count -gt 0) {
+        Add-Result "PASS" "ssms-workbench-manifest" "remaining work cockpit shortcut is represented"
+    }
+    else {
+        Add-Result "FAIL" "ssms-workbench-manifest" "remaining work cockpit shortcut is missing"
     }
 
     if (@($manifest.backend.apiRoutes).Count -gt 0) {
