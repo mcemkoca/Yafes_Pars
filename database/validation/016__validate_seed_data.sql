@@ -95,6 +95,26 @@ IF EXISTS (
     THROW 51614, 'Coverage package seed has no items.', 1;
 
 IF EXISTS (
+    SELECT required.coverage_code
+    FROM (VALUES
+        (N'BA_AUTO', 1),
+        (N'AUTO_LIABILITY', 0),
+        (N'OMNIUM', 0),
+        (N'MINI_OMNIUM', 0),
+        (N'DRIVER_PROTECTION', 0),
+        (N'LEGAL_PROTECTION_AUTO', 0)
+    ) AS required (coverage_code, is_default)
+    WHERE NOT EXISTS (
+        SELECT 1
+        FROM coverage.CoverageDomain cd
+        WHERE cd.coverage_code = required.coverage_code
+          AND cd.contract_domain_code = N'MOTOR'
+          AND cd.is_default = required.is_default
+    )
+)
+    THROW 51616, 'Missing MOTOR coverage mapping for auto policy domain.', 1;
+
+IF EXISTS (
     SELECT required.lookup_name
     FROM (VALUES
         (N'risk.VehicleType', 3),
