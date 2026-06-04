@@ -11,7 +11,6 @@ on:
   push:
     branches:
       - main
-      - "feature/**"
     paths:
       - "database/migrations/**"
       - "database/validation/**"
@@ -64,18 +63,22 @@ jobs:
         run: |
           set -euo pipefail
           password="Yafes_CI_$(openssl rand -hex 12)!A1"
+          container_name="yafes-sqlserver-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          host_port="$(shuf -i 20000-45000 -n 1)"
           echo "::add-mask::$password"
           echo "YAFES_SQL_PASSWORD=$password" >> "$GITHUB_ENV"
+          echo "YAFES_SQL_CONTAINER=$container_name" >> "$GITHUB_ENV"
+          echo "YAFES_SQL_SERVER=localhost,$host_port" >> "$GITHUB_ENV"
           mkdir -p "$YAFES_SQL_BACKUP_DIR"
           chmod 777 "$YAFES_SQL_BACKUP_DIR"
 
           docker run --detach \
-            --name yafes-sqlserver \
+            --name "$container_name" \
             --env ACCEPT_EULA=Y \
             --env MSSQL_PID=Developer \
             --env MSSQL_SA_PASSWORD="$password" \
             --volume "$YAFES_SQL_BACKUP_DIR:$YAFES_SQL_BACKUP_DIR" \
-            --publish 1433:1433 \
+            --publish "127.0.0.1:${host_port}:1433" \
             mcr.microsoft.com/mssql/server:2022-latest
 
       - name: Wait for SQL Server
@@ -90,7 +93,7 @@ jobs:
           done
 
           echo "SQL Server did not become ready in time." >&2
-          docker logs yafes-sqlserver >&2 || true
+          docker logs "$YAFES_SQL_CONTAINER" >&2 || true
           exit 1
 
       - name: Create DEV database for backup preflight
@@ -120,4 +123,4 @@ jobs:
       - name: Stop SQL Server container
         if: always()
         shell: bash
-        run: docker rm --force yafes-sqlserver >/dev/null 2>&1 || true
+        run: docker rm --force "${YAFES_SQL_CONTAINER:-yafes-sqlserver}" >/dev/null 2>&1 || true
