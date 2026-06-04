@@ -33,7 +33,7 @@ jobs:
     timeout-minutes: 30
 
     env:
-      YAFES_SQL_SERVER: localhost,14333
+      YAFES_SQL_SERVER: localhost
       YAFES_SQL_DATABASE: YafesPars_DEV
       YAFES_SQL_USER: sa
       YAFES_SQL_BACKUP_DIR: /tmp/yafes-sql-backups
@@ -46,17 +46,6 @@ jobs:
       - name: Run static SQL quality gate
         shell: pwsh
         run: ./database/tools/test-sql-quality-gate.ps1 -NoReportFile
-
-      - name: Install sqlcmd
-        shell: bash
-        run: |
-          set -euo pipefail
-          sudo rm -f /usr/share/keyrings/microsoft-prod.gpg
-          curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --batch --yes --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
-          curl -fsSL https://packages.microsoft.com/config/ubuntu/24.04/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list >/dev/null
-          sudo apt-get update
-          sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev
-          echo "/opt/mssql-tools18/bin" >> "$GITHUB_PATH"
 
       - name: Start SQL Server container
         shell: bash
@@ -76,15 +65,76 @@ jobs:
             --env MSSQL_PID=Developer \
             --env MSSQL_SA_PASSWORD="$password" \
             --volume "$YAFES_SQL_BACKUP_DIR:$YAFES_SQL_BACKUP_DIR" \
-            --publish "127.0.0.1:14333:1433" \
             mcr.microsoft.com/mssql/server:2022-latest
+
+      - name: Create container sqlcmd wrapper
+        shell: bash
+        run: |
+          set -euo pipefail
+          wrapper_dir="$RUNNER_TEMP/yafes-sqlcmd"
+          mkdir -p "$wrapper_dir"
+          cat > "$wrapper_dir/sqlcmd" <<'BASH'
+          #!/usr/bin/env bash
+          set -euo pipefail
+
+          container="${YAFES_SQL_CONTAINER:?YAFES_SQL_CONTAINER is required}"
+          args=()
+          output_file=""
+          container_output=""
+
+          while (($#)); do
+            case "$1" in
+              -S)
+                args+=("-S" "localhost")
+                shift 2
+                ;;
+              -i)
+                input_file="$2"
+                container_input="/tmp/yafes-sqlcmd/$(basename "$input_file").$$.sql"
+                docker exec "$container" mkdir -p /tmp/yafes-sqlcmd >/dev/null
+                docker cp "$input_file" "$container:$container_input" >/dev/null
+                args+=("-i" "$container_input")
+                shift 2
+                ;;
+              -o)
+                output_file="$2"
+                container_output="/tmp/yafes-sqlcmd/$(basename "$output_file").$$.out"
+                args+=("-o" "$container_output")
+                shift 2
+                ;;
+              *)
+                args+=("$1")
+                shift
+                ;;
+            esac
+          done
+
+          if [[ -n "$container_output" ]]; then
+            docker exec "$container" mkdir -p /tmp/yafes-sqlcmd >/dev/null
+          fi
+
+          set +e
+          docker exec "$container" /opt/mssql-tools18/bin/sqlcmd "${args[@]}"
+          exit_code=$?
+          set -e
+
+          if [[ -n "$output_file" ]]; then
+            mkdir -p "$(dirname "$output_file")"
+            docker cp "$container:$container_output" "$output_file" >/dev/null 2>&1 || true
+          fi
+
+          exit "$exit_code"
+          BASH
+          sed -i 's/^          //' "$wrapper_dir/sqlcmd"
+          chmod +x "$wrapper_dir/sqlcmd"
+          echo "$wrapper_dir" >> "$GITHUB_PATH"
 
       - name: Wait for SQL Server
         shell: bash
         run: |
           set -euo pipefail
           for i in {1..60}; do
-            if sqlcmd -S "$YAFES_SQL_SERVER" -U "$YAFES_SQL_USER" -P "$YAFES_SQL_PASSWORD" -C -l 5 -Q "SELECT 1" >/dev/null 2>&1; then
+            if docker exec "$YAFES_SQL_CONTAINER" /opt/mssql-tools18/bin/sqlcmd -S localhost -U "$YAFES_SQL_USER" -P "$YAFES_SQL_PASSWORD" -C -l 5 -Q "SELECT 1" >/dev/null 2>&1; then
               exit 0
             fi
             sleep 2
@@ -98,8 +148,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          sqlcmd \
-            -S "$YAFES_SQL_SERVER" \
+          docker exec "$YAFES_SQL_CONTAINER" /opt/mssql-tools18/bin/sqlcmd \
+            -S localhost \
             -U "$YAFES_SQL_USER" \
             -P "$YAFES_SQL_PASSWORD" \
             -C \
