@@ -1,5 +1,7 @@
 # Yafes Pars
 
+**Product owner and maintainer:** `Deuterium12{MCK}`
+
 [![SQL Server validation](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/sql-server-validation.yml/badge.svg)](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/sql-server-validation.yml)
 [![Database quality gate](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/database-quality-gate.yml/badge.svg)](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/database-quality-gate.yml)
 [![SSMS workbench validation](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/ssms-workbench-validation.yml/badge.svg)](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/ssms-workbench-validation.yml)
@@ -30,6 +32,7 @@ come first; the .NET backend is an optional integration foundation.
 | Monitoring and job readiness | Available | DEV health, backlog, backup visibility, and SQL Agent handoff grids are available in SSMS. |
 | Delivery gap register | Available | Commit review closure, unfinished delivery gaps, owner blockers, and next SSMS actions are visible in one read-only grid set. |
 | Remaining work cockpit | Available | Open blockers are grouped into owner evidence, 019+ decision intake, edge bridge ranking, and DBA handoff grids. |
+| Tenant-isolated backend API | Available | JWT tenant claims bind domain reads to the authenticated tenant; production auth configuration is mandatory. |
 | Quality gates | Available | CI protects migration order, SQL Server syntax, destructive patterns, artifact policy, SSMS conventions, and documentation. |
 | Documentation hub | Available | Human-readable docs are organized under `md/`. |
 
@@ -64,6 +67,7 @@ with SQLCMD Mode enabled against a DEV database.
 | Path | Purpose |
 | --- | --- |
 | `md/README.md` | Documentation hub and writing rules. |
+| `md/product-ownership.md` | Product ownership, release authority, and attribution rules. |
 | `md/mustafaplan.md` | Living roadmap, expert assessment, risks, and next update queue. |
 | `md/database/` | SQL Server architecture, deployment, migration, security, ERD, and readiness docs. |
 | `md/ssms/` | SSMS workbench, tutorials, templates, and dashboard plan. |
@@ -137,7 +141,7 @@ katmandir.
 | Monitoring ve job readiness | Hazir | DEV health, backlog, backup gorunurlugu ve SQL Agent handoff gridleri SSMS icinden alinir. |
 | Delivery gap register | Hazir | Commit kapanis durumu, bitmeyen teslimat bosluklari, is sahibi blokajlari ve siradaki SSMS aksiyonlari tek read-only grid setinde gorunur. |
 | Remaining work cockpit | Hazir | Acik blokajlar owner evidence, 019+ karar girisi, edge bridge siralama ve DBA handoff gridlerine ayrilir. |
-| Backend API authorization | Hazir | Domain read endpointleri JWT/Bearer authorization zorunlulugu ile korunur; auth config ve health ayrik tutulur. |
+| Tenant izole backend API | Hazir | Domain read endpointleri JWT tenant claim ile oturum tenantina baglanir; production auth ayarlari zorunludur. |
 | Kalite kapilari | Hazir | Migration sirasi, SQL Server syntax, destructive pattern, artifact policy, SSMS standartlari ve dokumanlar kontrol edilir. |
 | Dokuman merkezi | Hazir | Okunabilir proje dokumanlari `md/` altinda toplandi. |
 
@@ -172,6 +176,7 @@ icinde, SQLCMD Mode acik olarak ve sadece DEV database uzerinde yapilmalidir.
 | Yol | Amac |
 | --- | --- |
 | `md/README.md` | Dokuman merkezi ve yazim kurallari. |
+| `md/product-ownership.md` | Urun sahipligi, release yetkisi ve atif kurallari. |
 | `md/mustafaplan.md` | Canli plan, uzman degerlendirmesi, riskler ve siradaki isler. |
 | `md/database/` | SQL Server mimari, deploy, migration, guvenlik, ERD ve readiness dokumanlari. |
 | `md/ssms/` | SSMS workbench, tutorial, template ve dashboard plani. |

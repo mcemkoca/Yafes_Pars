@@ -6,12 +6,18 @@ public static class AuthEndpoints
     {
         var group = app.MapGroup("/api/auth").WithTags("Auth");
 
-        group.MapGet("/config", (IConfiguration configuration) => Results.Ok(new
+        group.MapGet("/config", (IConfiguration configuration) =>
         {
-            jwtReady = true,
-            authorityConfigured = !string.IsNullOrWhiteSpace(configuration["Authentication:Authority"]),
-            audienceConfigured = !string.IsNullOrWhiteSpace(configuration["Authentication:Audience"])
-        }));
+            var authorityConfigured = !string.IsNullOrWhiteSpace(configuration["Authentication:Authority"]);
+            var audienceConfigured = !string.IsNullOrWhiteSpace(configuration["Authentication:Audience"]);
+
+            return Results.Ok(new
+            {
+                jwtReady = authorityConfigured && audienceConfigured,
+                authorityConfigured,
+                audienceConfigured
+            });
+        });
 
         return app;
     }

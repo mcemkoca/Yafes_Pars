@@ -2,6 +2,8 @@
 
 -
 
+Product owner: `Deuterium12{MCK}`
+
 ## Scope
 
 - [ ] Database migration or validation

@@ -7,6 +7,7 @@ on:
       - "database/validation/**"
       - "database/tools/**"
       - "database/templates/**"
+      - "database/ssms/**"
       - ".github/workflows/sql-server-validation.yml"
   push:
     branches:
@@ -16,6 +17,7 @@ on:
       - "database/validation/**"
       - "database/tools/**"
       - "database/templates/**"
+      - "database/ssms/**"
       - ".github/workflows/sql-server-validation.yml"
   workflow_dispatch:
 
@@ -158,6 +160,27 @@ jobs:
       - name: Run migrations and validations
         shell: pwsh
         run: ./database/tools/run-ci-sql-validation.ps1
+
+      - name: Run SSMS operator scripts against SQL Server
+        shell: bash
+        run: |
+          set -euo pipefail
+          log_dir="database/execution-logs/ssms-runtime"
+          mkdir -p "$log_dir"
+
+          for script in database/ssms/*.sql; do
+            name="$(basename "$script")"
+            echo "Running $name"
+            sqlcmd \
+              -S "$YAFES_SQL_SERVER" \
+              -d "$YAFES_SQL_DATABASE" \
+              -U "$YAFES_SQL_USER" \
+              -P "$YAFES_SQL_PASSWORD" \
+              -C -b -I -r 1 \
+              -v YAFES_SQL_DATABASE="$YAFES_SQL_DATABASE" \
+              -i "$script" \
+              -o "$log_dir/$name.log"
+          done
 
       - name: Upload SQL execution logs
         if: always()

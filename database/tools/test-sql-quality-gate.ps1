@@ -486,6 +486,28 @@ function Test-SsmsSqlcmdDevContract {
     }
 }
 
+function Test-MigrationRunnerDiscovery {
+    $relativePath = "database/tools/run-dev-migrations.ps1"
+    $fullPath = Join-Path $repoRoot $relativePath
+    $content = Get-Content -LiteralPath $fullPath -Raw
+    $requiredTexts = @(
+        '$script:MigrationPlan',
+        '$script:ValidationPlan',
+        '$futureFiles',
+        '$expectedNumber = $maxProtectedNumber + 1 + $index',
+        'Unexpected {0} file inside protected range'
+    )
+
+    foreach ($requiredText in $requiredTexts) {
+        if ($content.Contains($requiredText)) {
+            Add-Result "PASS" "migration-runner" "$relativePath contains $requiredText"
+        }
+        else {
+            Add-Result "FAIL" "migration-runner" "$relativePath is missing $requiredText"
+        }
+    }
+}
+
 function Write-Report {
     if ($NoReportFile) {
         return
@@ -579,6 +601,7 @@ Test-PatternScan -RelativeFolders @("database/migrations", "database/validation"
 Test-PatternScan -RelativeFolders @("database/migrations", "database/ssms", "database/templates") -Pattern "\b(DROP\s+DATABASE|DROP\s+TABLE|TRUNCATE\s+TABLE|ALTER\s+TABLE[^\r\n;]+DROP\s+COLUMN)\b" -Scope "safety" -FailureMessage "destructive SQL pattern"
 Test-PatternScan -RelativeFolders @("database/migrations", "database/validation", "database/ssms", "database/templates") -Pattern "CREATE\s+TABLE\s+(\[?dbo\]?\.)?\[?Object\]?\b" -Scope "naming" -FailureMessage "forbidden Object table name"
 Test-StyleConventions -RelativeFolders @("database/migrations", "database/validation")
+Test-MigrationRunnerDiscovery
 Test-SsmsSqlcmdDevContract
 Test-SsmsOperatorConventions
 Test-SsmsWorkbenchManifest

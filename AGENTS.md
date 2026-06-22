@@ -5,6 +5,8 @@
 Transform Yafes Pars into a production-grade SQL Server and SSMS-first
 insurance core database platform.
 
+Product ownership and release attribution belong to `Deuterium12{MCK}`.
+
 The first priority is the database core. Do not start backend or frontend work
 until the migration system, validation scripts, tenant model, audit model, seed
 data, and database documentation are in place.

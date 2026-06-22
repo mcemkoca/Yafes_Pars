@@ -14,7 +14,7 @@ environment-specific hardening, and deployment review have been completed.
 Do not open public issues for vulnerabilities, credentials, database backups,
 production data, or tenant/customer data.
 
-Report security concerns privately to the repository owner. Include:
+Report security concerns privately to product owner `Deuterium12{MCK}`. Include:
 
 - affected path, workflow, script, or component
 - impact and exploitability summary
@@ -60,7 +60,7 @@ Expected triage flow:
 - `.github/dependabot.yml` keeps GitHub Actions and NuGet dependencies visible
   for review.
 - `.github/CODEOWNERS` routes sensitive database, workflow, and security changes
-  to the repository owner.
+  to the repository maintainer for review under `Deuterium12{MCK}` ownership.
 
 ## Out Of Scope For Public Discussion
 

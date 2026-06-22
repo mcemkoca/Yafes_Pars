@@ -106,6 +106,10 @@ Behavior:
 - Removed the frontend workflow because the requested target is SSMS-first.
 - GitHub Actions now validates backend build, SQL Server validation, database
   quality gate, and SSMS workbench validation.
+- SQL Server validation now executes the checked-in SSMS operator scripts after
+  the guarded migration and validation sequence.
+- The guarded runner automatically includes contiguous `019+` scripts instead
+  of relying on a permanently fixed file list.
 
 ## Backend/API Status
 
@@ -113,11 +117,23 @@ Behavior:
 - Added API, Application, Domain, Infrastructure, and Tests projects.
 - Added Swagger/OpenAPI setup.
 - Added JWT-ready authentication wiring.
-- Enforced authorization metadata on all domain read endpoints.
-- Added DB connectivity health endpoint.
+- Bound tenant-scoped domain reads to the authenticated JWT `tenant_id` claim.
+- Required JWT authority and audience outside Development.
+- Restricted Swagger to Development and protected the DB connectivity health
+  endpoint with authorization.
 - Added read/search endpoints for tenants, persons, institutions, risks,
   policies, claims, documents, tasks, coverage, and lookup health.
 - Backend build is confirmed in CI.
+- Seven backend authorization and tenant-claim tests pass locally.
+
+## Product Ownership
+
+- Product owner, maintainer, technical direction, and release attribution:
+  `Deuterium12{MCK}`.
+- Public repository documents and contribution templates use the same ownership
+  label.
+- GitHub account handles are retained only where the platform requires a valid
+  account for permissions and review routing.
 
 ## Frontend/Web Status
 

@@ -146,13 +146,13 @@ Benzerlik skoru şu kriterlere göre hesaplanmıştır:
 |---------|--------------|----------|
 | Açık kaynak | ✅ (bizimki) | ✅ |
 | Customizable | ✅ | ✅ (daha fazla) |
-| AI Reporting | ❌ | ✅ |
+| Advanced Reporting | ❌ | ✅ |
 | Reinsurance | ❌ | ✅ |
 | Document repo | ❌ | ✅ |
 | Belgian data | ✅ | ❌ |
 
 **Ne alabiliriz:**
-- AI-powered reporting (Rapporten sayfasına LLM entegrasyonu)
+- Advanced automated reporting (Rapporten sayfasi entegrasyonu)
 - Document management system (Schadeclaims'e belge yükleme)
 - Smart reminders (Contract vervaldatum bildirimleri)
 
@@ -169,7 +169,7 @@ Benzerlik skoru şu kriterlere göre hesaplanmıştır:
 | sumitkumar1503/insurancemanagement | %10 | Admin/Customer rol ayrımı, FAQ sistemi |
 | ritenchhatrala2/insurance-mgmt-JAVA | %10 | - |
 | InsuranceProCRM | %22 | Lead management, interaction tracking |
-| Openkoda Insurance | %25 | AI Reporting, Document repo, Smart reminders |
+| Openkoda Insurance | %25 | Advanced Reporting, Document repo, Smart reminders |
 
 ---
 
@@ -205,7 +205,7 @@ Benzerlik skoru şu kriterlere göre hesaplanmıştır:
 - Contract vervaldatum bildirimleri
 - Claim açık >30 gün uyarıları
 
-### 7. AI-Powered Reporting
+### 7. Advanced Reporting
 - Openkoda'dan ilham
 - LLM entegrasyonu ile doğal dil raporlama
 - "Bu ayki komisyonları özetle" gibi sorgular

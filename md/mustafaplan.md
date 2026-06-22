@@ -13,6 +13,9 @@ assessment, clean-up decisions, and next update queue in one place.
   `019+`.
 - Documentation structure: operational markdown now lives under `md/`.
 - Root `README.md`: customer-facing, bilingual English/Turkish entry point.
+- Product owner and release attribution: `Deuterium12{MCK}`.
+- Technical solution package: complete on the feature branch; merge and
+  environment evidence remain release gates.
 
 ## SSMS Expert Assessment
 
@@ -97,6 +100,18 @@ assessment, clean-up decisions, and next update queue in one place.
   release gate result grids.
 - Added delivery gap tutorial coverage in
   `md/ssms/tutorials/10_delivery_gap_register.md`.
+- Bound backend domain reads to the authenticated JWT `tenant_id` claim and
+  removed caller-selected tenant identifiers from tenant-scoped endpoints.
+- Required production JWT authority/audience configuration, restricted Swagger
+  to Development, and protected database health details with authorization.
+- Extended backend coverage to seven passing authorization and tenant-claim
+  tests.
+- Updated the migration runner so contiguous `019+` migration and validation
+  scripts are discovered, executed, and included in reports automatically.
+- Extended SQL Server CI to execute all checked-in SSMS operator scripts against
+  the disposable SQL Server database after migrations and validations.
+- Standardized public product ownership and release attribution as
+  `Deuterium12{MCK}`.
 
 ### Remaining Risks And Gaps
 

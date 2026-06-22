@@ -8,7 +8,7 @@ public static class TenantClaims
 
     public static bool TryGetTenantId(ClaimsPrincipal user, out Guid tenantId)
     {
-        return Guid.TryParse(user.FindFirstValue(TenantIdClaimType), out tenantId);
+        return Guid.TryParse(user.FindFirst(TenantIdClaimType)?.Value, out tenantId);
     }
 
     public static Guid GetRequiredTenantId(ClaimsPrincipal user)

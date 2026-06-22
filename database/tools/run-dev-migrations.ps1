@@ -67,6 +67,8 @@ $expectedValidations = @(
 
 $script:MigrationResults = @()
 $script:ValidationResults = @()
+$script:MigrationPlan = @($expectedMigrations)
+$script:ValidationPlan = @($expectedValidations)
 $script:Warnings = New-Object System.Collections.Generic.List[string]
 $script:Errors = New-Object System.Collections.Generic.List[string]
 $script:TargetServer = 'NOT VERIFIED'
@@ -105,7 +107,7 @@ function Write-FinalReport {
     $lines += ('- SSMS fallback script: {0}' -f $script:SsmsScriptPath)
     $lines += ''
     $lines += '## Migrations'
-    foreach ($name in $expectedMigrations) {
+    foreach ($name in $script:MigrationPlan) {
         $result = $script:MigrationResults | Where-Object { $_.Name -eq $name } | Select-Object -First 1
         if ($null -eq $result) {
             $lines += ('- {0}: NOT RUN' -f $name)
@@ -116,7 +118,7 @@ function Write-FinalReport {
     }
     $lines += ''
     $lines += '## Validations'
-    foreach ($name in $expectedValidations) {
+    foreach ($name in $script:ValidationPlan) {
         $result = $script:ValidationResults | Where-Object { $_.Name -eq $name } | Select-Object -First 1
         if ($null -eq $result) {
             $lines += ('- {0}: NOT RUN' -f $name)
@@ -169,6 +171,26 @@ function Resolve-OrderedSqlFiles {
         throw ('No SQL files found in {0}: {1}' -f $Label, $Directory)
     }
 
+    $numberedFiles = @()
+    foreach ($file in $allFiles) {
+        if ($file.Name -notmatch '^(\d{3})__.*\.sql$') {
+            throw ('Invalid {0} file name; expected NNN__*.sql: {1}' -f $Label, $file.Name)
+        }
+
+        $numberedFiles += [pscustomobject]@{
+            Number = [int]$Matches[1]
+            File = $file
+        }
+    }
+
+    $duplicates = @($numberedFiles | Group-Object Number | Where-Object { $_.Count -gt 1 })
+    if ($duplicates.Count -gt 0) {
+        $duplicateNames = @($duplicates | ForEach-Object {
+            ($_.Group | ForEach-Object { $_.File.Name }) -join ', '
+        }) -join '; '
+        throw ('Duplicate {0} numeric prefixes found: {1}' -f $Label, $duplicateNames)
+    }
+
     $resolved = @()
     foreach ($expectedName in $ExpectedNames) {
         $exactPath = Join-Path $Directory $expectedName
@@ -190,6 +212,27 @@ function Resolve-OrderedSqlFiles {
         }
 
         throw ('Missing expected {0} file: {1}' -f $Label, $expectedName)
+    }
+
+    $maxProtectedNumber = ($ExpectedNames | ForEach-Object { [int]$_.Substring(0, 3) } | Measure-Object -Maximum).Maximum
+    $resolvedPaths = @($resolved | ForEach-Object { $_.FullName })
+    $unexpectedProtected = @($numberedFiles | Where-Object {
+        $_.Number -le $maxProtectedNumber -and $_.File.FullName -notin $resolvedPaths
+    })
+    if ($unexpectedProtected.Count -gt 0) {
+        throw ('Unexpected {0} file inside protected range: {1}' -f $Label, (($unexpectedProtected.File.Name) -join ', '))
+    }
+
+    $futureFiles = @($numberedFiles |
+        Where-Object { $_.Number -gt $maxProtectedNumber } |
+        Sort-Object Number)
+    for ($index = 0; $index -lt $futureFiles.Count; $index++) {
+        $expectedNumber = $maxProtectedNumber + 1 + $index
+        if ($futureFiles[$index].Number -ne $expectedNumber) {
+            throw ('Future {0} script {1} must continue at prefix {2:000}.' -f $Label, $futureFiles[$index].File.Name, $expectedNumber)
+        }
+
+        $resolved += $futureFiles[$index].File
     }
 
     return $resolved
@@ -515,6 +558,8 @@ try {
     Write-Host 'Preflight: resolving migration and validation files.'
     $migrationFiles = @(Resolve-OrderedSqlFiles -Directory $migrationRoot -ExpectedNames $expectedMigrations -Label 'migration')
     $validationFiles = @(Resolve-OrderedSqlFiles -Directory $validationRoot -ExpectedNames $expectedValidations -Label 'validation')
+    $script:MigrationPlan = @($migrationFiles.Name)
+    $script:ValidationPlan = @($validationFiles.Name)
 
     Write-Host 'Preflight: checking SQL Server compatibility and unsafe migration operations.'
     Assert-NoUnsupportedSqlSyntax -Files ($migrationFiles + $validationFiles)

@@ -9,6 +9,7 @@ stay in their conventional locations because GitHub and tooling read them there.
 | Path | Purpose |
 | --- | --- |
 | `md/mustafaplan.md` | Living plan, expert review, risks, and next update backlog. |
+| `md/product-ownership.md` | Product ownership, release authority, and attribution rules. |
 | `md/database/` | SQL Server architecture, deployment, migration, security, ERD, and readiness docs. |
 | `md/ssms/` | SSMS operator workbench docs, tutorials, templates, and dashboard plan. |
 | `md/backend/` | Optional .NET backend foundation notes. |
