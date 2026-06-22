@@ -37,14 +37,14 @@ WITH table_counts AS (
     GROUP BY s.name
 )
 SELECT
-    domain_order,
-    domain_group,
-    subheading,
-    schema_name,
+    m.domain_order,
+    m.domain_group,
+    m.subheading,
+    m.schema_name AS schema_name,
     COALESCE(tc.table_count, 0) AS table_count,
-    working_logic,
-    ssms_entry_point,
-    info_tip
+    m.working_logic,
+    m.ssms_entry_point,
+    m.info_tip
 FROM (VALUES
     (10, N'Core', N'Tenant, users, RBAC, migration ledger', N'core', N'Sets identity, tenant isolation, role permissions, and schema migration tracking.', N'04__admin_security_audit_queries.sql', N'Use this first when access, tenant, or migration state is unclear.'),
     (20, N'Reference', N'Languages, statuses, lookup standards', N'ref', N'Provides shared lookup values used by people, contact details, and domain scripts.', N'06__query_library_shortcuts.sql', N'Lookup values should be selected from grids, not typed from memory.'),
@@ -60,7 +60,7 @@ FROM (VALUES
 ) AS m(domain_order, domain_group, subheading, schema_name, working_logic, ssms_entry_point, info_tip)
 LEFT JOIN table_counts tc
     ON tc.schema_name = m.schema_name
-ORDER BY domain_order;
+ORDER BY m.domain_order;
 
 PRINT '02 - Working flow with control points';
 SELECT
