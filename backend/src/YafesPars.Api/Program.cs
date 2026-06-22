@@ -2,6 +2,7 @@ using Dapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 using YafesPars.Api.Endpoints;
+using YafesPars.Api.Security;
 using YafesPars.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +10,15 @@ var builder = WebApplication.CreateBuilder(args);
 DefaultTypeMap.MatchNamesWithUnderscores = true;
 
 builder.Configuration.AddEnvironmentVariables();
+
+var authority = builder.Configuration["Authentication:Authority"];
+var audience = builder.Configuration["Authentication:Audience"];
+if (!builder.Environment.IsDevelopment()
+    && (string.IsNullOrWhiteSpace(authority) || string.IsNullOrWhiteSpace(audience)))
+{
+    throw new InvalidOperationException(
+        "Authentication:Authority and Authentication:Audience are required outside Development.");
+}
 
 builder.Services.AddInfrastructure();
 builder.Services.AddEndpointsApiExplorer();
@@ -33,16 +43,26 @@ builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        options.Authority = builder.Configuration["Authentication:Authority"];
-        options.Audience = builder.Configuration["Authentication:Audience"];
+        options.Authority = authority;
+        options.Audience = audience;
         options.RequireHttpsMetadata = true;
     });
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("TenantUser", policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.RequireAssertion(context => TenantClaims.TryGetTenantId(context.User, out _));
+    });
+});
 
 var app = builder.Build();
 
-app.UseSwagger();
-app.UseSwaggerUI();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 app.UseAuthentication();
 app.UseAuthorization();
 

@@ -1,5 +1,7 @@
+using System.Security.Claims;
 using YafesPars.Application.Abstractions;
 using YafesPars.Application.ReadModels;
+using YafesPars.Api.Security;
 
 namespace YafesPars.Api.Endpoints;
 
@@ -9,7 +11,7 @@ public static class DomainReadEndpoints
     {
         var api = app.MapGroup("/api")
             .WithTags("Domain reads")
-            .RequireAuthorization();
+            .RequireAuthorization("TenantUser");
 
         api.MapGet("/tenants", QueryTenantsAsync);
         api.MapGet("/persons", QueryPersonsAsync);
@@ -31,6 +33,7 @@ public static class DomainReadEndpoints
     }
 
     private static async Task<IResult> QueryTenantsAsync(
+        ClaimsPrincipal user,
         IReadRepository repository,
         int? take,
         CancellationToken cancellationToken)
@@ -43,18 +46,19 @@ public static class DomainReadEndpoints
                 legal_name AS LegalName,
                 is_active AS IsActive
             FROM core.Tenant
+            WHERE tenant_id = @TenantId
             ORDER BY tenant_code;
             """;
 
         var rows = await repository.QueryAsync<TenantRow>(
             sql,
-            new { Take = NormalizeTake(take) },
+            new { TenantId = TenantClaims.GetRequiredTenantId(user), Take = NormalizeTake(take) },
             cancellationToken);
         return Results.Ok(rows);
     }
 
     private static async Task<IResult> QueryPersonsAsync(
-        Guid tenantId,
+        ClaimsPrincipal user,
         string? search,
         int? take,
         IReadRepository repository,
@@ -74,13 +78,13 @@ public static class DomainReadEndpoints
               )
             ORDER BY updated_at_utc DESC;
             """,
-            Params(tenantId, search, take),
+            Params(user, search, take),
             cancellationToken);
         return Results.Ok(rows);
     }
 
     private static async Task<IResult> QueryInstitutionsAsync(
-        Guid tenantId,
+        ClaimsPrincipal user,
         string? search,
         int? take,
         IReadRepository repository,
@@ -94,13 +98,13 @@ public static class DomainReadEndpoints
               AND (@Search IS NULL OR institution_code LIKE @SearchPattern OR name LIKE @SearchPattern)
             ORDER BY name;
             """,
-            Params(tenantId, search, take),
+            Params(user, search, take),
             cancellationToken);
         return Results.Ok(rows);
     }
 
     private static async Task<IResult> QueryRisksAsync(
-        Guid tenantId,
+        ClaimsPrincipal user,
         string? search,
         int? take,
         IReadRepository repository,
@@ -114,13 +118,13 @@ public static class DomainReadEndpoints
               AND (@Search IS NULL OR description LIKE @SearchPattern OR license_plate LIKE @SearchPattern OR chassis_number LIKE @SearchPattern)
             ORDER BY updated_at_utc DESC;
             """,
-            Params(tenantId, search, take),
+            Params(user, search, take),
             cancellationToken);
         return Results.Ok(rows);
     }
 
     private static async Task<IResult> QueryPoliciesAsync(
-        Guid tenantId,
+        ClaimsPrincipal user,
         string? search,
         int? take,
         IReadRepository repository,
@@ -134,13 +138,13 @@ public static class DomainReadEndpoints
               AND (@Search IS NULL OR contract_number LIKE @SearchPattern OR company_name LIKE @SearchPattern)
             ORDER BY contract_number DESC;
             """,
-            Params(tenantId, search, take),
+            Params(user, search, take),
             cancellationToken);
         return Results.Ok(rows);
     }
 
     private static async Task<IResult> QueryClaimsAsync(
-        Guid tenantId,
+        ClaimsPrincipal user,
         string? search,
         int? take,
         IReadRepository repository,
@@ -154,13 +158,13 @@ public static class DomainReadEndpoints
               AND (@Search IS NULL OR claim_number LIKE @SearchPattern OR contract_number LIKE @SearchPattern)
             ORDER BY reported_date DESC;
             """,
-            Params(tenantId, search, take),
+            Params(user, search, take),
             cancellationToken);
         return Results.Ok(rows);
     }
 
     private static async Task<IResult> QueryDocumentsAsync(
-        Guid tenantId,
+        ClaimsPrincipal user,
         string? ownerEntityType,
         int? take,
         IReadRepository repository,
@@ -184,13 +188,18 @@ public static class DomainReadEndpoints
               AND (@OwnerEntityType IS NULL OR owner_entity_type = @OwnerEntityType)
             ORDER BY uploaded_at_utc DESC;
             """,
-            new { TenantId = tenantId, OwnerEntityType = ownerEntityType, Take = NormalizeTake(take) },
+            new
+            {
+                TenantId = TenantClaims.GetRequiredTenantId(user),
+                OwnerEntityType = ownerEntityType,
+                Take = NormalizeTake(take)
+            },
             cancellationToken);
         return Results.Ok(rows);
     }
 
     private static async Task<IResult> QueryTasksAsync(
-        Guid tenantId,
+        ClaimsPrincipal user,
         int? take,
         IReadRepository repository,
         CancellationToken cancellationToken)
@@ -202,7 +211,7 @@ public static class DomainReadEndpoints
             WHERE tenant_id = @TenantId
             ORDER BY due_at_utc, created_at_utc DESC;
             """,
-            new { TenantId = tenantId, Take = NormalizeTake(take) },
+            new { TenantId = TenantClaims.GetRequiredTenantId(user), Take = NormalizeTake(take) },
             cancellationToken);
         return Results.Ok(rows);
     }
@@ -249,11 +258,11 @@ public static class DomainReadEndpoints
         return Results.Ok(rows);
     }
 
-    private static object Params(Guid tenantId, string? search, int? take)
+    private static object Params(ClaimsPrincipal user, string? search, int? take)
     {
         return new
         {
-            TenantId = tenantId,
+            TenantId = TenantClaims.GetRequiredTenantId(user),
             Search = string.IsNullOrWhiteSpace(search) ? null : search,
             SearchPattern = string.IsNullOrWhiteSpace(search) ? null : $"%{search.Trim()}%",
             Take = NormalizeTake(take)
