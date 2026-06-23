@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Yafes Pars — Sigorta Yönetim Sistemi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0d1117;
+      --surface:  #161b22;
+      --border:   #30363d;
+      --accent:   #0a84ff;
+      --accent2:  #58a6ff;
+      --text:     #e6edf3;
+      --muted:    #8b949e;
+      --green:    #3fb950;
+      --red:      #f85149;
+      --yellow:   #d29922;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ─────────────────────────────────── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      height: 56px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo { font-size: 1.1rem; font-weight: 700; color: var(--accent2); letter-spacing: -.3px; }
+    .logo span { color: var(--muted); font-weight: 400; }
+    nav { display: flex; gap: .25rem; }
+    nav button {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font: inherit;
+      font-size: .85rem;
+      padding: .4rem .85rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+    nav button:hover, nav button.active {
+      background: rgba(88,166,255,.1);
+      color: var(--accent2);
+    }
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      font-size: .82rem;
+      color: var(--muted);
+    }
+    .avatar {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #6e40c9);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .7rem; font-weight: 700; color: #fff;
+    }
+
+    /* ── Layout ─────────────────────────────────── */
+    .app { display: flex; height: calc(100vh - 56px); }
+
+    /* ── Sidebar ─────────────────────────────────── */
+    aside {
+      width: 220px;
+      min-width: 220px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 1rem 0;
+    }
+    .sidebar-section { margin-bottom: 1.5rem; }
+    .sidebar-label {
+      font-size: .68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      padding: 0 1rem .4rem;
+    }
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+      padding: .48rem 1rem;
+      cursor: pointer;
+      font-size: .84rem;
+      color: var(--muted);
+      border-left: 2px solid transparent;
+      transition: all .12s;
+    }
+    .sidebar-item:hover { background: rgba(255,255,255,.04); color: var(--text); }
+    .sidebar-item.active {
+      background: rgba(10,132,255,.08);
+      color: var(--accent2);
+      border-left-color: var(--accent);
+    }
+    .sidebar-item .icon { width: 16px; text-align: center; opacity: .7; }
+    .badge {
+      margin-left: auto;
+      font-size: .68rem;
+      background: rgba(10,132,255,.2);
+      color: var(--accent2);
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+
+    /* ── Main ─────────────────────────────────── */
+    main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.75rem 2rem;
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+    .page-header h1 { font-size: 1.25rem; font-weight: 600; }
+    .page-header p { font-size: .82rem; color: var(--muted); margin-top: 2px; }
+
+    /* ── Stats Row ─────────────────────────────── */
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.75rem; }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.1rem 1.25rem;
+    }
+    .stat-label { font-size: .75rem; color: var(--muted); margin-bottom: .5rem; }
+    .stat-value { font-size: 1.6rem; font-weight: 700; }
+    .stat-delta { font-size: .72rem; margin-top: .3rem; }
+    .delta-up { color: var(--green); }
+    .delta-dn { color: var(--red); }
+
+    /* ── Table ─────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .9rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .card-title { font-size: .9rem; font-weight: 600; }
+
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: .3rem .7rem;
+      font-size: .8rem;
+      color: var(--muted);
+      width: 220px;
+    }
+    .search-bar input {
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font: inherit;
+      width: 100%;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      text-align: left;
+      font-size: .72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--muted);
+      padding: .6rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: .72rem 1.25rem;
+      font-size: .82rem;
+      border-bottom: 1px solid rgba(48,54,61,.5);
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,.02); }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      font-size: .72rem;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+    .status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+    .status-active  { background: rgba(63,185,80,.12); color: var(--green); }
+    .status-active::before { background: var(--green); }
+    .status-pending { background: rgba(210,153,34,.12); color: var(--yellow); }
+    .status-pending::before { background: var(--yellow); }
+    .status-closed  { background: rgba(139,148,158,.12); color: var(--muted); }
+    .status-closed::before { background: var(--muted); }
+
+    /* ── Btn ─────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .4rem .9rem;
+      border-radius: 6px;
+      font: inherit;
+      font-size: .82rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      transition: all .12s;
+    }
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover { background: #0070d8; }
+    .btn-ghost { background: none; color: var(--muted); }
+    .btn-ghost:hover { background: rgba(255,255,255,.05); color: var(--text); }
+
+    /* ── API Status ─────────────────────────── */
+    .api-indicator {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      font-size: .75rem;
+    }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+    .dot.online  { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .dot.offline { background: var(--red); }
+
+    /* ── Empty state ─────────────────────────── */
+    .empty {
+      padding: 3rem 1rem;
+      text-align: center;
+      color: var(--muted);
+    }
+    .empty .icon-big { font-size: 2rem; margin-bottom: .75rem; opacity: .4; }
+    .empty p { font-size: .85rem; }
+
+    /* ── Toast ───────────────────────────────── */
+    #toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .75rem 1.1rem;
+      font-size: .82rem;
+      color: var(--text);
+      display: none;
+      box-shadow: 0 8px 24px rgba(0,0,0,.4);
+    }
+
+    /* ── Scrollbar ───────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Yafes Pars <span>SYS</span></div>
+  <nav>
+    <button class="active" onclick="showPage('dashboard', this)">Dashboard</button>
+    <button onclick="showPage('policies', this)">Poliçeler</button>
+    <button onclick="showPage('claims', this)">Hasarlar</button>
+    <button onclick="showPage('persons', this)">Müşteriler</button>
+    <button onclick="showPage('tasks', this)">Görevler</button>
+    <button onclick="showPage('finance', this)">Finans</button>
+  </nav>
+  <div class="user-badge">
+    <div id="apiDot" class="dot"></div>
+    <span id="apiLabel">API bağlanıyor…</span>
+    <div class="avatar">OP</div>
+  </div>
+</header>
+
+<div class="app">
+  <aside>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Genel Bakış</div>
+      <div class="sidebar-item active" onclick="showPage('dashboard', null, this)">
+        <span class="icon">◈</span> Dashboard
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Sigorta İşlemleri</div>
+      <div class="sidebar-item" onclick="showPage('policies', null, this)">
+        <span class="icon">📋</span> Poliçeler <span class="badge" id="policyBadge">—</span>
+      </div>
+      <div class="sidebar-item" onclick="showPage('claims', null, this)">
+        <span class="icon">🚨</span> Hasarlar
+      </div>
+      <div class="sidebar-item" onclick="showPage('persons', null, this)">
+        <span class="icon">👤</span> Müşteriler
+      </div>
+      <div class="sidebar-item" onclick="showPage('tasks', null, this)">
+        <span class="icon">✅</span> Görevler
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Finans & Belgeler</div>
+      <div class="sidebar-item" onclick="showPage('finance', null, this)">
+        <span class="icon">💰</span> Faturalar
+      </div>
+      <div class="sidebar-item" onclick="showPage('documents', null, this)">
+        <span class="icon">📄</span> Belgeler
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Sistem</div>
+      <div class="sidebar-item" onclick="showPage('settings', null, this)">
+        <span class="icon">⚙</span> Ayarlar
+      </div>
+    </div>
+  </aside>
+
+  <main>
+
+    <!-- DASHBOARD -->
+    <div id="page-dashboard" class="page active">
+      <div class="page-header">
+        <div>
+          <h1>Dashboard</h1>
+          <p>Günlük operasyon özeti</p>
+        </div>
+        <button class="btn btn-ghost" onclick="loadAll()">↻ Yenile</button>
+      </div>
+
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-label">Aktif Poliçe</div>
+          <div class="stat-value" id="statPolicies">—</div>
+          <div class="stat-delta delta-up" id="statPoliciesDelta"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Açık Hasar</div>
+          <div class="stat-value" id="statClaims">—</div>
+          <div class="stat-delta delta-dn" id="statClaimsDelta"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Bekleyen Görev</div>
+          <div class="stat-value" id="statTasks">—</div>
+          <div class="stat-delta" id="statTasksDelta"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Toplam Müşteri</div>
+          <div class="stat-value" id="statPersons">—</div>
+          <div class="stat-delta delta-up" id="statPersonsDelta"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Son Poliçeler</span>
+          <button class="btn btn-ghost" style="font-size:.75rem" onclick="showPage('policies')">Tümünü gör →</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Poliçe No</th>
+              <th>Müşteri</th>
+              <th>Başlangıç</th>
+              <th>Bitiş</th>
+              <th>Durum</th>
+            </tr>
+          </thead>
+          <tbody id="dashPolicies">
+            <tr><td colspan="5"><div class="empty"><p>Yükleniyor…</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- POLİÇELER -->
+    <div id="page-policies" class="page">
+      <div class="page-header">
+        <div><h1>Poliçeler</h1><p>Sözleşme ve kapsam yönetimi</p></div>
+        <div class="search-bar">
+          <span>🔍</span>
+          <input id="policySearch" placeholder="Poliçe ara…" oninput="filterPolicies()" />
+        </div>
+      </div>
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Poliçe No</th><th>Poliçe Sahibi</th><th>Sigorta Şirketi</th>
+              <th>Başlangıç</th><th>Bitiş</th><th>Durum</th>
+            </tr>
+          </thead>
+          <tbody id="policyTable">
+            <tr><td colspan="6"><div class="empty"><p>Yükleniyor…</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- HASARLAR -->
+    <div id="page-claims" class="page">
+      <div class="page-header">
+        <div><h1>Hasarlar</h1><p>Hasar bildirimleri ve takip</p></div>
+      </div>
+      <div class="card">
+        <table>
+          <thead>
+            <tr><th>Hasar No</th><th>Müşteri</th><th>Olay Tarihi</th><th>Rezerv</th><th>Durum</th></tr>
+          </thead>
+          <tbody id="claimTable">
+            <tr><td colspan="5"><div class="empty"><p>Yükleniyor…</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MÜŞTERİLER -->
+    <div id="page-persons" class="page">
+      <div class="page-header">
+        <div><h1>Müşteriler</h1><p>Doğal ve tüzel kişi yönetimi</p></div>
+        <button class="btn btn-primary">+ Yeni Müşteri</button>
+      </div>
+      <div class="card">
+        <table>
+          <thead>
+            <tr><th>Ad Soyad</th><th>T.C. / Vergi No</th><th>İletişim</th><th>Tip</th></tr>
+          </thead>
+          <tbody id="personTable">
+            <tr><td colspan="4"><div class="empty"><p>Yükleniyor…</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- GÖREVLER -->
+    <div id="page-tasks" class="page">
+      <div class="page-header">
+        <div><h1>Görevler</h1><p>Operasyon görev takibi</p></div>
+        <button class="btn btn-primary">+ Yeni Görev</button>
+      </div>
+      <div class="card">
+        <table>
+          <thead>
+            <tr><th>Görev</th><th>Öncelik</th><th>Son Tarih</th><th>Durum</th></tr>
+          </thead>
+          <tbody id="taskTable">
+            <tr><td colspan="4"><div class="empty"><p>Yükleniyor…</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- FİNANS -->
+    <div id="page-finance" class="page">
+      <div class="page-header">
+        <div><h1>Faturalar</h1><p>Prim ve ödeme takibi</p></div>
+        <button class="btn btn-primary">+ Yeni Fatura</button>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Fatura Listesi</span></div>
+        <div class="empty">
+          <div class="icon-big">💰</div>
+          <p>API bağlantısı kurulduğunda fatura listesi burada görünür.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- BELGELER -->
+    <div id="page-documents" class="page">
+      <div class="page-header">
+        <div><h1>Belgeler</h1><p>Poliçe ve hasar belge arşivi</p></div>
+      </div>
+      <div class="card">
+        <div class="empty">
+          <div class="icon-big">📄</div>
+          <p>Belgeler API'den yüklenecek.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- AYARLAR -->
+    <div id="page-settings" class="page">
+      <div class="page-header">
+        <div><h1>Ayarlar</h1><p>API bağlantısı ve ortam yapılandırması</p></div>
+      </div>
+      <div class="card" style="padding:1.5rem">
+        <label style="display:block;margin-bottom:.4rem;font-size:.82rem;color:var(--muted)">API Base URL</label>
+        <div style="display:flex;gap:.5rem">
+          <input id="apiUrl" value="http://localhost:8080"
+            style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:.45rem .75rem;color:var(--text);font:inherit;font-size:.85rem;outline:none" />
+          <button class="btn btn-primary" onclick="saveSettings()">Kaydet & Test Et</button>
+        </div>
+        <p style="margin-top:.75rem;font-size:.78rem;color:var(--muted)">
+          Yerel geliştirme: <code>http://localhost:8080</code> &nbsp;·&nbsp;
+          Azure: <code>https://yafespars-prod.azurewebsites.net</code>
+        </p>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── Config ──────────────────────────────────────────────
+let BASE = localStorage.getItem('yafes_api') || 'http://localhost:8080';
+let TOKEN = localStorage.getItem('yafes_token') || '';
+let allPolicies = [];
+
+// ── Navigation ──────────────────────────────────────────
+function showPage(id, navBtn, sideBtn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id)?.classList.add('active');
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
+  if (navBtn) navBtn.classList.add('active');
+  if (sideBtn) sideBtn.classList.add('active');
+}
+
+// ── API helper ──────────────────────────────────────────
+async function api(path) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (TOKEN) headers['Authorization'] = 'Bearer ' + TOKEN;
+  const r = await fetch(BASE + path, { headers });
+  if (!r.ok) throw new Error(r.status);
+  return r.json();
+}
+
+// ── Status indicator ─────────────────────────────────────
+async function checkHealth() {
+  const dot = document.getElementById('apiDot');
+  const label = document.getElementById('apiLabel');
+  try {
+    await api('/health');
+    dot.className = 'dot online';
+    label.textContent = 'API bağlı';
+  } catch {
+    dot.className = 'dot offline';
+    label.textContent = 'API bağlı değil';
+  }
+}
+
+// ── Load data ────────────────────────────────────────────
+async function loadAll() {
+  await checkHealth();
+  loadPolicies();
+  loadClaims();
+  loadPersons();
+  loadTasks();
+}
+
+function statusBadge(s) {
+  const map = { Active:'active', Pending:'pending', Closed:'closed',
+                ACTIVE:'active', PENDING:'pending', CLOSED:'closed' };
+  const cls = map[s] || 'closed';
+  const labels = { active:'Aktif', pending:'Beklemede', closed:'Kapalı' };
+  return `<span class="status status-${cls}">${labels[cls] || s}</span>`;
+}
+
+function fmt(d) { return d ? new Date(d).toLocaleDateString('tr-TR') : '—'; }
+function money(v) { return v != null ? Number(v).toLocaleString('tr-TR') + ' ₺' : '—'; }
+
+async function loadPolicies() {
+  try {
+    const data = await api('/api/policies?take=50');
+    allPolicies = data;
+    document.getElementById('statPolicies').textContent = data.length;
+    document.getElementById('policyBadge').textContent = data.length;
+    renderPolicies(data);
+  } catch { /* offline */ }
+}
+
+function renderPolicies(data) {
+  const tbody = document.getElementById('policyTable');
+  const dash  = document.getElementById('dashPolicies');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty"><p>Poliçe bulunamadı.</p></div></td></tr>`;
+    return;
+  }
+  const rows = data.slice(0, 5).map(p => `
+    <tr>
+      <td><code style="font-size:.78rem;color:var(--accent2)">${p.contractNumber ?? '—'}</code></td>
+      <td>${p.policyHolderName ?? '—'}</td>
+      <td>${p.companyName ?? '—'}</td>
+      <td>${fmt(p.startDate)}</td>
+      <td>${fmt(p.endDate)}</td>
+      <td>${statusBadge(p.status)}</td>
+    </tr>`).join('');
+  if (dash) dash.innerHTML = rows;
+  tbody.innerHTML = data.map(p => `
+    <tr>
+      <td><code style="font-size:.78rem;color:var(--accent2)">${p.contractNumber ?? '—'}</code></td>
+      <td>${p.policyHolderName ?? '—'}</td>
+      <td>${p.companyName ?? '—'}</td>
+      <td>${fmt(p.startDate)}</td>
+      <td>${fmt(p.endDate)}</td>
+      <td>${statusBadge(p.status)}</td>
+    </tr>`).join('');
+}
+
+function filterPolicies() {
+  const q = document.getElementById('policySearch').value.toLowerCase();
+  renderPolicies(allPolicies.filter(p =>
+    (p.contractNumber ?? '').toLowerCase().includes(q) ||
+    (p.policyHolderName ?? '').toLowerCase().includes(q)
+  ));
+}
+
+async function loadClaims() {
+  try {
+    const data = await api('/api/claims?take=50');
+    document.getElementById('statClaims').textContent = data.length;
+    document.getElementById('claimTable').innerHTML = data.length
+      ? data.map(c => `<tr>
+          <td><code style="font-size:.78rem;color:var(--red)">${c.claimNumber ?? '—'}</code></td>
+          <td>${c.policyHolderName ?? '—'}</td>
+          <td>${fmt(c.incidentDate)}</td>
+          <td>${money(c.reservedAmount)}</td>
+          <td>${statusBadge(c.status)}</td>
+        </tr>`).join('')
+      : `<tr><td colspan="5"><div class="empty"><p>Hasar bulunamadı.</p></div></td></tr>`;
+  } catch { /* offline */ }
+}
+
+async function loadPersons() {
+  try {
+    const data = await api('/api/persons?take=50');
+    document.getElementById('statPersons').textContent = data.length;
+    document.getElementById('personTable').innerHTML = data.length
+      ? data.map(p => `<tr>
+          <td>${p.fullName ?? '—'}</td>
+          <td>${p.nationalId ?? p.taxNumber ?? '—'}</td>
+          <td>${p.email ?? p.phone ?? '—'}</td>
+          <td>${p.personType ?? '—'}</td>
+        </tr>`).join('')
+      : `<tr><td colspan="4"><div class="empty"><p>Müşteri bulunamadı.</p></div></td></tr>`;
+  } catch { /* offline */ }
+}
+
+async function loadTasks() {
+  try {
+    const data = await api('/api/tasks?take=50');
+    document.getElementById('statTasks').textContent = data.filter(t => t.status !== 'Closed').length;
+    document.getElementById('taskTable').innerHTML = data.length
+      ? data.map(t => `<tr>
+          <td>${t.title ?? '—'}</td>
+          <td>${t.priority ?? '—'}</td>
+          <td>${fmt(t.dueDate)}</td>
+          <td>${statusBadge(t.status)}</td>
+        </tr>`).join('')
+      : `<tr><td colspan="4"><div class="empty"><p>Görev bulunamadı.</p></div></td></tr>`;
+  } catch { /* offline */ }
+}
+
+// ── Settings ─────────────────────────────────────────────
+function saveSettings() {
+  BASE = document.getElementById('apiUrl').value.trim();
+  localStorage.setItem('yafes_api', BASE);
+  loadAll();
+  toast('Ayarlar kaydedildi, bağlantı test ediliyor…');
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 3000);
+}
+
+// ── Boot ─────────────────────────────────────────────────
+document.getElementById('apiUrl').value = BASE;
+loadAll();
+</script>
+</body>
+</html>
