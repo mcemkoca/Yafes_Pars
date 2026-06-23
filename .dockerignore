@@ -1,0 +1,17 @@
+**/.git
+**/.gitignore
+**/bin
+**/obj
+**/*.user
+**/*.suo
+**/.vs
+**/node_modules
+database/execution-logs
+docs
+ERD
+UML
+.env
+.env.*
+!.env.example
+infra
+*.md
