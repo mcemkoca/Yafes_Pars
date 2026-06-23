@@ -185,6 +185,10 @@ try
     app.MapPolicyWriteEndpoints();
     app.MapClaimWriteEndpoints();
     app.MapTaskWriteEndpoints();
+    app.MapFinanceWriteEndpoints();
+    app.MapDocumentWriteEndpoints();
+    app.MapCoverageWriteEndpoints();
+    app.MapRiskWriteEndpoints();
 
     app.Run();
 }
