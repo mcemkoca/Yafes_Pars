@@ -1,6 +1,9 @@
+using System.Security.Claims;
+using System.Threading.RateLimiting;
 using Dapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using Serilog.Events;
@@ -37,9 +40,9 @@ try
             .Enrich.WithProperty("Environment", ctx.HostingEnvironment.EnvironmentName)
             .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}");
 
-        var aiConnectionString = ctx.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"];
-        if (!string.IsNullOrWhiteSpace(aiConnectionString))
-            cfg.WriteTo.ApplicationInsights(aiConnectionString, TelemetryConverter.Traces);
+        var aiCs = ctx.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"];
+        if (!string.IsNullOrWhiteSpace(aiCs))
+            cfg.WriteTo.ApplicationInsights(aiCs, TelemetryConverter.Traces);
     });
 
     var authority = builder.Configuration["Authentication:Authority"];
@@ -63,6 +66,36 @@ try
                 policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
             else
                 policy.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod();
+        });
+    });
+
+    // Rate limiting: per-tenant sliding window
+    builder.Services.AddRateLimiter(options =>
+    {
+        options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+        options.AddPolicy("tenant", httpContext =>
+        {
+            var tenantId = httpContext.User.FindFirstValue("tenant_id") ?? "anonymous";
+            return RateLimitPartition.GetSlidingWindowLimiter(tenantId, _ => new SlidingWindowRateLimiterOptions
+            {
+                Window = TimeSpan.FromMinutes(1),
+                SegmentsPerWindow = 6,
+                PermitLimit = 300,
+                QueueLimit = 0
+            });
+        });
+
+        options.AddPolicy("write", httpContext =>
+        {
+            var tenantId = httpContext.User.FindFirstValue("tenant_id") ?? "anonymous";
+            return RateLimitPartition.GetSlidingWindowLimiter($"write:{tenantId}", _ => new SlidingWindowRateLimiterOptions
+            {
+                Window = TimeSpan.FromMinutes(1),
+                SegmentsPerWindow = 6,
+                PermitLimit = 60,
+                QueueLimit = 0
+            });
         });
     });
 
@@ -130,6 +163,7 @@ try
         app.UseHttpsRedirection();
 
     app.UseCors("YafesPolicy");
+    app.UseRateLimiter();
     app.UseSerilogRequestLogging(options =>
     {
         options.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000}ms";
@@ -147,6 +181,10 @@ try
     app.MapHealthEndpoints();
     app.MapAuthEndpoints();
     app.MapDomainReadEndpoints();
+    app.MapPersonWriteEndpoints();
+    app.MapPolicyWriteEndpoints();
+    app.MapClaimWriteEndpoints();
+    app.MapTaskWriteEndpoints();
 
     app.Run();
 }
