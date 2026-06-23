@@ -5,159 +5,456 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Yafes Pars — SSMS İnteraktif Tutorial</title>
 <style>
-:root{
-  --bg:#1e1e1e;--bg2:#252526;--bg3:#2d2d30;--bg4:#3c3c3c;
-  --border:#3e3e42;--accent:#007acc;--accent2:#1a8ad4;
-  --text:#d4d4d4;--dim:#858585;--bright:#fff;
-  --kw:#569cd6;--fn:#dcdcaa;--str:#ce9178;--num:#b5cea8;
-  --cmt:#6a9955;--tbl:#4ec9b0;--op:#9cdcfe;--red:#f44747;
-  --green:#4ec9b0;--yellow:#e2c08d;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg:       #141414;
+  --bg2:      #1c1c1e;
+  --bg3:      #242428;
+  --bg4:      #2c2c32;
+  --bg5:      #34343c;
+  --border:   #38383f;
+  --border2:  #48485a;
+  --accent:   #0a84ff;
+  --accent2:  #3fa0ff;
+  --accent3:  #005fcc;
+  --glow:     rgba(10,132,255,.25);
+  --text:     #e0e0e8;
+  --dim:      #80808a;
+  --dimmer:   #50505a;
+  --bright:   #ffffff;
+  --kw:       #5b9bd5;
+  --fn:       #e0c07a;
+  --str:      #d4976a;
+  --num:      #9ecc8a;
+  --cmt:      #5f8a50;
+  --tbl:      #3dcfb0;
+  --op:       #9fc6e8;
+  --red:      #ff453a;
+  --green:    #30d158;
+  --yellow:   #ffd60a;
+  --purple:   #bf5af2;
+  --mono:     'JetBrains Mono', Consolas, monospace;
+  --sans:     'Inter', 'Segoe UI', sans-serif;
 }
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',Consolas,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;font-size:13px;user-select:none}
 
-/* ── TITLEBAR ── */
-#titlebar{background:#323233;border-bottom:1px solid #111;height:30px;display:flex;align-items:center;padding:0 12px;gap:0;flex-shrink:0}
-#titlebar-logo{font-weight:700;font-size:12px;color:#ccc;margin-right:16px;letter-spacing:.5px}
-.mnu{padding:0 10px;height:100%;display:flex;align-items:center;font-size:12px;color:#ccc;cursor:pointer}
-.mnu:hover{background:#505050}
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; overflow:hidden; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  -webkit-font-smoothing: antialiased;
+}
 
-/* ── TOOLBAR ── */
-#toolbar{background:#2d2d2d;border-bottom:1px solid var(--border);height:28px;display:flex;align-items:center;padding:0 6px;gap:1px;flex-shrink:0}
-.tb{background:0;border:1px solid transparent;color:var(--text);padding:0 7px;height:22px;cursor:pointer;border-radius:2px;font-size:11px;display:flex;align-items:center;gap:3px;transition:background .1s}
-.tb:hover:not(:disabled){background:#3e3e3e;border-color:#555}
-.tb:disabled{opacity:.4;cursor:default}
-.tb.run{background:#388a34;color:#fff;border-color:#4a9e46}
-.tb.run:hover{background:#2d7429}
-.tb-sep{width:1px;height:18px;background:var(--border);margin:0 3px}
-.db-sel{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0 8px;height:22px;font-size:11px;border-radius:2px;min-width:150px}
+/* ═══════════════════════════════
+   SPLASH SCREEN
+   ═══════════════════════════════ */
+#splash {
+  position: fixed; inset: 0;
+  background: radial-gradient(ellipse at 30% 40%, #0a1628 0%, #090910 60%, #000 100%);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+  transition: opacity .5s ease, visibility .5s;
+}
+#splash.gone { opacity: 0; visibility: hidden; pointer-events: none; }
+.splash-inner { text-align: center; }
+.splash-logo {
+  font-size: 48px; margin-bottom: 16px;
+  filter: drop-shadow(0 0 24px rgba(10,132,255,.6));
+  animation: logo-pulse 2s ease-in-out infinite;
+}
+@keyframes logo-pulse { 0%,100%{filter:drop-shadow(0 0 24px rgba(10,132,255,.5))} 50%{filter:drop-shadow(0 0 40px rgba(10,132,255,.9))} }
+.splash-title {
+  font-size: 28px; font-weight: 700; letter-spacing: -.5px;
+  background: linear-gradient(135deg, #fff 0%, var(--accent2) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 6px;
+}
+.splash-sub { font-size: 13px; color: var(--dim); margin-bottom: 36px; font-weight: 400; }
+.splash-bar { width: 260px; height: 3px; background: var(--bg4); border-radius: 99px; margin: 0 auto; overflow: hidden; }
+.splash-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent3), var(--accent2)); border-radius: 99px; transition: width .05s; animation: fill-bar 1.8s ease-out forwards; }
+@keyframes fill-bar { 0%{width:0%} 100%{width:100%} }
+.splash-label { font-size: 11px; color: var(--dimmer); margin-top: 10px; font-family: var(--mono); }
 
-/* ── LAYOUT ── */
-#layout{display:flex;flex:1;overflow:hidden}
+/* ═══════════════════════════════
+   TITLE BAR  (macOS-ish)
+   ═══════════════════════════════ */
+#titlebar {
+  background: linear-gradient(180deg, #2a2a30 0%, #222228 100%);
+  border-bottom: 1px solid var(--border);
+  height: 38px; display: flex; align-items: center;
+  padding: 0 16px; gap: 0; flex-shrink: 0;
+  -webkit-app-region: drag;
+}
+.win-btn-group { display: flex; gap: 7px; margin-right: 18px; }
+.win-btn { width: 13px; height: 13px; border-radius: 50%; cursor: pointer; transition: filter .15s; }
+.win-btn:hover { filter: brightness(1.3); }
+.wb-close  { background: #ff5f57; }
+.wb-min    { background: #febc2e; }
+.wb-max    { background: #28c840; }
+.tb-logo   { font-size: 15px; margin-right: 6px; }
+.tb-appname { font-size: 12px; font-weight: 600; color: #c8c8d0; letter-spacing: .2px; margin-right: 24px; }
+.mnu { padding: 0 10px; height: 100%; display: flex; align-items: center; font-size: 12px; color: #a0a0b0; cursor: pointer; border-radius: 4px; -webkit-app-region: no-drag; }
+.mnu:hover { background: rgba(255,255,255,.07); color: var(--bright); }
 
-/* ── OE ── */
-#oe{width:250px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;transition:width .2s}
-#oe-hdr{background:#333335;padding:5px 10px;font-size:11px;font-weight:700;letter-spacing:.4px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
-#oe-hdr span{cursor:pointer;opacity:.6;font-weight:400}
-#oe-search{padding:4px 6px;border-bottom:1px solid var(--border);flex-shrink:0}
-#oe-search input{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:3px 7px;font-size:11px;border-radius:2px;outline:0}
-#oe-search input:focus{border-color:var(--accent)}
-#oe-tree{flex:1;overflow-y:auto;overflow-x:hidden}
+/* ═══════════════════════════════
+   TOOLBAR
+   ═══════════════════════════════ */
+#toolbar {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  height: 36px; display: flex; align-items: center;
+  padding: 0 10px; gap: 2px; flex-shrink: 0;
+}
+.tb {
+  background: 0; border: 1px solid transparent; color: var(--dim);
+  padding: 0 9px; height: 26px; cursor: pointer; border-radius: 5px;
+  font: 500 11px var(--sans); display: flex; align-items: center; gap: 5px;
+  transition: all .12s; white-space: nowrap;
+}
+.tb:hover:not(:disabled) { background: var(--bg4); border-color: var(--border2); color: var(--text); }
+.tb:disabled { opacity: .35; cursor: default; }
+.tb.run {
+  background: linear-gradient(135deg, #1a6e28, #28a745);
+  color: #fff; border-color: #2dbd4e;
+  box-shadow: 0 1px 6px rgba(40,167,69,.3);
+}
+.tb.run:hover:not(:disabled) { background: linear-gradient(135deg, #1e8030, #2fc052); box-shadow: 0 1px 10px rgba(40,167,69,.5); }
+.tb-sep { width: 1px; height: 20px; background: var(--border); margin: 0 5px; }
+.db-sel {
+  background: var(--bg3); border: 1px solid var(--border2); color: var(--text);
+  padding: 0 10px; height: 26px; font: 11px var(--sans); border-radius: 5px;
+  min-width: 165px; cursor: pointer; outline: 0;
+}
+.db-sel:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--glow); }
+.tb-connect-btn {
+  background: linear-gradient(135deg, var(--accent3), var(--accent));
+  color: #fff; border: 1px solid var(--accent2);
+  box-shadow: 0 1px 6px var(--glow);
+}
+.tb-connect-btn:hover { box-shadow: 0 1px 12px rgba(10,132,255,.5); filter: brightness(1.1); }
 
-.nd{user-select:none}
-.nr{display:flex;align-items:center;padding:2px 0;padding-left:var(--d,4px);cursor:pointer;white-space:nowrap;border:1px solid transparent;transition:background .08s}
-.nr:hover{background:#2a2d2e}
-.nr.sel{background:#094771}
-.nr.hl{animation:hl .7s ease-in-out 3}
-@keyframes hl{0%,100%{background:#0e3a5c}50%{background:#1464a0}}
-.nr.clickable-hint{border-color:#007acc55;background:#0d1f2d}
-.nr.clickable-hint:hover{border-color:var(--accent);background:#0e2a3d}
-.ea{width:14px;font-size:9px;color:var(--dim);text-align:center;flex-shrink:0;transition:transform .15s}
-.ea.op{transform:rotate(90deg)}
-.ni{font-size:12px;margin:0 4px;flex-shrink:0}
-.nl{font-size:12px;overflow:hidden;text-overflow:ellipsis;flex:1}
-.nc{display:none}
-.nc.op{display:block}
+/* ═══════════════════════════════
+   LAYOUT
+   ═══════════════════════════════ */
+#layout { display: flex; flex: 1; overflow: hidden; }
 
-/* ── EDITOR AREA ── */
-#ea{flex:1;display:flex;flex-direction:column;overflow:hidden}
-#tabs{background:var(--bg3);border-bottom:1px solid var(--border);display:flex;align-items:flex-end;height:26px;padding:0 4px;gap:2px;flex-shrink:0}
-.tab{padding:3px 14px;background:#3c3c3c;border:1px solid var(--border);border-bottom:none;font-size:11px;color:var(--dim);border-radius:3px 3px 0 0;cursor:pointer}
-.tab.on{background:var(--bg);color:var(--bright);border-bottom:1px solid var(--bg)}
-#qe{flex:1;display:flex;overflow:hidden;position:relative}
-#lnum{background:#1e1e1e;padding:12px 6px 12px 0;text-align:right;color:#444;font:13px/1.6 Consolas,monospace;min-width:36px;border-right:1px solid #2a2a2a;flex-shrink:0;overflow:hidden}
-#cwrap{flex:1;padding:12px;overflow:auto;position:relative}
-#prog{position:absolute;top:0;left:0;right:0;height:3px;display:none;background:linear-gradient(90deg,var(--accent),#56c4ff,var(--accent));background-size:200%;animation:pg 1s linear infinite}
-@keyframes pg{0%{background-position:0}100%{background-position:200%}}
-#code{white-space:pre;font:13px/1.6 Consolas,monospace}
-#cur{display:inline-block;width:2px;height:15px;background:#aeafad;animation:bl 1s step-end infinite;vertical-align:text-bottom}
-@keyframes bl{0%,100%{opacity:1}50%{opacity:0}}
+/* ═══════════════════════════════
+   OBJECT EXPLORER
+   ═══════════════════════════════ */
+#oe {
+  width: 262px; background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; flex-shrink: 0;
+}
+#oe-hdr {
+  background: linear-gradient(180deg, var(--bg3) 0%, var(--bg2) 100%);
+  padding: 7px 12px; font: 600 11px var(--sans); letter-spacing: .5px;
+  color: #9090a0; border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  flex-shrink: 0; text-transform: uppercase;
+}
+#oe-hdr .refresh { cursor: pointer; opacity: .5; font-size: 13px; transition: opacity .15s, transform .3s; }
+#oe-hdr .refresh:hover { opacity: 1; transform: rotate(180deg); }
+#oe-search { padding: 6px 8px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+#oe-search input {
+  width: 100%; background: var(--bg); border: 1px solid var(--border);
+  color: var(--text); padding: 4px 9px; font: 11px var(--sans);
+  border-radius: 6px; outline: 0; transition: border-color .15s, box-shadow .15s;
+}
+#oe-search input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--glow); }
+#oe-tree { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 4px 0; }
 
-.kw{color:var(--kw)}.fn{color:var(--fn)}.str{color:var(--str)}.num{color:var(--num)}.cmt{color:var(--cmt)}.tbl{color:var(--tbl)}.op{color:var(--op)}
+.nd { user-select: none; }
+.nr {
+  display: flex; align-items: center; padding: 3px 0;
+  padding-left: var(--d, 6px); cursor: pointer;
+  white-space: nowrap; border-left: 2px solid transparent;
+  transition: background .08s, border-color .08s;
+}
+.nr:hover { background: rgba(255,255,255,.04); }
+.nr.sel { background: rgba(10,132,255,.15); border-left-color: var(--accent); }
+.nr.hl  { animation: node-hl .65s ease-in-out 4; }
+@keyframes node-hl { 0%,100%{background:rgba(10,132,255,.12)} 50%{background:rgba(10,132,255,.28)} }
+.nr.hint-click {
+  border: 1px solid rgba(10,132,255,.5);
+  background: rgba(10,132,255,.08);
+  border-left: 2px solid var(--accent);
+  border-radius: 4px;
+}
+.ea { width: 14px; font-size: 8px; color: var(--dimmer); text-align: center; flex-shrink: 0; transition: transform .15s; }
+.ea.op { transform: rotate(90deg); }
+.ni { font-size: 13px; margin: 0 5px 0 2px; flex-shrink: 0; }
+.nl { font-size: 12px; font-family: var(--sans); overflow: hidden; text-overflow: ellipsis; flex: 1; color: var(--text); }
+.nl.schema { color: var(--tbl); }
+.nl.sp-name { color: var(--fn); }
+.nl.view-name { color: var(--purple); }
+.nc { display: none; }
+.nc.op { display: block; }
 
-/* ── SP PANEL ── */
-#spp{display:none;background:#1a2418;border-top:1px solid #3a5a3a;padding:8px 14px;flex-shrink:0}
-#spp h4{font-size:11px;color:var(--tbl);margin-bottom:7px}
-.sprow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.spf{display:flex;align-items:center;gap:5px;font-size:11px}
-.spf label{color:var(--op);white-space:nowrap}
-.spf input{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:3px 7px;border-radius:2px;font:11px Consolas;width:130px;outline:0}
-.spf input:focus{border-color:var(--accent)}
-.btnsp{background:#388a34;color:#fff;border:none;padding:5px 14px;border-radius:3px;cursor:pointer;font-size:11px;margin-top:6px}
-.btnsp:hover{background:#2d7429}
+/* ═══════════════════════════════
+   EDITOR AREA
+   ═══════════════════════════════ */
+#ea { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
-/* ── RESULTS ── */
-#rp{height:200px;border-top:1px solid var(--border);display:flex;flex-direction:column;background:var(--bg2);flex-shrink:0}
-#rtabs{display:flex;align-items:center;background:#2d2d30;border-bottom:1px solid var(--border);flex-shrink:0}
-.rt{padding:4px 14px;font-size:11px;cursor:pointer;color:var(--dim);border-right:1px solid var(--border)}
-.rt.on{background:var(--bg2);color:var(--bright)}
-#rcount{margin-left:auto;padding:0 10px;font-size:10px;color:var(--dim)}
-#rc{flex:1;overflow:auto}
-#rg{width:100%;border-collapse:collapse;font:12px Consolas,monospace;display:none}
-#rg th{background:#16213e;color:var(--op);padding:3px 10px;border:1px solid #333;text-align:left;font-weight:400;font-size:11px;position:sticky;top:0;z-index:1}
-#rg td{padding:2px 10px;border:1px solid #2a2a2a;color:var(--text)}
-#rg tr:nth-child(even) td{background:#1c1c1c}
-#rg tr:hover td{background:#2a2d2e}
-.fr td{animation:fr .5s ease-out}
-@keyframes fr{from{background:#0d3320}to{background:transparent}}
-#mp{padding:10px 14px;font:12px Consolas,monospace;display:none}
-.mok{color:var(--tbl)}.merr{color:var(--red)}.minf{color:var(--op)}
+#tabs {
+  background: var(--bg3); border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-end; height: 32px; padding: 0 8px; gap: 2px;
+  flex-shrink: 0;
+}
+.tab {
+  padding: 5px 16px; background: var(--bg4); border: 1px solid var(--border);
+  border-bottom: none; font: 500 11px var(--sans); color: var(--dim);
+  border-radius: 6px 6px 0 0; cursor: pointer;
+  transition: color .15s, background .15s;
+}
+.tab.on { background: var(--bg); color: var(--bright); border-color: var(--border2); border-bottom: 1px solid var(--bg); }
 
-/* ── STATUS ── */
-#sb{background:var(--accent);color:#fff;height:22px;display:flex;align-items:center;padding:0 12px;font-size:11px;gap:16px;flex-shrink:0}
-#sbr{margin-left:auto;display:flex;gap:14px;opacity:.9}
+#qe { flex: 1; display: flex; overflow: hidden; }
+#lnum {
+  background: var(--bg); padding: 14px 8px 14px 4px; text-align: right;
+  color: var(--dimmer); font: 12px/1.65 var(--mono); min-width: 40px;
+  border-right: 1px solid var(--border); flex-shrink: 0; overflow: hidden;
+  selection: none;
+}
+#cwrap { flex: 1; padding: 14px 16px; overflow: auto; position: relative; }
+#prog {
+  position: absolute; top: 0; left: 0; right: 0; height: 2px; display: none;
+  background: linear-gradient(90deg, var(--accent3), var(--accent2), var(--tbl));
+  background-size: 200%; animation: pg 1.2s ease infinite;
+}
+@keyframes pg { 0%{background-position:0%} 100%{background-position:200%} }
+#code { white-space: pre; font: 13px/1.65 var(--mono); }
+#cur { display: inline-block; width: 2px; height: 14px; background: var(--accent2); animation: bl 1s step-end infinite; vertical-align: text-bottom; }
+@keyframes bl { 0%,100%{opacity:1} 50%{opacity:0} }
 
-/* ── CONNECT DIALOG ── */
-#dlg{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:300}
-.dbox{background:#2d2d30;border:1px solid #555;border-radius:4px;width:440px;box-shadow:0 16px 48px rgba(0,0,0,.8)}
-.dttl{background:#3c3f41;padding:9px 14px;font-size:13px;font-weight:700;border-bottom:1px solid #555;display:flex;align-items:center;gap:8px}
-.dbody{padding:18px}
-.df{margin-bottom:12px}
-.df label{display:block;font-size:11px;color:var(--dim);margin-bottom:4px}
-.df input,.df select{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:2px;font:12px Consolas;outline:0}
-.df input.focus,.df input:focus{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
-.dfoot{padding:10px 14px;background:#3c3f41;border-top:1px solid #555;display:flex;justify-content:flex-end;gap:8px}
-.btncon{background:var(--accent);color:#fff;border:none;padding:6px 18px;border-radius:3px;cursor:pointer;font-size:12px}
-.btncon:disabled{opacity:.6}
-.btndlg{background:#5a5a5a;color:var(--text);border:1px solid #666;padding:6px 14px;border-radius:3px;cursor:pointer;font-size:12px}
-@keyframes sp{to{transform:rotate(360deg)}}
-.spin{width:12px;height:12px;border:2px solid #444;border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;display:inline-block;vertical-align:middle;margin-right:5px}
+/* syntax */
+.kw  { color: var(--kw); }
+.fn  { color: var(--fn); }
+.str { color: var(--str); }
+.num { color: var(--num); }
+.cmt { color: var(--cmt); font-style: italic; }
+.tbl { color: var(--tbl); }
+.op  { color: var(--op); }
 
-/* ── TUTORIAL CARD ── */
-#tov{position:fixed;inset:0;pointer-events:none;z-index:600}
-#spl{position:absolute;border-radius:3px;box-shadow:0 0 0 9999px rgba(0,0,0,.55);border:2px solid var(--accent);transition:all .35s cubic-bezier(.4,0,.2,1);pointer-events:none;display:none}
-#tc{position:absolute;background:#0c1a2a;border:1px solid var(--accent);border-radius:8px;padding:16px 18px;width:320px;box-shadow:0 12px 40px rgba(0,0,0,.75);pointer-events:all;transition:top .3s,left .3s}
-#tc h3{font-size:13px;color:var(--op);margin-bottom:8px;display:flex;align-items:center;gap:7px}
-.tbg{background:var(--accent);color:#fff;border-radius:10px;padding:2px 8px;font-size:10px;font-weight:700;flex-shrink:0}
-#tc p{font-size:12px;color:var(--text);line-height:1.65;margin-bottom:12px}
-#tc code{background:#050d15;padding:1px 5px;border-radius:3px;font-family:Consolas;color:var(--tbl);font-size:11px}
-#tc kbd{background:#3a3a3a;border:1px solid #555;border-radius:3px;padding:1px 5px;font:11px Consolas;color:#eee}
-.tnav{display:flex;align-items:center;gap:7px}
-.btnn{background:var(--accent);color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:700}
-.btnn:hover{background:var(--accent2)}
-.btnsk{background:0;color:var(--dim);border:1px solid #555;padding:5px 10px;border-radius:4px;cursor:pointer;font-size:11px}
-.btnsk:hover{color:var(--text)}
-.tdots{display:flex;gap:5px;margin-left:auto}
-.tdot{width:6px;height:6px;border-radius:50%;background:#444;transition:background .2s}
-.tdot.on{background:var(--accent)}
+/* ═══════════════════════════════
+   SP PANEL
+   ═══════════════════════════════ */
+#spp {
+  display: none; background: linear-gradient(180deg, #0f1e14 0%, #111811 100%);
+  border-top: 1px solid #2a4a2a; padding: 10px 16px; flex-shrink: 0;
+}
+#spp h4 { font: 600 11px var(--sans); color: var(--tbl); margin-bottom: 8px; letter-spacing: .3px; }
+.sprow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.spf { display: flex; align-items: center; gap: 6px; font-size: 11px; }
+.spf label { color: var(--op); font-family: var(--mono); white-space: nowrap; font-size: 11px; }
+.spf input {
+  background: var(--bg); border: 1px solid var(--border2); color: var(--text);
+  padding: 3px 8px; border-radius: 5px; font: 11px var(--mono); width: 130px; outline: 0;
+  transition: border-color .15s, box-shadow .15s;
+}
+.spf input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--glow); }
+.btnsp {
+  background: linear-gradient(135deg, #1a6e28, #28a745);
+  color: #fff; border: 1px solid #2dbd4e; padding: 5px 16px;
+  border-radius: 6px; cursor: pointer; font: 600 11px var(--sans); margin-top: 8px;
+  transition: all .15s; box-shadow: 0 2px 8px rgba(40,167,69,.25);
+}
+.btnsp:hover { filter: brightness(1.15); box-shadow: 0 2px 14px rgba(40,167,69,.4); }
 
-/* ── ACTION HINT ── */
-.action-hint{position:fixed;background:#1a2a1a;border:1px solid var(--tbl);border-radius:20px;padding:5px 14px;font-size:11px;color:var(--tbl);pointer-events:none;z-index:650;animation:bounce .6s ease-in-out infinite alternate;display:none}
-@keyframes bounce{0%{transform:translateY(0)}100%{transform:translateY(-4px)}}
-#arrow{position:fixed;pointer-events:none;z-index:650;display:none;animation:pulse-arr .8s ease-in-out infinite alternate}
-@keyframes pulse-arr{0%{opacity:.6;transform:scale(.9)}100%{opacity:1;transform:scale(1.05)}}
+/* ═══════════════════════════════
+   RESULTS PANEL
+   ═══════════════════════════════ */
+#rp {
+  height: 210px; border-top: 1px solid var(--border);
+  display: flex; flex-direction: column; background: var(--bg2); flex-shrink: 0;
+}
+#rtabs { display: flex; align-items: center; background: var(--bg3); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.rt { padding: 5px 16px; font: 500 11px var(--sans); cursor: pointer; color: var(--dim); border-right: 1px solid var(--border); transition: color .15s, background .15s; }
+.rt.on { background: var(--bg2); color: var(--bright); border-bottom: 1px solid var(--bg2); }
+#rcount { margin-left: auto; padding: 0 12px; font: 11px var(--mono); color: var(--dimmer); }
+#rc { flex: 1; overflow: auto; }
+#rg { width: 100%; border-collapse: collapse; font: 11.5px var(--mono); display: none; }
+#rg th {
+  background: linear-gradient(180deg, #151f30 0%, #101828 100%);
+  color: var(--op); padding: 4px 12px; border: 1px solid #1e2a3a;
+  text-align: left; font-weight: 500; font-size: 11px;
+  position: sticky; top: 0; z-index: 1;
+}
+#rg td { padding: 3px 12px; border: 1px solid #1e1e24; color: var(--text); }
+#rg tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+#rg tr:hover td { background: rgba(10,132,255,.08); }
+.fr td { animation: fr .4s ease-out; }
+@keyframes fr { from { background: rgba(48,209,88,.12); } to {} }
+#mp { padding: 12px 16px; font: 12px var(--mono); display: none; line-height: 1.7; }
+.mok  { color: var(--green); }
+.merr { color: var(--red); }
+.minf { color: var(--op); }
 
-::-webkit-scrollbar{width:8px;height:8px}
-::-webkit-scrollbar-track{background:var(--bg2)}
-::-webkit-scrollbar-thumb{background:#555;border-radius:4px}
+/* ═══════════════════════════════
+   STATUS BAR
+   ═══════════════════════════════ */
+#sb {
+  background: linear-gradient(90deg, var(--accent3) 0%, var(--accent) 100%);
+  color: #fff; height: 24px; display: flex; align-items: center;
+  padding: 0 14px; font: 11px var(--sans); gap: 20px; flex-shrink: 0;
+}
+#sb .sb-sep { width: 1px; height: 14px; background: rgba(255,255,255,.2); }
+#sbr { margin-left: auto; display: flex; gap: 18px; opacity: .88; }
+
+/* ═══════════════════════════════
+   CONNECT DIALOG
+   ═══════════════════════════════ */
+#dlg {
+  position: fixed; inset: 0; background: rgba(0,0,0,.7);
+  backdrop-filter: blur(4px);
+  display: none; align-items: center; justify-content: center; z-index: 300;
+}
+.dbox {
+  background: linear-gradient(180deg, #232328 0%, #1c1c22 100%);
+  border: 1px solid var(--border2); border-radius: 12px; width: 440px;
+  box-shadow: 0 24px 64px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.04);
+  overflow: hidden;
+}
+.dttl {
+  background: linear-gradient(180deg, #2c2c34 0%, #242428 100%);
+  padding: 14px 18px; font: 600 13px var(--sans); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px; color: var(--bright);
+}
+.dttl .icon { font-size: 18px; }
+.dbody { padding: 20px 18px; }
+.df { margin-bottom: 14px; }
+.df label { display: block; font: 500 11px var(--sans); color: var(--dim); margin-bottom: 5px; letter-spacing: .2px; }
+.df input, .df select {
+  width: 100%; background: var(--bg); border: 1px solid var(--border2);
+  color: var(--text); padding: 7px 10px; border-radius: 7px; font: 12px var(--mono); outline: 0;
+  transition: border-color .15s, box-shadow .15s;
+}
+.df input:focus, .df select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
+.df input.typing { border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
+.dfoot {
+  padding: 12px 18px; background: rgba(0,0,0,.2);
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: flex-end; gap: 8px;
+}
+.btncon {
+  background: linear-gradient(135deg, var(--accent3), var(--accent));
+  color: #fff; border: none; padding: 8px 22px; border-radius: 7px;
+  cursor: pointer; font: 600 12px var(--sans);
+  box-shadow: 0 2px 12px var(--glow); transition: all .15s;
+}
+.btncon:hover { filter: brightness(1.15); box-shadow: 0 4px 20px var(--glow); }
+.btncon:disabled { opacity: .6; }
+.btndlg {
+  background: var(--bg4); color: var(--dim); border: 1px solid var(--border2);
+  padding: 8px 16px; border-radius: 7px; cursor: pointer; font: 500 12px var(--sans);
+  transition: all .12s;
+}
+.btndlg:hover { color: var(--text); background: var(--bg5); }
+@keyframes sp { to { transform: rotate(360deg); } }
+.spin { width: 12px; height: 12px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: sp .7s linear infinite; display: inline-block; vertical-align: middle; margin-right: 6px; }
+
+/* ═══════════════════════════════
+   TUTORIAL OVERLAY
+   ═══════════════════════════════ */
+#tov { position: fixed; inset: 0; pointer-events: none; z-index: 600; }
+#spl {
+  position: absolute; border-radius: 6px;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,.6);
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 0 9999px rgba(0,0,0,.6), 0 0 20px 4px var(--glow);
+  transition: all .35s cubic-bezier(.4,0,.2,1); display: none; pointer-events: none;
+}
+#tc {
+  position: absolute;
+  background: linear-gradient(145deg, #0e1e32 0%, #0a1420 100%);
+  border: 1px solid rgba(10,132,255,.4);
+  border-radius: 12px; padding: 18px 20px; width: 330px;
+  box-shadow: 0 16px 48px rgba(0,0,0,.8), 0 0 0 1px rgba(10,132,255,.1), inset 0 1px 0 rgba(255,255,255,.05);
+  pointer-events: all; transition: top .3s cubic-bezier(.4,0,.2,1), left .3s cubic-bezier(.4,0,.2,1);
+  backdrop-filter: blur(12px);
+}
+#tc::before {
+  content: ''; position: absolute; top: 0; left: 20px; right: 20px; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(10,132,255,.5), transparent);
+}
+#tc h3 { font: 700 13px var(--sans); color: var(--bright); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.tbg {
+  background: linear-gradient(135deg, var(--accent3), var(--accent));
+  color: #fff; border-radius: 20px; padding: 2px 9px;
+  font: 700 10px var(--sans); flex-shrink: 0;
+  box-shadow: 0 2px 8px var(--glow);
+}
+#tc p { font: 400 12px var(--sans); color: #b0b8c8; line-height: 1.7; margin-bottom: 14px; }
+#tc b { color: var(--bright); font-weight: 600; }
+#tc kbd {
+  background: var(--bg4); border: 1px solid var(--border2);
+  border-radius: 4px; padding: 1px 6px; font: 11px var(--mono); color: #dde;
+  box-shadow: 0 1px 0 rgba(0,0,0,.4);
+}
+#tc code { background: rgba(255,255,255,.07); padding: 1px 6px; border-radius: 4px; font: 11px var(--mono); color: var(--tbl); }
+.tnav { display: flex; align-items: center; gap: 8px; }
+.btnn {
+  background: linear-gradient(135deg, var(--accent3), var(--accent));
+  color: #fff; border: none; padding: 7px 18px; border-radius: 7px;
+  cursor: pointer; font: 600 12px var(--sans);
+  box-shadow: 0 2px 10px var(--glow); transition: all .15s;
+}
+.btnn:hover { filter: brightness(1.12); box-shadow: 0 4px 18px var(--glow); }
+.btnsk { background: 0; color: var(--dimmer); border: 1px solid var(--border); padding: 6px 12px; border-radius: 7px; cursor: pointer; font: 500 11px var(--sans); transition: all .15s; }
+.btnsk:hover { color: var(--dim); border-color: var(--border2); }
+.tdots { display: flex; gap: 5px; margin-left: auto; }
+.tdot { width: 6px; height: 6px; border-radius: 50%; background: var(--bg5); transition: all .2s; }
+.tdot.on { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+
+/* ═══════════════════════════════
+   ACTION HINTS
+   ═══════════════════════════════ */
+#hint {
+  position: fixed; background: linear-gradient(135deg, #0a2a0a, #112211);
+  border: 1px solid var(--green); border-radius: 20px;
+  padding: 5px 14px; font: 600 11px var(--sans); color: var(--green);
+  pointer-events: none; z-index: 700;
+  box-shadow: 0 4px 20px rgba(48,209,88,.3);
+  animation: bounce .6s ease-in-out infinite alternate; display: none;
+}
+@keyframes bounce { 0%{transform:translateY(0)} 100%{transform:translateY(-5px)} }
+#arrow {
+  position: fixed; pointer-events: none; z-index: 700;
+  font-size: 18px; display: none;
+  animation: pulse-a .7s ease-in-out infinite alternate;
+  filter: drop-shadow(0 0 6px var(--green));
+}
+@keyframes pulse-a { 0%{transform:scale(.85) translateY(0)} 100%{transform:scale(1.1) translateY(-3px)} }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bg5); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border2); }
 </style>
 </head>
 <body>
 
+<!-- SPLASH SCREEN -->
+<div id="splash">
+  <div class="splash-inner">
+    <div class="splash-logo">🗄️</div>
+    <div class="splash-title">Yafes Pars SSMS</div>
+    <div class="splash-sub">Sigorta Yönetim Sistemi · İnteraktif Tutorial</div>
+    <div class="splash-bar"><div class="splash-fill"></div></div>
+    <div class="splash-label">SQL Server 2022 bağlantısı hazırlanıyor...</div>
+  </div>
+</div>
+
 <!-- CONNECT DIALOG -->
 <div id="dlg">
   <div class="dbox">
-    <div class="dttl">🗄️ Sunucuya Bağlan — SQL Server</div>
+    <div class="dttl"><span class="icon">🔐</span> Sunucuya Bağlan — SQL Server</div>
     <div class="dbody">
       <div class="df"><label>Sunucu Türü</label><select><option>Veritabanı Altyapısı</option></select></div>
       <div class="df"><label>Sunucu Adı</label><input id="fs" type="text" autocomplete="off" placeholder="sunucu adı veya IP"></div>
@@ -167,28 +464,34 @@ body{font-family:'Segoe UI',Consolas,sans-serif;background:var(--bg);color:var(-
     </div>
     <div class="dfoot">
       <button class="btndlg" onclick="closeDlg()">İptal</button>
-      <button class="btncon" id="bcon">Bağlan</button>
+      <button class="btncon" id="bcon">🔌 Bağlan</button>
     </div>
   </div>
 </div>
 
-<!-- TITLE / MENU BAR -->
+<!-- TITLE BAR -->
 <div id="titlebar">
-  <div id="titlebar-logo">Microsoft SQL Server Management Studio</div>
+  <div class="win-btn-group">
+    <div class="win-btn wb-close"></div>
+    <div class="win-btn wb-min"></div>
+    <div class="win-btn wb-max"></div>
+  </div>
+  <span class="tb-logo">🗄️</span>
+  <span class="tb-appname">Microsoft SQL Server Management Studio 20</span>
   <div class="mnu">Dosya</div><div class="mnu">Düzen</div><div class="mnu">Görünüm</div>
-  <div class="mnu">Sorgu</div><div class="mnu">Proje</div><div class="mnu">Araçlar</div>
-  <div class="mnu">Pencere</div><div class="mnu">Yardım</div>
+  <div class="mnu">Sorgu</div><div class="mnu">Proje</div>
+  <div class="mnu">Araçlar</div><div class="mnu">Pencere</div><div class="mnu">Yardım</div>
 </div>
 
 <!-- TOOLBAR -->
 <div id="toolbar">
-  <button class="tb" title="Yeni Sorgu" id="tb-new">📄 Yeni Sorgu</button>
+  <button class="tb" title="Yeni Sorgu">📄 Yeni</button>
   <button class="tb" title="Aç">📂</button>
   <button class="tb" title="Kaydet">💾</button>
   <div class="tb-sep"></div>
   <button class="tb run" id="tb-run" title="Çalıştır (F5)" disabled>▶ Çalıştır</button>
   <button class="tb" title="Durdur" disabled>⏹</button>
-  <button class="tb" title="Ayrıştır" disabled>✓</button>
+  <button class="tb" title="Ayrıştır" disabled>✓ Ayrıştır</button>
   <div class="tb-sep"></div>
   <select class="db-sel" id="dbs">
     <option value="">— Veritabanı Seçin —</option>
@@ -196,15 +499,15 @@ body{font-family:'Segoe UI',Consolas,sans-serif;background:var(--bg);color:var(-
     <option value="YafesPars">YafesPars</option>
   </select>
   <div class="tb-sep"></div>
-  <button class="tb" title="Bağlan" id="tb-connect">🔌 Bağlan</button>
+  <button class="tb tb-connect-btn" id="tb-connect">🔌 Bağlan</button>
 </div>
 
-<!-- LAYOUT -->
+<!-- MAIN LAYOUT -->
 <div id="layout">
 
   <!-- OBJECT EXPLORER -->
   <div id="oe">
-    <div id="oe-hdr">Nesne Gezgini <span title="Yenile">↻</span></div>
+    <div id="oe-hdr">Nesne Gezgini <span class="refresh" title="Yenile">↻</span></div>
     <div id="oe-search"><input id="oe-q" placeholder="🔍 Nesne ara..." oninput="filterTree(this.value)"></div>
     <div id="oe-tree"></div>
   </div>
@@ -250,11 +553,14 @@ body{font-family:'Segoe UI',Consolas,sans-serif;background:var(--bg);color:var(-
 
 <!-- STATUS BAR -->
 <div id="sb">
-  <span id="sc">● Bağlı değil</span>
+  <span id="sc">⬤ Bağlı değil</span>
+  <div class="sb-sep"></div>
   <span id="sd"></span>
   <div id="sbr">
     <span id="et"></span>
+    <div class="sb-sep"></div>
     <span>Sat 1, Stn 1</span>
+    <div class="sb-sep"></div>
     <span>INS</span>
   </div>
 </div>
@@ -273,38 +579,50 @@ body{font-family:'Segoe UI',Consolas,sans-serif;background:var(--bg);color:var(-
   </div>
 </div>
 
-<!-- ACTION HINT -->
-<div class="action-hint" id="hint"></div>
+<!-- HINTS -->
+<div id="hint"></div>
 <div id="arrow">👆</div>
 
 <script>
-// ─── DATA ───────────────────────────────────────────────
-const TREE = [{id:'svr',l:'yafespars-sql.database.windows.net',i:'🖥️',kids:[
+// ─── DATA ────────────────────────────────────────────────
+const TREE=[{id:'svr',l:'yafespars-sql.database.windows.net',i:'🖥️',kids:[
   {id:'dbs-n',l:'Veritabanları',i:'📁',kids:[
     {id:'yf',l:'YafesPars',i:'🗄️',kids:[
       {id:'tbls',l:'Tablolar',i:'📁',kids:[
-        {id:'tnp',l:'person.NaturalPersons',i:'📋'},{id:'tlp',l:'person.LegalPersons',i:'📋'},
-        {id:'tadr',l:'person.Addresses',i:'📋'},{id:'tcon',l:'policy.Contracts',i:'📋'},
-        {id:'tpar',l:'policy.ContractParties',i:'📋'},{id:'tobj',l:'policy.ContractObjects',i:'📋'},
-        {id:'tclm',l:'claim.Claims',i:'📋'},{id:'tpay',l:'claim.Payments',i:'📋'},
-        {id:'ttsk',l:'task.Tasks',i:'📋'},{id:'tten',l:'tenant.Tenants',i:'📋'},
+        {id:'tnp', l:'person.NaturalPersons',  i:'📋',cls:'schema'},
+        {id:'tlp', l:'person.LegalPersons',    i:'📋',cls:'schema'},
+        {id:'tadr',l:'person.Addresses',       i:'📋',cls:'schema'},
+        {id:'tcon',l:'policy.Contracts',       i:'📋',cls:'schema'},
+        {id:'tpar',l:'policy.ContractParties', i:'📋',cls:'schema'},
+        {id:'tobj',l:'policy.ContractObjects', i:'📋',cls:'schema'},
+        {id:'tclm',l:'claim.Claims',           i:'📋',cls:'schema'},
+        {id:'tpay',l:'claim.Payments',         i:'📋',cls:'schema'},
+        {id:'ttsk',l:'task.Tasks',             i:'📋',cls:'schema'},
+        {id:'tten',l:'tenant.Tenants',         i:'📋',cls:'schema'},
       ]},
       {id:'vws',l:'Görünümler',i:'📁',kids:[
-        {id:'vps',l:'reporting.PolicySummary',i:'👁️'},{id:'vcs',l:'reporting.ClaimSummary',i:'👁️'},
+        {id:'vps',l:'reporting.PolicySummary',i:'👁️',cls:'view-name'},
+        {id:'vcs',l:'reporting.ClaimSummary', i:'👁️',cls:'view-name'},
       ]},
       {id:'sps',l:'Saklı Yordamlar',i:'📁',kids:[
-        {id:'sp-np',l:'SP_CreateNaturalPerson',i:'⚙️'},{id:'sp-lp',l:'SP_CreateLegalPerson',i:'⚙️'},
-        {id:'sp-co',l:'SP_CreateContract',i:'⚙️'},{id:'sp-cl',l:'SP_CreateClaim',i:'⚙️'},
-        {id:'sp-cc',l:'SP_CloseClaim',i:'⚙️'},{id:'sp-tk',l:'SP_CreateTask',i:'⚙️'},
+        {id:'sp-np',l:'SP_CreateNaturalPerson',i:'⚙️',cls:'sp-name'},
+        {id:'sp-lp',l:'SP_CreateLegalPerson',  i:'⚙️',cls:'sp-name'},
+        {id:'sp-co',l:'SP_CreateContract',     i:'⚙️',cls:'sp-name'},
+        {id:'sp-cl',l:'SP_CreateClaim',        i:'⚙️',cls:'sp-name'},
+        {id:'sp-cc',l:'SP_CloseClaim',         i:'⚙️',cls:'sp-name'},
+        {id:'sp-tk',l:'SP_CreateTask',         i:'⚙️',cls:'sp-name'},
       ]},
-      {id:'idx',l:'İndeksler',i:'📁',kids:[]},{id:'sec',l:'Güvenlik',i:'📁',kids:[]},
+      {id:'idx',l:'İndeksler', i:'📁',kids:[]},
+      {id:'sec',l:'Güvenlik',  i:'📁',kids:[]},
     ]},
-    {id:'mst',l:'master',i:'🗄️',kids:[]},{id:'tdb',l:'tempdb',i:'🗄️',kids:[]},
+    {id:'mst',l:'master', i:'🗄️',kids:[]},
+    {id:'tdb',l:'tempdb', i:'🗄️',kids:[]},
   ]},
-  {id:'sec2',l:'Güvenlik',i:'📁',kids:[]},{id:'mgmt',l:'Yönetim',i:'📁',kids:[]},
+  {id:'sec2',l:'Güvenlik',i:'📁',kids:[]},
+  {id:'mgmt',l:'Yönetim', i:'📁',kids:[]},
 ]}];
 
-const DATA = {
+const DATA={
   tnp:{cols:['PersonId','TenantId','FirstName','LastName','NationalId','BirthDate','CreatedAt'],
     rows:[['8a1f2c3d','tenant-001','Ahmet','Yılmaz','12345678901','1985-03-15','2024-01-10 09:15'],
           ['9b2e3f4a','tenant-001','Fatma','Kaya','98765432109','1990-07-22','2024-01-11 14:32'],
@@ -332,19 +650,17 @@ const DATA = {
 };
 
 // ─── TREE ────────────────────────────────────────────────
-const oeTree = document.getElementById('oe-tree');
-function mkTree(nodes, depth){
-  const f = document.createDocumentFragment();
-  nodes.forEach(n => {
-    const hasK = n.kids && n.kids.length;
-    const wrap = document.createElement('div');
-    wrap.className='nd'; wrap.id='nd-'+n.id;
-    const row = document.createElement('div');
-    row.className='nr'; row.id='row-'+n.id;
-    row.style.setProperty('--d',(depth*16+4)+'px');
+const oeTree=document.getElementById('oe-tree');
+function mkTree(nodes,depth){
+  const f=document.createDocumentFragment();
+  nodes.forEach(n=>{
+    const hasK=n.kids&&n.kids.length;
+    const wrap=document.createElement('div'); wrap.className='nd'; wrap.id='nd-'+n.id;
+    const row=document.createElement('div'); row.className='nr'; row.id='row-'+n.id;
+    row.style.setProperty('--d',(depth*16+6)+'px');
     const ea=document.createElement('span'); ea.className='ea'; ea.id='ea-'+n.id; ea.textContent=hasK?'▶':'';
     const ni=document.createElement('span'); ni.className='ni'; ni.textContent=n.i||'';
-    const nl=document.createElement('span'); nl.className='nl'; nl.textContent=n.l;
+    const nl=document.createElement('span'); nl.className='nl'+(n.cls?' '+n.cls:''); nl.textContent=n.l;
     row.append(ea,ni,nl); wrap.appendChild(row);
     if(hasK){
       const ch=document.createElement('div'); ch.className='nc'; ch.id='ch-'+n.id;
@@ -354,7 +670,7 @@ function mkTree(nodes, depth){
     row.addEventListener('click',()=>{
       document.querySelectorAll('.nr.sel').forEach(r=>r.classList.remove('sel'));
       row.classList.add('sel');
-      if(n.id.startsWith('t')&&DATA[n.id]) onTable(n);
+      if(DATA[n.id]) onTable(n);
       if(n.id.startsWith('sp-')) onSP(n);
       advanceTutorial(n.id);
     });
@@ -364,33 +680,21 @@ function mkTree(nodes, depth){
 }
 oeTree.appendChild(mkTree(TREE,0));
 
-function toggle(id){
-  const ch=document.getElementById('ch-'+id),ea=document.getElementById('ea-'+id);
-  if(!ch)return; const o=ch.classList.toggle('op'); if(ea)ea.classList.toggle('op',o);
+function toggle(id){const ch=document.getElementById('ch-'+id),ea=document.getElementById('ea-'+id);if(!ch)return;const o=ch.classList.toggle('op');if(ea)ea.classList.toggle('op',o);}
+function expand(id){const ch=document.getElementById('ch-'+id),ea=document.getElementById('ea-'+id);if(ch&&!ch.classList.contains('op')){ch.classList.add('op');if(ea)ea.classList.add('op');}}
+function hl(id){const r=document.getElementById('row-'+id);if(r){r.classList.add('hl');setTimeout(()=>r.classList.remove('hl'),2800);}}
+function markHint(id){
+  document.querySelectorAll('.hint-click').forEach(r=>r.classList.remove('hint-click'));
+  if(id){const r=document.getElementById('row-'+id);if(r)r.classList.add('hint-click');}
 }
-function expand(id){
-  const ch=document.getElementById('ch-'+id),ea=document.getElementById('ea-'+id);
-  if(ch&&!ch.classList.contains('op')){ch.classList.add('op');if(ea)ea.classList.add('op');}
-}
-function hl(id){
-  const r=document.getElementById('row-'+id);
-  if(r){r.classList.add('hl');setTimeout(()=>r.classList.remove('hl'),2500);}
-}
-function markClickable(id){
-  document.querySelectorAll('.clickable-hint').forEach(r=>r.classList.remove('clickable-hint'));
-  const r=document.getElementById('row-'+id);
-  if(r) r.classList.add('clickable-hint');
-}
-
 function filterTree(q){
   document.querySelectorAll('.nl').forEach(nl=>{
     const row=nl.closest('.nr');
-    if(!q){row.style.display='';return;}
-    row.style.display=nl.textContent.toLowerCase().includes(q.toLowerCase())?'':'none';
+    row.style.display=(!q||nl.textContent.toLowerCase().includes(q.toLowerCase()))?'':'none';
   });
 }
 
-// ─── SQL HIGHLIGHT ────────────────────────────────────────
+// ─── SQL ─────────────────────────────────────────────────
 const KWS=/\b(SELECT|FROM|WHERE|AND|OR|NOT|INSERT|INTO|VALUES|UPDATE|SET|DELETE|JOIN|LEFT|RIGHT|INNER|OUTER|ON|AS|TOP|ORDER|BY|GROUP|HAVING|DISTINCT|COUNT|SUM|AVG|MAX|MIN|EXEC|EXECUTE|DECLARE|BEGIN|END|COMMIT|ROLLBACK|USE|GO|CREATE|TABLE|ALTER|DROP|PROCEDURE|RETURN|IS|NULL|CASE|WHEN|THEN|ELSE|WITH|CAST|CONVERT)\b/gi;
 function hl_sql(s){
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
@@ -407,22 +711,24 @@ function setCode(plain){
   const n=(plain.match(/\n/g)||[]).length+1;
   document.getElementById('lnum').textContent=Array.from({length:n},(_,i)=>i+1).join('\n');
 }
-async function typeCode(lines,spd=22){
-  const plain=lines.join('\n'), codeEl=document.getElementById('code'), lEl=document.getElementById('lnum');
+async function typeCode(lines,spd=20){
+  const plain=lines.join('\n');
+  const codeEl=document.getElementById('code'),lEl=document.getElementById('lnum');
   for(let i=0;i<=plain.length;i++){
     const chunk=plain.slice(0,i);
     codeEl.innerHTML=hl_sql(chunk);
     lEl.textContent=Array.from({length:(chunk.match(/\n/g)||[]).length+1},(_,j)=>j+1).join('\n');
-    const ch=plain[i]; if(ch===undefined)break;
-    await sleep(ch==='\n'?spd*3:spd);
+    const ch=plain[i];if(ch===undefined)break;
+    await sleep(ch==='\n'?spd*4:spd);
   }
 }
 
 // ─── RESULTS ─────────────────────────────────────────────
 function showGrid(cols,rows){
-  const g=document.getElementById('rg'),h=document.getElementById('rgh'),b=document.getElementById('rgb');
+  const g=document.getElementById('rg');
   document.getElementById('mp').style.display='none'; g.style.display='';
-  h.innerHTML='<tr>'+cols.map(c=>`<th>${c}</th>`).join('')+'</tr>'; b.innerHTML='';
+  document.getElementById('rgh').innerHTML='<tr>'+cols.map(c=>`<th>${c}</th>`).join('')+'</tr>';
+  const b=document.getElementById('rgb'); b.innerHTML='';
   rows.forEach((row,i)=>{
     const tr=document.createElement('tr'); tr.classList.add('fr');
     row.forEach(v=>{const td=document.createElement('td');td.textContent=String(v??'NULL');tr.appendChild(td);});
@@ -432,7 +738,7 @@ function showGrid(cols,rows){
 }
 function showMsg(html){
   document.getElementById('rg').style.display='none';
-  const m=document.getElementById('mp'); m.style.display=''; m.innerHTML=html;
+  const m=document.getElementById('mp');m.style.display='';m.innerHTML=html;
   document.getElementById('rcount').textContent='';
 }
 function clearR(){
@@ -441,22 +747,27 @@ function clearR(){
   document.getElementById('rcount').textContent='';
 }
 function runProg(cb,ms=900){
-  const bar=document.getElementById('prog'); bar.style.display='block';
+  const bar=document.getElementById('prog');bar.style.display='block';
   const t=Date.now();
-  setTimeout(()=>{
-    bar.style.display='none';
-    document.getElementById('et').textContent=`00:00:${((Date.now()-t)/1000).toFixed(3)}`;
-    cb();
-  },ms);
+  setTimeout(()=>{bar.style.display='none';document.getElementById('et').textContent=`${((Date.now()-t)/1000).toFixed(3)}s`;cb();},ms);
 }
+document.getElementById('tb-run').addEventListener('click',()=>{
+  advanceTutorial('__run__');
+  clearR();
+  runProg(()=>showGrid(
+    ['Tenant','Domain','Toplam','Aktif'],
+    [['MetLife Türkiye','Hayat','31','30'],['Güven Sigorta A.Ş.','Kasko','24','22'],
+     ['Güven Sigorta A.Ş.','Sağlık','18','17'],['Anadolu Sigorta','Konut','15','14'],
+     ['MetLife Türkiye','Kasko','12','10']]),800);
+});
 
-// ─── TABLE / SP HANDLERS ─────────────────────────────────
+// ─── TABLE / SP ───────────────────────────────────────────
 function onTable(n){
   if(!connected)return;
   document.getElementById('dbs').value='YafesPars';
-  document.getElementById('sd').textContent='YafesPars';
+  document.getElementById('sd').textContent='⬤ YafesPars';
   const plain=`SELECT TOP 100 *\nFROM [${n.l}]\nORDER BY 1 DESC;`;
-  setCode(plain); clearR();
+  setCode(plain);clearR();
   runProg(()=>showGrid(DATA[n.id].cols,DATA[n.id].rows),700);
 }
 function onSP(n){
@@ -470,39 +781,23 @@ function execSP(){
   const tid=document.getElementById('sp0').value,fn=document.getElementById('sp1').value,
         ln=document.getElementById('sp2').value,nid=document.getElementById('sp3').value,bd=document.getElementById('sp4').value;
   const newId='xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c=='x'?r:(r&3|8)).toString(16);});
-  const plain=`EXEC SP_CreateNaturalPerson\n    @TenantId   = '${tid}',\n    @FirstName  = '${fn}',\n    @LastName   = '${ln}',\n    @NationalId = '${nid}',\n    @BirthDate  = '${bd}';`;
-  setCode(plain); clearR();
+  setCode(`EXEC SP_CreateNaturalPerson\n    @TenantId='${tid}', @FirstName='${fn}',\n    @LastName='${ln}', @NationalId='${nid}', @BirthDate='${bd}';`);
+  clearR();
   runProg(()=>{
     showGrid(['PersonId','TenantId','FirstName','LastName','NationalId','Sonuç'],[[newId,tid,fn,ln,nid,'✔ Oluşturuldu']]);
     document.getElementById('rg').style.display='';
-    showMsg(`<span class="mok">✔ SP_CreateNaturalPerson başarıyla tamamlandı.<br>PersonId: <code>${newId}</code><br>(1 satır etkilendi)</span>`);
+    showMsg(`<span class="mok">✔ SP_CreateNaturalPerson başarıyla tamamlandı.<br>PersonId: <code style="color:var(--tbl)">${newId}</code><br>(1 satır etkilendi)</span>`);
     document.getElementById('mp').style.display='block';
   },1100);
 }
 
-// ─── TOOLBAR EXECUTE ─────────────────────────────────────
-document.getElementById('tb-run').addEventListener('click',()=>{
-  const plain=document.getElementById('code').textContent; if(!plain.trim())return;
-  clearR();
-  let found=null;
-  for(const [id,s] of Object.entries(DATA)){
-    if(plain.toLowerCase().includes(id.slice(1))) {found=s;break;}
-    if(plain.toLowerCase().includes(s.cols[0].toLowerCase())) {found=s;break;}
-  }
-  runProg(()=>{
-    if(found)showGrid(found.cols,found.rows);
-    else showMsg('<span class="mok">✔ Komut başarıyla tamamlandı.</span>');
-  });
-});
-
 // ─── CONNECTION ───────────────────────────────────────────
 let connected=false;
-function closeDlg(){ document.getElementById('dlg').style.display='none'; }
+function closeDlg(){document.getElementById('dlg').style.display='none';}
 document.getElementById('bcon').addEventListener('click',async()=>{
   const b=document.getElementById('bcon');
-  b.innerHTML='<span class="spin"></span>Bağlanıyor...'; b.disabled=true;
-  await sleep(1300);
-  b.innerHTML='Bağlan'; b.disabled=false;
+  b.innerHTML='<span class="spin"></span>Bağlanıyor...';b.disabled=true;
+  await sleep(1400); b.innerHTML='🔌 Bağlan'; b.disabled=false;
   closeDlg(); doConnect();
 });
 document.getElementById('tb-connect').addEventListener('click',()=>{
@@ -511,9 +806,9 @@ document.getElementById('tb-connect').addEventListener('click',()=>{
 });
 function doConnect(){
   connected=true;
-  document.getElementById('sc').textContent='● yafespars-sql.database.windows.net';
+  document.getElementById('sc').textContent='⬤ yafespars-sql.database.windows.net';
   document.getElementById('tb-run').disabled=false;
-  expand('svr'); expand('dbs-n');
+  expand('svr');expand('dbs-n');
   advanceTutorial('__connected__');
 }
 
@@ -523,109 +818,101 @@ function spot(sel){
   const el=sel?document.querySelector(sel):null;
   if(!el){s.style.display='none';return;}
   const r=el.getBoundingClientRect();
-  s.style.cssText=`display:block;top:${r.top-4}px;left:${r.left-4}px;width:${r.width+8}px;height:${r.height+8}px;`;
+  Object.assign(s.style,{display:'block',top:(r.top-5)+'px',left:(r.left-5)+'px',width:(r.width+10)+'px',height:(r.height+10)+'px'});
 }
 function posCard(sel,side){
-  const card=document.getElementById('tc'); card.style.transform='';
+  const card=document.getElementById('tc');card.style.transform='';
   const el=sel?document.querySelector(sel):null;
   if(!el){card.style.top='50%';card.style.left='50%';card.style.transform='translate(-50%,-50%)';return;}
-  const r=el.getBoundingClientRect(),W=window.innerWidth,H=window.innerHeight,CW=330,CH=230,M=12;
+  const r=el.getBoundingClientRect(),W=window.innerWidth,H=window.innerHeight,CW=340,CH=240,M=14;
   let t,l;
-  if(side==='right'){l=r.right+M;t=Math.max(M,Math.min(H-CH-M,r.top));}
+  if(side==='right'){l=r.right+M;t=Math.max(M,Math.min(H-CH-M,r.top+r.height/2-CH/2));}
   else if(side==='below'){t=r.bottom+M;l=Math.max(M,Math.min(W-CW-M,r.left));}
   else if(side==='above'){t=r.top-CH-M;l=Math.max(M,Math.min(W-CW-M,r.left));}
   else{t=r.bottom+M;l=Math.max(M,Math.min(W-CW-M,r.left));}
-  if(l+CW>W)l=W-CW-M; if(t<M)t=M; if(t+CH>H)t=H-CH-M;
-  card.style.top=t+'px'; card.style.left=l+'px';
+  if(l+CW>W)l=W-CW-M;if(t<M)t=M;if(t+CH>H)t=H-CH-M;
+  card.style.top=t+'px';card.style.left=l+'px';
 }
-function showHint(text,targetSel){
+function showHint(text,sel){
   const h=document.getElementById('hint'),a=document.getElementById('arrow');
-  if(!text||!targetSel){h.style.display='none';a.style.display='none';return;}
-  const el=document.querySelector(targetSel);
-  if(!el){h.style.display='none';a.style.display='none';return;}
-  const r=el.getBoundingClientRect();
-  h.textContent=text; h.style.display='block';
-  h.style.top=(r.top-36)+'px'; h.style.left=(r.left+r.width/2-h.offsetWidth/2)+'px';
-  a.style.display='block'; a.style.top=(r.top-18)+'px'; a.style.left=(r.left+r.width/2-10)+'px';
+  if(!text||!sel){h.style.display='none';a.style.display='none';return;}
+  setTimeout(()=>{
+    const el=document.querySelector(sel);if(!el)return;
+    const r=el.getBoundingClientRect();
+    h.textContent=text;h.style.display='block';
+    h.style.top=(r.top-38)+'px';h.style.left=Math.max(8,r.left+r.width/2-h.offsetWidth/2)+'px';
+    a.style.display='block';a.style.top=(r.top-18)+'px';a.style.left=(r.left+r.width/2-12)+'px';
+  },80);
 }
 function hideHint(){document.getElementById('hint').style.display='none';document.getElementById('arrow').style.display='none';}
 
-// ─── TUTORIAL STEPS ──────────────────────────────────────
+// ─── TUTORIAL ────────────────────────────────────────────
 const STEPS=[
-  // 0
-  { title:'👋 Hoş Geldiniz!',
-    body:'Bu interaktif tutorial, Yafes Pars\'ın SQL Server Management Studio üzerinde nasıl kullanıldığını adım adım gösterir.\n\nHer adımda ne yapmanız gerektiği söylenecek. <b>Siz tıklayın</b>, sistem yanıt versin.',
-    setup: async()=>{ spot(null); posCard(null,'center'); hideHint(); document.getElementById('btnn').textContent='Başla →'; },
-    waitFor: null },
+  {title:'👋 Hoş Geldiniz!',
+   body:'Bu interaktif tutorial, <b>Yafes Pars</b>\'ın SQL Server Management Studio üzerinde nasıl kullanıldığını adım adım gösterir.\n\nHer adımda <b>siz tıklarsınız</b>, sistem yanıt verir. Tutorial boyunca 9 temel işlem yapacaksınız.',
+   setup:async()=>{spot(null);posCard(null);hideHint();markHint(null);document.getElementById('btnn').textContent='Başla →';},
+   waitFor:null},
 
-  // 1 — connect
-  { title:'🔌 Adım 1 / 9 — Sunucuya Bağlan',
-    body:'Gerçek SSMS\'te ilk adım sunucuya bağlanmaktır.\n\n👉 Araç çubuğundaki <kbd>🔌 Bağlan</kbd> düğmesine tıklayın.',
-    setup: async()=>{ spot('#tb-connect'); posCard('#tb-connect','below'); showHint('Buraya tıklayın!','#tb-connect'); markClickable(null); },
-    waitFor:'__dlg_open__' },
+  {title:'🔌 Adım 1 / 9 — Sunucuya Bağlan',
+   body:'Gerçek SSMS\'te ilk adım her zaman sunucuya bağlanmaktır. Bağlantı olmadan hiçbir işlem yapılamaz.\n\n👉 Araç çubuğundaki <kbd>🔌 Bağlan</kbd> düğmesine tıklayın.',
+   setup:async()=>{spot('#tb-connect');posCard('#tb-connect','below');showHint('Buraya tıklayın!','#tb-connect');markHint(null);},
+   waitFor:'__dlg_open__'},
 
-  // 2 — fill form
-  { title:'⌨️ Adım 2 / 9 — Kimlik Bilgilerini Gir',
-    body:'Bağlan penceresi açıldı. Sunucu bilgileri otomatik dolduruldu.\n\n👉 <kbd>Bağlan</kbd> düğmesine tıklayarak bağlantıyı kurun.',
-    setup: async()=>{
-      document.getElementById('dlg').style.display='flex';
-      await typeField('fs','yafespars-sql.database.windows.net',30);
-      await sleep(200); await typeField('fu','yafespars_admin',35);
-      await sleep(150); await typeField('fp','••••••••••••',40);
-      spot('.dbox'); posCard('.dbox','right');
-      setTimeout(()=>showHint('Bağlan\'a tıklayın!','#bcon'),100); },
-    waitFor:'__connected__' },
+  {title:'⌨️ Adım 2 / 9 — Kimlik Bilgileri',
+   body:'Bağlan penceresi açıldı. Sunucu bilgileri otomatik dolduruldu:\n• <code>yafespars-sql.database.windows.net</code>\n• Kullanıcı: <code>yafespars_admin</code>\n\n👉 <kbd>🔌 Bağlan</kbd> düğmesine tıklayın.',
+   setup:async()=>{
+     document.getElementById('dlg').style.display='flex';
+     await typeField('fs','yafespars-sql.database.windows.net',28);
+     await sleep(180);await typeField('fu','yafespars_admin',36);
+     await sleep(140);await typeField('fp','••••••••••••',42);
+     spot('.dbox');posCard('.dbox','right');showHint('Bağlan\'a tıklayın!','#bcon');},
+   waitFor:'__connected__'},
 
-  // 3 — expand db
-  { title:'📁 Adım 3 / 9 — Veritabanını Genişlet',
-    body:'Bağlantı kuruldu! Sol panelde sunucu düğümleri açıldı.\n\n👉 <b>YafesPars</b> veritabanına tıklayarak içeriğini açın.',
-    setup: async()=>{ expand('dbs-n'); await sleep(200); hl('yf'); spot('#oe'); posCard('#oe','right'); showHint('YafesPars\'a tıklayın!','#row-yf'); markClickable('yf'); },
-    waitFor:'yf' },
+  {title:'📁 Adım 3 / 9 — Veritabanını Aç',
+   body:'Bağlantı kuruldu! Nesne Gezgini\'nde sunucu düğümleri göründü.\n\n👉 <b>YafesPars</b> veritabanına tıklayarak içeriği açın.',
+   setup:async()=>{expand('dbs-n');await sleep(200);hl('yf');spot('#oe');posCard('#oe','right');showHint('YafesPars\'a tıklayın!','#row-yf');markHint('yf');},
+   waitFor:'yf'},
 
-  // 4 — expand tables
-  { title:'📋 Adım 4 / 9 — Tabloları Görüntüle',
-    body:'YafesPars veritabanı açıldı. İçinde tablolar, görünümler ve saklı yordamlar bulunuyor.\n\n👉 <b>Tablolar</b> düğümüne tıklayın.',
-    setup: async()=>{ expand('yf'); await sleep(200); hl('tbls'); spot('#row-tbls'); posCard('#row-tbls','right'); showHint('Tablolar\'a tıklayın!','#row-tbls'); markClickable('tbls'); },
-    waitFor:'tbls' },
+  {title:'📋 Adım 4 / 9 — Tablolara Bak',
+   body:'YafesPars veritabanı açıldı. İçinde tablolar, görünümler ve saklı yordamlar var.\n\n👉 <b>Tablolar</b> düğümüne tıklayın.',
+   setup:async()=>{expand('yf');await sleep(200);hl('tbls');spot('#row-tbls');posCard('#row-tbls','right');showHint('Tablolar\'a tıklayın!','#row-tbls');markHint('tbls');},
+   waitFor:'tbls'},
 
-  // 5 — select NaturalPersons
-  { title:'🔍 Adım 5 / 9 — Tablo Sorgula',
-    body:'Tablolar listesi açıldı. 108 tablo, 11 domain şemasına ayrılmış.\n\n👉 <b>person.NaturalPersons</b> tablosuna tıklayın — otomatik SELECT sorgusu çalışacak.',
-    setup: async()=>{ expand('tbls'); await sleep(200); hl('tnp'); spot('#row-tnp'); posCard('#row-tnp','right'); showHint('Tabloya tıklayın!','#row-tnp'); markClickable('tnp'); },
-    waitFor:'tnp' },
+  {title:'🔍 Adım 5 / 9 — Tablo Sorgula',
+   body:'<b>108 tablo</b>, 11 domain şemasına bölünmüş durumda.\n\n👉 <b>person.NaturalPersons</b> tablosuna tıklayın — editörde SELECT sorgusu oluşturulur ve çalıştırılır.',
+   setup:async()=>{expand('tbls');await sleep(200);hl('tnp');spot('#row-tnp');posCard('#row-tnp','right');showHint('Tabloya tıklayın!','#row-tnp');markHint('tnp');},
+   waitFor:'tnp'},
 
-  // 6 — results
-  { title:'📊 Adım 6 / 9 — Sonuçları İncele',
-    body:'Harika! Sorgu çalıştı ve alt panelde sonuçlar göründü.\n\n✔ Her satır bir <b>doğal kişi</b> kaydı.\n✔ Sütunlar: PersonId, TenantId, Ad, Soyad, TC No, Doğum Tarihi.\n\n👉 Şimdi <b>policy.Contracts</b> tablosuna tıklayın.',
-    setup: async()=>{ await sleep(1000); spot('#rp'); posCard('#rp','above'); showHint('policy.Contracts\'a tıklayın!','#row-tcon'); markClickable('tcon'); },
-    waitFor:'tcon' },
+  {title:'📊 Adım 6 / 9 — Sonuçları İncele',
+   body:'Sorgu çalıştı! Alt panelde Results Grid açıldı.\n\n✔ Her satır = bir <b>doğal kişi</b> kaydı\n✔ PersonId, TenantId, Ad, TC, Doğum Tarihi\n\n👉 Şimdi <b>policy.Contracts</b> tablosuna tıklayın.',
+   setup:async()=>{await sleep(900);spot('#rp');posCard('#rp','above');showHint('policy.Contracts\'a tıklayın!','#row-tcon');markHint('tcon');},
+   waitFor:'tcon'},
 
-  // 7 — write query
-  { title:'✏️ Adım 7 / 9 — Analitik Sorgu',
-    body:'Poliçe tablosunu gördünüz. Şimdi editörde manuel bir analitik sorgu çalıştıralım.\n\n👉 Araç çubuğundaki <kbd>▶ Çalıştır</kbd> düğmesine tıklayın.',
-    setup: async()=>{
-      await typeCode(['-- Tenant bazlı aktif poliçe özeti','SELECT','    t.Name        AS Tenant,','    c.Domain,','    COUNT(*)      AS Toplam,',
-        "    SUM(CASE WHEN c.Status = 'Aktif' THEN 1 ELSE 0 END) AS Aktif",
-        'FROM [policy.Contracts] c','JOIN [tenant.Tenants] t ON t.TenantId = c.TenantId','GROUP BY t.Name, c.Domain','ORDER BY Aktif DESC;'],20);
-      spot('#tb-run'); posCard('#tb-run','below'); showHint('Çalıştır\'a tıklayın!','#tb-run'); markClickable(null); },
-    waitFor:'__run__' },
+  {title:'✏️ Adım 7 / 9 — SQL Sorgusu Yaz',
+   body:'Poliçe verilerini gördünüz. Şimdi editörde analitik bir sorgu yazılacak.\n\n👉 Araç çubuğundaki <kbd>▶ Çalıştır</kbd> düğmesine tıklayın.',
+   setup:async()=>{
+     clearR();
+     await typeCode(['-- Tenant bazlı aktif poliçe özeti','SELECT','    t.Name        AS Tenant,','    c.Domain,','    COUNT(*)      AS Toplam,',
+       "    SUM(CASE WHEN c.Status = 'Aktif' THEN 1 ELSE 0 END) AS Aktif",
+       'FROM [policy.Contracts] c','JOIN [tenant.Tenants] t ON t.TenantId = c.TenantId',
+       'GROUP BY t.Name, c.Domain','ORDER BY Aktif DESC;'],19);
+     spot('#tb-run');posCard('#tb-run','below');showHint('Çalıştır\'a tıklayın!','#tb-run');markHint(null);},
+   waitFor:'__run__'},
 
-  // 8 — SP
-  { title:'⚙️ Adım 8 / 9 — Saklı Yordam',
-    body:'Sorgu başarıyla çalıştı! Şimdi bir saklı yordam deneyelim.\n\n👉 Sol panelde <b>Saklı Yordamlar</b> → <b>SP_CreateNaturalPerson</b>\'a tıklayın.',
-    setup: async()=>{ expand('sps'); await sleep(300); hl('sp-np'); spot('#row-sp-np'); posCard('#row-sp-np','right'); showHint('SP\'ye tıklayın!','#row-sp-np'); markClickable('sp-np'); },
-    waitFor:'sp-np' },
+  {title:'⚙️ Adım 8 / 9 — Saklı Yordam',
+   body:'Sorgu sonuçları hazır. Şimdi bir saklı yordam çalıştıralım.\n\n👉 Sol panelde <b>Saklı Yordamlar → SP_CreateNaturalPerson</b>\'a tıklayın.',
+   setup:async()=>{expand('sps');await sleep(280);hl('sp-np');spot('#row-sp-np');posCard('#row-sp-np','right');showHint('SP\'ye tıklayın!','#row-sp-np');markHint('sp-np');},
+   waitFor:'sp-np'},
 
-  // 9 — done
-  { title:'🎉 Tutorial Tamamlandı!',
-    body:'Tebrikler! Yafes Pars SSMS temel iş akışlarını başarıyla tamamladınız:\n\n✔ Sunucuya bağlanma\n✔ Nesne Gezgini\'nde gezinme\n✔ Tablo sorgulama ve Results Grid\n✔ Analitik SQL sorgusu yazma\n✔ Saklı yordam çalıştırma\n\nŞimdi sol panelden dilediğiniz tabloyu veya SP\'yi seçebilirsiniz.',
-    setup: async()=>{ spot(null); hideHint(); markClickable(null); posCard(null,'center'); document.getElementById('btnn').textContent='Kapat ✓'; },
-    waitFor: null },
+  {title:'🎉 Tutorial Tamamlandı!',
+   body:'Tebrikler! Yafes Pars SSMS iş akışlarını başarıyla tamamladınız:\n\n✔ Sunucuya bağlanma\n✔ Nesne Gezgini\'nde gezinme\n✔ Tablo sorgulama ve Results Grid\n✔ Analitik SQL yazma\n✔ Saklı yordam çalıştırma\n\nSol panelden istediğiniz tabloyu veya SP\'yi seçebilirsiniz.',
+   setup:async()=>{spot(null);hideHint();markHint(null);posCard(null);document.getElementById('btnn').textContent='Kapat ✓';},
+   waitFor:null},
 ];
 
-let step=0, waiting=null;
+let step=0,waiting=null;
 function buildDots(){
-  const d=document.getElementById('tdots'); d.innerHTML='';
+  const d=document.getElementById('tdots');d.innerHTML='';
   STEPS.forEach((_,i)=>{const dot=document.createElement('div');dot.className='tdot'+(i===step?' on':'');d.appendChild(dot);});
 }
 async function showStep(i){
@@ -634,51 +921,39 @@ async function showStep(i){
   document.getElementById('tttl').textContent=s.title;
   document.getElementById('tbody').innerHTML=s.body.replace(/\n/g,'<br>');
   document.getElementById('btnn').textContent=i===STEPS.length-1?'Kapat ✓':'Devam →';
-  buildDots();
-  waiting=s.waitFor;
+  buildDots(); waiting=s.waitFor;
   await s.setup();
 }
-async function advanceTutorial(eventId){
-  if(!waiting||waiting!==eventId)return;
-  waiting=null; hideHint();
-  if(eventId==='__connected__') document.getElementById('dlg').style.display='none';
+async function advanceTutorial(eid){
+  if(!waiting||waiting!==eid)return;
+  waiting=null;hideHint();
+  if(eid==='__connected__')document.getElementById('dlg').style.display='none';
   if(step<STEPS.length-1){step++;await showStep(step);}
 }
-
 document.getElementById('btnn').addEventListener('click',async()=>{
   if(step>=STEPS.length-1){document.getElementById('tov').style.display='none';hideHint();return;}
-  // skip waiting if user clicks next
-  waiting=null; hideHint(); step++; await showStep(step);
+  waiting=null;hideHint();step++;await showStep(step);
 });
 document.getElementById('btnsk').addEventListener('click',()=>{
-  document.getElementById('tov').style.display='none'; hideHint();
+  document.getElementById('tov').style.display='none';hideHint();
   document.getElementById('dlg').style.display='none';
   if(!connected)doConnect();
-  expand('svr');expand('dbs-n');expand('yf');expand('tbls');expand('sps');
-  markClickable(null);
+  ['svr','dbs-n','yf','tbls','sps'].forEach(expand);
+  markHint(null);
 });
 
-// intercept run for tutorial
-document.getElementById('tb-run').addEventListener('click',()=>{ advanceTutorial('__run__'); runAnalytics(); },false);
-
-function runAnalytics(){
-  clearR();
-  runProg(()=>showGrid(
-    ['Tenant','Domain','Toplam','Aktif'],
-    [['MetLife Türkiye','Hayat','31','30'],['Güven Sigorta A.Ş.','Kasko','24','22'],
-     ['Güven Sigorta A.Ş.','Sağlık','18','17'],['Anadolu Sigorta','Konut','15','14'],
-     ['MetLife Türkiye','Kasko','12','10']]),800);
-}
-
 async function typeField(id,text,spd){
-  const el=document.getElementById(id); el.value=''; el.classList.add('focus');
+  const el=document.getElementById(id);el.value='';el.classList.add('typing');
   for(let i=0;i<text.length;i++){el.value=text.slice(0,i+1);await sleep(spd);}
-  el.classList.remove('focus');
+  el.classList.remove('typing');
 }
 function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 
 // ─── INIT ─────────────────────────────────────────────────
-setTimeout(()=>showStep(0),400);
+setTimeout(()=>{
+  document.getElementById('splash').classList.add('gone');
+  setTimeout(()=>showStep(0),300);
+},2000);
 </script>
 </body>
 </html>
