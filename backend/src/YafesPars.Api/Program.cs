@@ -1,5 +1,6 @@
 using Dapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.OpenApi.Models;
 using YafesPars.Api.Endpoints;
 using YafesPars.Api.Security;
@@ -20,6 +21,21 @@ if (!builder.Environment.IsDevelopment()
         "Authentication:Authority and Authentication:Audience are required outside Development.");
 }
 
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>() ?? [];
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("YafesPolicy", policy =>
+    {
+        if (builder.Environment.IsDevelopment())
+            policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+        else
+            policy.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod();
+    });
+});
+
 builder.Services.AddInfrastructure();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -37,6 +53,13 @@ builder.Services.AddSwaggerGen(options =>
         BearerFormat = "JWT",
         In = ParameterLocation.Header
     });
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" } },
+            []
+        }
+    });
 });
 
 builder.Services
@@ -45,8 +68,9 @@ builder.Services
     {
         options.Authority = authority;
         options.Audience = audience;
-        options.RequireHttpsMetadata = true;
+        options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
     });
+
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("TenantUser", policy =>
@@ -58,11 +82,29 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        context.Response.StatusCode = 500;
+        context.Response.ContentType = "application/json";
+        var feature = context.Features.Get<IExceptionHandlerFeature>();
+        var detail = app.Environment.IsDevelopment() ? feature?.Error.Message : "An unexpected error occurred.";
+        await context.Response.WriteAsJsonAsync(new { error = detail });
+    });
+});
+
+if (!app.Environment.IsDevelopment())
+    app.UseHttpsRedirection();
+
+app.UseCors("YafesPolicy");
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 app.UseAuthentication();
 app.UseAuthorization();
 

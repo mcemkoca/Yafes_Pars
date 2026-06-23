@@ -1,0 +1,126 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/**"
+      - "Dockerfile"
+      - "infra/**"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deploy environment'
+        required: true
+        default: 'prod'
+        type: choice
+        options: [prod, staging]
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/yafes_pars
+  DOTNET_NOLOGO: "true"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+
+jobs:
+  build-and-push:
+    name: Build Docker image
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    outputs:
+      image-tag: ${{ steps.meta.outputs.version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=sha-
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy-infra:
+    name: Deploy Azure infrastructure
+    runs-on: ubuntu-24.04
+    needs: build-and-push
+    timeout-minutes: 20
+    environment: ${{ inputs.environment || 'prod' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy Bicep
+        uses: azure/arm-deploy@v2
+        with:
+          resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP }}
+          template: infra/main.bicep
+          parameters: >
+            containerImage=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+            imageTag=${{ needs.build-and-push.outputs.image-tag }}
+            jwtAuthority=${{ secrets.JWT_AUTHORITY }}
+            jwtAudience=${{ secrets.JWT_AUDIENCE }}
+            corsAllowedOrigins=${{ secrets.CORS_ALLOWED_ORIGINS }}
+          deploymentName: yafespars-${{ github.run_number }}
+          failOnStdErr: false
+
+  smoke-test:
+    name: Smoke test
+    runs-on: ubuntu-24.04
+    needs: deploy-infra
+    timeout-minutes: 5
+
+    steps:
+      - name: Health check
+        run: |
+          URL="https://yafespars-${{ inputs.environment || 'prod' }}.azurewebsites.net/health"
+          for i in {1..10}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+            if [ "$STATUS" = "200" ]; then
+              echo "Health check passed (HTTP $STATUS)"
+              exit 0
+            fi
+            echo "Attempt $i: HTTP $STATUS — retrying in 15s"
+            sleep 15
+          done
+          echo "Health check failed after 10 attempts"
+          exit 1
