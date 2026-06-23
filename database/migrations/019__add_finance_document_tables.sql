@@ -6,6 +6,14 @@
 USE YafesPars;
 GO
 
+-- ─── finance schema ───────────────────────────────────────────────────────────
+IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = N'finance')
+BEGIN
+    EXEC sp_executesql N'CREATE SCHEMA finance';
+    PRINT 'Schema finance created.';
+END
+GO
+
 -- ─── finance.Invoices ────────────────────────────────────────────────────────
 IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE schema_id = SCHEMA_ID('finance') AND name = 'Invoices')
 BEGIN
