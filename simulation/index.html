@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Yafes Pars — SSMS Simülasyon</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d2e;
+      --surface2: #222540;
+      --border: #2e3252;
+      --accent: #4f6ef7;
+      --accent-hover: #6b85ff;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --radius: 8px;
+      --font: 'Segoe UI', system-ui, sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; }
+    .logo-icon { width: 32px; height: 32px; background: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .header-status { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .tenant-badge { background: var(--surface2); border: 1px solid var(--border); padding: 4px 10px; border-radius: 20px; font-size: 12px; }
+
+    /* ── LAYOUT ── */
+    .layout { display: flex; flex: 1; }
+
+    /* ── SIDEBAR ── */
+    nav {
+      width: 220px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 16px 0;
+      flex-shrink: 0;
+    }
+    .nav-section { padding: 8px 16px 4px; font-size: 10px; font-weight: 700; letter-spacing: .1em; color: var(--text-dim); text-transform: uppercase; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 16px; cursor: pointer; font-size: 13px;
+      color: var(--text-muted); transition: all .15s; border: none; background: none; width: 100%; text-align: left;
+    }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: rgba(79,110,247,.15); color: var(--accent); border-right: 2px solid var(--accent); }
+    .nav-icon { width: 18px; text-align: center; font-size: 15px; }
+
+    /* ── MAIN ── */
+    main { flex: 1; overflow-y: auto; padding: 24px; }
+
+    /* ── PAGE TITLE ── */
+    .page-title { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .page-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
+
+    /* ── STATS ── */
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+    .stat-label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+    .stat-value { font-size: 26px; font-weight: 700; }
+    .stat-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+    .stat-blue { color: var(--accent); }
+    .stat-green { color: var(--success); }
+    .stat-yellow { color: var(--warning); }
+    .stat-red { color: var(--danger); }
+
+    /* ── PANELS ── */
+    .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .panel-header { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .panel-title { font-size: 13px; font-weight: 600; }
+    .panel-body { padding: 16px; }
+
+    /* ── FORM ── */
+    .form-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 16px; }
+    .form-header { padding: 14px 20px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+    .form-body { padding: 20px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+    .form-full { grid-column: 1/-1; }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+    label .req { color: var(--danger); margin-left: 2px; }
+    input, select, textarea {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--text); padding: 8px 10px; font-size: 13px; font-family: inherit;
+      transition: border-color .15s; outline: none;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+    textarea { resize: vertical; min-height: 80px; }
+    select option { background: var(--surface2); }
+
+    /* ── BUTTONS ── */
+    .btn-row { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+    .btn {
+      padding: 9px 20px; border-radius: 6px; font-size: 13px; font-weight: 600;
+      cursor: pointer; border: none; transition: all .15s; display: flex; align-items: center; gap: 6px;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-secondary { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
+    .btn-secondary:hover { color: var(--text); border-color: var(--text-dim); }
+    .btn-danger { background: rgba(239,68,68,.15); color: var(--danger); border: 1px solid rgba(239,68,68,.3); }
+    .btn-success { background: rgba(34,197,94,.15); color: var(--success); border: 1px solid rgba(34,197,94,.3); }
+
+    /* ── TABLE ── */
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; padding: 8px 12px; color: var(--text-dim); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid var(--border); }
+    td { padding: 10px 12px; border-bottom: 1px solid rgba(46,50,82,.5); }
+    tr:hover td { background: rgba(255,255,255,.02); }
+    tr:last-child td { border-bottom: none; }
+
+    /* ── BADGES ── */
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+    .badge-green { background: rgba(34,197,94,.15); color: var(--success); }
+    .badge-blue { background: rgba(79,110,247,.15); color: var(--accent); }
+    .badge-yellow { background: rgba(245,158,11,.15); color: var(--warning); }
+    .badge-red { background: rgba(239,68,68,.15); color: var(--danger); }
+    .badge-gray { background: rgba(100,116,139,.15); color: var(--text-muted); }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed; bottom: 24px; right: 24px; z-index: 999;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px 18px;
+      font-size: 13px; max-width: 320px;
+      transform: translateY(80px); opacity: 0;
+      transition: all .3s; pointer-events: none;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+    #toast.success { border-color: var(--success); }
+    #toast.error { border-color: var(--danger); }
+
+    /* ── TABS ── */
+    .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+    .tab {
+      padding: 10px 18px; font-size: 13px; cursor: pointer; color: var(--text-muted);
+      border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all .15s;
+      background: none; border-top: none; border-left: none; border-right: none; font-family: inherit;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* ── SPINNER ── */
+    .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.2); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── HIDDEN ── */
+    .hidden { display: none !important; }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── RESULT BOX ── */
+    .result-box { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 12px; font-size: 12px; font-family: 'Courier New', monospace; color: var(--success); margin-top: 16px; white-space: pre-wrap; word-break: break-all; }
+
+    /* ── DIVIDER ── */
+    .divider { height: 1px; background: var(--border); margin: 20px 0; }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">🛡</div>
+    <span>Yafes Pars</span>
+    <span style="color:var(--text-dim);font-weight:400;font-size:13px;">SSMS</span>
+  </div>
+  <div class="header-status">
+    <div class="tenant-badge">Demo Tenant</div>
+    <div class="status-dot"></div>
+    <span>Simülasyon Modu</span>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <nav>
+    <div class="nav-section">Genel</div>
+    <button class="nav-item active" onclick="showPage('dashboard')">
+      <span class="nav-icon">📊</span> Dashboard
+    </button>
+
+    <div class="nav-section">Yönetim</div>
+    <button class="nav-item" onclick="showPage('musteri')">
+      <span class="nav-icon">👤</span> Müşteri Kayıt
+    </button>
+    <button class="nav-item" onclick="showPage('police')">
+      <span class="nav-icon">📋</span> Poliçe Oluştur
+    </button>
+    <button class="nav-item" onclick="showPage('hasar')">
+      <span class="nav-icon">⚠️</span> Hasar Kaydı
+    </button>
+    <button class="nav-item" onclick="showPage('gorev')">
+      <span class="nav-icon">✅</span> Görev Yönetimi
+    </button>
+
+    <div class="nav-section">Raporlar</div>
+    <button class="nav-item" onclick="showPage('liste')">
+      <span class="nav-icon">🔍</span> Poliçe Listesi
+    </button>
+    <button class="nav-item" onclick="showPage('api')">
+      <span class="nav-icon">⚡</span> API Test
+    </button>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main>
+
+    <!-- ══ DASHBOARD ══ -->
+    <div id="page-dashboard" class="page active">
+      <div class="page-title">Dashboard</div>
+      <div class="page-sub">Yafes Pars Sigorta Yönetim Sistemi — Genel Bakış</div>
+
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-label">Aktif Poliçe</div>
+          <div class="stat-value stat-blue" id="stat-police">248</div>
+          <div class="stat-sub">+12 bu ay</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Açık Hasar</div>
+          <div class="stat-value stat-yellow" id="stat-hasar">37</div>
+          <div class="stat-sub">5 acil</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Toplam Müşteri</div>
+          <div class="stat-value stat-green" id="stat-musteri">1.204</div>
+          <div class="stat-sub">+28 bu ay</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Bekleyen Görev</div>
+          <div class="stat-value stat-red" id="stat-gorev">14</div>
+          <div class="stat-sub">3 bugün sona eriyor</div>
+        </div>
+      </div>
+
+      <div class="panels">
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">📋 Son Poliçeler</span>
+            <span style="font-size:11px;color:var(--text-dim)">Son 5</span>
+          </div>
+          <div class="panel-body" style="padding:0">
+            <table>
+              <thead><tr><th>Numara</th><th>Müşteri</th><th>Domain</th><th>Durum</th></tr></thead>
+              <tbody>
+                <tr><td>AUT-2024-001</td><td>Ahmet Yılmaz</td><td><span class="badge badge-blue">OTOMOBIL</span></td><td><span class="badge badge-green">Aktif</span></td></tr>
+                <tr><td>FIRE-2024-042</td><td>Güven A.Ş.</td><td><span class="badge badge-yellow">YANGIN</span></td><td><span class="badge badge-green">Aktif</span></td></tr>
+                <tr><td>LIFE-2024-019</td><td>Fatma Kaya</td><td><span class="badge badge-blue">HAYAT</span></td><td><span class="badge badge-yellow">Yenilenecek</span></td></tr>
+                <tr><td>AUT-2024-003</td><td>Mehmet Demir</td><td><span class="badge badge-blue">OTOMOBIL</span></td><td><span class="badge badge-red">İptal</span></td></tr>
+                <tr><td>HEALTH-2024-07</td><td>Zeynep Arslan</td><td><span class="badge badge-green">SAĞLIK</span></td><td><span class="badge badge-green">Aktif</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">⚠️ Açık Hasarlar</span>
+            <span style="font-size:11px;color:var(--text-dim)">Son 5</span>
+          </div>
+          <div class="panel-body" style="padding:0">
+            <table>
+              <thead><tr><th>Hasar No</th><th>Poliçe</th><th>Rezerv</th><th>Durum</th></tr></thead>
+              <tbody>
+                <tr><td>CLM-2024-011</td><td>AUT-2024-001</td><td>₺48.500</td><td><span class="badge badge-yellow">İncelemede</span></td></tr>
+                <tr><td>CLM-2024-008</td><td>FIRE-2024-042</td><td>₺120.000</td><td><span class="badge badge-red">Acil</span></td></tr>
+                <tr><td>CLM-2024-015</td><td>HEALTH-2024-07</td><td>₺8.200</td><td><span class="badge badge-blue">Belgeler Bekleniyor</span></td></tr>
+                <tr><td>CLM-2024-003</td><td>AUT-2024-003</td><td>₺22.000</td><td><span class="badge badge-gray">Kapandı</span></td></tr>
+                <tr><td>CLM-2024-017</td><td>LIFE-2024-019</td><td>₺65.000</td><td><span class="badge badge-yellow">İncelemede</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MÜŞTERİ KAYIT ══ -->
+    <div id="page-musteri" class="page">
+      <div class="page-title">Müşteri Kayıt</div>
+      <div class="page-sub">Yeni gerçek kişi veya tüzel kişi kaydı oluştur</div>
+
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab(this,'gercek')">👤 Gerçek Kişi</button>
+        <button class="tab" onclick="switchTab(this,'tuzel')">🏢 Tüzel Kişi</button>
+      </div>
+
+      <!-- Gerçek Kişi -->
+      <div id="tab-gercek">
+        <form class="form-section" onsubmit="submitForm(event,'musteri-gercek')">
+          <div class="form-header">👤 Doğal Kişi Bilgileri</div>
+          <div class="form-body">
+            <div class="form-grid">
+              <div class="field">
+                <label>Ad <span class="req">*</span></label>
+                <input type="text" id="fn-ad" placeholder="Ahmet" />
+              </div>
+              <div class="field">
+                <label>Soyad <span class="req">*</span></label>
+                <input type="text" id="fn-soyad" placeholder="Yılmaz" />
+              </div>
+              <div class="field">
+                <label>Doğum Tarihi</label>
+                <input type="date" id="fn-dogum" />
+              </div>
+              <div class="field">
+                <label>Dil</label>
+                <select id="fn-dil">
+                  <option value="tr">Türkçe</option>
+                  <option value="en">İngilizce</option>
+                  <option value="nl">Flemenkçe</option>
+                  <option value="fr">Fransızca</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Unvan</label>
+                <select id="fn-unvan">
+                  <option value="">— Seçin —</option>
+                  <option>Bay</option><option>Bayan</option><option>Dr.</option><option>Prof.</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Dosya No</label>
+                <input type="text" id="fn-dosya" placeholder="DOS-2024-001" />
+              </div>
+            </div>
+            <div class="btn-row">
+              <button type="button" class="btn btn-secondary" onclick="resetForm('musteri-gercek')">Temizle</button>
+              <button type="submit" class="btn btn-primary" id="btn-musteri-gercek">
+                <span>💾 Kaydet</span>
+              </button>
+            </div>
+            <div id="result-musteri-gercek" class="result-box hidden"></div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Tüzel Kişi -->
+      <div id="tab-tuzel" class="hidden">
+        <form class="form-section" onsubmit="submitForm(event,'musteri-tuzel')">
+          <div class="form-header">🏢 Tüzel Kişi Bilgileri</div>
+          <div class="form-body">
+            <div class="form-grid">
+              <div class="field form-full">
+                <label>Ticaret Unvanı <span class="req">*</span></label>
+                <input type="text" id="tp-unvan" placeholder="Örnek Sigorta A.Ş." />
+              </div>
+              <div class="field">
+                <label>Hukuki Form</label>
+                <select id="tp-form">
+                  <option value="">— Seçin —</option>
+                  <option>A.Ş.</option><option>Ltd. Şti.</option><option>Anonim</option><option>Kooperatif</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Vergi No</label>
+                <input type="text" id="tp-vat" placeholder="1234567890" />
+              </div>
+              <div class="field">
+                <label>Dil</label>
+                <select id="tp-dil">
+                  <option value="tr">Türkçe</option>
+                  <option value="en">İngilizce</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Dosya No</label>
+                <input type="text" id="tp-dosya" placeholder="KUR-2024-001" />
+              </div>
+            </div>
+            <div class="btn-row">
+              <button type="button" class="btn btn-secondary" onclick="resetForm('musteri-tuzel')">Temizle</button>
+              <button type="submit" class="btn btn-primary" id="btn-musteri-tuzel">
+                <span>💾 Kaydet</span>
+              </button>
+            </div>
+            <div id="result-musteri-tuzel" class="result-box hidden"></div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ══ POLİÇE OLUŞTUR ══ -->
+    <div id="page-police" class="page">
+      <div class="page-title">Poliçe Oluştur</div>
+      <div class="page-sub">Yeni sigorta sözleşmesi kaydı</div>
+
+      <form class="form-section" onsubmit="submitForm(event,'police')">
+        <div class="form-header">📋 Sözleşme Bilgileri</div>
+        <div class="form-body">
+          <div class="form-grid">
+            <div class="field">
+              <label>Domain <span class="req">*</span></label>
+              <select id="pol-domain">
+                <option value="">— Seçin —</option>
+                <option value="MOTOR">Motorlu Araç (MOTOR)</option>
+                <option value="FIRE">Yangın (FIRE)</option>
+                <option value="LIFE">Hayat (LIFE)</option>
+                <option value="HEALTH">Sağlık (HEALTH)</option>
+                <option value="TRANSPORT">Nakliye (TRANSPORT)</option>
+                <option value="LIABILITY">Sorumluluk (LIABILITY)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Sözleşme Tipi <span class="req">*</span></label>
+              <select id="pol-tip">
+                <option value="">— Seçin —</option>
+                <option value="NEW">Yeni</option>
+                <option value="RENEWAL">Yenileme</option>
+                <option value="ENDORSEMENT">Zeyilname</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Başlangıç Tarihi <span class="req">*</span></label>
+              <input type="date" id="pol-baslangic" />
+            </div>
+            <div class="field">
+              <label>Bitiş Tarihi</label>
+              <input type="date" id="pol-bitis" />
+            </div>
+            <div class="field form-full">
+              <label>Sigortacı Kurum Kodu</label>
+              <input type="text" id="pol-kurum" placeholder="INS-001" />
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="form-header" style="border:none;padding:0 0 12px;font-size:13px;">👤 Sigortalı Taraf</div>
+          <div class="form-grid">
+            <div class="field">
+              <label>Kişi ID</label>
+              <input type="text" id="pol-kisi" placeholder="UUID veya boş bırakın" />
+            </div>
+            <div class="field">
+              <label>Rol</label>
+              <select id="pol-rol">
+                <option value="POLICY_HOLDER">Poliçe Sahibi</option>
+                <option value="INSURED">Sigortalı</option>
+                <option value="BENEFICIARY">Lehdar</option>
+              </select>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn btn-secondary" onclick="resetForm('police')">Temizle</button>
+            <button type="submit" class="btn btn-primary" id="btn-police">
+              <span>📋 Poliçe Oluştur</span>
+            </button>
+          </div>
+          <div id="result-police" class="result-box hidden"></div>
+        </div>
+      </form>
+    </div>
+
+    <!-- ══ HASAR KAYDI ══ -->
+    <div id="page-hasar" class="page">
+      <div class="page-title">Hasar Kaydı</div>
+      <div class="page-sub">Yeni hasar ihbarı ve kapama işlemi</div>
+
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab(this,'hasar-ac')">⚠️ Hasar Aç</button>
+        <button class="tab" onclick="switchTab(this,'hasar-kapat')">✅ Hasar Kapat</button>
+      </div>
+
+      <div id="tab-hasar-ac">
+        <form class="form-section" onsubmit="submitForm(event,'hasar-ac')">
+          <div class="form-header">⚠️ Hasar İhbar Bilgileri</div>
+          <div class="form-body">
+            <div class="form-grid">
+              <div class="field">
+                <label>Poliçe ID <span class="req">*</span></label>
+                <input type="text" id="hac-polid" placeholder="Poliçe UUID" />
+              </div>
+              <div class="field">
+                <label>Teminat Kodu</label>
+                <select id="hac-teminat">
+                  <option value="">— Seçin —</option>
+                  <option value="KASKO">Kasko</option>
+                  <option value="TRAFIK">Trafik</option>
+                  <option value="YANGIN">Yangın</option>
+                  <option value="HIRSIZLIK">Hırsızlık</option>
+                  <option value="HAYAT">Hayat</option>
+                  <option value="SAGLIK">Sağlık</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Olay Tarihi <span class="req">*</span></label>
+                <input type="date" id="hac-olay" />
+              </div>
+              <div class="field">
+                <label>İhbar Tarihi <span class="req">*</span></label>
+                <input type="date" id="hac-ihbar" />
+              </div>
+              <div class="field">
+                <label>Rezerv Tutarı (₺)</label>
+                <input type="number" id="hac-rezerv" placeholder="0.00" step="0.01" min="0" />
+              </div>
+              <div class="field">
+                <label>&nbsp;</label>
+              </div>
+              <div class="field form-full">
+                <label>Açıklama</label>
+                <textarea id="hac-aciklama" placeholder="Hasar detayları..."></textarea>
+              </div>
+            </div>
+            <div class="btn-row">
+              <button type="button" class="btn btn-secondary" onclick="resetForm('hasar-ac')">Temizle</button>
+              <button type="submit" class="btn btn-danger" id="btn-hasar-ac">
+                <span>⚠️ Hasar Aç</span>
+              </button>
+            </div>
+            <div id="result-hasar-ac" class="result-box hidden"></div>
+          </div>
+        </form>
+      </div>
+
+      <div id="tab-hasar-kapat" class="hidden">
+        <form class="form-section" onsubmit="submitForm(event,'hasar-kapat')">
+          <div class="form-header">✅ Hasar Kapama</div>
+          <div class="form-body">
+            <div class="form-grid">
+              <div class="field">
+                <label>Hasar ID <span class="req">*</span></label>
+                <input type="text" id="hk-id" placeholder="Hasar UUID" />
+              </div>
+              <div class="field">
+                <label>Ödenen Tutar (₺)</label>
+                <input type="number" id="hk-odeme" placeholder="0.00" step="0.01" min="0" />
+              </div>
+              <div class="field form-full">
+                <label>Kapama Sebebi</label>
+                <textarea id="hk-sebep" placeholder="Hasar kapatma gerekçesi..."></textarea>
+              </div>
+            </div>
+            <div class="btn-row">
+              <button type="button" class="btn btn-secondary" onclick="resetForm('hasar-kapat')">Temizle</button>
+              <button type="submit" class="btn btn-success" id="btn-hasar-kapat">
+                <span>✅ Hasarı Kapat</span>
+              </button>
+            </div>
+            <div id="result-hasar-kapat" class="result-box hidden"></div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ══ GÖREV YÖNETİMİ ══ -->
+    <div id="page-gorev" class="page">
+      <div class="page-title">Görev Yönetimi</div>
+      <div class="page-sub">Yeni görev oluştur ve takip et</div>
+
+      <form class="form-section" onsubmit="submitForm(event,'gorev')">
+        <div class="form-header">✅ Görev Bilgileri</div>
+        <div class="form-body">
+          <div class="form-grid">
+            <div class="field form-full">
+              <label>Başlık <span class="req">*</span></label>
+              <input type="text" id="gv-baslik" placeholder="Görev başlığı..." />
+            </div>
+            <div class="field">
+              <label>Öncelik</label>
+              <select id="gv-oncelik">
+                <option value="LOW">Düşük</option>
+                <option value="NORMAL" selected>Normal</option>
+                <option value="HIGH">Yüksek</option>
+                <option value="URGENT">Acil</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>İlgili Varlık Türü</label>
+              <select id="gv-tur">
+                <option value="">— Yok —</option>
+                <option value="POLICY">Poliçe</option>
+                <option value="CLAIM">Hasar</option>
+                <option value="PERSON">Müşteri</option>
+                <option value="DOCUMENT">Belge</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>İlgili ID</label>
+              <input type="text" id="gv-ilgili" placeholder="UUID" />
+            </div>
+            <div class="field">
+              <label>Son Tarih</label>
+              <input type="datetime-local" id="gv-son" />
+            </div>
+            <div class="field form-full">
+              <label>Açıklama</label>
+              <textarea id="gv-aciklama" placeholder="Görev detayları..."></textarea>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn btn-secondary" onclick="resetForm('gorev')">Temizle</button>
+            <button type="submit" class="btn btn-primary" id="btn-gorev">
+              <span>✅ Görev Oluştur</span>
+            </button>
+          </div>
+          <div id="result-gorev" class="result-box hidden"></div>
+        </div>
+      </form>
+    </div>
+
+    <!-- ══ POLİÇE LİSTESİ ══ -->
+    <div id="page-liste" class="page">
+      <div class="page-title">Poliçe Listesi</div>
+      <div class="page-sub">Tüm poliçeleri sorgula ve filtrele</div>
+
+      <div class="form-section">
+        <div class="form-header">🔍 Arama Kriterleri</div>
+        <div class="form-body">
+          <div class="form-grid-3">
+            <div class="field">
+              <label>Arama</label>
+              <input type="text" id="lst-arama" placeholder="Poliçe no, müşteri..." />
+            </div>
+            <div class="field">
+              <label>Domain</label>
+              <select id="lst-domain">
+                <option value="">Tümü</option>
+                <option value="MOTOR">Motorlu Araç</option>
+                <option value="FIRE">Yangın</option>
+                <option value="LIFE">Hayat</option>
+                <option value="HEALTH">Sağlık</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Durum</label>
+              <select id="lst-durum">
+                <option value="">Tümü</option>
+                <option value="ACTIVE">Aktif</option>
+                <option value="EXPIRED">Süresi Dolmuş</option>
+                <option value="CANCELLED">İptal</option>
+              </select>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn btn-primary" onclick="searchPolicies()">🔍 Ara</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Sonuçlar</span>
+          <span id="lst-count" style="font-size:11px;color:var(--text-dim)">5 kayıt</span>
+        </div>
+        <div style="padding:0">
+          <table>
+            <thead><tr><th>Poliçe No</th><th>Müşteri</th><th>Domain</th><th>Başlangıç</th><th>Bitiş</th><th>Durum</th></tr></thead>
+            <tbody id="lst-body">
+              <tr><td>AUT-2024-001</td><td>Ahmet Yılmaz</td><td><span class="badge badge-blue">MOTOR</span></td><td>01.01.2024</td><td>01.01.2025</td><td><span class="badge badge-green">Aktif</span></td></tr>
+              <tr><td>FIRE-2024-042</td><td>Güven A.Ş.</td><td><span class="badge badge-yellow">YANGIN</span></td><td>15.03.2024</td><td>15.03.2025</td><td><span class="badge badge-green">Aktif</span></td></tr>
+              <tr><td>LIFE-2024-019</td><td>Fatma Kaya</td><td><span class="badge badge-blue">HAYAT</span></td><td>01.06.2024</td><td>01.06.2025</td><td><span class="badge badge-yellow">Yenilenecek</span></td></tr>
+              <tr><td>AUT-2024-003</td><td>Mehmet Demir</td><td><span class="badge badge-blue">MOTOR</span></td><td>01.02.2024</td><td>01.02.2025</td><td><span class="badge badge-red">İptal</span></td></tr>
+              <tr><td>HEALTH-2024-07</td><td>Zeynep Arslan</td><td><span class="badge badge-green">SAĞLIK</span></td><td>01.04.2024</td><td>01.04.2025</td><td><span class="badge badge-green">Aktif</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ API TEST ══ -->
+    <div id="page-api" class="page">
+      <div class="page-title">API Test</div>
+      <div class="page-sub">Gerçek API endpoint'lerine test isteği gönder</div>
+
+      <div class="form-section">
+        <div class="form-header">⚡ İstek Yapılandırması</div>
+        <div class="form-body">
+          <div class="form-grid">
+            <div class="field">
+              <label>Method</label>
+              <select id="api-method">
+                <option>GET</option><option>POST</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Endpoint</label>
+              <select id="api-endpoint">
+                <option value="/health">GET /health</option>
+                <option value="/health/db">GET /health/db</option>
+                <option value="/api/tenants">GET /api/tenants</option>
+                <option value="/api/persons">GET /api/persons</option>
+                <option value="/api/policies">GET /api/policies</option>
+                <option value="/api/claims">GET /api/claims</option>
+                <option value="/api/tasks">GET /api/tasks</option>
+                <option value="/api/settings/lookups">GET /api/settings/lookups</option>
+              </select>
+            </div>
+            <div class="field form-full">
+              <label>Base URL</label>
+              <input type="text" id="api-base" value="http://localhost:8080" placeholder="https://yafespars-prod.azurewebsites.net" />
+            </div>
+            <div class="field form-full">
+              <label>Bearer Token (JWT)</label>
+              <input type="text" id="api-token" placeholder="eyJhbGci... (opsiyonel)" />
+            </div>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn btn-primary" onclick="callApi()">⚡ Gönder</button>
+          </div>
+          <div id="api-result" class="result-box hidden"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+  // ── PAGE NAV ──
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+
+  // ── TABS ──
+  function switchTab(btn, tabId) {
+    const parent = btn.closest('.page') || document.body;
+    parent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+
+    const allTabDivs = btn.closest('main').querySelectorAll('[id^="tab-"]');
+    // Hide only sibling tabs (same prefix group)
+    const prefix = tabId.split('-')[0];
+    allTabDivs.forEach(d => {
+      if (d.id.startsWith('tab-' + prefix) || d.id === 'tab-' + tabId.replace(/-\w+$/, '')) {
+        d.classList.add('hidden');
+      }
+    });
+    document.getElementById('tab-' + tabId).classList.remove('hidden');
+  }
+
+  // Fix tab group switching
+  document.querySelectorAll('.tabs').forEach(tabGroup => {
+    tabGroup.querySelectorAll('.tab').forEach(btn => {
+      btn.addEventListener('click', function() {
+        tabGroup.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+  });
+
+  // ── TOAST ──
+  function toast(msg, type = 'success') {
+    const el = document.getElementById('toast');
+    el.textContent = (type === 'success' ? '✅ ' : '❌ ') + msg;
+    el.className = 'show ' + type;
+    setTimeout(() => el.className = '', 3000);
+  }
+
+  // ── FORM SUBMIT (simülasyon) ──
+  const formDefs = {
+    'musteri-gercek': () => ({
+      endpoint: 'POST /api/persons/natural',
+      body: {
+        firstName: document.getElementById('fn-ad').value,
+        lastName: document.getElementById('fn-soyad').value,
+        birthDate: document.getElementById('fn-dogum').value || null,
+        languageCode: document.getElementById('fn-dil').value,
+        titleCode: document.getElementById('fn-unvan').value || null,
+        dossier: document.getElementById('fn-dosya').value || null
+      },
+      validate: () => {
+        if (!document.getElementById('fn-ad').value.trim() && !document.getElementById('fn-soyad').value.trim())
+          return 'Ad veya Soyad zorunludur';
+        return null;
+      }
+    }),
+    'musteri-tuzel': () => ({
+      endpoint: 'POST /api/persons/legal',
+      body: {
+        legalName: document.getElementById('tp-unvan').value,
+        legalForm: document.getElementById('tp-form').value || null,
+        vatNumber: document.getElementById('tp-vat').value || null,
+        languageCode: document.getElementById('tp-dil').value,
+        dossier: document.getElementById('tp-dosya').value || null
+      },
+      validate: () => !document.getElementById('tp-unvan').value.trim() ? 'Ticaret unvanı zorunludur' : null
+    }),
+    'police': () => ({
+      endpoint: 'POST /api/policies',
+      body: {
+        contractDomainCode: document.getElementById('pol-domain').value,
+        contractTypeCode: document.getElementById('pol-tip').value,
+        startDate: document.getElementById('pol-baslangic').value,
+        endDate: document.getElementById('pol-bitis').value || null,
+        insurerInstitutionCode: document.getElementById('pol-kurum').value || null
+      },
+      validate: () => {
+        if (!document.getElementById('pol-domain').value) return 'Domain seçimi zorunludur';
+        if (!document.getElementById('pol-tip').value) return 'Sözleşme tipi zorunludur';
+        if (!document.getElementById('pol-baslangic').value) return 'Başlangıç tarihi zorunludur';
+        return null;
+      }
+    }),
+    'hasar-ac': () => ({
+      endpoint: 'POST /api/claims',
+      body: {
+        contractId: document.getElementById('hac-polid').value,
+        coverageCode: document.getElementById('hac-teminat').value || null,
+        incidentDate: document.getElementById('hac-olay').value,
+        reportedDate: document.getElementById('hac-ihbar').value,
+        description: document.getElementById('hac-aciklama').value || null,
+        reservedAmount: parseFloat(document.getElementById('hac-rezerv').value) || null
+      },
+      validate: () => {
+        if (!document.getElementById('hac-polid').value.trim()) return 'Poliçe ID zorunludur';
+        if (!document.getElementById('hac-olay').value) return 'Olay tarihi zorunludur';
+        if (!document.getElementById('hac-ihbar').value) return 'İhbar tarihi zorunludur';
+        return null;
+      }
+    }),
+    'hasar-kapat': () => ({
+      endpoint: 'POST /api/claims/{id}/close',
+      body: {
+        claimId: document.getElementById('hk-id').value,
+        paidAmount: parseFloat(document.getElementById('hk-odeme').value) || null,
+        closeReason: document.getElementById('hk-sebep').value || null
+      },
+      validate: () => !document.getElementById('hk-id').value.trim() ? 'Hasar ID zorunludur' : null
+    }),
+    'gorev': () => ({
+      endpoint: 'POST /api/tasks',
+      body: {
+        title: document.getElementById('gv-baslik').value,
+        taskPriorityCode: document.getElementById('gv-oncelik').value,
+        relatedEntityType: document.getElementById('gv-tur').value || null,
+        relatedEntityId: document.getElementById('gv-ilgili').value || null,
+        dueAtUtc: document.getElementById('gv-son').value || null,
+        description: document.getElementById('gv-aciklama').value || null
+      },
+      validate: () => !document.getElementById('gv-baslik').value.trim() ? 'Görev başlığı zorunludur' : null
+    })
+  };
+
+  function submitForm(e, key) {
+    e.preventDefault();
+    const def = formDefs[key]();
+    const err = def.validate();
+    if (err) { toast(err, 'error'); return; }
+
+    const btn = document.getElementById('btn-' + key);
+    const result = document.getElementById('result-' + key);
+    btn.innerHTML = '<div class="spinner"></div>';
+    btn.disabled = true;
+
+    setTimeout(() => {
+      const fakeId = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
+      const response = {
+        simülasyon: true,
+        endpoint: def.endpoint,
+        status: 201,
+        response: { id: fakeId, ...Object.fromEntries(Object.entries(def.body).filter(([,v]) => v != null)) },
+        timestamp: new Date().toISOString(),
+        not: 'Gerçek API için /simulation/index.html sayfasındaki API Test sekmesini kullanın.'
+      };
+      result.textContent = JSON.stringify(response, null, 2);
+      result.classList.remove('hidden');
+      btn.innerHTML = '<span>✅ Kaydedildi</span>';
+      btn.disabled = false;
+      toast('Kayıt simüle edildi — ID: ' + fakeId.slice(0,8) + '...');
+
+      // Update dashboard stat
+      const statMap = { 'musteri-gercek': 'stat-musteri', 'musteri-tuzel': 'stat-musteri', 'police': 'stat-police', 'hasar-ac': 'stat-hasar', 'gorev': 'stat-gorev' };
+      if (statMap[key]) {
+        const el = document.getElementById(statMap[key]);
+        const n = parseInt(el.textContent.replace('.','')) + 1;
+        el.textContent = n.toLocaleString('tr-TR');
+      }
+    }, 900);
+  }
+
+  function resetForm(key) {
+    const resultEl = document.getElementById('result-' + key);
+    if (resultEl) resultEl.classList.add('hidden');
+    const btn = document.getElementById('btn-' + key);
+    if (btn) btn.innerHTML = btn.innerHTML.replace('✅ Kaydedildi', btn.dataset.orig || btn.textContent);
+  }
+
+  // ── SEARCH ──
+  function searchPolicies() {
+    const q = document.getElementById('lst-arama').value.toLowerCase();
+    const rows = document.querySelectorAll('#lst-body tr');
+    let count = 0;
+    rows.forEach(r => {
+      const match = !q || r.textContent.toLowerCase().includes(q);
+      r.style.display = match ? '' : 'none';
+      if (match) count++;
+    });
+    document.getElementById('lst-count').textContent = count + ' kayıt';
+  }
+
+  // ── API CALL ──
+  async function callApi() {
+    const base = document.getElementById('api-base').value.replace(/\/$/, '');
+    const endpoint = document.getElementById('api-endpoint').value;
+    const token = document.getElementById('api-token').value;
+    const result = document.getElementById('api-result');
+    result.textContent = '⏳ İstek gönderiliyor...';
+    result.classList.remove('hidden');
+
+    try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+      const res = await fetch(base + endpoint, { headers });
+      const text = await res.text();
+      let parsed;
+      try { parsed = JSON.parse(text); } catch { parsed = text; }
+      result.textContent = `HTTP ${res.status} ${res.statusText}\n\n${JSON.stringify(parsed, null, 2)}`;
+      result.style.color = res.ok ? 'var(--success)' : 'var(--danger)';
+    } catch (err) {
+      result.textContent = `❌ Bağlantı hatası: ${err.message}\n\nNot: CORS politikası nedeniyle tarayıcıdan doğrudan istek yapılamayabilir.\nDocker Compose ile çalıştırın: docker compose up`;
+      result.style.color = 'var(--danger)';
+    }
+  }
+
+  // Auto-set today's date
+  const today = new Date().toISOString().split('T')[0];
+  document.querySelectorAll('input[type=date]').forEach(el => {
+    if (!el.value && !el.id.includes('dogum') && !el.id.includes('bitis') && !el.id.includes('son')) {
+      el.value = today;
+    }
+  });
+</script>
+</body>
+</html>
