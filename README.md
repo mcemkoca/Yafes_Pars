@@ -1,203 +1,250 @@
-# Yafes Pars
+<div align="center">
 
-**Product owner and maintainer:** `Deuterium12{MCK}`
+<img src="https://img.shields.io/badge/SQL%20Server-2022-CC2927?style=for-the-badge&logo=microsoftsqlserver&logoColor=white"/>
+<img src="https://img.shields.io/badge/.NET-8.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white"/>
+<img src="https://img.shields.io/badge/Azure-App%20Service-0089D6?style=for-the-badge&logo=microsoftazure&logoColor=white"/>
+<img src="https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge&logo=docker&logoColor=white"/>
 
-[![SQL Server validation](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/sql-server-validation.yml/badge.svg)](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/sql-server-validation.yml)
-[![Database quality gate](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/database-quality-gate.yml/badge.svg)](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/database-quality-gate.yml)
-[![SSMS workbench validation](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/ssms-workbench-validation.yml/badge.svg)](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/ssms-workbench-validation.yml)
-[![Backend build](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/backend-build.yml/badge.svg)](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/backend-build.yml)
+# Yafes Pars — Sigorta Yönetim Sistemi
 
-## English
+**Brokerlik ve sigorta operasyonları için SQL Server tabanlı çok kiracılı yönetim platformu.**
 
-Yafes Pars is an SSMS-first SQL Server insurance operations platform for broker,
-policy, claim, risk, customer, document, task, security, and audit workflows.
-The primary user experience is SQL Server Management Studio: Query Editor,
-Results Grid, Messages, SQLCMD Mode, guided scripts, bridge templates, guarded
-editing, and report grids.
+[![SQL Server Validation](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/sql-server-validation.yml/badge.svg)](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/sql-server-validation.yml)
+[![Database Quality Gate](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/database-quality-gate.yml/badge.svg)](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/database-quality-gate.yml)
+[![Backend Build](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/backend-build.yml/badge.svg)](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/backend-build.yml)
+[![SSMS Workbench](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/ssms-workbench-validation.yml/badge.svg)](https://github.com/mcemkoca/Yafes_Pars/actions/workflows/ssms-workbench-validation.yml)
 
-This is not a web-first product. The database core and SSMS operator workbench
-come first; the .NET backend is an optional integration foundation.
+</div>
 
-### What The Client Gets
+---
 
-| Capability | Status | Value |
-| --- | --- | --- |
-| SQL Server core | Complete through migration `018` | Stable database foundation for DEV validation. |
-| 108-table domain model | Available | Customer, institution, risk, policy, coverage, claim, document, task, RBAC, tenant, and audit areas are separated. |
-| SSMS operator workbench | Available | Users start from one dashboard and move through safe daily workflows. |
-| Working logic map | Available | Domain groups, subheadings, control points, and planning cards are visible from SSMS. |
-| Visual workflow board | Available | Mind-map style node, edge, subheading, and template-route datasets are available as SSMS Results Grid output. |
-| Table catalog and FK map | Available | Real SQL Server metadata supports table planning before new migrations. |
-| Admin role matrix | Available | User-friendly RBAC, permission, user assignment, and least-privilege grids are available in SSMS. |
-| Monitoring and job readiness | Available | DEV health, backlog, backup visibility, and SQL Agent handoff grids are available in SSMS. |
-| Delivery gap register | Available | Commit review closure, unfinished delivery gaps, owner blockers, and next SSMS actions are visible in one read-only grid set. |
-| Remaining work cockpit | Available | Open blockers are grouped into owner evidence, 019+ decision intake, edge bridge ranking, and DBA handoff grids. |
-| Tenant-isolated backend API | Available | JWT tenant claims bind domain reads to the authenticated tenant; production auth configuration is mandatory. |
-| Quality gates | Available | CI protects migration order, SQL Server syntax, destructive patterns, artifact policy, SSMS conventions, and documentation. |
-| Documentation hub | Available | Human-readable docs are organized under `md/`. |
+## Nedir?
 
-### SSMS Operator Flow
+Yafes Pars; poliçe, hasar, müşteri, görev, belge ve denetim iş akışlarını tek bir SQL Server veritabanında birleştiren **SSMS-first** bir sigorta operasyon platformudur.
 
-Open scripts from `database/ssms/` in SQL Server Management Studio. Enable
-`Query > SQLCMD Mode` for files that use `:setvar` or `:r`.
+Kullanıcı deneyiminin merkezi bir web arayüzü değil, SQL Server Management Studio'dur: Query Editor, Results Grid, SQLCMD Mode, yönlendirilmiş scriptler ve güvenli bridge template'leri.
 
-The local workbench preview is non-persistent. Real work must be done in SSMS
-with SQLCMD Mode enabled against a DEV database.
+> **Canlı Simülasyon →** [`simulation/index.html`](simulation/index.html) dosyasını tarayıcıda açarak SSMS arayüzünün interaktif tutorial'ını görebilirsiniz.
 
-1. `00__open_first_safety_check.sql` - confirm DEV database and safe server.
-2. `05__operator_dashboard_home.sql` - keep this open as the SSMS home tab.
-3. `11__schema_working_logic_map.sql` - review domain groups and planning cards.
-4. `13__visual_workflow_board.sql` - review SSMS-safe node, edge, subheading, and template-route grids.
-5. `12__table_catalog_and_relationships.sql` - inspect the table catalog and FK map.
-6. `10__daily_operator_checklist.sql` - run daily readiness checks.
-7. `02__operations_dashboard.sql` - review operational result grids.
-8. `06__query_library_shortcuts.sql` - search records and copy IDs from Results Grid.
-9. `07__data_entry_bridge_templates.sql` - create person, vehicle risk object, policy, links, claims, and tasks with preview-first bridges.
-10. `08__data_editing_guardrails.sql` - update data with rollback-first guardrails.
-11. `09__graph_report_pack.sql` - produce chart-ready/export-ready grids.
-12. `03__create_renewal_tasks.sql` - run renewal tasks in dry-run mode first.
-13. `04__admin_security_audit_queries.sql` - review RBAC, audit, and integrity.
-14. `14__admin_role_permission_matrix.sql` - review roles, permissions, user assignments, and least-privilege checks.
-15. `15__monitoring_and_job_readiness.sql` - review DEV health, backlog, backup visibility, and SQL Agent readiness.
-16. `16__delivery_gap_register.sql` - review commit closure, unfinished delivery gaps, and next SSMS actions.
-17. `17__remaining_work_cockpit.sql` - turn open blockers into owner evidence, 019+ decisions, bridge ranking, and DBA handoff actions.
+---
 
-### Documentation
+## Mimari
 
-| Path | Purpose |
-| --- | --- |
-| `md/README.md` | Documentation hub and writing rules. |
-| `md/product-ownership.md` | Product ownership, release authority, and attribution rules. |
-| `md/mustafaplan.md` | Living roadmap, expert assessment, risks, and next update queue. |
-| `md/database/` | SQL Server architecture, deployment, migration, security, ERD, and readiness docs. |
-| `md/ssms/` | SSMS workbench, tutorials, templates, and dashboard plan. |
-| `md/backend/` | Optional .NET backend notes. |
-| `md/reports/` | Delivery and progress reports. |
-
-### Local Validation
-
-```powershell
-./database/tools/test-sql-quality-gate.ps1 -NoReportFile
-./database/tools/run-dev-migrations.ps1 -GenerateSsmsScriptOnly
+```
+┌─────────────────────────────────────────────────────────┐
+│                     SSMS Operator                       │
+│           Query Editor · Results Grid · SQLCMD          │
+└───────────────────────┬─────────────────────────────────┘
+                        │
+┌───────────────────────▼─────────────────────────────────┐
+│              SQL Server 2022 — YafesPars DB             │
+│                                                         │
+│  person · policy · claim · task · document · tenant     │
+│  risk · coverage · finance · security · audit           │
+│                                                         │
+│  108 tablo  ·  19 migration  ·  11 domain şeması        │
+└───────────────────────┬─────────────────────────────────┘
+                        │
+┌───────────────────────▼─────────────────────────────────┐
+│           .NET 8 Web API (Dapper + Minimal API)         │
+│      JWT/OIDC · Rate Limiting · Application Insights    │
+└───────────────────────┬─────────────────────────────────┘
+                        │
+┌───────────────────────▼─────────────────────────────────┐
+│                  Azure App Service                      │
+│      Key Vault · Log Analytics · GHCR · Bicep IaC      │
+└─────────────────────────────────────────────────────────┘
 ```
 
-Run the guarded DEV migration workflow only against a verified DEV SQL Server:
+---
 
-```powershell
+## Özellikler
+
+| Alan | Kapsam |
+|------|--------|
+| **Müşteri & Kurum** | Gerçek/tüzel kişi, adres, iletişim, belge |
+| **Risk & Poliçe** | Sözleşme, taraf, nesne, teminat, prim |
+| **Hasar** | Olay kaydı, ödeme, kapanış iş akışı |
+| **Görev & Belge** | Görev atama, yorum, belge bağlama |
+| **Tenant & RBAC** | Çok kiracılı izolasyon, rol/yetki matrisi |
+| **Denetim** | Değişiklik kaydı, audit trail, güvenlik |
+| **Backend API** | 25+ endpoint, stored procedure entegrasyonu |
+| **CI/CD** | GitHub Actions → GHCR → Azure Bicep deploy |
+
+---
+
+## Veritabanı Şeması
+
+```
+11 Domain Şeması · 108 Tablo · 19 Migration
+─────────────────────────────────────────────
+person     →  NaturalPersons, LegalPersons, Addresses, Contacts
+policy     →  Contracts, ContractParties, ContractObjects
+coverage   →  CoverageItems, Premiums
+claim      →  Claims, Payments, ClaimDocuments
+risk       →  RiskObjects, Vehicles, Properties
+task       →  Tasks, TaskComments, TaskDocuments
+document   →  Documents, DocumentLinks
+finance    →  Invoices, PaymentPlans
+security   →  Users, Roles, Permissions, UserRoles
+tenant     →  Tenants, TenantSettings
+audit      →  AuditLogs, ChangeHistory
+```
+
+---
+
+## Hızlı Başlangıç
+
+### SSMS ile (Birincil İş Akışı)
+
+```sql
+-- 1. Bağlan: yafespars-sql veya localhost,1433
+-- 2. Veritabanı: YafesPars
+
+-- Dashboard'u aç
+:r database/ssms/05__operator_dashboard_home.sql
+
+-- Günlük kontrol
+:r database/ssms/10__daily_operator_checklist.sql
+```
+
+> `Query → SQLCMD Mode` açık olmalıdır.
+
+### Script Sırası
+
+| # | Script | Amaç |
+|---|--------|-------|
+| 1 | `00__open_first_safety_check.sql` | Sunucu ve veritabanı doğrulama |
+| 2 | `05__operator_dashboard_home.sql` | Ana dashboard sekmesi |
+| 3 | `10__daily_operator_checklist.sql` | Günlük hazırlık kontrolleri |
+| 4 | `06__query_library_shortcuts.sql` | Kayıt arama ve ID kopyalama |
+| 5 | `07__data_entry_bridge_templates.sql` | Kişi, poliçe, hasar oluşturma |
+| 6 | `08__data_editing_guardrails.sql` | Güvenli veri güncelleme |
+| 7 | `09__graph_report_pack.sql` | Rapor ve grafik gridleri |
+| 8 | `04__admin_security_audit_queries.sql` | RBAC ve denetim |
+
+---
+
+### Docker ile Yerel Çalıştırma
+
+```bash
+# .env oluştur
+cp .env.example .env
+
+# Başlat
+docker compose up -d
+
+# Migration'ları çalıştır
 $env:YAFES_SQL_SERVER = "localhost,1433"
 $env:YAFES_SQL_DATABASE = "YafesPars_DEV"
-$env:YAFES_SQL_USER = "sa"
-$env:YAFES_SQL_PASSWORD = "<dev-password>"
-$env:YAFES_SQL_BACKUP_DIR = "C:\SqlBackups"
-
 ./database/tools/run-dev-migrations.ps1
 ```
 
-For manual SSMS execution, generate the all-in-one script first:
+### Backend API
 
-```powershell
-./database/tools/run-dev-migrations.ps1 -GenerateSsmsScriptOnly
+```bash
+cd backend/src/YafesPars.Api
+dotnet run
+
+# Swagger: http://localhost:5000/swagger
+# Health:  http://localhost:5000/health
 ```
 
-Then open the generated `database/execution-logs/<run-id>/ssms-dev-migrations.sql`
-file in SSMS, enable SQLCMD Mode, verify variables, and run against DEV only.
+---
 
-### Next Updates
+## Proje Yapısı
 
-1. Rotate any exposed coordination token and keep all credentials outside Git.
-2. Run `16__delivery_gap_register.sql` after PR/commit review to keep unfinished work visible in SSMS.
-3. Run `17__remaining_work_cockpit.sql` to assign remaining evidence, 019+ decisions, bridge ranking, and SQL Agent handoff actions.
-4. Record repeatable TEST/PROD execution evidence after target environment refresh.
-5. Add TEST/PROD role/permission evidence for operator, admin, auditor, and deployer.
-6. Add TEST/PROD restore drill evidence to the production readiness checklist.
-7. Design migration `019+` candidates only after owner approval: finance,
-   import/export staging, entity notes, and product templates.
-8. Continue extending bridge templates for lower-frequency department workflows after operator priority is confirmed.
-9. Turn monitoring/job-readiness grids into approved SQL Agent jobs after DEV/TEST infrastructure exists.
+```
+Yafes_Pars/
+├── database/
+│   ├── migrations/          # 001–018 sıralı migration scriptleri
+│   ├── ssms/                # SSMS operator scriptleri
+│   ├── stored-procedures/   # İş mantığı SP'leri
+│   └── tools/               # CI/CD ve migration araçları
+├── backend/
+│   └── src/
+│       ├── YafesPars.Api/           # Minimal API endpoints
+│       ├── YafesPars.Application/   # CQRS commands & queries
+│       └── YafesPars.Infrastructure/ # Dapper + repositories
+├── infra/
+│   ├── main.bicep           # Azure App Service, Key Vault, App Insights
+│   └── main.bicepparam      # Parametre dosyası
+├── simulation/
+│   └── index.html           # İnteraktif SSMS tutorial simülasyonu
+├── docs/
+│   └── kullanim-kilavuzu.md # Türkçe kullanım kılavuzu
+├── Dockerfile               # Multi-stage .NET 8 image
+└── docker-compose.yml       # API + SQL Server 2022
+```
 
-## Turkce
+---
 
-Yafes Pars, brokerlik ve sigorta operasyonlari icin hazirlanan SSMS-first SQL
-Server platformudur. Kullanici deneyiminin merkezi web sitesi degil, SQL Server
-Management Studio icindeki Query Editor, Results Grid, Messages, SQLCMD Mode,
-rehberli scriptler, bridge template'leri, guardrail guncellemeleri ve rapor
-gridleridir.
+## CI/CD Pipeline
 
-Bu nedenle ana oncelik veri tabani cekirdegi ve SSMS operator deneyimidir.
-.NET backend sadece ileride entegrasyon icin kullanilabilecek yardimci bir
-katmandir.
+```
+git push main
+    │
+    ├─► backend-build.yml        # dotnet build + test
+    ├─► sql-server-validation.yml # Migration syntax + sıra kontrolü
+    ├─► database-quality-gate.yml # Destructive pattern tarama
+    └─► deploy.yml (main)
+            │
+            ├─► Docker build → GHCR push
+            ├─► Bicep → Azure App Service deploy
+            └─► Smoke test (health check)
+```
 
-### Musteri Degeri
+---
 
-| Yetenek | Durum | Deger |
-| --- | --- | --- |
-| SQL Server cekirdegi | `018` migration'a kadar tamam | DEV ortaminda kontrollu dogrulama icin saglam temel. |
-| 108 tablolu domain model | Hazir | Musteri, kurum, risk, police, teminat, hasar, dokuman, gorev, RBAC, tenant ve audit ayrildi. |
-| SSMS operator workbench | Hazir | Kullanici tek dashboard'dan guvenli gunluk is akisi baslatir. |
-| Calisma mantigi haritasi | Hazir | Alanlar, alt basliklar, kontrol noktalari ve plan kartlari SSMS icinde gorunur. |
-| Visual workflow board | Hazir | Mind-map benzeri node, edge, alt baslik ve template-route verileri SSMS Results Grid olarak alinir. |
-| Tablo katalogu ve FK haritasi | Hazir | Yeni tablo/migration oncesi gercek SQL Server metadata'si incelenir. |
-| Admin rol matrisi | Hazir | RBAC, permission, kullanici rol atamalari ve least-privilege kontrolleri SSMS Results Grid olarak alinir. |
-| Monitoring ve job readiness | Hazir | DEV health, backlog, backup gorunurlugu ve SQL Agent handoff gridleri SSMS icinden alinir. |
-| Delivery gap register | Hazir | Commit kapanis durumu, bitmeyen teslimat bosluklari, is sahibi blokajlari ve siradaki SSMS aksiyonlari tek read-only grid setinde gorunur. |
-| Remaining work cockpit | Hazir | Acik blokajlar owner evidence, 019+ karar girisi, edge bridge siralama ve DBA handoff gridlerine ayrilir. |
-| Tenant izole backend API | Hazir | Domain read endpointleri JWT tenant claim ile oturum tenantina baglanir; production auth ayarlari zorunludur. |
-| Kalite kapilari | Hazir | Migration sirasi, SQL Server syntax, destructive pattern, artifact policy, SSMS standartlari ve dokumanlar kontrol edilir. |
-| Dokuman merkezi | Hazir | Okunabilir proje dokumanlari `md/` altinda toplandi. |
+## Azure Deploy
 
-### SSMS Calisma Akisi
+```bash
+# Azure login
+az login
 
-Scriptleri `database/ssms/` altindan SSMS icinde acin. `:setvar` veya `:r`
-kullanan scriptlerde `Query > SQLCMD Mode` acik olmalidir.
+# Resource group
+az group create --name rg-yafespars-prod --location westeurope
 
-Local workbench preview kalici veri degisikligi yapmaz. Gercek calisma SSMS
-icinde, SQLCMD Mode acik olarak ve sadece DEV database uzerinde yapilmalidir.
+# Bicep deploy
+az deployment group create \
+  --resource-group rg-yafespars-prod \
+  --template-file infra/main.bicep \
+  --parameters @infra/main.bicepparam
 
-1. `00__open_first_safety_check.sql` - DEV veritabani ve guvenli server kontrolu.
-2. `05__operator_dashboard_home.sql` - SSMS ana dashboard sekmesi.
-3. `11__schema_working_logic_map.sql` - alanlar, alt basliklar ve plan kartlari.
-4. `13__visual_workflow_board.sql` - SSMS uyumlu node, edge, alt baslik ve template-route gridleri.
-5. `12__table_catalog_and_relationships.sql` - tablo katalogu ve FK haritasi.
-6. `10__daily_operator_checklist.sql` - gunluk hazirlik kontrolleri.
-7. `02__operations_dashboard.sql` - operasyonel Results Grid ozetleri.
-8. `06__query_library_shortcuts.sql` - kayit arama ve ID kopyalama.
-9. `07__data_entry_bridge_templates.sql` - kisi, arac risk objesi, police, link, hasar ve task icin preview-first veri olusturma.
-10. `08__data_editing_guardrails.sql` - rollback-first veri guncelleme.
-11. `09__graph_report_pack.sql` - grafik/export hazir rapor gridleri.
-12. `03__create_renewal_tasks.sql` - once dry-run ile yenileme gorevleri.
-13. `04__admin_security_audit_queries.sql` - RBAC, audit ve veri kalite kontrolu.
-14. `14__admin_role_permission_matrix.sql` - rol, permission, kullanici atamasi ve least-privilege kontrolu.
-15. `15__monitoring_and_job_readiness.sql` - DEV health, backlog, backup gorunurlugu ve SQL Agent hazirlik kontrolu.
-16. `16__delivery_gap_register.sql` - commit kapanis durumu, bitmeyen isler ve siradaki SSMS aksiyonlari.
-17. `17__remaining_work_cockpit.sql` - acik blokajlari owner evidence, 019+ karar, bridge siralama ve DBA handoff aksiyonlarina cevirir.
+# Key Vault'a connection string ekle
+az keyvault secret set \
+  --vault-name <vault-name> \
+  --name YafesParsConnectionString \
+  --value "Server=...;Database=YafesPars;..."
+```
 
-### Dokumanlar
+---
 
-| Yol | Amac |
-| --- | --- |
-| `md/README.md` | Dokuman merkezi ve yazim kurallari. |
-| `md/product-ownership.md` | Urun sahipligi, release yetkisi ve atif kurallari. |
-| `md/mustafaplan.md` | Canli plan, uzman degerlendirmesi, riskler ve siradaki isler. |
-| `md/database/` | SQL Server mimari, deploy, migration, guvenlik, ERD ve readiness dokumanlari. |
-| `md/ssms/` | SSMS workbench, tutorial, template ve dashboard plani. |
-| `md/backend/` | Opsiyonel .NET backend notlari. |
-| `md/reports/` | Ilerleme ve teslimat raporlari. |
+## Belgeler
 
-### Sonraki Guncellemeler
+| Yol | İçerik |
+|-----|--------|
+| [`docs/kullanim-kilavuzu.md`](docs/kullanim-kilavuzu.md) | Tam Türkçe kullanım kılavuzu |
+| [`md/database/architecture.md`](md/database/architecture.md) | Veritabanı mimarisi |
+| [`md/database/domain-model.md`](md/database/domain-model.md) | Domain model açıklamaları |
+| [`md/ssms/operator-workbench.md`](md/ssms/operator-workbench.md) | SSMS operator kılavuzu |
+| [`md/ssms/tutorials/`](md/ssms/tutorials/) | Adım adım tutorial serisi |
+| [`SECURITY.md`](SECURITY.md) | Güvenlik politikası |
 
-1. Paylasilmis/riske girmis token varsa rotate edilecek; credential'lar Git disinda tutulacak.
-2. PR/commit review sonrasinda `16__delivery_gap_register.sql` calistirilip bitmeyen isler SSMS icinde gorunur tutulacak.
-3. `17__remaining_work_cockpit.sql` ile kalan evidence, 019+ karar, bridge siralama ve SQL Agent handoff aksiyonlari atanacak.
-4. TEST/PROD ortam yenilemesinden sonra tekrar edilebilir execution evidence kaydi tutulacak.
-5. Operator, admin, auditor ve deployer rolleri icin TEST/PROD permission kaniti eklenecek.
-6. TEST/PROD restore drill kaniti production readiness checklist'e eklenecek.
-7. `019+` migration adaylari is sahibi onayi ile tasarlanacak: finance,
-   import/export staging, entity notes, product templates.
-8. Daha dusuk frekansli departman aksiyonlari icin bridge template kapsami artirilacak.
-9. Monitoring/job-readiness gridleri DEV/TEST altyapisi netlesince onayli SQL Agent job'larina donusturulecek.
+---
 
-## Security
+## Gereksinimler
 
-Security policy and vulnerability reporting rules are defined in `SECURITY.md`.
-Do not commit credentials, database backups, connection strings, `.env` files,
-package archives, VM images, or production data.
+- SQL Server 2022 (Developer veya Express yerel, Azure SQL üretim)
+- SSMS 19+ veya Azure Data Studio
+- .NET 8 SDK (backend için)
+- Docker Desktop (isteğe bağlı)
+- PowerShell 7+ (migration araçları için)
+
+---
+
+<div align="center">
+
+**Yafes Pars** · SQL Server 2022 · .NET 8 · Azure · MIT License
+
+</div>
