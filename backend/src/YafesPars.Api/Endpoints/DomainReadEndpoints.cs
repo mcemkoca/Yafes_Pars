@@ -11,7 +11,8 @@ public static class DomainReadEndpoints
     {
         var api = app.MapGroup("/api")
             .WithTags("Domain reads")
-            .RequireAuthorization("TenantUser");
+            .RequireAuthorization("TenantUser")
+            .RequireRateLimiting("tenant");
 
         api.MapGet("/tenants", QueryTenantsAsync);
         api.MapGet("/persons", QueryPersonsAsync);

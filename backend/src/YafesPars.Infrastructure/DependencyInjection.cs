@@ -11,6 +11,7 @@ public static class DependencyInjection
         services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
         services.AddScoped<ISqlConnectionFactory, SqlConnectionFactory>();
         services.AddScoped<IReadRepository, DapperReadRepository>();
+        services.AddScoped<IWriteRepository, DapperWriteRepository>();
         return services;
     }
 }
