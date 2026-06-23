@@ -106,5 +106,55 @@ IF COL_LENGTH(N'person.Person', N'tenant_id') IS NULL
 IF COL_LENGTH(N'person.Person', N'is_deleted') IS NULL
     THROW 50219, 'Missing column: person.Person.is_deleted', 1;
 
+IF EXISTS (
+    SELECT 1
+    FROM person.Person p
+    WHERE p.person_kind = N'NATURAL'
+      AND p.is_deleted = 0
+      AND NOT EXISTS (
+            SELECT 1
+            FROM person.NaturalPerson np
+            WHERE np.person_id = p.person_id
+              AND np.is_deleted = 0
+      )
+)
+    THROW 50220, 'Natural person without NaturalPerson row.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM person.Person p
+    WHERE p.person_kind = N'LEGAL'
+      AND p.is_deleted = 0
+      AND NOT EXISTS (
+            SELECT 1
+            FROM person.LegalPerson lp
+            WHERE lp.person_id = p.person_id
+              AND lp.is_deleted = 0
+      )
+)
+    THROW 50221, 'Legal person without LegalPerson row.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM person.NaturalPerson np
+    INNER JOIN person.LegalPerson lp
+        ON lp.person_id = np.person_id
+    WHERE np.is_deleted = 0
+      AND lp.is_deleted = 0
+)
+    THROW 50222, 'Person cannot be both natural and legal.', 1;
+
+IF EXISTS (
+    SELECT p.tenant_id, e.email
+    FROM person.Email e
+    INNER JOIN person.Person p
+        ON p.person_id = e.person_id
+    WHERE e.is_deleted = 0
+      AND e.is_primary = 1
+    GROUP BY p.tenant_id, e.email
+    HAVING COUNT(1) > 1
+)
+    THROW 50223, 'Duplicate primary email per tenant.', 1;
+
 PRINT 'Person domain validation passed.';
 GO

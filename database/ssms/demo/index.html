@@ -1,0 +1,3238 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Yafes Pars - SSMS Operator Workbench</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%230078d4'/%3E%3Cpath d='M8 9h16v3H8zm0 6h16v3H8zm0 6h10v3H8z' fill='white'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      --chrome: #f3f3f3;
+      --chrome-2: #e8e8e8;
+      --line: #c6c6c6;
+      --line-2: #dedede;
+      --text: #1e1e1e;
+      --muted: #5b5b5b;
+      --blue: #0078d4;
+      --blue-2: #cce8ff;
+      --green: #107c10;
+      --amber: #fff4ce;
+      --amber-line: #dfc15f;
+      --red: #c50f1f;
+      --panel: #fbfbfb;
+      --editor: #ffffff;
+      --head: #f0f0f0;
+      --status: #007acc;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      color: var(--text);
+      background: #dadada;
+      font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+      font-size: 12px;
+      letter-spacing: 0;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .window {
+      height: 100vh;
+      display: grid;
+      grid-template-rows: 30px 29px 1fr 24px;
+      border: 1px solid #8a8a8a;
+      background: var(--chrome);
+    }
+
+    .titlebar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+      background: linear-gradient(#fdfdfd, #ececec);
+      border-bottom: 1px solid var(--line);
+      user-select: none;
+    }
+
+    .titlebar strong {
+      font-weight: 600;
+    }
+
+    .title-controls {
+      display: flex;
+      gap: 2px;
+    }
+
+    .title-button {
+      width: 38px;
+      height: 22px;
+      display: grid;
+      place-items: center;
+      border: 1px solid transparent;
+      background: transparent;
+      color: #333;
+      padding: 0;
+    }
+
+    .title-button:hover {
+      border-color: #aaa;
+      background: #fff;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 8px;
+      border-bottom: 1px solid var(--line);
+      background: var(--chrome);
+      white-space: nowrap;
+    }
+
+    .menu {
+      display: flex;
+      gap: 13px;
+      margin-right: 8px;
+    }
+
+    .menu-item {
+      height: 22px;
+      padding: 0 2px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: #222;
+      cursor: default;
+    }
+
+    .menu-item:hover,
+    .menu-item.active {
+      border-color: #b8b8b8;
+      background: #fff;
+    }
+
+    .tool {
+      min-width: 26px;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 0 7px;
+      border: 1px solid #b8b8b8;
+      background: linear-gradient(#fff, #e7e7e7);
+      color: #222;
+      cursor: default;
+    }
+
+    .tool:disabled {
+      color: #8a8a8a;
+      background: #ededed;
+      cursor: default;
+    }
+
+    .tool:not(:disabled):active {
+      background: #d8ecff;
+      border-color: #6ca1d3;
+    }
+
+    .tool.primary {
+      border-color: #6ca1d3;
+      background: linear-gradient(#eef7ff, #d5eaff);
+      color: #003b67;
+      font-weight: 600;
+    }
+
+    .tool[aria-pressed="true"] {
+      border-color: #6c9dce;
+      background: #d8ecff;
+      box-shadow: inset 0 0 0 1px #fff;
+    }
+
+    .separator {
+      width: 1px;
+      height: 20px;
+      background: var(--line);
+      margin: 0 2px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      height: 20px;
+      padding: 0 7px;
+      border: 1px solid #9bc89b;
+      background: #ecf7ec;
+      color: #0b5a0b;
+      font-weight: 600;
+    }
+
+    .workspace {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 330px minmax(560px, 1fr) 320px;
+      background: #fff;
+    }
+
+    .dock {
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: 26px 1fr;
+      background: var(--panel);
+    }
+
+    .explorer {
+      border-right: 1px solid var(--line);
+    }
+
+    .assistant {
+      border-left: 1px solid var(--line);
+    }
+
+    .pane-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 8px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(#fafafa, #e9e9e9);
+      font-weight: 600;
+    }
+
+    .tree,
+    .guide {
+      min-height: 0;
+      overflow: auto;
+      padding: 8px 10px 18px;
+    }
+
+    .tree {
+      line-height: 1.8;
+      white-space: nowrap;
+    }
+
+    .tree-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .tree-count {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .tree-subheading {
+      display: block;
+      margin: -1px 0 2px 22px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.35;
+      white-space: normal;
+    }
+
+    .tree ul {
+      margin: 0 0 0 15px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .node {
+      display: block;
+      width: 100%;
+      padding: 1px 3px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: inherit;
+      text-align: left;
+    }
+
+    .node:hover {
+      border-color: #c7d8ea;
+      background: #f3f8ff;
+    }
+
+    .node.selected {
+      border-color: #99c2e6;
+      background: var(--blue-2);
+    }
+
+    .node::before {
+      content: "+";
+      display: inline-grid;
+      place-items: center;
+      width: 13px;
+      height: 13px;
+      margin-right: 4px;
+      border: 1px solid #a0a0a0;
+      background: #fff;
+      color: #333;
+      font-size: 10px;
+      line-height: 1;
+    }
+
+    .node.open::before {
+      content: "-";
+    }
+
+    .node.leaf::before {
+      content: "";
+      border-color: transparent;
+      background: transparent;
+    }
+
+    .main {
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: 31px auto minmax(150px, 33%) 1fr;
+      background: #fff;
+    }
+
+    .tabbar {
+      display: flex;
+      align-items: end;
+      overflow: hidden;
+      padding: 4px 5px 0;
+      border-bottom: 1px solid var(--line);
+      background: #ececec;
+    }
+
+    .tab {
+      height: 26px;
+      display: flex;
+      align-items: center;
+      padding: 0 11px;
+      border: 1px solid var(--line);
+      border-bottom: 0;
+      background: #f8f8f8;
+      color: #333;
+      max-width: 260px;
+      cursor: default;
+    }
+
+    .tab.active {
+      height: 27px;
+      background: #fff;
+      color: #000;
+      font-weight: 600;
+    }
+
+    .operator-strip {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--line-2);
+      background: #fff;
+    }
+
+    .operator-note {
+      grid-column: 1 / -1;
+      min-height: 28px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 7px;
+      border: 1px solid #9ec4e6;
+      background: #edf6ff;
+      color: #163f5f;
+      line-height: 1.35;
+    }
+
+    .operator-note strong {
+      white-space: nowrap;
+    }
+
+    .workflow {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .step {
+      min-width: 0;
+      height: 52px;
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 6px;
+      align-items: center;
+      padding: 6px;
+      border: 1px solid var(--line);
+      background: #f9f9f9;
+      text-align: left;
+      color: #222;
+    }
+
+    .step.active {
+      border-color: #6ca1d3;
+      background: #eaf4ff;
+    }
+
+    .step.done {
+      border-color: #8fbd8f;
+      background: #f0f8f0;
+    }
+
+    .step-num {
+      width: 22px;
+      height: 22px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: #dcdcdc;
+      font-weight: 600;
+    }
+
+    .step.active .step-num {
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .step.done .step-num {
+      background: var(--green);
+      color: #fff;
+    }
+
+    .step-title {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 600;
+    }
+
+    .step-sub {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--muted);
+    }
+
+    .quick-form {
+      width: 250px;
+      display: grid;
+      grid-template-columns: 82px 1fr;
+      gap: 5px 7px;
+      align-items: center;
+    }
+
+    .quick-form label {
+      color: var(--muted);
+    }
+
+    .quick-form select,
+    .quick-form input {
+      min-width: 0;
+      height: 22px;
+      padding: 1px 5px;
+      border: 1px solid #b8b8b8;
+      background: #fff;
+    }
+
+    .editor {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 46px 1fr;
+      border-bottom: 1px solid var(--line);
+      overflow: hidden;
+      background: var(--editor);
+    }
+
+    .line-numbers {
+      padding: 8px 8px 8px 0;
+      text-align: right;
+      color: #2b91af;
+      background: #f8f8f8;
+      border-right: 1px solid #e1e1e1;
+      font-family: Consolas, "Courier New", monospace;
+      line-height: 18px;
+      user-select: none;
+    }
+
+    .code {
+      margin: 0;
+      padding: 8px 12px;
+      overflow: auto;
+      color: #000;
+      background: #fff;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 12px;
+      line-height: 18px;
+      white-space: pre;
+    }
+
+    .kw {
+      color: #0000ff;
+    }
+
+    .str {
+      color: #a31515;
+    }
+
+    .comment {
+      color: #008000;
+    }
+
+    .sys {
+      color: #2b91af;
+    }
+
+    .split {
+      min-height: 0;
+      display: grid;
+      grid-template-rows: 28px 1fr 103px;
+      background: #fff;
+    }
+
+    .results-tabs {
+      display: flex;
+      align-items: end;
+      gap: 2px;
+      padding-left: 6px;
+      border-bottom: 1px solid var(--line);
+      background: #efefef;
+    }
+
+    .result-tab {
+      height: 24px;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-bottom: 0;
+      background: #fafafa;
+      color: #222;
+      cursor: default;
+    }
+
+    .result-tab.active {
+      background: #fff;
+      font-weight: 600;
+    }
+
+    .panel-stack {
+      min-height: 0;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .results,
+    .message-results,
+    .execution-plan {
+      height: 100%;
+      min-height: 0;
+      overflow: auto;
+      padding: 9px;
+      background: #fff;
+    }
+
+    .results[hidden],
+    .message-results[hidden],
+    .execution-plan[hidden] {
+      display: none;
+    }
+
+    .message-results {
+      font-family: Consolas, "Courier New", monospace;
+      line-height: 18px;
+    }
+
+    .plan-grid {
+      display: grid;
+      gap: 8px;
+    }
+
+    .plan-step {
+      border: 1px solid #d0d7de;
+      background: #f8fafc;
+      padding: 8px;
+    }
+
+    .plan-step strong {
+      display: block;
+      color: #0969da;
+      margin-bottom: 4px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(110px, 1fr));
+      gap: 7px;
+      margin-bottom: 9px;
+    }
+
+    .metric {
+      min-width: 0;
+      border: 1px solid var(--line-2);
+      background: #fafafa;
+      padding: 7px;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 18px;
+      line-height: 21px;
+      color: #202020;
+    }
+
+    .metric span {
+      color: var(--muted);
+    }
+
+    .section-title {
+      margin: 0 0 5px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .grid-link {
+      max-width: 100%;
+      display: inline;
+      border: 0;
+      background: transparent;
+      color: #0969da;
+      padding: 0;
+      text-align: left;
+      text-decoration: underline;
+      cursor: default;
+    }
+
+    .grid-link:focus-visible,
+    .tool:focus-visible,
+    .step:focus-visible,
+    .tab:focus-visible,
+    .result-tab:focus-visible,
+    .node:focus-visible,
+    .menu-item:focus-visible,
+    .title-button:focus-visible {
+      outline: 2px solid #0078d4;
+      outline-offset: -1px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      margin-bottom: 12px;
+      font-size: 12px;
+    }
+
+    th,
+    td {
+      height: 24px;
+      padding: 3px 6px;
+      border: 1px solid #d0d0d0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      text-align: left;
+    }
+
+    th {
+      background: var(--head);
+      font-weight: 600;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #fafafa;
+    }
+
+    tbody tr.selected-row {
+      background: var(--blue-2);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      height: 18px;
+      padding: 0 6px;
+      border: 1px solid var(--line);
+      background: #fff;
+      font-weight: 600;
+    }
+
+    .pill.ok {
+      border-color: #8fbd8f;
+      background: #eef8ee;
+      color: var(--green);
+    }
+
+    .pill.warn {
+      border-color: var(--amber-line);
+      background: var(--amber);
+      color: #5f4700;
+    }
+
+    .logic-map {
+      display: grid;
+      grid-template-columns: minmax(170px, 220px) 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+      padding: 12px;
+      border: 1px solid #2f3b52;
+      background: #111827;
+      color: #e5edf7;
+    }
+
+    .logic-center {
+      display: grid;
+      place-items: center;
+      min-height: 150px;
+      padding: 16px;
+      border: 1px solid #6d5dfc;
+      background: #1f2937;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .logic-center span {
+      display: block;
+      margin-top: 6px;
+      color: #a5b4fc;
+      font-weight: 400;
+    }
+
+    .logic-clusters {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 8px;
+    }
+
+    .logic-card,
+    .board-card {
+      min-width: 0;
+      border: 1px solid #475569;
+      background: #172033;
+      padding: 8px;
+    }
+
+    .logic-card h4,
+    .board-card h4 {
+      margin: 0 0 5px;
+      color: #f8fafc;
+      font-size: 12px;
+    }
+
+    .logic-card p,
+    .board-card p {
+      margin: 0;
+      color: #cbd5e1;
+      line-height: 1.35;
+    }
+
+    .subchips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 7px;
+    }
+
+    .subchips span {
+      border: 1px solid #64748b;
+      background: #0f172a;
+      color: #dbeafe;
+      padding: 2px 5px;
+      font-size: 11px;
+    }
+
+    .board-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .board-card {
+      background: #f8fafc;
+      border-color: #d0d7de;
+      color: #24292f;
+    }
+
+    .board-card h4 {
+      color: #0969da;
+    }
+
+    .board-card p {
+      color: #57606a;
+    }
+
+    .board-card .subchips span {
+      border-color: #bfdbfe;
+      background: #eff6ff;
+      color: #1e3a8a;
+    }
+
+    .messages {
+      min-height: 0;
+      display: grid;
+      grid-template-rows: 22px 1fr;
+      border-top: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .messages-title {
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      border-bottom: 1px solid #ddd;
+      background: #f3f3f3;
+      font-weight: 600;
+    }
+
+    .messages-body {
+      overflow: auto;
+      padding: 6px 10px;
+      font-family: Consolas, "Courier New", monospace;
+      line-height: 18px;
+      background: #fff;
+    }
+
+    .message-ok {
+      color: var(--green);
+      font-weight: 600;
+    }
+
+    .guide-card {
+      border: 1px solid var(--line-2);
+      background: #fff;
+      margin-bottom: 8px;
+    }
+
+    .guide-card h2,
+    .guide-card h3 {
+      margin: 0;
+      padding: 7px 8px;
+      border-bottom: 1px solid var(--line-2);
+      background: #f8f8f8;
+      font-size: 12px;
+    }
+
+    .guide-card .body {
+      padding: 8px;
+      line-height: 1.45;
+    }
+
+    .checklist {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .checklist li {
+      display: grid;
+      grid-template-columns: 18px 1fr;
+      gap: 5px;
+      margin: 0 0 7px;
+    }
+
+    .check {
+      width: 18px;
+      height: 16px;
+      display: grid;
+      place-items: center;
+      margin-top: 1px;
+      border: 1px solid #8fbd8f;
+      background: #eef8ee;
+      color: var(--green);
+      font-size: 9px;
+      font-weight: 700;
+    }
+
+    .callout {
+      border: 1px solid var(--amber-line);
+      background: var(--amber);
+      padding: 7px;
+      color: #604400;
+      line-height: 1.4;
+    }
+
+    .flow-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .statusbar {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto auto;
+      gap: 18px;
+      align-items: center;
+      padding: 0 10px;
+      color: #fff;
+      background: var(--status);
+      font-size: 12px;
+    }
+
+    @media (max-width: 1120px) {
+      .workspace {
+        grid-template-columns: 225px minmax(450px, 1fr);
+      }
+
+      .assistant {
+        display: none;
+      }
+    }
+
+    @media (max-width: 820px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .explorer {
+        display: none;
+      }
+
+      .operator-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .quick-form {
+        width: 100%;
+        grid-template-columns: 70px 1fr;
+      }
+
+      .workflow {
+        grid-template-columns: repeat(2, minmax(120px, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="window">
+    <div class="titlebar">
+      <strong id="windowTitle">Microsoft SQL Server Management Studio - YafesPars_Dev - Corporate Operator Workbench</strong>
+      <div class="title-controls" aria-label="Window controls">
+        <button class="title-button" type="button" data-window-command="minimize">_</button>
+        <button class="title-button" type="button" data-window-command="maximize">[]</button>
+        <button class="title-button" type="button" data-window-command="close">X</button>
+      </div>
+    </div>
+
+    <div class="toolbar" role="toolbar" aria-label="SSMS command bar">
+      <div class="menu" aria-label="Menu">
+        <button class="menu-item" type="button" data-menu="File">File</button>
+        <button class="menu-item" type="button" data-menu="Edit">Edit</button>
+        <button class="menu-item" type="button" data-menu="View">View</button>
+        <button class="menu-item" type="button" data-menu="Query">Query</button>
+        <button class="menu-item" type="button" data-menu="Tools">Tools</button>
+        <button class="menu-item" type="button" data-menu="Window">Window</button>
+        <button class="menu-item" type="button" data-menu="Help">Help</button>
+      </div>
+      <button class="tool" id="newQueryButton" type="button" title="Yeni sorgu">New Query</button>
+      <button class="tool" id="openButton" type="button" title="Script ac">Open</button>
+      <button class="tool" id="saveButton" type="button" title="Kaydet">Save</button>
+      <span class="separator"></span>
+      <button class="tool primary" id="executeButton" type="button" title="Secili sorguyu calistir">Execute</button>
+      <button class="tool" id="cancelButton" type="button" title="Durdur">Cancel</button>
+      <button class="tool" id="parseButton" type="button" title="Parse">Parse</button>
+      <span class="separator"></span>
+      <button class="tool" id="sqlcmdButton" type="button" aria-pressed="true" title="Query > SQLCMD Mode aktif">SQLCMD Mode</button>
+      <button class="tool" id="gridButton" type="button" aria-pressed="true" title="Sonuclar Grid olarak gosterilir">Results to Grid</button>
+      <span class="separator"></span>
+      <button class="tool" id="copySqlButton" type="button" title="SQL kopyala">Copy SQL</button>
+      <button class="tool" id="copyGridButton" type="button" title="Grid kopyala">Copy Grid</button>
+      <button class="tool" id="exportButton" type="button" title="CSV indir">Export CSV</button>
+      <span class="separator"></span>
+      <span class="badge">DEV SAFE</span>
+    </div>
+
+    <div class="workspace">
+      <aside class="dock explorer" aria-label="Object Explorer">
+        <div class="pane-title">
+          <span>Object Explorer</span>
+          <span>Connected</span>
+        </div>
+        <div class="tree" id="objectTree"></div>
+      </aside>
+
+      <main class="main">
+        <div class="tabbar" id="tabbar" aria-label="Open query tabs"></div>
+
+        <div class="operator-strip">
+          <div class="operator-note">
+            <strong>Operator Guide</strong>
+            <span id="inlineHelp">Operator akisi hazirlaniyor.</span>
+          </div>
+          <div class="workflow" id="workflow" aria-label="Operator workflow"></div>
+          <div class="quick-form" aria-label="Operator controls">
+            <label for="tenant">Tenant</label>
+            <select id="tenant">
+              <option value="DEV-BE-BROKER">Belgium Broker Tenant (DEV)</option>
+              <option value="DEV-NL-BROKER">Netherlands Broker Tenant (DEV)</option>
+            </select>
+            <label for="rows">Top Rows</label>
+            <input id="rows" type="number" min="10" max="1000" step="10" value="100">
+            <label for="mode">Mode</label>
+            <select id="mode">
+              <option>Dry run</option>
+              <option>Execute</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="editor">
+          <div class="line-numbers" id="lineNumbers"></div>
+          <pre class="code" id="codeBlock"></pre>
+        </div>
+
+        <section class="split" aria-label="Results and messages">
+          <div class="results-tabs">
+            <button class="result-tab active" type="button" data-panel="results">Results</button>
+            <button class="result-tab" type="button" data-panel="messages">Messages</button>
+            <button class="result-tab" type="button" data-panel="execution">Execution plan</button>
+          </div>
+
+          <div class="panel-stack">
+            <div class="results" id="results"></div>
+            <div class="message-results" id="messageResults" hidden></div>
+            <div class="execution-plan" id="executionPlan" hidden></div>
+          </div>
+
+          <div class="messages">
+            <div class="messages-title">Messages</div>
+            <div class="messages-body" id="messages"></div>
+          </div>
+        </section>
+      </main>
+
+      <aside class="dock assistant" aria-label="Operator guide">
+        <div class="pane-title">
+          <span>Operator Guide</span>
+          <span id="guideStatus">Ready</span>
+        </div>
+        <div class="guide">
+          <div class="guide-card">
+            <h2>Bugunku is akisi</h2>
+            <div class="body">
+              <ul class="checklist">
+                <li><span class="check">OK</span><span>Home dashboard kisa yollar ve saglik sinyalleri verir.</span></li>
+                <li><span class="check">OK</span><span>Migration handoff gercek generated SSMS scriptine yonlendirir.</span></li>
+                <li><span class="check">OK</span><span>Working logic map alanlari ve alt basliklari gosterir.</span></li>
+                <li><span class="check">OK</span><span>Table catalog gercek tablo sayilari ve FK mantigini aciklar.</span></li>
+                <li><span class="check">OK</span><span>Visual workflow board node/edge gridleri ve template route verir.</span></li>
+                <li><span class="check">OK</span><span>Admin role matrix kullanici ve permission kontrolunu SSMS gridinde verir.</span></li>
+                <li><span class="check">OK</span><span>Data bridge create islemlerini preview-first yapar.</span></li>
+                <li><span class="check">OK</span><span>Edit guardrail rollback default ile calisir.</span></li>
+                <li><span class="check">OK</span><span>Report pack SSMS gridlerini grafik/export verisine cevirir.</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="guide-card">
+            <h3>Secili adim</h3>
+            <div class="body" id="stepHelp"></div>
+          </div>
+
+          <div class="guide-card">
+            <h3>Guvenlik notu</h3>
+            <div class="body">
+              <div class="callout">Calisma standardi: SSMS icinde SQLCMD Mode acik olmali ve tum islemler yalnizca DEV database uzerinde yapilmalidir.</div>
+            </div>
+          </div>
+
+          <div class="guide-card">
+            <h3>Akis kontrolu</h3>
+            <div class="body">
+              <div class="flow-actions">
+                <button class="tool" id="prevButton">Onceki</button>
+                <button class="tool primary" id="nextButton">Sonraki</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="statusbar">
+      <span id="statusLeft">Connected - YafesPars_Dev</span>
+      <span>Home | Logic | Visual | Catalog | Admin | Bridge | Reports | Delivery</span>
+      <span>SQLCMD Mode</span>
+      <span id="rowStatus">Rows: 100</span>
+      <span id="cursorStatus">Ln 1, Col 1</span>
+    </div>
+  </div>
+
+  <script>
+    const scenarios = [
+      {
+        file: "05__operator_dashboard_home.sql",
+        title: "Home",
+        subtitle: "Kisayol merkezi",
+        help: "Operator dashboard SSMS icinde ana kontrol panelidir: kisayollar, saglik sinyalleri, aktif tenant ve onerilen sonraki adimlari gosterir.",
+        code: `/* Yafes Pars SSMS Workbench - Operator Dashboard Home */
+:ON ERROR EXIT
+:setvar YAFES_SQL_DATABASE "YafesPars_Dev"
+:setvar TENANT_CODE "DEV-BE-BROKER"
+
+USE [$(YAFES_SQL_DATABASE)];
+GO
+
+PRINT '01 - Operator shortcuts';
+SELECT shortcut_order, shortcut_group, action_name, ssms_file, safety_mode, info_tip
+FROM operator_shortcuts
+ORDER BY shortcut_order;`,
+        metrics: [
+          ["Shortcuts", "16"],
+          ["Health", "4"],
+          ["Mode", "Read-only"],
+          ["Tenant", "DEV-BE"]
+        ],
+        tables: [
+          {
+            title: "01 - Operator shortcuts",
+            columns: ["order", "group", "action", "ssms_file", "safety"],
+            rows: [
+              ["10", "Start", "Safety check", "00__open_first_safety_check.sql", "READ_ONLY"],
+              ["20", "Start", "DEV migration handoff", "01__run_all_dev_migrations_sqlcmd.sql", "READ_ONLY_HANDOFF"],
+              ["25", "Architecture", "Working logic map", "11__schema_working_logic_map.sql", "READ_ONLY"],
+              ["26", "Architecture", "Table catalog and FK map", "12__table_catalog_and_relationships.sql", "READ_ONLY"],
+              ["27", "Architecture", "Visual workflow board", "13__visual_workflow_board.sql", "READ_ONLY"],
+              ["30", "Operate", "Operations dashboard", "02__operations_dashboard.sql", "READ_ONLY"],
+              ["55", "Control", "Role/permission matrix", "14__admin_role_permission_matrix.sql", "READ_ONLY"],
+              ["70", "Edit", "Data entry bridge", "07__data_entry_bridge_templates.sql", "REVIEW_BEFORE_COMMIT"],
+              ["90", "Report", "Graph/report pack", "09__graph_report_pack.sql", "READ_ONLY"],
+              ["110", "Control", "Monitoring and job readiness", "15__monitoring_and_job_readiness.sql", "READ_ONLY"],
+              ["120", "Control", "Delivery gap register", "16__delivery_gap_register.sql", "READ_ONLY"]
+            ]
+          },
+          {
+            title: "03 - Health signals",
+            columns: ["signal", "value", "status", "info_tip"],
+            rows: [
+              ["Latest migration", "018 complete", "OK", "Expected ledger count is 17; source files are 19 through 018."],
+              ["Open tasks", "6", "OK", "Review if above team threshold."],
+              ["Renewal candidates", "3", "ACTION", "Run renewal dry-run first."]
+            ]
+          }
+        ],
+        messages: [
+          "Home dashboard loaded.",
+          "Shortcuts are SSMS files, not web links.",
+          "Keep this tab open as the operator cockpit."
+        ]
+      },
+      {
+        file: "01__run_all_dev_migrations_sqlcmd.sql",
+        title: "Migrate",
+        subtitle: "DEV handoff",
+        help: "Migration handoff bu ekranda migration baslatmaz. Gercek all-in-one SSMS scripti PowerShell runner ile uretilir, sonra SSMS icinde SQLCMD Mode acik olarak DEV database uzerinde calistirilir.",
+        code: `/* DEV Migration Handoff */
+:ON ERROR EXIT
+:setvar YAFES_SQL_DATABASE "YafesPars_Dev"
+:setvar YAFES_SQL_BACKUP_PATH "C:\\SqlBackups\\YafesPars_Dev_PreMigration_YYYYMMDD_HHMMSS.bak"
+
+USE [master];
+GO
+
+IF N'$(YAFES_SQL_DATABASE)' NOT LIKE N'%DEV%'
+    THROW 52005, 'Target database name must contain DEV.', 1;
+
+PRINT 'Generate the real SSMS script first:';
+PRINT '.\\database\\tools\\run-dev-migrations.ps1 -GenerateSsmsScriptOnly';
+PRINT 'Then open database/execution-logs/<run-id>/ssms-dev-migrations.sql in SSMS.';`,
+        metrics: [
+          ["Mode", "Handoff"],
+          ["Run here", "No"],
+          ["Backup", "Required"],
+          ["Target", "DEV only"]
+        ],
+        boardCards: [
+          {
+            title: "Generate",
+            text: "Create the all-in-one SSMS migration file with the guarded PowerShell runner.",
+            chips: ["run-dev-migrations", "GenerateSsmsScriptOnly"]
+          },
+          {
+            title: "Verify",
+            text: "Open the generated script, enable SQLCMD Mode, check database and backup variables.",
+            chips: ["SQLCMD Mode", "DEV", "backup path"]
+          },
+          {
+            title: "Execute",
+            text: "Run the generated script only against a verified DEV database from SSMS.",
+            chips: ["migrations 000-018", "validations 001-017"]
+          }
+        ],
+        tables: [
+          {
+            title: "01 - Migration handoff status",
+            columns: ["item", "status", "expected_operator_action", "info_tip"],
+            rows: [
+              ["Checked-in 01 file", "READY", "Use as read-only preflight only", "It does not run migrations directly."],
+              ["Generated SSMS script", "REQUIRED", "Create database/execution-logs/<run-id>/ssms-dev-migrations.sql", "Generated files are not committed."],
+              ["SQLCMD Mode", "REQUIRED", "Enable Query > SQLCMD Mode in SSMS", "Required for :setvar and :r handling."],
+              ["DEV database", "REQUIRED", "Confirm name contains DEV", "Stops if target looks wrong."]
+            ]
+          },
+          {
+            title: "02 - Manual SSMS execution checklist",
+            columns: ["order", "step", "script_or_file", "safety"],
+            rows: [
+              ["1", "Generate all-in-one script", "run-dev-migrations.ps1 -GenerateSsmsScriptOnly", "READ_ONLY_GENERATION"],
+              ["2", "Open generated script", "database/execution-logs/<run-id>/ssms-dev-migrations.sql", "LOCAL_ARTIFACT"],
+              ["3", "Verify variables", "YAFES_SQL_DATABASE / YAFES_SQL_BACKUP_PATH", "BACKUP_REQUIRED"],
+              ["4", "Run in SSMS", "SQLCMD Mode enabled", "DEV_ONLY"]
+            ]
+          }
+        ],
+        messages: [
+          "Migration handoff loaded.",
+          "This workbench screen does not execute migrations directly.",
+          "Generate ssms-dev-migrations.sql, then run it in SSMS with SQLCMD Mode enabled."
+        ]
+      },
+      {
+        file: "11__schema_working_logic_map.sql",
+        title: "Logic Map",
+        subtitle: "Alanlar ve alt basliklar",
+        help: "Working logic map kullaniciya tablo gruplarini, alt basliklari, kontrol noktalarini ve gelecek planlama kartlarini SSMS Results Grid icinde gosterir.",
+        code: `/* Schema Working Logic Map */
+:ON ERROR EXIT
+:setvar YAFES_SQL_DATABASE "YafesPars_Dev"
+:setvar TENANT_CODE "DEV-BE-BROKER"
+
+USE [$(YAFES_SQL_DATABASE)];
+GO
+
+PRINT '01 - Domain groups and subheadings';
+SELECT domain_group, subheading, schema_name, table_count, working_logic, ssms_entry_point, info_tip
+FROM #DomainMap
+ORDER BY domain_order;
+
+PRINT '03 - Ready-made board cards for future drag/drop planning';
+SELECT board_lane, card_title, subitems, current_state, recommended_next_action
+FROM #PlanningCards
+ORDER BY card_order;`,
+        metrics: [
+          ["Domains", "11"],
+          ["Tables", "108"],
+          ["Backlog", "019+"],
+          ["Mode", "Read-only"]
+        ],
+        logicGroups: [
+          {
+            title: "Foundation",
+            text: "Tenant, RBAC, migration ledger, reference standards.",
+            chips: ["core", "ref"]
+          },
+          {
+            title: "Customer",
+            text: "Natural/legal identities, contact data, institutions.",
+            chips: ["person", "institution"]
+          },
+          {
+            title: "Insurance Core",
+            text: "Risk objects, contracts, versions, parties, coverage.",
+            chips: ["risk", "policy", "coverage"]
+          },
+          {
+            title: "Operations",
+            text: "Claims, documents, tasks, reminders, comments.",
+            chips: ["claim", "document", "tasking"]
+          },
+          {
+            title: "Control",
+            text: "Audit logs and entity change sets after guarded edits.",
+            chips: ["audit"]
+          }
+        ],
+        boardCards: [
+          {
+            title: "Risk/Object",
+            text: "Largest domain. Replaces unsafe generic Object naming with risk.InsurableObject.",
+            chips: ["33 tables", "vehicles", "real estate", "loans"]
+          },
+          {
+            title: "Policy",
+            text: "Central operating record for renewals, claims, parties, objects, and status.",
+            chips: ["17 tables", "renewals", "versions"]
+          },
+          {
+            title: "Bridge Flow",
+            text: "Search IDs, preview procedure input, execute only after review.",
+            chips: ["query", "preview", "output IDs"]
+          },
+          {
+            title: "Candidate 019+",
+            text: "Finance, import/export staging, entity notes, product templates.",
+            chips: ["planned", "forward-only", "approval"]
+          }
+        ],
+        tables: [
+          {
+            title: "01 - Domain groups and subheadings",
+            columns: ["order", "domain", "schema", "tables", "subheading", "info_tip"],
+            rows: [
+              ["10", "Core", "core", "7", "Tenant, users, RBAC, migration ledger", "Use when access or migration state is unclear."],
+              ["30", "Person", "person", "16", "Natural/legal identity, contacts, relations", "Create through stored procedures."],
+              ["50", "Risk/Object", "risk", "33", "Vehicle, real estate, loan, person risk, thing, activity", "Use risk.InsurableObject as root."],
+              ["60", "Policy", "policy", "17", "Contract, versions, parties, objects, takeovers", "Central operational hub."],
+              ["100", "Task", "tasking", "5", "Tasks, comments, reminders, priority/status", "Daily operator queue."]
+            ]
+          },
+          {
+            title: "02 - Working flow with control points",
+            columns: ["source", "target", "relationship", "control_point", "info_tip"],
+            rows: [
+              ["Core", "All domains", "Tenant and RBAC context", "TENANT_CODE", "Every script confirms context."],
+              ["Person", "Policy", "Policy holder, insured, broker", "policy.ContractParty", "Copy person_id from search."],
+              ["Risk/Object", "Policy", "Insurable object relation", "policy.ContractObject", "Use subtype tables for detail."],
+              ["Policy", "Claim", "Claim opened against policy", "claim.Claim.contract_id", "Verify policy and tenant."],
+              ["Root domains", "Audit", "Change logging", "audit.AuditLog", "Review after guarded edits."]
+            ]
+          }
+        ],
+        messages: [
+          "Working logic map loaded.",
+          "All groups include subheadings and operator info tips.",
+          "Use this before designing future 019+ migrations."
+        ]
+      },
+      {
+        file: "13__visual_workflow_board.sql",
+        title: "Visual Board",
+        subtitle: "Node/edge gridleri",
+        help: "Visual workflow board mind-map fikrini SSMS'e uygun hale getirir: domain kartlari, alt basliklar, node/edge satirlari, template route'lari ve hazirlik bosluklari Results Grid olarak gelir.",
+        code: `/* Visual Workflow Board */
+:ON ERROR EXIT
+:setvar YAFES_SQL_DATABASE "YafesPars_Dev"
+:setvar TENANT_CODE "DEV-BE-BROKER"
+:setvar FOCUS_DOMAIN "ALL"
+
+USE [$(YAFES_SQL_DATABASE)];
+GO
+
+PRINT '02 - Domain board lanes and cards';
+SELECT board_lane, domain_group, schema_name, table_count, primary_tables, ssms_entry_point
+FROM #VisualDomainCards
+ORDER BY board_lane, domain_order;
+
+PRINT '04 - Mind map nodes for SSMS grid or future renderer';
+SELECT node_id, parent_node_id, node_type, display_label, open_script, info_tip
+FROM #MindMapNodes
+ORDER BY node_id;
+
+PRINT '06 - Ready template routes';
+SELECT domain_group, action_type, ssms_file, template_mode, operator_rule
+FROM #TemplateRoutes
+ORDER BY route_order;`,
+        metrics: [
+          ["Domains", "11"],
+          ["Tables", "108"],
+          ["Legacy ref", "89"],
+          ["Mode", "Read-only"]
+        ],
+        boardCards: [
+          {
+            title: "Domain Cards",
+            text: "Foundation, Customer, Insurance Core, Operations, and Control lanes are returned as SSMS rows.",
+            chips: ["11 domains", "subheadings", "info tips"]
+          },
+          {
+            title: "Mind Map Nodes",
+            text: "Root, domain, and subheading nodes can feed SSMS review, Excel, Power BI, or a future visual renderer.",
+            chips: ["ROOT", "DOMAIN", "SUBHEADING"]
+          },
+          {
+            title: "Edges",
+            text: "Control points show how tenant, lookup, person, risk, policy, claim, document, task, and audit flow together.",
+            chips: ["from", "to", "control"]
+          },
+          {
+            title: "Template Routes",
+            text: "Drag/drop is translated into safe SSMS behavior: find ID, preview bridge, execute or rollback.",
+            chips: ["query", "bridge", "guardrail"]
+          }
+        ],
+        tables: [
+          {
+            title: "01 - Visual board operating context",
+            columns: ["database", "tenant", "actual_tables", "source_tables", "legacy_reference", "status"],
+            rows: [
+              ["YafesPars_Dev", "DEV-BE-BROKER", "108", "108", "89", "OK"],
+              ["INFO", "Table count", "Current migrations are source of truth", "Legacy package is comparison input", "Do not downsize blindly", "REVIEW"]
+            ]
+          },
+          {
+            title: "02 - Domain board lanes and cards",
+            columns: ["lane", "domain", "schema", "tables", "entry_point"],
+            rows: [
+              ["Foundation", "Core", "core", "7", "04__admin_security_audit_queries.sql"],
+              ["Customer", "Person", "person", "16", "07__data_entry_bridge_templates.sql"],
+              ["Insurance Core", "Risk/Object", "risk", "33", "06__query_library_shortcuts.sql"],
+              ["Insurance Core", "Policy", "policy", "17", "03__create_renewal_tasks.sql"],
+              ["Operations", "Claim", "claim", "8", "06__query_library_shortcuts.sql"],
+              ["Control", "Audit", "audit", "2", "04__admin_security_audit_queries.sql"]
+            ]
+          },
+          {
+            title: "03 - Domain subheading cards",
+            columns: ["domain", "subheading", "table_group", "safe_action", "template_route"],
+            rows: [
+              ["Person", "Identity roots", "Person | NaturalPerson | LegalPerson", "Find existing person first", "07__data_entry_bridge_templates.sql"],
+              ["Risk/Object", "Vehicle risk", "InsurableVehicle | VehicleType | UsageType", "Use lookup-guided template", "07__data_entry_bridge_templates.sql"],
+              ["Policy", "Parties and objects", "ContractParty | ContractObject", "Copy IDs from search grids", "07__data_entry_bridge_templates.sql"],
+              ["Claim", "Claim facts", "ClaimCircumstance | ClaimCircumstanceType", "Use guarded edits", "08__data_editing_guardrails.sql"],
+              ["Task", "Task collaboration", "TaskComment | TaskReminder", "Add through guided patterns", "07__data_entry_bridge_templates.sql"]
+            ]
+          },
+          {
+            title: "05 - Mind map edges and control points",
+            columns: ["from_node", "to_node", "relationship", "control_point", "script"],
+            rows: [
+              ["DOMAIN_core", "DOMAIN_ref", "Validated lookup choices", "Seed validation", "06__query_library_shortcuts.sql"],
+              ["DOMAIN_person", "DOMAIN_policy", "Person becomes policy party", "policy.ContractParty", "06__query_library_shortcuts.sql"],
+              ["DOMAIN_risk", "DOMAIN_policy", "Risk object attaches to contract", "policy.ContractObject", "07__data_entry_bridge_templates.sql"],
+              ["DOMAIN_policy", "DOMAIN_claim", "Claim opens against policy", "claim.Claim.contract_id", "06__query_library_shortcuts.sql"],
+              ["DOMAIN_tasking", "DOMAIN_audit", "Guarded edits create review trail", "audit.AuditLog", "04__admin_security_audit_queries.sql"]
+            ]
+          },
+          {
+            title: "07 - Visual idea readiness and gaps",
+            columns: ["capability", "status", "implementation_rule", "next_action"],
+            rows: [
+              ["SSMS-native dashboard", "READY", "Use Results Grid shortcut rows", "Keep scripts read-only"],
+              ["Mind-map style groups", "READY", "Use node/card result sets", "Workbench mirrors these rows"],
+              ["Drag/drop behavior", "SSMS_ADAPTED", "Use route + preview + execute/rollback", "Use bridge templates"],
+              ["89 vs 108 reconciliation", "OPEN", "Current migrations are source of truth", "Compare names before schema changes"],
+              ["Every-table bridge coverage", "PARTIAL", "Prioritize daily workflows", "Add bridges by usage"]
+            ]
+          }
+        ],
+        messages: [
+          "Visual workflow board loaded.",
+          "SSMS grid rows are the source; the workbench mirrors them visually.",
+          "Use 13__visual_workflow_board.sql for node, edge, route, and readiness review."
+        ]
+      },
+      {
+        file: "12__table_catalog_and_relationships.sql",
+        title: "Catalog",
+        subtitle: "Tablo ve FK haritasi",
+        help: "Table catalog SQL Server metadata uzerinden tam tablo listesini, kolon profilini, root tablolarini ve foreign-key iliski haritasini gosterir.",
+        code: `/* Table Catalog And Relationships */
+:ON ERROR EXIT
+:setvar YAFES_SQL_DATABASE "YafesPars_Dev"
+:setvar TENANT_CODE "DEV-BE-BROKER"
+
+USE [$(YAFES_SQL_DATABASE)];
+GO
+
+PRINT '01 - Schema summary';
+SELECT s.name AS schema_name, COUNT(t.object_id) AS table_count
+FROM sys.schemas s
+LEFT JOIN sys.tables t ON t.schema_id = s.schema_id
+WHERE s.name IN ('core','ref','person','institution','risk','policy','coverage','claim','document','tasking','audit')
+GROUP BY s.name;
+
+PRINT '02 - Full table catalog';
+SELECT s.name AS schema_name, t.name AS table_name, COUNT(c.column_id) AS column_count
+FROM sys.tables t
+JOIN sys.schemas s ON s.schema_id = t.schema_id
+JOIN sys.columns c ON c.object_id = t.object_id
+GROUP BY s.name, t.name
+ORDER BY schema_name, table_name;`,
+        metrics: [
+          ["Schemas", "11"],
+          ["Tables", "108"],
+          ["Root tables", "9"],
+          ["Mode", "Read-only"]
+        ],
+        boardCards: [
+          {
+            title: "Schema Summary",
+            text: "Counts tables, views, and procedures by SQL Server schema.",
+            chips: ["core", "policy", "risk"]
+          },
+          {
+            title: "Full Table Catalog",
+            text: "Shows tenant_id, soft-delete flag, column count, and FK counts.",
+            chips: ["metadata", "columns", "FK counts"]
+          },
+          {
+            title: "Relationship Map",
+            text: "Lists parent and referenced tables so the real model is inspectable.",
+            chips: ["from", "to", "type"]
+          },
+          {
+            title: "Root Tables",
+            text: "Highlights safe starting tables for operators and planning.",
+            chips: ["Tenant", "Person", "Contract"]
+          }
+        ],
+        tables: [
+          {
+            title: "01 - Schema summary",
+            columns: ["schema", "tables", "views", "procedures", "domain_summary"],
+            rows: [
+              ["core", "7", "0", "0", "Tenant, users, RBAC, migration ledger"],
+              ["person", "16", "1", "2", "Customer identity and contact records"],
+              ["risk", "33", "0", "0", "Insurable objects and object subtypes"],
+              ["policy", "17", "1", "0", "Contracts, versions, parties, objects"],
+              ["claim", "8", "0", "0", "Claims and claim workflow"]
+            ]
+          },
+          {
+            title: "04 - Operator-safe root table list",
+            columns: ["domain", "full_table_name", "operator_use", "safe_entry_script"],
+            rows: [
+              ["Core", "core.Tenant", "Tenant context and isolation boundary", "05__operator_dashboard_home.sql"],
+              ["Person", "person.Person", "Customer identity root", "06__query_library_shortcuts.sql"],
+              ["Risk/Object", "risk.InsurableObject", "Insured object root", "06__query_library_shortcuts.sql"],
+              ["Policy", "policy.Contract", "Policy/contract root", "03__create_renewal_tasks.sql"],
+              ["Claim", "claim.Claim", "Claim file root", "06__query_library_shortcuts.sql"]
+            ]
+          },
+          {
+            title: "05 - Candidate table backlog for 019+ planning",
+            columns: ["priority", "candidate_domain", "candidate_tables", "migration_rule"],
+            rows: [
+              ["P1", "Finance/Commission", "Commission, PaymentLedger, ClaimReserve, BrokerStatement", "New forward migration 019+ only"],
+              ["P1", "Import/Export Staging", "ImportBatch, ImportRow, ImportValidationIssue, ExportJob", "New forward migration 019+ only"],
+              ["P2", "Entity Notes", "Note, NoteLink, NoteType", "New forward migration 019+ only"],
+              ["P2", "Product Templates", "ProductTemplate, RatingRule, ClauseTemplate", "New forward migration 019+ only"]
+            ]
+          }
+        ],
+        messages: [
+          "Table catalog loaded from SQL Server metadata.",
+          "Use this before creating new migrations.",
+          "No direct data changes."
+        ]
+      },
+      {
+        file: "14__admin_role_permission_matrix.sql",
+        title: "Admin",
+        subtitle: "RBAC ve yetki matrisi",
+        help: "Admin role matrix kullaniciya hangi rolun hangi izne sahip oldugunu, kimde hangi rol oldugunu ve least-privilege kontrol noktalarini SSMS Results Grid olarak gosterir.",
+        code: `/* Admin Role Permission Matrix */
+:ON ERROR EXIT
+:setvar YAFES_SQL_DATABASE "YafesPars_Dev"
+:setvar TENANT_CODE "DEV-BE-BROKER"
+
+USE [$(YAFES_SQL_DATABASE)];
+GO
+
+DECLARE @TenantId UNIQUEIDENTIFIER;
+SELECT @TenantId = tenant_id
+FROM core.Tenant
+WHERE tenant_code = N'$(TENANT_CODE)';
+
+PRINT '02 - Expected system role coverage';
+WITH ExpectedRoles AS (
+    SELECT * FROM (VALUES
+        (10, N'SYSTEM_ADMIN', N'Platform owner'),
+        (20, N'BROKER_ADMIN', N'Broker office admin'),
+        (30, N'BROKER_USER', N'Daily broker operator'),
+        (40, N'CLAIM_HANDLER', N'Claims operator')
+    ) AS er(role_order, role_code, expected_operator_profile)
+)
+SELECT er.role_code, er.expected_operator_profile, CASE WHEN r.role_id IS NULL THEN N'MISSING' ELSE N'OK' END AS role_status
+FROM ExpectedRoles er
+LEFT JOIN core.Role r ON r.tenant_id IS NULL AND r.role_code = er.role_code
+ORDER BY role_order;
+
+PRINT '03 - Role permission matrix';
+SELECT role_code, module_code, permission_code, permission_name, access_weight, info_tip
+FROM (
+    SELECT r.role_code, p.module_code, p.permission_code, p.permission_name,
+           CASE WHEN p.permission_code LIKE N'admin.%' THEN N'ADMIN'
+                WHEN p.permission_code LIKE N'%.write' THEN N'WRITE'
+                ELSE N'READ' END AS access_weight,
+           N'Assign the smallest role that covers the operator task.' AS info_tip
+    FROM core.Role r
+    JOIN core.RolePermission rp ON rp.role_id = r.role_id
+    JOIN core.Permission p ON p.permission_code = rp.permission_code
+) AS matrix
+ORDER BY role_code, module_code, permission_code;
+
+PRINT '05 - Tenant user role assignments';
+SELECT u.email, u.display_name, r.role_code, u.is_active
+FROM core.AppUser u
+LEFT JOIN core.UserRole ur ON ur.user_id = u.user_id
+LEFT JOIN core.Role r ON r.role_id = ur.role_id
+WHERE u.tenant_id = @TenantId
+ORDER BY u.email;`,
+        metrics: [
+          ["Roles", "4"],
+          ["Permissions", "18"],
+          ["Users", "3"],
+          ["Mode", "Read-only"]
+        ],
+        boardCards: [
+          {
+            title: "Role Coverage",
+            text: "SYSTEM_ADMIN, BROKER_ADMIN, BROKER_USER, and CLAIM_HANDLER are checked before access changes.",
+            chips: ["expected roles", "status", "permission count"]
+          },
+          {
+            title: "Permission Matrix",
+            text: "Permissions are grouped by module and labelled as READ, WRITE, ADMIN, or ACTION.",
+            chips: ["module", "permission", "access weight"]
+          },
+          {
+            title: "User Assignment",
+            text: "Tenant users show active state, role list, effective permission count, and admin review status.",
+            chips: ["tenant", "users", "roles"]
+          },
+          {
+            title: "Least Privilege",
+            text: "Checklist rows identify missing admin coverage, elevated broker access, and inactive-user role risk.",
+            chips: ["review", "approval", "evidence"]
+          }
+        ],
+        tables: [
+          {
+            title: "02 - Expected system role coverage",
+            columns: ["order", "role", "profile", "permission_shape", "status", "permission_count"],
+            rows: [
+              ["10", "SYSTEM_ADMIN", "Platform owner", "All active permissions", "OK", "18"],
+              ["20", "BROKER_ADMIN", "Broker office admin", "Person/policy/claim/document/admin modules", "OK", "15"],
+              ["30", "BROKER_USER", "Daily broker operator", "Read-only customer and insurance visibility", "OK", "6"],
+              ["40", "CLAIM_HANDLER", "Claims operator", "Claim close and document handling", "OK", "5"]
+            ]
+          },
+          {
+            title: "03 - Role permission matrix",
+            columns: ["role", "module", "permission", "permission_name", "access_weight", "info_tip"],
+            rows: [
+              ["BROKER_ADMIN", "admin", "admin.user.manage", "Manage users", "ADMIN", "Assign only to approved tenant admins."],
+              ["BROKER_ADMIN", "policy", "policy.version.create", "Create policy versions", "WRITE", "Use bridge or guarded script."],
+              ["BROKER_USER", "policy", "policy.read", "Read policies", "READ", "Safe daily visibility."],
+              ["CLAIM_HANDLER", "claim", "claim.close", "Close claims", "WRITE", "Use claim closure approval trail."],
+              ["CLAIM_HANDLER", "document", "document.upload", "Upload documents", "WRITE", "Confirm document type first."]
+            ]
+          },
+          {
+            title: "05 - Tenant user role assignments",
+            columns: ["email", "display_name", "active", "roles", "permission_count", "assignment_status"],
+            rows: [
+              ["ops.admin@yafes.local", "Operations Admin", "1", "BROKER_ADMIN", "15", "ADMIN_REVIEW"],
+              ["broker.operator@yafes.local", "Broker Operator", "1", "BROKER_USER", "6", "OK"],
+              ["claims.owner@yafes.local", "Claims Specialist", "1", "CLAIM_HANDLER", "5", "OK"]
+            ]
+          },
+          {
+            title: "06 - Least privilege checklist",
+            columns: ["area", "expected_rule", "observed_signal", "status", "admin_action"],
+            rows: [
+              ["SYSTEM_ADMIN", "Has every active permission", "0 missing permission(s)", "OK", "Keep assignment rare and audited."],
+              ["BROKER_USER", "No write/admin permissions", "0 elevated permission(s)", "OK", "Use BROKER_ADMIN only after approval."],
+              ["CLAIM_HANDLER", "Can close claims", "claim.close present", "OK", "Confirm claim owner policy."],
+              ["Tenant admin assignment", "At least one active BROKER_ADMIN", "1 active broker admin user(s)", "OK", "Keep one named owner."],
+              ["Inactive users", "No role assignments", "0 inactive user role assignment(s)", "OK", "Review during offboarding."]
+            ]
+          },
+          {
+            title: "07 - Admin handoff scripts",
+            columns: ["order", "open_script", "purpose", "safety", "admin_rule"],
+            rows: [
+              ["10", "04__admin_security_audit_queries.sql", "RBAC, audit, trigger, integrity checks", "READ_ONLY", "Run after role matrix."],
+              ["20", "05__operator_dashboard_home.sql", "Return to cockpit", "READ_ONLY", "Keep dashboard pinned."],
+              ["30", "08__data_editing_guardrails.sql", "Rollback-default updates", "ROLLBACK_DEFAULT", "Use only after row-count review."],
+              ["40", "md/database/security-hardening.md", "Environment hardening", "DOCUMENTATION", "Use for TEST/PROD."]
+            ]
+          }
+        ],
+        messages: [
+          "Admin role permission matrix loaded.",
+          "This screen is read-only and mirrors core security tables.",
+          "Use before assigning users or preparing TEST/PROD access evidence."
+        ]
+      },
+      {
+        file: "06__query_library_shortcuts.sql",
+        title: "Query",
+        subtitle: "Kayit bul ve ID kopyala",
+        help: "Query library kullanicinin musteri, kurum, arac, police, claim ve task kayitlarini guvenli sekilde bulmasini saglar.",
+        code: `/* Query Library Shortcuts */
+:ON ERROR EXIT
+:setvar SEARCH_TEXT "POL-2026"
+:setvar TOP_ROWS "100"
+
+EXEC person.SP_SearchPerson @tenant_id = @TenantId, @search_text = @SearchText;
+EXEC institution.SP_SearchInstitution @tenant_id = @TenantId, @search_text = @SearchText;
+
+SELECT TOP (@TopRows) contract_id, contract_number, contract_status_code
+FROM policy.VW_PolicyDashboard
+WHERE tenant_id = @TenantId
+ORDER BY start_date DESC;`,
+        metrics: [
+          ["Search sets", "7"],
+          ["Top rows", "100"],
+          ["Mode", "Read-only"],
+          ["Copy IDs", "Yes"]
+        ],
+        tables: [
+          {
+            title: "04 - Recent policies",
+            columns: ["contract_id", "contract_number", "status", "domain", "info_tip"],
+            rows: [
+              ["7E4...A11", "POL-2026-0008", "ACTIVE", "AUTO", "Copy contract_id into claim or version templates."],
+              ["73C...9F2", "POL-2026-0007", "ACTIVE", "FIRE", "Copy contract_id into party/object templates."]
+            ]
+          },
+          {
+            title: "07 - Lookup helper",
+            columns: ["lookup_area", "lookup_code", "label", "info_tip"],
+            rows: [
+              ["policy.ContractStatus", "ACTIVE", "Active", "Use for policy status templates."],
+              ["tasking.TaskPriority", "HIGH", "High", "Use for task priority selection."],
+              ["claim.ClaimStatus", "OPEN", "Open", "Use for claim workflow status."]
+            ]
+          }
+        ],
+        messages: [
+          "Search executed in read-only mode.",
+          "Use Results Grid IDs in bridge templates.",
+          "No direct table edit required."
+        ]
+      },
+      {
+        file: "07__data_entry_bridge_templates.sql",
+        title: "Bridge",
+        subtitle: "Preview-first veri giris",
+        help: "Data bridge create islemlerini stored procedure uzerinden yapar. Arac risk objesi once uretilir, output ID sonra policy object linkine kopyalanir.",
+        code: `/* Data Entry Bridge Templates */
+:setvar ACTION_NAME "CREATE_VEHICLE_OBJECT"
+:setvar EXECUTE_ACTION "0"
+:setvar VEHICLE_DESCRIPTION "2026 Volvo XC40"
+:setvar VEHICLE_LICENSE_PLATE "1-SSMS-001"
+:setvar VEHICLE_CHASSIS_NUMBER "YV1NEWSSMS0000001"
+:setvar VEHICLE_TYPE_CODE "CAR"
+:setvar VEHICLE_USAGE_TYPE_CODE "PRIVATE"
+:setvar VEHICLE_PLATE_TYPE_CODE "NORMAL"
+:setvar VEHICLE_BRAND "Volvo"
+:setvar VEHICLE_MODEL "XC40"
+:setvar VEHICLE_BUILD_YEAR "2026"
+
+EXEC risk.SP_CreateVehicleObject
+    @tenant_id = @TenantId,
+    @description = N'$(VEHICLE_DESCRIPTION)',
+    @status_code = N'ACTIVE',
+    @start_date = '2026-01-01',
+    @vehicle_type_code = N'$(VEHICLE_TYPE_CODE)',
+    @usage_type_code = N'$(VEHICLE_USAGE_TYPE_CODE)',
+    @plate_type_code = N'$(VEHICLE_PLATE_TYPE_CODE)',
+    @brand = N'$(VEHICLE_BRAND)',
+    @model = N'$(VEHICLE_MODEL)',
+    @build_year = 2026,
+    @first_commissioning_date = '2026-01-01',
+    @registration_date = '2026-01-02',
+    @license_plate = N'$(VEHICLE_LICENSE_PLATE)',
+    @chassis_number = N'$(VEHICLE_CHASSIS_NUMBER)',
+    @created_insurable_object_id = @CreatedInsurableObjectId OUTPUT;`,
+        metrics: [
+          ["Actions", "11"],
+          ["Default", "Preview"],
+          ["Exec flag", "0"],
+          ["Output IDs", "Yes"]
+        ],
+        tables: [
+          {
+            title: "02 - CREATE_VEHICLE_OBJECT preview",
+            columns: ["tenant", "description", "license_plate", "vehicle_type", "usage_type", "info_tip"],
+            rows: [
+              ["DEV-BE-BROKER", "2026 Volvo XC40", "1-SSMS-001", "CAR", "PRIVATE", "Create vehicle first, then copy output ID into ADD_POLICY_OBJECT."]
+            ]
+          },
+          {
+            title: "03 - Vehicle lookup and duplicate validation",
+            columns: ["vehicle_type", "usage_type", "plate_type", "fuel_type", "duplicate_vehicle"],
+            rows: [
+              ["OK", "OK", "OK", "OK", "OK"]
+            ]
+          },
+          {
+            title: "Supported actions",
+            columns: ["action_name", "purpose", "safety"],
+            rows: [
+              ["CREATE_NATURAL_PERSON", "Create customer", "EXECUTE_ACTION required"],
+              ["CREATE_VEHICLE_OBJECT", "Create vehicle risk object", "Lookup and duplicate preview first"],
+              ["CREATE_POLICY", "Create policy", "Lookup preview first"],
+              ["ADD_POLICY_OBJECT", "Link risk object to policy", "Tenant ownership validation"],
+              ["CREATE_CLAIM", "Create claim", "Contract ID required"],
+              ["CLOSE_CLAIM", "Close claim", "Amount and payment checks"],
+              ["CREATE_TASK", "Create task", "Optional related entity validation"],
+              ["ADD_TASK_COMMENT", "Add task comment", "Tenant-owned task required"],
+              ["ADD_TASK_REMINDER", "Add task reminder", "Future reminder and channel validation"]
+            ]
+          },
+          {
+            title: "04 - CREATE_TASK preview",
+            columns: ["tenant", "title", "related_type", "assigned_to", "priority", "status"],
+            rows: [
+              ["DEV-BE-BROKER", "Follow up customer file", "CLAIM", "broker.operator@yafes.local", "NORMAL", "OPEN"]
+            ]
+          },
+          {
+            title: "05 - Task lookup and ownership validation",
+            columns: ["priority", "task_status", "assigned_user", "related_entity", "info_tip"],
+            rows: [
+              ["OK", "OK", "OK", "OK", "All statuses must be OK before EXECUTE_ACTION = 1."]
+            ]
+          }
+        ],
+        messages: [
+          "Preview mode only.",
+          "Set EXECUTE_ACTION = 1 after review.",
+          "Stored procedures protect tenant, lookup, duplicate, and key rules."
+        ]
+      },
+      {
+        file: "08__data_editing_guardrails.sql",
+        title: "Edit",
+        subtitle: "Rollback default",
+        help: "Edit guardrail guncellemeleri transaction icinde yapar, once/sonra gridlerini gosterir ve COMMIT_CHANGES = 0 iken rollback eder.",
+        code: `/* Data Editing Guardrails */
+:setvar ACTION_NAME "UPDATE_TASK_STATUS"
+:setvar COMMIT_CHANGES "0"
+:setvar TASK_ID "..."
+:setvar TASK_STATUS_CODE "DONE"
+
+BEGIN TRANSACTION;
+SELECT task_id, title, task_status_code FROM tasking.Task WHERE task_id = @TaskId;
+UPDATE tasking.Task SET task_status_code = N'$(TASK_STATUS_CODE)' WHERE task_id = @TaskId;
+SELECT task_id, title, task_status_code FROM tasking.Task WHERE task_id = @TaskId;
+ROLLBACK TRANSACTION;`,
+        metrics: [
+          ["Actions", "3"],
+          ["Default", "Rollback"],
+          ["Row count", "1"],
+          ["Audit after", "Yes"]
+        ],
+        tables: [
+          {
+            title: "Before / after preview",
+            columns: ["phase", "task_id", "title", "status", "info_tip"],
+            rows: [
+              ["Before", "A83...D21", "Policy renewal follow-up", "OPEN", "Expected row count is exactly 1."],
+              ["After", "A83...D21", "Policy renewal follow-up", "DONE", "If wrong, keep COMMIT_CHANGES = 0."]
+            ]
+          }
+        ],
+        messages: [
+          "ROLLBACK completed because COMMIT_CHANGES = 0.",
+          "No persistent data change in preview.",
+          "Set COMMIT_CHANGES = 1 only after approval."
+        ]
+      },
+      {
+        file: "09__graph_report_pack.sql",
+        title: "Reports",
+        subtitle: "Grafik ve export gridleri",
+        help: "Report pack SSMS Results Grid ile grafik-ready veri setleri uretir: chart_axis, chart_value ve text_bar kolonlari Excel/BI icin hazirdir.",
+        code: `/* Graph And Report Pack */
+:ON ERROR EXIT
+:setvar TENANT_CODE "DEV-BE-BROKER"
+
+SELECT
+    contract_domain_code AS chart_axis,
+    COUNT_BIG(*) AS chart_value,
+    REPLICATE(N'#', COUNT_BIG(*)) AS text_bar
+FROM policy.Contract
+WHERE tenant_id = @TenantId
+GROUP BY contract_domain_code;`,
+        metrics: [
+          ["Report sets", "6"],
+          ["Charts", "Grid-ready"],
+          ["Export", "Excel/BI"],
+          ["Mode", "Read-only"]
+        ],
+        tables: [
+          {
+            title: "01 - Policy portfolio by domain",
+            columns: ["chart_axis", "chart_value", "text_bar", "info_tip"],
+            rows: [
+              ["AUTO", "4", "##############################", "Spot concentration by domain."],
+              ["FIRE", "2", "###############", "Useful for portfolio review."],
+              ["FAMILY", "2", "###############", "Copy to Excel for charting."]
+            ]
+          },
+          {
+            title: "06 - Export catalog",
+            columns: ["export_name", "consumer", "source", "info_tip"],
+            rows: [
+              ["Portfolio summary", "Operations lead", "Result sets 01 and 04", "Copy to Excel/BI."],
+              ["Task backlog", "Team lead", "Result set 03", "Focus overdue first."]
+            ]
+          }
+        ],
+        messages: [
+          "Report grids generated.",
+          "Use chart_axis/chart_value for external charts.",
+          "No data changes."
+        ]
+      },
+      {
+        file: "16__delivery_gap_register.sql",
+        title: "Delivery",
+        subtitle: "Bitmeyen is register",
+        help: "Delivery gap register commit inceleme sonucunu, kapanan/supersede edilen isleri, ortam kaniti bekleyen maddeleri ve siradaki SSMS aksiyonlarini Results Grid olarak gosterir.",
+        code: `/* Delivery Gap Register */
+:ON ERROR EXIT
+:setvar YAFES_SQL_DATABASE "YafesPars_Dev"
+:setvar TENANT_CODE "DEV-BE-BROKER"
+:setvar REVIEW_OWNER "Mustafa"
+
+USE [$(YAFES_SQL_DATABASE)];
+GO
+
+DECLARE @MigrationCount INT = (SELECT COUNT_BIG(*) FROM core.SchemaMigration);
+
+PRINT '02 - Current implementation signals';
+SELECT signal_name, observed_value, expected_value, signal_status, info_tip
+FROM (VALUES
+  (10, N'Domain table count', N'108', N'108', N'OK', N'INFO TIP: Active migrations are the source of truth.'),
+  (20, N'Migration ledger count', CONVERT(NVARCHAR(40), @MigrationCount), N'17 tracked ledger rows; 19 source files', CASE WHEN @MigrationCount >= 17 THEN N'OK' ELSE N'REVIEW' END, N'INFO TIP: 000 and 001 run before the ledger exists.'),
+  (30, N'Procedure bridge coverage', N'14', N'14 required procedures', N'OK', N'INFO TIP: Bridge scripts call stored procedures.')
+) AS s(signal_order, signal_name, observed_value, expected_value, signal_status, info_tip)
+ORDER BY signal_order;
+
+PRINT '04 - Delivery gap register';
+SELECT priority, area, current_status, ssms_owner_action, open_script_or_doc
+FROM (VALUES
+  (N'P0', N'Token hygiene', N'EXTERNAL_ACTION_REQUIRED', N'Rotate or revoke shared coordination token.', N'GitHub security settings'),
+  (N'P1', N'TEST/PROD access evidence', N'WAITING_ENVIRONMENT', N'Run role/permission review and sign-off.', N'14__admin_role_permission_matrix.sql'),
+  (N'P2', N'Finance ledger and commission', N'OWNER_DECISION_REQUIRED', N'Approve accounting flow before 019+.', N'12__table_catalog_and_relationships.sql')
+) AS g(priority, area, current_status, ssms_owner_action, open_script_or_doc)
+ORDER BY priority, area;
+
+PRINT '05 - Listed commit review closure';
+SELECT commit_order, commit_ref, commit_title, closure_status, ssms_evidence
+FROM (VALUES
+  (10, N'da97249', N'feat: add backend API foundation', N'KEPT_AS_SUPPORTING_LAYER', N'Backend route inventory is in the manifest.'),
+  (20, N'8388c8a', N'feat: add frontend admin panel foundation', N'SUPERSEDED', N'Active operator files are under database/ssms.'),
+  (40, N'528edbd', N'refactor: replace web panel with ssms workbench', N'CLOSED', N'05 through 17 SSMS workbench files.')
+) AS c(commit_order, commit_ref, commit_title, closure_status, ssms_evidence)
+ORDER BY commit_order;`,
+        metrics: [
+          ["Commit rows", "17"],
+          ["Open gaps", "8"],
+          ["Mode", "Read-only"],
+          ["Next", "019+"]
+        ],
+        boardCards: [
+          {
+            title: "Commit Closure",
+            text: "Backend support, removed frontend direction, SSMS workbench, visual board, governance, and CI commits are classified.",
+            chips: ["closed", "superseded", "partial external"]
+          },
+          {
+            title: "Open Gaps",
+            text: "Token rotation, TEST/PROD evidence, restore drill, finance, import/export, bridge coverage, and SQL Agent promotion stay visible.",
+            chips: ["P0", "P1", "P2", "P3"]
+          },
+          {
+            title: "SSMS Evidence",
+            text: "Each remaining item points to the SSMS script or markdown evidence template that should be opened next.",
+            chips: ["14", "15", "16", "17", "019+"]
+          },
+          {
+            title: "Owner Decisions",
+            text: "Finance/import/product/entity-note tables are not created until owner-approved migration 019+ design is confirmed.",
+            chips: ["forward-only", "approval", "no direct INSERT"]
+          }
+        ],
+        tables: [
+          {
+            title: "02 - Current implementation signals",
+            columns: ["signal", "observed", "expected", "status", "info_tip"],
+            rows: [
+              ["Domain table count", "108", "108", "OK", "Active migrations are the source of truth."],
+              ["Migration ledger count", "17", "17 tracked ledger rows; 19 source files", "OK", "000 and 001 run before the ledger exists."],
+              ["Procedure bridge coverage", "14", "14 required procedures", "OK", "Use stored procedures instead of direct inserts."],
+              ["Finance ledger tables", "0", "0 until approved", "OWNER_DECISION", "Do not invent accounting tables yet."],
+              ["Import/export staging tables", "0", "0 until approved", "OWNER_DECISION", "Confirm file format and validation ownership first."]
+            ]
+          },
+          {
+            title: "04 - Delivery gap register",
+            columns: ["priority", "area", "status", "owner_action", "open_script"],
+            rows: [
+              ["P0", "Token hygiene", "EXTERNAL_ACTION_REQUIRED", "Rotate or revoke shared coordination token.", "GitHub security settings"],
+              ["P1", "TEST/PROD execution evidence", "WAITING_ENVIRONMENT", "Run approved migration/validation evidence.", "migration-execution-log-template.md"],
+              ["P1", "TEST/PROD access evidence", "WAITING_ENVIRONMENT", "Run role/permission review and sign-off.", "14__admin_role_permission_matrix.sql"],
+              ["P1", "TEST/PROD restore drill", "WAITING_ENVIRONMENT", "Record VERIFYONLY and restored validation evidence.", "restore-drill-evidence-template.md"],
+              ["P2", "Finance ledger and commission", "OWNER_DECISION_REQUIRED", "Approve accounting flow before 019+.", "12__table_catalog_and_relationships.sql"],
+              ["P2", "Department bridge coverage", "PARTIAL_REMAINING", "Task bridge covered; rank next non-task workflow.", "07__data_entry_bridge_templates.sql"],
+              ["P3", "SQL Agent jobs", "WAITING_INFRASTRUCTURE", "Approve job owners and schedules.", "15__monitoring_and_job_readiness.sql"]
+            ]
+          },
+          {
+            title: "05 - Listed commit review closure",
+            columns: ["commit", "title", "position", "status", "evidence"],
+            rows: [
+              ["da97249", "backend API foundation", "Optional support layer", "KEPT_AS_SUPPORTING_LAYER", "Manifest route inventory"],
+              ["8388c8a", "frontend admin panel foundation", "Superseded by SSMS-first workbench", "SUPERSEDED", "database/ssms"],
+              ["528edbd", "replace web panel with ssms workbench", "Current baseline", "CLOSED", "05 through 17 SSMS files"],
+              ["d99167b", "production readiness gate", "DEV ready, TEST/PROD evidence pending", "PARTIAL_EXTERNAL", "P1 gap rows"],
+              ["1280f20", "logic map and table catalog", "Active planning base", "CLOSED_WITH_BACKLOG", "11, 12, 13, 16"],
+              ["becf7e8", "product language", "Active with preview boundary", "CLOSED", "README and operator docs"]
+            ]
+          },
+          {
+            title: "06 - Recommended next SSMS actions",
+            columns: ["order", "group", "open_script", "mode", "recommended_action"],
+            rows: [
+              ["10", "Control", "16__delivery_gap_register.sql", "READ_ONLY", "Run after PR/commit review."],
+              ["20", "Daily data entry", "07__data_entry_bridge_templates.sql", "PREVIEW_FIRST", "Continue core bridge workflows."],
+              ["30", "Access evidence", "14__admin_role_permission_matrix.sql", "READ_ONLY", "Use result sets as review evidence."],
+              ["40", "Monitoring evidence", "15__monitoring_and_job_readiness.sql", "READ_ONLY", "Review observed SQL Agent state."],
+              ["50", "019+ planning", "12__table_catalog_and_relationships.sql", "READ_ONLY", "Review real table catalog before new schema."],
+              ["60", "Remaining work cockpit", "17__remaining_work_cockpit.sql", "READ_ONLY", "Assign owner evidence, 019+ decisions, and DBA handoff."]
+            ]
+          }
+        ],
+        messages: [
+          "Delivery gap register loaded.",
+          "Commit list reviewed against current SSMS-first product direction.",
+          "Remaining items are tracked as environment evidence, owner decisions, or next SSMS actions."
+        ]
+      },
+      {
+        file: "17__remaining_work_cockpit.sql",
+        title: "Closure",
+        subtitle: "Kalan is cockpit",
+        help: "Remaining work cockpit owner evidence, 019+ karar girisi, edge bridge siralamasi, DBA handoff ve release gate gridlerini tek SSMS ekraninda toparlar.",
+        code: `/* Remaining Work Cockpit */
+:ON ERROR EXIT
+:setvar YAFES_SQL_DATABASE "YafesPars_DEV"
+:setvar TENANT_CODE "DEV-BE-BROKER"
+:setvar REVIEW_OWNER "Mustafa"
+
+USE [$(YAFES_SQL_DATABASE)];
+GO
+
+IF DB_NAME() NOT LIKE N'%DEV%'
+    THROW 52499, 'Current database name must contain DEV.', 1;
+
+PRINT '02 - Workstream closure board';
+SELECT priority, workstream, current_state, closure_owner, next_ssms_or_owner_action
+FROM (VALUES
+  (N'P0', N'Token hygiene', N'OWNER_ACTION_REQUIRED', N'GitHub/account owner', N'Rotate or revoke shared token outside the repository.'),
+  (N'P1', N'TEST/PROD migration evidence', N'READY_FOR_ENV_OWNER', N'DBA/deployer', N'Run approved migration and validation process.'),
+  (N'P2', N'Finance ledger and commission', N'OWNER_DECISION_REQUIRED', N'Business/accounting owner', N'Answer the 019+ decision intake before schema design.'),
+  (N'P3', N'SQL Agent jobs', N'DBA_HANDOFF_READY', N'DBA/infrastructure owner', N'Approve job owners, schedules, alerts, and output paths.')
+) AS w(priority, workstream, current_state, closure_owner, next_ssms_or_owner_action)
+ORDER BY priority, workstream;
+
+PRINT '04 - Owner decision intake for 019+ candidates';
+SELECT candidate_area, business_question, candidate_tables, recommended_output
+FROM (VALUES
+  (N'Finance/Commission', N'Which events create payable commission or ledger movement?', N'Commission | PaymentLedger | ClaimReserve | BrokerStatement', N'Owner-approved 019+ entity contract.'),
+  (N'Import/Export Staging', N'Which files enter the system and who fixes invalid rows?', N'ImportBatch | ImportRow | ImportValidationIssue | ExportJob', N'Import contract plus validation grid design.'),
+  (N'Product Templates', N'Who owns product/rating templates?', N'ProductTemplate | RatingRule | ClauseTemplate', N'Product owner workflow.'),
+  (N'Entity Notes', N'Do task comments and audit already cover notes?', N'Note | NoteLink | NoteType', N'Implement, defer, or reject notes.')
+) AS d(candidate_area, business_question, candidate_tables, recommended_output)
+ORDER BY candidate_area;`,
+        metrics: [
+          ["Workstreams", "8"],
+          ["Evidence rows", "6"],
+          ["019+ decisions", "4"],
+          ["Release gates", "5"]
+        ],
+        boardCards: [
+          {
+            title: "Evidence Handoff",
+            text: "TEST/PROD migration, access review, and restore evidence rows identify owner, artifact, and done condition.",
+            chips: ["P1", "TEST", "PROD"]
+          },
+          {
+            title: "019+ Intake",
+            text: "Finance, import/export, product templates, and entity notes stay decision-first before migration design.",
+            chips: ["owner approval", "forward-only", "no invented tables"]
+          },
+          {
+            title: "Bridge Ranking",
+            text: "Lower-frequency department actions are ranked before adding new procedure-backed templates.",
+            chips: ["claims", "documents", "policy"]
+          },
+          {
+            title: "DBA Handoff",
+            text: "SQL Agent promotion is prepared as job blueprints, schedules, owner decisions, and blockers.",
+            chips: ["jobs", "alerts", "output path"]
+          }
+        ],
+        tables: [
+          {
+            title: "02 - Workstream closure board",
+            columns: ["priority", "workstream", "state", "owner", "next_action"],
+            rows: [
+              ["P0", "Token hygiene", "OWNER_ACTION_REQUIRED", "GitHub/account owner", "Rotate or revoke shared token."],
+              ["P1", "TEST/PROD migration evidence", "READY_FOR_ENV_OWNER", "DBA/deployer", "Run approved migration and validation process."],
+              ["P1", "TEST/PROD restore drill", "READY_FOR_DBA", "DBA", "Run backup verification and restore drill."],
+              ["P2", "Finance ledger and commission", "OWNER_DECISION_REQUIRED", "Business/accounting owner", "Answer 019+ decision intake."],
+              ["P2", "Department bridge edge workflows", "RANKING_REQUIRED", "Department owner", "Rank next non-task workflow."],
+              ["P3", "SQL Agent jobs", "DBA_HANDOFF_READY", "DBA/infrastructure owner", "Approve jobs, schedules, alerts, and output paths."]
+            ]
+          },
+          {
+            title: "04 - Owner decision intake for 019+ candidates",
+            columns: ["candidate", "question", "tables", "output"],
+            rows: [
+              ["Finance/Commission", "Which events create payable commission or ledger movement?", "Commission | PaymentLedger | ClaimReserve | BrokerStatement", "Owner-approved 019+ entity contract"],
+              ["Import/Export Staging", "Which files enter the system and who fixes invalid rows?", "ImportBatch | ImportRow | ImportValidationIssue | ExportJob", "Import contract plus validation grid design"],
+              ["Product Templates", "Who owns product/rating templates?", "ProductTemplate | RatingRule | ClauseTemplate", "Product owner workflow"],
+              ["Entity Notes", "Do task comments and audit already cover notes?", "Note | NoteLink | NoteType", "Implement, defer, or reject notes"]
+            ]
+          },
+          {
+            title: "07 - Closure gates before release",
+            columns: ["gate", "control", "pass_condition", "fail_condition"],
+            rows: [
+              ["Local quality gate", "test-sql-quality-gate.ps1", "0 failures and 0 warnings", "Manifest drift or missing SSMS script"],
+              ["Clean SQL Server validation", "SQL Server validation", "All migrations and validations pass", "Any SQL Server failure"],
+              ["SSMS demo synchronization", "index.html + manifest", "Script list and shortcuts match", "Stale scenario text"],
+              ["Owner decision closure", "16 and 17", "Signed evidence or approved deferral", "Unsigned P0/P1 rows"],
+              ["019+ design readiness", "12 plus cockpit section 04", "Approved entity contract", "Tables designed without owner"]
+            ]
+          }
+        ],
+        messages: [
+          "Remaining work cockpit loaded.",
+          "Open items are grouped by evidence, owner decision, bridge ranking, and DBA handoff.",
+          "No schema, job, token, or production data changes are made."
+        ]
+      }
+    ];
+
+    let objectExplorerGroups = [
+      {
+        schema: "core",
+        title: "Core",
+        subheading: "Tenant, users, RBAC, migration ledger",
+        tables: ["SchemaMigration", "Tenant", "AppUser", "Role", "Permission", "RolePermission", "UserRole"]
+      },
+      {
+        schema: "ref",
+        title: "Reference",
+        subheading: "Shared lookup standards",
+        tables: ["Language", "Title", "PhoneType", "SocialType", "ProfessionalStatus", "PersonType"]
+      },
+      {
+        schema: "person",
+        title: "Person",
+        subheading: "Natural/legal identity, contacts, bank accounts, relations",
+        tables: ["PersonAddressRole", "PersonRelationType", "Person", "NaturalPerson", "LegalPerson", "EconomicActivity", "EconomicActivityNacebel", "PersonPersonType", "Address", "Phone", "Email", "SocialMedia", "BankAccount", "DriverLicense", "PersonRelation", "PersonRelationPerson"]
+      },
+      {
+        schema: "institution",
+        title: "Institution",
+        subheading: "Insurers, banks, brokers, identifiers, addresses",
+        tables: ["InstitutionRole", "InstitutionIdentifierType", "InstitutionAddressRole", "Institution", "InstitutionIdentifier", "InstitutionAddress"]
+      },
+      {
+        schema: "risk",
+        title: "Risk/Object",
+        subheading: "Insurable object root, subtypes, vehicles, real estate, loans",
+        tables: ["InsurableObjectType", "VehicleType", "UsageType", "FuelType", "DriveType", "LicensePlateType", "RealEstateType", "InsuredRole", "UseTypeRealEstate", "ResidenceType", "DestinationType", "AdjacencyType", "OccupancyLevel", "ConstructionType", "RoofType", "BurglaryProtectionType", "InsurablePersonSubtype", "WorkerRiskClass", "EmployeeRiskClass", "AgeCategory", "InsurableThingSubtype", "ThingRiskCategory", "ThingMaterialType", "InsurableActivitySubtype", "ActivityRiskLevel", "InsurableObject", "InsurableVehicle", "InsurableRealEstate", "InsurableRealEstateBurglaryProtection", "InsurableLoan", "InsurablePerson", "InsurableThing", "InsurableActivity"]
+      },
+      {
+        schema: "policy",
+        title: "Policy",
+        subheading: "Contracts, versions, parties, objects, status, renewal flow",
+        tables: ["ContractDomain", "ContractStatus", "ContractVersionStatus", "Periodicity", "CollectionMethod", "DurationType", "ContractType", "ContractPartyRole", "ContractObjectStatus", "TakeoverDirection", "TakeoverSourceType", "Contract", "ContractVersion", "ContractParty", "ContractObject", "ContractVersionObject", "ContractTakeover"]
+      },
+      {
+        schema: "coverage",
+        title: "Coverage",
+        subheading: "Coverage catalog, domains, packages",
+        tables: ["Coverage", "CoverageDomain", "CoveragePackage", "CoveragePackageItem"]
+      },
+      {
+        schema: "claim",
+        title: "Claim",
+        subheading: "Claims, parties, objects, circumstances, payment method",
+        tables: ["ClaimStatus", "ClaimPartyRole", "ClaimCircumstanceType", "ClaimPaymentMethod", "Claim", "ClaimParty", "ClaimObject", "ClaimCircumstance"]
+      },
+      {
+        schema: "document",
+        title: "Document",
+        subheading: "Metadata, links, versions, external storage keys",
+        tables: ["DocumentType", "Document", "DocumentLink", "DocumentVersion"]
+      },
+      {
+        schema: "tasking",
+        title: "Tasking",
+        subheading: "Tasks, comments, reminders, priority/status",
+        tables: ["TaskStatus", "TaskPriority", "Task", "TaskComment", "TaskReminder"]
+      },
+      {
+        schema: "audit",
+        title: "Audit",
+        subheading: "Audit log and change details",
+        tables: ["AuditLog", "EntityChangeSet"]
+      }
+    ];
+
+    const appState = {
+      activeIndex: 0,
+      activePanel: "results",
+      databaseName: "YafesPars_Dev",
+      sqlcmdMode: true,
+      resultsToGrid: true,
+      executing: false,
+      executionTimer: null,
+      selectedScript: "",
+      selectedObject: "YafesPars_Dev",
+      tenant: "DEV-BE-BROKER",
+      topRows: 100,
+      mode: "Dry run",
+      queryCounter: 1,
+      windowMode: "normal",
+      commandLog: [],
+      collapsedSchemas: new Set()
+    };
+
+    let infrastructureManifest = null;
+
+    const windowTitle = document.getElementById("windowTitle");
+    const tabbar = document.getElementById("tabbar");
+    const objectTree = document.getElementById("objectTree");
+    const workflow = document.getElementById("workflow");
+    const codeBlock = document.getElementById("codeBlock");
+    const lineNumbers = document.getElementById("lineNumbers");
+    const results = document.getElementById("results");
+    const messageResults = document.getElementById("messageResults");
+    const executionPlan = document.getElementById("executionPlan");
+    const messages = document.getElementById("messages");
+    const stepHelp = document.getElementById("stepHelp");
+    const inlineHelp = document.getElementById("inlineHelp");
+    const guideStatus = document.getElementById("guideStatus");
+    const statusLeft = document.getElementById("statusLeft");
+    const rowStatus = document.getElementById("rowStatus");
+    const cursorStatus = document.getElementById("cursorStatus");
+    const tenantSelect = document.getElementById("tenant");
+    const rowsInput = document.getElementById("rows");
+    const modeSelect = document.getElementById("mode");
+    const executeButton = document.getElementById("executeButton");
+    const cancelButton = document.getElementById("cancelButton");
+    const sqlcmdButton = document.getElementById("sqlcmdButton");
+    const gridButton = document.getElementById("gridButton");
+    const prevButton = document.getElementById("prevButton");
+    const nextButton = document.getElementById("nextButton");
+
+    async function loadInfrastructureManifest() {
+      try {
+        const response = await fetch("workbench-manifest.json", { cache: "no-store" });
+        if (!response.ok) {
+          throw new Error(`Manifest HTTP ${response.status}`);
+        }
+
+        return await response.json();
+      }
+      catch (error) {
+        console.warn("Workbench manifest could not be loaded.", error);
+        return null;
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function getTenantLabel() {
+      const tenant = infrastructureManifest?.tenant;
+      if (tenant?.displayName) {
+        const suffix = tenant.environmentLabel ? ` (${tenant.environmentLabel})` : "";
+        return `${tenant.displayName}${suffix}`;
+      }
+
+      return appState.tenant
+        .replace(/^DEV-/, "")
+        .replace(/^DEMO-/, "");
+    }
+
+    function getLatestCompleteLabel(fileName) {
+      const match = String(fileName || "").match(/^(\d{3})__/);
+      return match ? `${match[1]} complete` : "current";
+    }
+
+    function setMetric(scenario, label, value) {
+      if (!scenario?.metrics) {
+        return;
+      }
+
+      const metric = scenario.metrics.find(([metricLabel]) => metricLabel === label);
+      if (metric) {
+        metric[1] = String(value);
+      }
+    }
+
+    function findTable(scenario, title) {
+      return scenario?.tables?.find(table => table.title === title);
+    }
+
+    function findScenarioByFile(fileName) {
+      return scenarios.find(scenario => scenario.file === fileName);
+    }
+
+    function updateScenariosFromManifest(manifest) {
+      const database = manifest.database || {};
+      const shortcuts = Array.isArray(manifest.shortcuts) ? manifest.shortcuts : [];
+      const schemas = Array.isArray(manifest.schemas) ? manifest.schemas : [];
+      const tableCount = String(database.tableCount || objectExplorerGroups.reduce((sum, group) => sum + group.tables.length, 0));
+      const schemaCount = String(database.schemaCount || schemas.length || objectExplorerGroups.length);
+      const legacyCount = String(database.legacyReferenceTableCount || 89);
+
+      const home = findScenarioByFile("05__operator_dashboard_home.sql");
+      setMetric(home, "Shortcuts", shortcuts.length || 16);
+      setMetric(home, "Tenant", getTenantLabel());
+      const shortcutTable = findTable(home, "01 - Operator shortcuts");
+      if (shortcutTable && shortcuts.length) {
+        shortcutTable.rows = shortcuts.map(shortcut => [
+          String(shortcut.order),
+          shortcut.group,
+          shortcut.action,
+          shortcut.fileName,
+          shortcut.safety
+        ]);
+      }
+      const healthTable = findTable(home, "03 - Health signals");
+      if (healthTable) {
+        healthTable.rows[0] = [
+          "Latest migration",
+          getLatestCompleteLabel(manifest.migrations?.latest),
+          "OK",
+          `Expected migration count is ${manifest.migrations?.count || 19}.`
+        ];
+      }
+
+      const migrate = findScenarioByFile("01__run_all_dev_migrations_sqlcmd.sql");
+      const migrationStatus = findTable(migrate, "01 - Migration handoff status");
+      if (migrationStatus) {
+        migrationStatus.rows[0] = [
+          "Checked-in 01 file",
+          "READY",
+          `Protected migration line has ${manifest.migrations?.count || 19} script(s)`,
+          `Latest protected prefix: ${getLatestCompleteLabel(manifest.migrations?.latest)}.`
+        ];
+      }
+
+      const logic = findScenarioByFile("11__schema_working_logic_map.sql");
+      setMetric(logic, "Domains", schemaCount);
+      setMetric(logic, "Tables", tableCount);
+      const logicTable = findTable(logic, "01 - Domain groups and subheadings");
+      if (logicTable && schemas.length) {
+        logicTable.rows = schemas.map(schema => [
+          String(schema.order),
+          schema.title,
+          schema.schema,
+          String(schema.tableCount),
+          schema.subheading,
+          `Open ${schema.entryPoint} for this area.`
+        ]);
+      }
+      if (logic && schemas.length) {
+        const lanes = [...new Set(schemas.map(schema => schema.lane))];
+        logic.logicGroups = lanes.map(lane => {
+          const laneSchemas = schemas.filter(schema => schema.lane === lane);
+          return {
+            title: lane,
+            text: laneSchemas.map(schema => schema.subheading).join(" / "),
+            chips: laneSchemas.map(schema => schema.schema)
+          };
+        });
+      }
+
+      const visual = findScenarioByFile("13__visual_workflow_board.sql");
+      setMetric(visual, "Domains", schemaCount);
+      setMetric(visual, "Tables", tableCount);
+      setMetric(visual, "Legacy ref", legacyCount);
+      const visualContext = findTable(visual, "01 - Visual board operating context");
+      if (visualContext) {
+        visualContext.rows[0] = [
+          appState.databaseName,
+          getTenantLabel(),
+          tableCount,
+          tableCount,
+          legacyCount,
+          "OK"
+        ];
+      }
+      const visualDomains = findTable(visual, "02 - Domain board lanes and cards");
+      if (visualDomains && schemas.length) {
+        visualDomains.rows = schemas.map(schema => [
+          schema.lane,
+          schema.title,
+          schema.schema,
+          String(schema.tableCount),
+          schema.entryPoint
+        ]);
+      }
+      const visualSubheadings = findTable(visual, "03 - Domain subheading cards");
+      if (visualSubheadings && schemas.length) {
+        visualSubheadings.rows = schemas.map(schema => [
+          schema.title,
+          schema.subheading,
+          (schema.tables || []).slice(0, 3).join(" | "),
+          "Open entry script first",
+          schema.entryPoint
+        ]);
+      }
+
+      const catalog = findScenarioByFile("12__table_catalog_and_relationships.sql");
+      setMetric(catalog, "Schemas", schemaCount);
+      setMetric(catalog, "Tables", tableCount);
+      const schemaSummary = findTable(catalog, "01 - Schema summary");
+      if (schemaSummary && schemas.length) {
+        schemaSummary.rows = schemas.map(schema => [
+          schema.schema,
+          String(schema.tableCount),
+          "metadata",
+          "metadata",
+          schema.subheading
+        ]);
+      }
+
+      const bridge = findScenarioByFile("07__data_entry_bridge_templates.sql");
+      const bridgePreview = findTable(bridge, "02 - CREATE_NATURAL_PERSON preview");
+      if (bridgePreview?.rows?.[0]) {
+        bridgePreview.rows[0][0] = getTenantLabel();
+      }
+    }
+
+    function applyInfrastructureManifest(manifest) {
+      infrastructureManifest = manifest;
+
+      if (manifest.product?.previewTitle) {
+        document.title = manifest.product.previewTitle;
+      }
+
+      if (manifest.database?.defaultName) {
+        appState.databaseName = manifest.database.defaultName;
+      }
+
+      if (appState.selectedObject === "YafesPars_Dev") {
+        appState.selectedObject = appState.databaseName;
+      }
+
+      if (manifest.tenant?.defaultCode) {
+        appState.tenant = manifest.tenant.defaultCode;
+      }
+
+      if (manifest.product?.workbenchTitle) {
+        windowTitle.textContent = manifest.product.workbenchTitle;
+      }
+
+      tenantSelect.innerHTML = `
+        <option value="${escapeHtml(appState.tenant)}">${escapeHtml(getTenantLabel())}</option>
+      `;
+      tenantSelect.value = appState.tenant;
+
+      if (Array.isArray(manifest.schemas) && manifest.schemas.length) {
+        objectExplorerGroups = manifest.schemas.map(schema => ({
+          schema: schema.schema,
+          title: schema.title,
+          subheading: schema.subheading,
+          tables: schema.tables || []
+        }));
+      }
+
+      updateScenariosFromManifest(manifest);
+    }
+
+    function highlightSql(sql) {
+      return escapeHtml(sql)
+        .replace(/^(:[A-Z ]+.*)$/gm, '<span class="sys">$1</span>')
+        .replace(/(--.*)$/gm, '<span class="comment">$1</span>')
+        .replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="comment">$1</span>')
+        .replace(/'([^']*)'/g, "<span class=\"str\">'$1'</span>")
+        .replace(/\b(USE|GO|DECLARE|IF|SELECT|FROM|WHERE|ORDER BY|EXEC|THROW|TOP|IS NULL|LEFT JOIN|ON|AND|OR)\b/g, '<span class="kw">$1</span>');
+    }
+
+    function getScenario() {
+      return scenarios[appState.activeIndex];
+    }
+
+    function getScriptFileFromText(value) {
+      const match = String(value).match(/(?:database\/ssms\/)?([0-9]{2}__[-_a-zA-Z0-9]+\.sql)/);
+      return match ? match[1] : "";
+    }
+
+    function getScenarioIndexByFile(file) {
+      const normalized = String(file).replace(/^database\/ssms\//, "");
+      return scenarios.findIndex(item => item.file === normalized);
+    }
+
+    function getScenarioCode(scenario) {
+      let code = scenario.code
+        .replaceAll("YafesPars_Dev", appState.databaseName)
+        .replaceAll("DEV-BE-BROKER", appState.tenant)
+        .replace(/:setvar TOP_ROWS "\d+"/g, `:setvar TOP_ROWS "${appState.topRows}"`);
+
+      if (scenario.file === "07__data_entry_bridge_templates.sql") {
+        code = code.replace(/:setvar EXECUTE_ACTION "\d+"/g, `:setvar EXECUTE_ACTION "${appState.mode === "Execute" ? "1" : "0"}"`);
+      }
+
+      if (scenario.file === "08__data_editing_guardrails.sql") {
+        code = code.replace(/:setvar COMMIT_CHANGES "\d+"/g, `:setvar COMMIT_CHANGES "${appState.mode === "Execute" ? "1" : "0"}"`);
+      }
+
+      return code;
+    }
+
+    function getMetricValue(label, value) {
+      if (label === "Tenant") {
+        return getTenantLabel();
+      }
+
+      if (label === "Top rows") {
+        return String(appState.topRows);
+      }
+
+      if (label === "Default" && (value === "Preview" || value === "Rollback")) {
+        return appState.mode === "Execute" ? "Execute" : value;
+      }
+
+      if (label === "Exec flag") {
+        return appState.mode === "Execute" ? "1" : "0";
+      }
+
+      return value;
+    }
+
+    function getTotalRows(scenario) {
+      return scenario.tables.reduce((sum, table) => sum + table.rows.length, 0);
+    }
+
+    function getGridText(scenario) {
+      return scenario.tables.map(table => {
+        const header = table.columns.join("\t");
+        const rows = table.rows.map(row => row.join("\t")).join("\n");
+        return `${table.title}\n${header}\n${rows}`;
+      }).join("\n\n");
+    }
+
+    function getGridCsv(scenario) {
+      const csvEscape = value => `"${String(value).replaceAll('"', '""')}"`;
+      return scenario.tables.map(table => {
+        const title = [csvEscape(table.title)].join(",");
+        const header = table.columns.map(csvEscape).join(",");
+        const rows = table.rows.map(row => row.map(csvEscape).join(",")).join("\n");
+        return `${title}\n${header}\n${rows}`;
+      }).join("\n\n");
+    }
+
+    function logCommand(title, detail = [], tone = "ok") {
+      const time = new Date().toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      appState.commandLog.unshift({
+        time,
+        title,
+        detail: Array.isArray(detail) ? detail : [detail],
+        tone
+      });
+      appState.commandLog = appState.commandLog.slice(0, 8);
+      paintMessages();
+    }
+
+    function paintMessages() {
+      const scenario = getScenario();
+      const latest = appState.commandLog[0];
+      const latestHtml = latest ? `
+        <span class="${latest.tone === "warn" ? "" : "message-ok"}">${escapeHtml(latest.title)}</span><br>
+        ${latest.detail.map(line => `${escapeHtml(line)}<br>`).join("")}
+      ` : `<span class="message-ok">Command(s) completed successfully.</span><br>`;
+
+      messages.innerHTML = `
+        ${latestHtml}
+        ${scenario.messages.map(message => `${escapeHtml(message)}<br>`).join("")}
+      `;
+
+      messageResults.innerHTML = `
+        <p class="section-title"><span>Messages</span><span>${appState.commandLog.length} event(s)</span></p>
+        <table>
+          <thead><tr><th>time</th><th>command</th><th>detail</th></tr></thead>
+          <tbody>
+            ${appState.commandLog.map((entry, index) => `
+              <tr class="${index === 0 ? "selected-row" : ""}">
+                <td>${escapeHtml(entry.time)}</td>
+                <td>${escapeHtml(entry.title)}</td>
+                <td>${escapeHtml(entry.detail.join(" | "))}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+        <p class="section-title"><span>Scenario messages</span><span>${scenario.file}</span></p>
+        ${scenario.messages.map(message => `${escapeHtml(message)}<br>`).join("")}
+      `;
+    }
+
+    function updateButtons() {
+      prevButton.disabled = appState.activeIndex === 0;
+      nextButton.disabled = appState.activeIndex === scenarios.length - 1;
+      executeButton.disabled = appState.executing;
+      cancelButton.disabled = false;
+      sqlcmdButton.setAttribute("aria-pressed", String(appState.sqlcmdMode));
+      gridButton.setAttribute("aria-pressed", String(appState.resultsToGrid));
+      gridButton.textContent = appState.resultsToGrid ? "Results to Grid" : "Results to Text";
+      executeButton.textContent = appState.executing ? "Running" : "Execute";
+    }
+
+    function setActivePanel(panel) {
+      appState.activePanel = panel;
+      document.querySelectorAll(".result-tab").forEach(tab => {
+        tab.classList.toggle("active", tab.dataset.panel === panel);
+      });
+
+      results.hidden = panel !== "results";
+      messageResults.hidden = panel !== "messages";
+      executionPlan.hidden = panel !== "execution";
+    }
+
+    function renderExecutionPlan(scenario) {
+      const code = getScenarioCode(scenario);
+      const hasSqlcmd = code.includes(":setvar") || code.includes(":ON ERROR EXIT");
+      const rows = getTotalRows(scenario);
+      const safety = scenario.metrics.find(([label]) => label === "Mode")?.[1] || "Read-only";
+      const steps = [
+        ["1", "SQLCMD preflight", hasSqlcmd ? "Check SQLCMD directives and DEV variables." : "Plain query text; no SQLCMD directive needed.", appState.sqlcmdMode ? "READY" : "CHECK"],
+        ["2", "Context guard", `Tenant ${appState.tenant}, top ${appState.topRows}, mode ${appState.mode}.`, "READY"],
+        ["3", "Result grid build", `${scenario.tables.length} result set(s), ${rows} visible preview row(s).`, appState.resultsToGrid ? "GRID" : "TEXT"],
+        ["4", "Operator review", "Review info_tip columns, IDs, and safety mode before mutation routes.", safety],
+        ["5", "Next route", "Open linked SSMS file or use toolbar copy/export commands.", "READY"]
+      ];
+
+      return `
+        <div class="plan-grid">
+          ${steps.map(([order, title, text, status]) => `
+            <div class="plan-step">
+              <strong>${escapeHtml(order)} - ${escapeHtml(title)} <span class="pill ${status === "CHECK" ? "warn" : "ok"}">${escapeHtml(status)}</span></strong>
+              <span>${escapeHtml(text)}</span>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function renderTable(table) {
+      const head = table.columns.map(col => `<th>${escapeHtml(col)}</th>`).join("");
+      const body = table.rows.map((row, index) => {
+        const cells = row.map(cell => {
+          const text = escapeHtml(cell);
+          const scriptFile = getScriptFileFromText(cell);
+          if (scriptFile) {
+            return `<td><button class="grid-link" type="button" data-open-file="${escapeHtml(scriptFile)}">${text}</button></td>`;
+          }
+          if (["SUCCESS", "PASS", "DEV SAFE", "ACTIVE", "OPEN"].includes(String(cell))) {
+            return `<td><span class="pill ok">${text}</span></td>`;
+          }
+          if (["HIGH", "WAITING", "Required", "Dry run", "ACTION", "CHECK", "OPEN"].includes(String(cell))) {
+            return `<td><span class="pill warn">${text}</span></td>`;
+          }
+          return `<td>${text}</td>`;
+        }).join("");
+        return `<tr class="${index === 0 ? "selected-row" : ""}" data-grid-row="${index}" data-table-title="${escapeHtml(table.title)}">${cells}</tr>`;
+      }).join("");
+      return `
+        <p class="section-title"><span>${escapeHtml(table.title)}</span><span>${table.rows.length} row(s)</span></p>
+        <table>
+          <thead><tr>${head}</tr></thead>
+          <tbody>${body}</tbody>
+        </table>
+      `;
+    }
+
+    function renderObjectExplorer() {
+      const totalTables = objectExplorerGroups.reduce((sum, group) => sum + group.tables.length, 0);
+      const schemaItems = objectExplorerGroups.map(group => {
+        const isOpen = !appState.collapsedSchemas.has(group.schema);
+        return `
+        <li>
+          <button class="node ${isOpen ? "open" : ""} ${appState.selectedObject === group.schema ? "selected" : ""}" type="button" data-tree-kind="schema" data-schema="${escapeHtml(group.schema)}">
+            <span class="tree-heading">
+              <span>${escapeHtml(group.title)} (${escapeHtml(group.schema)})</span>
+              <span class="tree-count">${group.tables.length}</span>
+            </span>
+          </button>
+          <span class="tree-subheading">${escapeHtml(group.subheading)}</span>
+          <ul ${isOpen ? "" : "hidden"}>
+            ${group.tables.map(table => `
+              <li><button class="node leaf ${appState.selectedObject === `${group.schema}.${table}` ? "selected" : ""}" type="button" data-tree-kind="table" data-schema="${escapeHtml(group.schema)}" data-table="${escapeHtml(table)}">${escapeHtml(group.schema)}.${escapeHtml(table)}</button></li>
+            `).join("")}
+          </ul>
+        </li>
+      `;
+      }).join("");
+
+      objectTree.innerHTML = `
+        <button class="node open ${appState.selectedObject === "server" ? "selected" : ""}" type="button" data-tree-kind="server">MIRO-HMM\\SQLEXPRESS (SQL Server 2022)</button>
+        <ul>
+          <li>
+            <button class="node open" type="button" data-tree-kind="folder">Databases</button>
+            <ul>
+              <li>
+                <button class="node open ${appState.selectedObject === appState.databaseName ? "selected" : ""}" type="button" data-tree-kind="database">${escapeHtml(appState.databaseName)}</button>
+                <ul>
+                  <li>
+                    <button class="node open" type="button" data-tree-kind="folder">
+                      <span class="tree-heading">
+                        <span>Tables</span>
+                        <span class="tree-count">${totalTables}</span>
+                      </span>
+                    </button>
+                    <ul>${schemaItems}</ul>
+                  </li>
+                  <li><button class="node open" type="button" data-tree-kind="folder">Views</button></li>
+                  <li><button class="node leaf" type="button" data-tree-kind="object" data-object="person.VW_CustomerSummary">person.VW_CustomerSummary</button></li>
+                  <li><button class="node leaf" type="button" data-tree-kind="object" data-object="policy.VW_PolicyDashboard">policy.VW_PolicyDashboard</button></li>
+                  <li><button class="node leaf" type="button" data-tree-kind="object" data-object="tasking.VW_OpenTaskDashboard">tasking.VW_OpenTaskDashboard</button></li>
+                  <li><button class="node open" type="button" data-tree-kind="folder">Stored Procedures</button></li>
+                  <li><button class="node leaf" type="button" data-tree-kind="object" data-object="person.SP_CreateNaturalPerson">person.SP_CreateNaturalPerson</button></li>
+                  <li><button class="node leaf" type="button" data-tree-kind="object" data-object="institution.SP_SearchInstitution">institution.SP_SearchInstitution</button></li>
+                  <li><button class="node leaf" type="button" data-tree-kind="object" data-object="tasking.SP_CreateRenewalTasks">tasking.SP_CreateRenewalTasks</button></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li><button class="node open" type="button" data-tree-kind="object" data-object="Security">Security</button></li>
+          <li><button class="node open" type="button" data-tree-kind="object" data-object="SQL Server Agent">SQL Server Agent</button></li>
+        </ul>
+      `;
+    }
+
+    function renderBoardCards(cards = []) {
+      if (!cards.length) {
+        return "";
+      }
+
+      return `
+        <div class="board-grid">
+          ${cards.map(card => `
+            <div class="board-card">
+              <h4>${escapeHtml(card.title)}</h4>
+              <p>${escapeHtml(card.text)}</p>
+              <div class="subchips">
+                ${card.chips.map(chip => `<span>${escapeHtml(chip)}</span>`).join("")}
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function renderLogicMap(scenario) {
+      if (!scenario.logicGroups) {
+        return renderBoardCards(scenario.boardCards);
+      }
+
+      return `
+        <div class="logic-map">
+          <div class="logic-center">
+            Yafes Pars
+            <span>SSMS-first database operating model</span>
+          </div>
+          <div class="logic-clusters">
+            ${scenario.logicGroups.map(group => `
+              <div class="logic-card">
+                <h4>${escapeHtml(group.title)}</h4>
+                <p>${escapeHtml(group.text)}</p>
+                <div class="subchips">
+                  ${group.chips.map(chip => `<span>${escapeHtml(chip)}</span>`).join("")}
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+        ${renderBoardCards(scenario.boardCards)}
+      `;
+    }
+
+    function renderScenario(index) {
+      appState.activeIndex = Math.max(0, Math.min(index, scenarios.length - 1));
+      const scenario = getScenario();
+      const scenarioCode = getScenarioCode(scenario);
+
+      tabbar.innerHTML = scenarios.map((item, idx) => `
+        <button class="tab ${idx === appState.activeIndex ? "active" : ""}" type="button" data-index="${idx}">${escapeHtml(item.file)}</button>
+      `).join("");
+
+      workflow.innerHTML = scenarios.map((item, idx) => `
+        <button class="step ${idx === appState.activeIndex ? "active" : ""} ${idx < appState.activeIndex ? "done" : ""}" type="button" data-index="${idx}">
+          <span class="step-num">${idx + 1}</span>
+          <span>
+            <span class="step-title">${escapeHtml(item.title)}</span>
+            <span class="step-sub">${escapeHtml(item.subtitle)}</span>
+          </span>
+        </button>
+      `).join("");
+
+      const lines = scenarioCode.split("\n");
+      lineNumbers.innerHTML = lines.map((_, idx) => idx + 1).join("<br>");
+      codeBlock.innerHTML = highlightSql(scenarioCode);
+
+      if (appState.resultsToGrid) {
+        results.innerHTML = `
+        <div class="summary-grid">
+          ${scenario.metrics.map(([label, value]) => `
+            <div class="metric">
+              <strong>${escapeHtml(getMetricValue(label, value))}</strong>
+              <span>${escapeHtml(label)}</span>
+            </div>
+          `).join("")}
+        </div>
+        ${renderLogicMap(scenario)}
+        ${scenario.tables.map(renderTable).join("")}
+      `;
+      }
+      else {
+        results.innerHTML = `
+          <pre class="message-results">${escapeHtml(getGridText(scenario))}</pre>
+        `;
+      }
+
+      executionPlan.innerHTML = renderExecutionPlan(scenario);
+      paintMessages();
+
+      stepHelp.innerHTML = `
+        <strong>${escapeHtml(scenario.file)}</strong><br>
+        ${escapeHtml(scenario.help)}
+      `;
+      inlineHelp.textContent = `${scenario.title}: ${scenario.help}`;
+
+      guideStatus.textContent = scenario.title;
+      statusLeft.textContent = `Connected - ${appState.databaseName} - ${scenario.title}`;
+      rowStatus.textContent = `Rows: ${getTotalRows(scenario)} | Top: ${appState.topRows}`;
+      cursorStatus.textContent = `Ln ${Math.min(17, lines.length)}, Col 1`;
+      appState.selectedScript = scenario.file;
+      setActivePanel(appState.activePanel);
+      updateButtons();
+    }
+
+    function createScratchQuery() {
+      const number = appState.queryCounter++;
+      scenarios.push({
+        file: `Scratch_${number}.sql`,
+        title: "Scratch",
+        subtitle: "Yeni sorgu",
+        help: "Yeni sorgu sekmesi workbench icinde calisan guvenli bir taslaktir. Gercek ortamda bu dosya SSMS Query Editor icinde acilir.",
+        code: `/* Scratch query */
+:ON ERROR EXIT
+:setvar YAFES_SQL_DATABASE "${appState.databaseName}"
+:setvar TENANT_CODE "${appState.tenant}"
+
+USE [$(YAFES_SQL_DATABASE)];
+GO
+
+PRINT 'Scratch query ready';
+SELECT
+    DB_NAME() AS database_name,
+    N'$(TENANT_CODE)' AS tenant_code,
+    SYSUTCDATETIME() AS checked_at_utc;`,
+        metrics: [
+          ["Mode", "Read-only"],
+          ["Tenant", appState.tenant],
+          ["Rows", "1"],
+          ["Type", "Scratch"]
+        ],
+        tables: [
+          {
+            title: "Scratch context",
+            columns: ["database_name", "tenant_code", "checked_at_utc", "info_tip"],
+            rows: [[appState.databaseName, getTenantLabel(), "2026-06-03", "Use this as a safe draft query tab."]]
+          }
+        ],
+        messages: [
+          "Scratch query tab created.",
+          "No data changes."
+        ]
+      });
+      renderScenario(scenarios.length - 1);
+      logCommand("New Query created.", [`Scratch_${number}.sql acildi.`]);
+    }
+
+    function openScript(file) {
+      const normalized = String(file || appState.selectedScript || getScenario().file).replace(/^database\/ssms\//, "");
+      let index = getScenarioIndexByFile(normalized);
+
+      if (index === -1) {
+        scenarios.push({
+          file: normalized,
+          title: "Script",
+          subtitle: "SSMS dosyasi",
+        help: "Workbench bu dosya icin guvenli bir script handoff sekmesi acti. Gercek dosya SSMS icinde acilmalidir.",
+          code: `/* ${normalized} */
+:ON ERROR EXIT
+:setvar YAFES_SQL_DATABASE "${appState.databaseName}"
+:setvar TENANT_CODE "${appState.tenant}"
+
+PRINT 'Open this script in SSMS with SQLCMD Mode enabled.';`,
+          metrics: [
+            ["Mode", "Read-only"],
+            ["File", normalized],
+            ["Tenant", appState.tenant],
+            ["Workbench", "Handoff"]
+          ],
+          tables: [
+            {
+              title: "Script handoff",
+              columns: ["file", "action", "safety", "info_tip"],
+              rows: [[normalized, "Open in SSMS", "READ_ONLY", "Enable SQLCMD Mode and verify DEV context."]]
+            }
+          ],
+          messages: [
+            "Script handoff opened.",
+            "Real work remains inside SSMS."
+          ]
+        });
+        index = scenarios.length - 1;
+      }
+
+      renderScenario(index);
+      logCommand("Script opened.", [normalized]);
+    }
+
+    function saveWorkspace() {
+      const payload = {
+        file: getScenario().file,
+        tenant: appState.tenant,
+        topRows: appState.topRows,
+        mode: appState.mode,
+        sqlcmdMode: appState.sqlcmdMode,
+        savedAt: new Date().toISOString()
+      };
+      localStorage.setItem("yafesParsSsmsWorkbench", JSON.stringify(payload));
+      logCommand("Workspace saved.", [`${payload.file} local workbench state olarak kaydedildi.`]);
+    }
+
+    async function copyText(text, label) {
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+        }
+        else {
+          const textarea = document.createElement("textarea");
+          textarea.value = text;
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand("copy");
+          textarea.remove();
+        }
+        logCommand(`${label} copied.`, ["Clipboard guncellendi."]);
+      }
+      catch {
+        logCommand(`${label} copy failed.`, ["Browser clipboard izni gerekli olabilir."], "warn");
+      }
+    }
+
+    function exportCsv() {
+      const scenario = getScenario();
+      const csv = getGridCsv(scenario);
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `${scenario.file.replace(/\.sql$/i, "")}_results.csv`;
+      document.body.appendChild(link);
+      link.click();
+      URL.revokeObjectURL(link.href);
+      link.remove();
+      logCommand("CSV export prepared.", [`${scenario.file} result grid CSV olarak indirildi.`]);
+    }
+
+    function parseQuery() {
+      const code = getScenarioCode(getScenario());
+      const issues = [];
+
+      if ((code.includes(":setvar") || code.includes(":ON ERROR EXIT")) && !appState.sqlcmdMode) {
+        issues.push("SQLCMD Mode kapali; :setvar satirlari calismaz.");
+      }
+      if (!code.includes("GO")) {
+        issues.push("GO batch separator bulunmuyor.");
+      }
+      if (!/\bSELECT\b|\bEXEC\b|\bPRINT\b/.test(code)) {
+        issues.push("Calistirilabilir SELECT/EXEC/PRINT bulunmuyor.");
+      }
+
+      if (issues.length) {
+        setActivePanel("messages");
+        logCommand("Parse completed with checks.", issues, "warn");
+      }
+      else {
+        setActivePanel("execution");
+        logCommand("Parse succeeded.", ["Syntax check passed.", "Execution plan guncellendi."]);
+      }
+    }
+
+    function executeQuery() {
+      const scenario = getScenario();
+      const code = getScenarioCode(scenario);
+
+      if ((code.includes(":setvar") || code.includes(":ON ERROR EXIT")) && !appState.sqlcmdMode) {
+        setActivePanel("messages");
+        logCommand("Execution blocked.", ["SQLCMD Mode kapali. Query > SQLCMD Mode aktif olmali."], "warn");
+        return;
+      }
+
+      if (appState.executing) {
+        logCommand("Execution already running.", ["Cancel veya tamamlanmasini bekle."], "warn");
+        return;
+      }
+
+      appState.executing = true;
+      updateButtons();
+      setActivePanel("messages");
+      logCommand("Execution started.", [
+        `${scenario.file} calistiriliyor.`,
+        `Tenant: ${appState.tenant}; mode: ${appState.mode}; top rows: ${appState.topRows}.`
+      ]);
+
+      appState.executionTimer = window.setTimeout(() => {
+        appState.executing = false;
+        appState.executionTimer = null;
+        setActivePanel("results");
+        renderScenario(appState.activeIndex);
+        logCommand("Command(s) completed successfully.", [
+          `${scenario.file} result grid guncellendi.`,
+          appState.mode === "Execute" ? "Workbench preview calisti; kalici veri degisikligi SSMS DEV standardina baglidir." : "Dry run / read-only davranis korundu."
+        ]);
+      }, 520);
+    }
+
+    function cancelExecution() {
+      if (!appState.executing) {
+        logCommand("Cancel checked.", ["Calisan komut yok."]);
+        return;
+      }
+
+      window.clearTimeout(appState.executionTimer);
+      appState.executionTimer = null;
+      appState.executing = false;
+      updateButtons();
+      setActivePanel("messages");
+      logCommand("Execution cancelled.", [`${getScenario().file} durduruldu.`], "warn");
+    }
+
+    function handleMenu(menu) {
+      document.querySelectorAll(".menu-item").forEach(item => item.classList.toggle("active", item.dataset.menu === menu));
+      const menuMessages = {
+        File: ["New Query, Open, Save ve Export CSV komutlari aktif."],
+        Edit: ["Copy SQL ve Copy Grid komutlari aktif."],
+        View: ["Results, Messages ve Execution plan sekmeleri calisiyor."],
+        Query: ["Parse, Execute, Cancel ve SQLCMD Mode kontrolleri aktif."],
+        Tools: ["DEV SAFE, tenant, top rows ve mode kontrolleri aktif."],
+        Window: ["Pencere kontrolleri workbench durum mesaji uretir."],
+        Help: ["Operator Guide ve tutorial sirasi dokumanlarla hizalandi."]
+      };
+      setActivePanel("messages");
+      logCommand(`${menu} menu opened.`, menuMessages[menu] || ["Menu aktif."]);
+    }
+
+    function handleTreeClick(node) {
+      const kind = node.dataset.treeKind;
+
+      if (kind === "schema") {
+        const schema = node.dataset.schema;
+        if (appState.collapsedSchemas.has(schema)) {
+          appState.collapsedSchemas.delete(schema);
+        }
+        else {
+          appState.collapsedSchemas.add(schema);
+        }
+        appState.selectedObject = schema;
+        renderObjectExplorer();
+        setActivePanel("messages");
+        logCommand("Schema toggled.", [`${schema} schema ${appState.collapsedSchemas.has(schema) ? "kapandi" : "acildi"}.`]);
+        return;
+      }
+
+      if (kind === "table") {
+        appState.selectedObject = `${node.dataset.schema}.${node.dataset.table}`;
+        appState.selectedScript = "12__table_catalog_and_relationships.sql";
+        renderObjectExplorer();
+        setActivePanel("messages");
+        logCommand("Table selected.", [
+          appState.selectedObject,
+          "Open butonu tablo kataloguna yonlendirir."
+        ]);
+        return;
+      }
+
+      if (kind === "database") {
+        appState.selectedObject = appState.databaseName;
+        renderObjectExplorer();
+        logCommand("Database selected.", [appState.databaseName]);
+        return;
+      }
+
+      appState.selectedObject = node.dataset.object || kind || "object";
+      renderObjectExplorer();
+      logCommand("Object Explorer selection changed.", [appState.selectedObject]);
+    }
+
+    function handleWindowCommand(command) {
+      appState.windowMode = command;
+      const message = {
+        minimize: "Workbench minimized state simulated.",
+        maximize: "Workbench maximized state simulated.",
+        close: "Close intercepted; workbench remains open for review."
+      }[command] || "Window command handled.";
+      logCommand("Window control clicked.", [message]);
+    }
+
+    function markSelectedRow(row) {
+      row.parentElement.querySelectorAll("tr").forEach(item => item.classList.remove("selected-row"));
+      row.classList.add("selected-row");
+      const cells = Array.from(row.cells).map(cell => cell.innerText.trim()).filter(Boolean);
+      logCommand("Grid row selected.", [cells.slice(0, 3).join(" | ") || row.dataset.tableTitle]);
+    }
+
+    document.addEventListener("click", event => {
+      const fileLink = event.target.closest("[data-open-file]");
+      if (fileLink) {
+        event.preventDefault();
+        event.stopPropagation();
+        openScript(fileLink.dataset.openFile);
+        return;
+      }
+
+      const tab = event.target.closest(".tab, .step");
+      if (tab && tab.dataset.index) {
+        renderScenario(Number(tab.dataset.index));
+        logCommand("Tab changed.", [getScenario().file]);
+        return;
+      }
+
+      const resultTab = event.target.closest(".result-tab");
+      if (resultTab && resultTab.dataset.panel) {
+        setActivePanel(resultTab.dataset.panel);
+        logCommand("Result panel changed.", [resultTab.textContent.trim()]);
+        return;
+      }
+
+      const menuItem = event.target.closest(".menu-item");
+      if (menuItem && menuItem.dataset.menu) {
+        handleMenu(menuItem.dataset.menu);
+        return;
+      }
+
+      const treeNode = event.target.closest(".node[data-tree-kind]");
+      if (treeNode) {
+        handleTreeClick(treeNode);
+        return;
+      }
+
+      const titleButton = event.target.closest("[data-window-command]");
+      if (titleButton) {
+        handleWindowCommand(titleButton.dataset.windowCommand);
+        return;
+      }
+
+      const row = event.target.closest("tr[data-grid-row]");
+      if (row) {
+        markSelectedRow(row);
+      }
+    });
+
+    document.getElementById("newQueryButton").addEventListener("click", createScratchQuery);
+    document.getElementById("openButton").addEventListener("click", () => {
+      if (appState.selectedObject.includes(".") && appState.selectedScript === "12__table_catalog_and_relationships.sql") {
+        openScript("12__table_catalog_and_relationships.sql");
+        return;
+      }
+      openScript(appState.selectedScript || getScenario().file);
+    });
+    document.getElementById("saveButton").addEventListener("click", saveWorkspace);
+    executeButton.addEventListener("click", executeQuery);
+    cancelButton.addEventListener("click", cancelExecution);
+    document.getElementById("parseButton").addEventListener("click", parseQuery);
+    sqlcmdButton.addEventListener("click", () => {
+      appState.sqlcmdMode = !appState.sqlcmdMode;
+      updateButtons();
+      setActivePanel("messages");
+      logCommand("SQLCMD Mode toggled.", [`SQLCMD Mode: ${appState.sqlcmdMode ? "ON" : "OFF"}.`], appState.sqlcmdMode ? "ok" : "warn");
+    });
+    gridButton.addEventListener("click", () => {
+      appState.resultsToGrid = !appState.resultsToGrid;
+      renderScenario(appState.activeIndex);
+      logCommand("Results mode changed.", [appState.resultsToGrid ? "Results to Grid" : "Results to Text"]);
+    });
+    document.getElementById("copySqlButton").addEventListener("click", () => copyText(getScenarioCode(getScenario()), "SQL"));
+    document.getElementById("copyGridButton").addEventListener("click", () => copyText(getGridText(getScenario()), "Grid"));
+    document.getElementById("exportButton").addEventListener("click", exportCsv);
+
+    prevButton.addEventListener("click", () => {
+      renderScenario(appState.activeIndex - 1);
+      logCommand("Previous step opened.", [getScenario().file]);
+    });
+
+    nextButton.addEventListener("click", () => {
+      renderScenario(appState.activeIndex + 1);
+      logCommand("Next step opened.", [getScenario().file]);
+    });
+
+    tenantSelect.addEventListener("change", event => {
+      appState.tenant = event.target.value;
+      renderScenario(appState.activeIndex);
+      logCommand("Tenant context changed.", [
+        `Active tenant: ${appState.tenant}.`,
+        "Result sets use prepared DEV-safe preview data."
+      ]);
+    });
+
+    rowsInput.addEventListener("input", event => {
+      const value = Number(event.target.value || 100);
+      appState.topRows = Math.max(10, Math.min(1000, value));
+      const scenarioCode = getScenarioCode(getScenario());
+      lineNumbers.innerHTML = scenarioCode.split("\n").map((_, idx) => idx + 1).join("<br>");
+      codeBlock.innerHTML = highlightSql(scenarioCode);
+      rowStatus.textContent = `Rows: ${getTotalRows(getScenario())} | Top: ${appState.topRows}`;
+    });
+
+    rowsInput.addEventListener("change", () => {
+      rowsInput.value = appState.topRows;
+      logCommand("Top rows changed.", [`Top rows: ${appState.topRows}.`]);
+    });
+
+    modeSelect.addEventListener("change", event => {
+      appState.mode = event.target.value;
+      renderScenario(appState.activeIndex);
+      logCommand("Execution mode selected.", [
+        `Mode: ${appState.mode}.`,
+        appState.mode === "Execute" ? "Kalici calisma SSMS DEV icinde yapilmalidir." : "Dry run guvenli varsayilan olarak korunur."
+      ], appState.mode === "Execute" ? "warn" : "ok");
+    });
+
+    async function bootWorkbench() {
+      const manifest = await loadInfrastructureManifest();
+      if (manifest) {
+        applyInfrastructureManifest(manifest);
+      }
+
+      renderObjectExplorer();
+      renderScenario(appState.activeIndex);
+      logCommand("Workbench ready.", [
+        manifest ? "Infrastructure manifest loaded." : "Fallback workbench configuration loaded.",
+        "All visible operator controls are wired."
+      ]);
+    }
+
+    bootWorkbench();
+  </script>
+</body>
+</html>

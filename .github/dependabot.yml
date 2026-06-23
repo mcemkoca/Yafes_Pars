@@ -1,0 +1,61 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Brussels
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - github-actions
+    commit-message:
+      prefix: chore
+      include: scope
+
+  - package-ecosystem: nuget
+    directory: /backend/src/YafesPars.Api
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:15"
+      timezone: Europe/Brussels
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - dotnet
+    commit-message:
+      prefix: chore
+      include: scope
+
+  - package-ecosystem: nuget
+    directory: /backend/src/YafesPars.Infrastructure
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:30"
+      timezone: Europe/Brussels
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - dotnet
+    commit-message:
+      prefix: chore
+      include: scope
+
+  - package-ecosystem: nuget
+    directory: /backend/tests/YafesPars.Tests
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:45"
+      timezone: Europe/Brussels
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - dotnet
+    commit-message:
+      prefix: chore
+      include: scope

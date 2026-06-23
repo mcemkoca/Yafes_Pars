@@ -1,0 +1,51 @@
+name: Backend build
+
+on:
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-build.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-build.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Restore, build, and test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      DOTNET_NOLOGO: "true"
+      DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore API
+        run: dotnet restore backend/src/YafesPars.Api/YafesPars.Api.csproj
+
+      - name: Build API
+        run: dotnet build backend/src/YafesPars.Api/YafesPars.Api.csproj --configuration Release --no-restore
+
+      - name: Restore tests
+        run: dotnet restore backend/tests/YafesPars.Tests/YafesPars.Tests.csproj
+
+      - name: Test
+        run: dotnet test backend/tests/YafesPars.Tests/YafesPars.Tests.csproj --configuration Release --no-restore --verbosity normal

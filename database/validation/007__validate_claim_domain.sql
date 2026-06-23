@@ -70,5 +70,50 @@ IF NOT EXISTS (
 )
     THROW 50712, 'Missing index: IX_Claim_status_reported', 1;
 
+IF EXISTS (
+    SELECT 1
+    FROM claim.Claim
+    WHERE incident_date IS NOT NULL
+      AND reported_date < incident_date
+)
+    THROW 50713, 'Claim reported_date cannot be before incident_date.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM claim.Claim
+    WHERE (claim_status_code = N'CLOSED' AND closed_date IS NULL)
+       OR (claim_status_code <> N'CLOSED' AND closed_date IS NOT NULL)
+)
+    THROW 50714, 'Claim closed status/date state is inconsistent.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM claim.Claim
+    WHERE paid_amount > 0
+      AND payment_method_code IS NULL
+)
+    THROW 50715, 'Paid claim must have payment method.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM claim.Claim
+    WHERE ISNULL(paid_amount, 0) < 0
+       OR ISNULL(reserved_amount, 0) < 0
+)
+    THROW 50716, 'Claim paid/reserved amount cannot be negative.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM claim.Claim c
+    WHERE c.is_deleted = 0
+      AND NOT EXISTS (
+            SELECT 1
+            FROM policy.Contract pc
+            WHERE pc.contract_id = c.contract_id
+              AND pc.tenant_id = c.tenant_id
+      )
+)
+    THROW 50717, 'Claim contract tenant linkage is invalid.', 1;
+
 PRINT 'Claim domain validation passed.';
 GO

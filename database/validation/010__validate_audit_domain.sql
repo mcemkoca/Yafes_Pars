@@ -44,5 +44,26 @@ IF OBJECT_ID(N'policy.TR_ContractVersion_Audit', N'TR') IS NULL
 IF OBJECT_ID(N'claim.TR_Claim_Audit', N'TR') IS NULL
     THROW 51010, 'Missing trigger: claim.TR_Claim_Audit', 1;
 
+IF EXISTS (
+    SELECT 1
+    FROM audit.AuditLog
+    WHERE action_type NOT IN (N'INSERT', N'UPDATE', N'DELETE')
+)
+    THROW 51011, 'Invalid audit action_type.', 1;
+
+IF EXISTS (
+    SELECT expected.trigger_name
+    FROM (VALUES
+        (N'person.TR_Person_Audit'),
+        (N'institution.TR_Institution_Audit'),
+        (N'risk.TR_InsurableObject_Audit'),
+        (N'policy.TR_Contract_Audit'),
+        (N'policy.TR_ContractVersion_Audit'),
+        (N'claim.TR_Claim_Audit')
+    ) AS expected (trigger_name)
+    WHERE OBJECT_ID(expected.trigger_name, N'TR') IS NULL
+)
+    THROW 51012, 'Audited core table is missing an audit trigger.', 1;
+
 PRINT 'Audit domain validation passed.';
 GO

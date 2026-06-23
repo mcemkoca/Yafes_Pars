@@ -97,5 +97,61 @@ IF NOT EXISTS (
 )
     THROW 50516, 'Missing index: IX_ContractVersion_contract_effective', 1;
 
+IF EXISTS (
+    SELECT 1
+    FROM policy.Contract
+    WHERE is_deleted = 0
+      AND end_date IS NOT NULL
+      AND end_date < start_date
+)
+    THROW 50517, 'Contract end_date cannot be before start_date.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM policy.Contract c
+    WHERE c.is_deleted = 0
+      AND c.contract_status_code = N'ACTIVE'
+      AND NOT EXISTS (
+            SELECT 1
+            FROM policy.ContractParty cp
+            WHERE cp.contract_id = c.contract_id
+      )
+)
+    THROW 50518, 'Active contract must have at least one party.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM policy.Contract c
+    WHERE c.is_deleted = 0
+      AND c.contract_status_code = N'ACTIVE'
+      AND c.contract_domain_code IN (N'MOTOR', N'AUTO', N'FIRE', N'FAMILY', N'BUSINESS')
+      AND NOT EXISTS (
+            SELECT 1
+            FROM policy.ContractObject co
+            WHERE co.contract_id = c.contract_id
+              AND co.contract_object_status_code = N'ACTIVE'
+      )
+)
+    THROW 50519, 'Active contract in object-backed domain must have at least one active object.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM policy.ContractVersion
+    WHERE is_deleted = 0
+      AND effective_to IS NOT NULL
+      AND effective_to < effective_from
+)
+    THROW 50520, 'Contract version effective_to cannot be before effective_from.', 1;
+
+IF EXISTS (
+    SELECT contract_id
+    FROM policy.ContractVersion
+    WHERE is_deleted = 0
+      AND contract_version_status_code = N'ACTIVE'
+    GROUP BY contract_id
+    HAVING COUNT(1) > 1
+)
+    THROW 50521, 'Duplicate active contract versions detected.', 1;
+
 PRINT 'Policy domain validation passed.';
 GO

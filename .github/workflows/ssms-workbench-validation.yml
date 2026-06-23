@@ -1,0 +1,252 @@
+name: SSMS workbench validation
+
+on:
+  pull_request:
+    paths:
+      - "database/ssms/**"
+      - "database/tools/update-ssms-workbench-manifest.ps1"
+      - "md/ssms/**"
+      - "md/database/**"
+      - "md/mustafaplan.md"
+      - "README.md"
+      - ".github/workflows/ssms-workbench-validation.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "database/ssms/**"
+      - "database/tools/update-ssms-workbench-manifest.ps1"
+      - "md/ssms/**"
+      - "md/database/**"
+      - "md/mustafaplan.md"
+      - "README.md"
+      - ".github/workflows/ssms-workbench-validation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ssms-workbench-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-ssms-workbench:
+    name: Validate SSMS operator assets
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate required SSMS files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          required_files=(
+            database/ssms/00__open_first_safety_check.sql
+            database/ssms/01__run_all_dev_migrations_sqlcmd.sql
+            database/ssms/02__operations_dashboard.sql
+            database/ssms/03__create_renewal_tasks.sql
+            database/ssms/04__admin_security_audit_queries.sql
+            database/ssms/05__operator_dashboard_home.sql
+            database/ssms/06__query_library_shortcuts.sql
+            database/ssms/07__data_entry_bridge_templates.sql
+            database/ssms/08__data_editing_guardrails.sql
+            database/ssms/09__graph_report_pack.sql
+            database/ssms/10__daily_operator_checklist.sql
+            database/ssms/11__schema_working_logic_map.sql
+            database/ssms/12__table_catalog_and_relationships.sql
+            database/ssms/13__visual_workflow_board.sql
+            database/ssms/14__admin_role_permission_matrix.sql
+            database/ssms/15__monitoring_and_job_readiness.sql
+            database/ssms/16__delivery_gap_register.sql
+            database/ssms/17__remaining_work_cockpit.sql
+            md/ssms/operator-workbench.md
+            md/ssms/dashboard-plan.md
+            md/ssms/tutorials/README.md
+            md/ssms/templates.md
+            md/mustafaplan.md
+            database/ssms/demo/index.html
+            database/ssms/demo/workbench-manifest.json
+            database/tools/update-ssms-workbench-manifest.ps1
+          )
+
+          for file in "${required_files[@]}"; do
+            test -f "$file" || { echo "Missing required file: $file" >&2; exit 1; }
+          done
+
+      - name: Validate SQLCMD and info-tip conventions
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          for file in database/ssms/05__operator_dashboard_home.sql \
+                      database/ssms/06__query_library_shortcuts.sql \
+                      database/ssms/07__data_entry_bridge_templates.sql \
+                      database/ssms/08__data_editing_guardrails.sql \
+                      database/ssms/09__graph_report_pack.sql \
+                      database/ssms/10__daily_operator_checklist.sql \
+                      database/ssms/11__schema_working_logic_map.sql \
+                      database/ssms/12__table_catalog_and_relationships.sql \
+                      database/ssms/13__visual_workflow_board.sql \
+                      database/ssms/14__admin_role_permission_matrix.sql \
+                      database/ssms/15__monitoring_and_job_readiness.sql \
+                      database/ssms/16__delivery_gap_register.sql \
+                      database/ssms/17__remaining_work_cockpit.sql; do
+            grep -q ":ON ERROR EXIT" "$file" || { echo "Missing SQLCMD guard: $file" >&2; exit 1; }
+            grep -q "TENANT_CODE" "$file" || { echo "Missing TENANT_CODE variable: $file" >&2; exit 1; }
+            grep -q "INFO TIP" "$file" || { echo "Missing INFO TIP guidance: $file" >&2; exit 1; }
+          done
+
+      - name: Validate SSMS DEV execution contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+
+          ssms_files=(database/ssms/*.sql database/ssms/templates/*.sql)
+          for file in "${ssms_files[@]}"; do
+            grep -q ":ON ERROR EXIT" "$file" || { echo "Missing SQLCMD guard: $file" >&2; exit 1; }
+            grep -q "YAFES_SQL_DATABASE" "$file" || { echo "Missing YAFES_SQL_DATABASE variable: $file" >&2; exit 1; }
+            grep -q "SQLCMD Mode" "$file" || { echo "Missing SQLCMD Mode guidance: $file" >&2; exit 1; }
+            grep -q "INFO TIP" "$file" || { echo "Missing INFO TIP guidance: $file" >&2; exit 1; }
+            grep -Eq "(Target database name must contain DEV|Current database name must contain DEV|NOT[[:space:]]+LIKE[[:space:]]+N'%DEV%')" "$file" || {
+              echo "Missing DEV database guard: $file" >&2
+              exit 1
+            }
+            if grep -Eiq '^[[:space:]]*:r[[:space:]]+.*execution-logs' "$file"; then
+              echo "Checked-in SSMS file must not reference generated execution logs directly: $file" >&2
+              exit 1
+            fi
+          done
+
+      - name: Scan SSMS SQL for unsupported syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if grep -RInE '\b(AUTO_INCREMENT|SERIAL|jsonb|uuid_generate|RETURNING|LIMIT[[:space:]]+[0-9]+)\b' database/ssms; then
+            echo "Unsupported non-SQL Server syntax found in SSMS workbench files." >&2
+            exit 1
+          fi
+
+      - name: Scan SSMS SQL for destructive patterns
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if grep -RInE '\b(DROP[[:space:]]+DATABASE|DROP[[:space:]]+TABLE|TRUNCATE[[:space:]]+TABLE|ALTER[[:space:]]+TABLE.*DROP[[:space:]]+COLUMN)\b' database/ssms; then
+            echo "Destructive pattern found in SSMS workbench files." >&2
+            exit 1
+          fi
+
+      - name: Validate workbench JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          node <<'NODE'
+          const fs = require('fs');
+          const vm = require('vm');
+          const html = fs.readFileSync('database/ssms/demo/index.html', 'utf8');
+          const match = html.match(/<script>([\s\S]*)<\/script>/);
+          if (!match) {
+            throw new Error('Workbench script block is missing.');
+          }
+          new vm.Script(match[1]);
+          const requiredText = [
+            'Corporate Operator Workbench',
+            'workbench-manifest.json',
+            'loadInfrastructureManifest',
+            'applyInfrastructureManifest',
+            'updateScenariosFromManifest',
+            'newQueryButton',
+            'openButton',
+            'saveButton',
+            'executeButton',
+            'cancelButton',
+            'parseButton',
+            'sqlcmdButton',
+            'gridButton',
+            'copySqlButton',
+            'copyGridButton',
+            'exportButton',
+            'data-panel="results"',
+            'data-panel="messages"',
+            'data-panel="execution"',
+            'data-tree-kind',
+            '05__operator_dashboard_home.sql',
+            '07__data_entry_bridge_templates.sql',
+            '09__graph_report_pack.sql',
+            '11__schema_working_logic_map.sql',
+            '12__table_catalog_and_relationships.sql',
+            '13__visual_workflow_board.sql',
+            '14__admin_role_permission_matrix.sql',
+            '16__delivery_gap_register.sql',
+            '17__remaining_work_cockpit.sql',
+            'CREATE_TASK',
+            'ADD_TASK_COMMENT',
+            'ADD_TASK_REMINDER',
+            'function executeQuery',
+            'function cancelExecution',
+            'function parseQuery',
+            'function exportCsv'
+          ];
+          for (const text of requiredText) {
+            if (!html.includes(text)) {
+              throw new Error(`Workbench is missing required text: ${text}`);
+            }
+          }
+
+          const manifest = JSON.parse(fs.readFileSync('database/ssms/demo/workbench-manifest.json', 'utf8'));
+          const migrationFiles = fs.readdirSync('database/migrations').filter(file => file.endsWith('.sql')).sort();
+          const validationFiles = fs.readdirSync('database/validation').filter(file => file.endsWith('.sql')).sort();
+          const ssmsScripts = fs.readdirSync('database/ssms').filter(file => file.endsWith('.sql')).sort();
+          const tableNames = new Set();
+          const schemaNames = new Set();
+          for (const file of migrationFiles) {
+            const sql = fs.readFileSync(`database/migrations/${file}`, 'utf8');
+            for (const match of sql.matchAll(/CREATE\s+TABLE\s+([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)/g)) {
+              schemaNames.add(match[1]);
+              tableNames.add(`${match[1]}.${match[2]}`);
+            }
+          }
+
+          const checks = [
+            ['database.tableCount', manifest.database.tableCount, tableNames.size],
+            ['database.schemaCount', manifest.database.schemaCount, schemaNames.size],
+            ['migrations.count', manifest.migrations.count, migrationFiles.length],
+            ['validations.count', manifest.validations.count, validationFiles.length],
+            ['ssmsScripts.count', manifest.ssmsScripts.length, ssmsScripts.length]
+          ];
+
+          for (const [label, actual, expected] of checks) {
+            if (actual !== expected) {
+              throw new Error(`${label} is ${actual}, expected ${expected}. Regenerate workbench-manifest.json.`);
+            }
+          }
+
+          const dashboard = fs.readFileSync('database/ssms/05__operator_dashboard_home.sql', 'utf8');
+          const shortcutRows = [...dashboard.matchAll(/\(\s*(\d+),\s*N'((?:[^']|'')*)',\s*N'((?:[^']|'')*)',\s*N'((?:[^']|'')*)',\s*N'((?:[^']|'')*)',\s*N'((?:[^']|'')*)'\s*\)/g)];
+          if (manifest.shortcuts.length !== shortcutRows.length) {
+            throw new Error(`shortcut count is ${manifest.shortcuts.length}, expected ${shortcutRows.length}.`);
+          }
+          if (!manifest.shortcuts.some(shortcut => shortcut.fileName === '13__visual_workflow_board.sql')) {
+            throw new Error('Visual workflow board shortcut is missing from manifest.');
+          }
+          if (!manifest.shortcuts.some(shortcut => shortcut.fileName === '14__admin_role_permission_matrix.sql')) {
+            throw new Error('Admin role permission matrix shortcut is missing from manifest.');
+          }
+          if (!manifest.shortcuts.some(shortcut => shortcut.fileName === '15__monitoring_and_job_readiness.sql')) {
+            throw new Error('Monitoring and job readiness shortcut is missing from manifest.');
+          }
+          if (!manifest.shortcuts.some(shortcut => shortcut.fileName === '16__delivery_gap_register.sql')) {
+            throw new Error('Delivery gap register shortcut is missing from manifest.');
+          }
+          if (!manifest.shortcuts.some(shortcut => shortcut.fileName === '17__remaining_work_cockpit.sql')) {
+            throw new Error('Remaining work cockpit shortcut is missing from manifest.');
+          }
+          NODE

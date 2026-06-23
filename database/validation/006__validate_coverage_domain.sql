@@ -45,5 +45,57 @@ IF NOT EXISTS (
 )
     THROW 50609, 'Missing seed coverage: AUTO_LIABILITY', 1;
 
+IF NOT EXISTS (
+    SELECT 1
+    FROM coverage.Coverage
+    WHERE coverage_code = N'BA_AUTO'
+)
+    THROW 50610, 'Missing seed coverage: BA_AUTO', 1;
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM coverage.CoveragePackage
+    WHERE package_code = N'AUTO_BASIC'
+)
+    THROW 50611, 'Missing coverage package: AUTO_BASIC', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM coverage.CoveragePackage cp
+    WHERE cp.is_active = 1
+      AND NOT EXISTS (
+            SELECT 1
+            FROM coverage.CoveragePackageItem cpi
+            WHERE cpi.coverage_package_id = cp.coverage_package_id
+      )
+)
+    THROW 50612, 'Active coverage package without items.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM coverage.Coverage c
+    WHERE c.is_active = 1
+      AND NOT EXISTS (
+            SELECT 1
+            FROM coverage.CoverageDomain cd
+            WHERE cd.coverage_code = c.coverage_code
+      )
+)
+    THROW 50613, 'Active coverage without coverage domain mapping.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM coverage.CoveragePackage cp
+    INNER JOIN coverage.CoveragePackageItem cpi
+        ON cpi.coverage_package_id = cp.coverage_package_id
+    WHERE NOT EXISTS (
+        SELECT 1
+        FROM coverage.CoverageDomain cd
+        WHERE cd.coverage_code = cpi.coverage_code
+          AND cd.contract_domain_code = cp.contract_domain_code
+    )
+)
+    THROW 50614, 'Coverage package item is not valid for the package domain.', 1;
+
 PRINT 'Coverage domain validation passed.';
 GO

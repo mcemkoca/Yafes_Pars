@@ -54,5 +54,39 @@ IF NOT EXISTS (
 )
     THROW 50910, 'Missing index: IX_TaskReminder_due', 1;
 
+IF EXISTS (
+    SELECT 1
+    FROM tasking.Task
+    WHERE (task_status_code = N'DONE' AND completed_at_utc IS NULL)
+       OR (task_status_code <> N'DONE' AND completed_at_utc IS NOT NULL)
+)
+    THROW 50911, 'Task completion state is inconsistent.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM tasking.Task t
+    INNER JOIN core.AppUser u
+        ON u.user_id = t.assigned_to_user_id
+    WHERE t.assigned_to_user_id IS NOT NULL
+      AND u.tenant_id <> t.tenant_id
+)
+    THROW 50912, 'Assigned task user must belong to task tenant.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM tasking.Task
+    WHERE related_entity_type IS NOT NULL
+      AND related_entity_id IS NULL
+)
+    THROW 50913, 'Task related_entity_type requires related_entity_id.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM tasking.TaskReminder
+    WHERE sent_at_utc IS NOT NULL
+      AND sent_at_utc < remind_at_utc
+)
+    THROW 50914, 'Task reminder sent_at_utc cannot be before remind_at_utc.', 1;
+
 PRINT 'Task domain validation passed.';
 GO

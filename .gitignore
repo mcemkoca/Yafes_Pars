@@ -1,0 +1,35 @@
+database/execution-logs/
+
+# Local secrets and environment files
+.env
+.env.*
+!.env.example
+*.secret
+*.secrets
+*.local
+
+# Database and backup artifacts
+*.bak
+*.bacpac
+*.dacpac
+*.mdf
+*.ldf
+*.ndf
+*.trn
+*.sqlplan
+
+# VM and packaged delivery artifacts
+*.vhd
+*.vhdx
+*.iso
+*.zip
+*.7z
+*.rar
+
+# Local runtime noise
+node_modules/
+bin/
+obj/
+dist/
+build/
+coverage/

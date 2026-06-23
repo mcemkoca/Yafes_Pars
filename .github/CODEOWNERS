@@ -1,0 +1,11 @@
+# Product ownership: Deuterium12{MCK}
+# GitHub review routing uses the repository maintainer account below.
+* @mcemkoca
+
+# High-risk areas.
+/.github/ @mcemkoca
+/database/migrations/ @mcemkoca
+/database/validation/ @mcemkoca
+/database/tools/ @mcemkoca
+/database/ssms/ @mcemkoca
+/SECURITY.md @mcemkoca
