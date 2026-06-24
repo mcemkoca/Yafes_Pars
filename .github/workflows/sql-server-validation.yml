@@ -43,7 +43,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
       - name: Run static SQL quality gate
         shell: pwsh
@@ -184,7 +184,7 @@ jobs:
 
       - name: Upload SQL execution logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: sql-execution-logs
           path: database/execution-logs/**
