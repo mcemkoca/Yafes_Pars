@@ -175,7 +175,7 @@ GO
 -- ─── risk.sp_CreateProperty ──────────────────────────────────────────────────
 CREATE OR ALTER PROCEDURE risk.sp_CreateProperty
     @tenant_id             UNIQUEIDENTIFIER,
-    @address               NVARCHAR(500)    = NULL,
+    @property_address      NVARCHAR(500)    = NULL,
     @property_type_code    NVARCHAR(80)     = N'HOUSE',
     @construction_area     DECIMAL(10,2)    = NULL,
     @construction_year     INT              = NULL,
@@ -197,7 +197,7 @@ BEGIN
         EXEC risk.sp_CreateRiskObject
             @tenant_id           = @tenant_id,
             @object_type_code    = N'REAL_ESTATE',
-            @description         = ISNULL(@address, N'Property'),
+            @description         = ISNULL(@property_address, N'Property'),
             @created_by_user_id  = @created_by_user_id,
             @insurable_object_id = @insurable_object_id OUTPUT;
 
@@ -208,7 +208,7 @@ BEGIN
             (@insurable_object_id,
              ISNULL(@property_type_code, N'HOUSE'),
              N'PRIMARY', N'OWNER',
-             ISNULL(@address, N''), N'-', N'00000', N'-', N'TR');
+             ISNULL(@property_address, N''), N'-', N'00000', N'-', N'TR');
 
         COMMIT TRANSACTION;
     END TRY

@@ -48,8 +48,8 @@ public static class RiskWriteEndpoints
             try
             {
                 var id = await repo.ExecuteScalarAsync<Guid>(
-                    "EXEC risk.sp_CreateProperty @Address, @PropertyTypeCode, @ConstructionArea, @ConstructionYear, @InsuredValue, @CurrencyCode",
-                    new { cmd.Address, cmd.PropertyTypeCode, cmd.ConstructionArea, cmd.ConstructionYear, cmd.InsuredValue, cmd.CurrencyCode });
+                    "EXEC risk.sp_CreateProperty @PropertyAddress, @PropertyTypeCode, @ConstructionArea, @ConstructionYear, @InsuredValue, @CurrencyCode",
+                    new { PropertyAddress = cmd.Address, cmd.PropertyTypeCode, cmd.ConstructionArea, cmd.ConstructionYear, cmd.InsuredValue, cmd.CurrencyCode });
                 return Results.Created($"/api/risk/properties/{id}", new { propertyId = id });
             }
             catch (SqlException ex) when (ex.Number is >= 52000 and <= 52030)
