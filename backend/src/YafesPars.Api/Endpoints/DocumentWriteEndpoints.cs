@@ -13,7 +13,7 @@ public static class DocumentWriteEndpoints
             .RequireAuthorization("TenantUser")
             .RequireRateLimiting("write");
 
-        api.MapPost("/", async (CreateDocumentCommand cmd, IWriteRepository repo) =>
+        api.MapPost("", async (CreateDocumentCommand cmd, IWriteRepository repo) =>
         {
             try
             {
