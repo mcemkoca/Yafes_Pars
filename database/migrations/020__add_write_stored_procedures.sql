@@ -241,8 +241,8 @@ BEGIN
     IF EXISTS (SELECT 1 FROM policy.ContractObject WHERE contract_id = @contract_id AND insurable_object_id = @insurable_object_id)
         RETURN;
 
-    INSERT INTO policy.ContractObject (contract_id, insurable_object_id, added_by_user_id)
-    VALUES (@contract_id, @insurable_object_id, @created_by_user_id);
+    INSERT INTO policy.ContractObject (contract_id, insurable_object_id, contract_object_status_code)
+    VALUES (@contract_id, @insurable_object_id, N'ACTIVE');
 END;
 GO
 
