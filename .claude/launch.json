@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "simulation",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "simulation", "-p", "5500", "--no-clipboard"],
+      "port": 5500
+    },
+    {
+      "name": "frontend",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "frontend", "-p", "5501", "--no-clipboard"],
+      "port": 5501
+    }
+  ]
+}

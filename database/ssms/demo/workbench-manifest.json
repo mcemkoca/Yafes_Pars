@@ -535,12 +535,28 @@
                         "schema":  "audit",
                         "title":  "Audit",
                         "lane":  "Control",
-                        "subheading":  "Audit log and change details",
+                        "subheading":  "Audit log, change details, entity notes",
                         "entryPoint":  "04__admin_security_audit_queries.sql",
-                        "tableCount":  2,
+                        "tableCount":  3,
                         "tables":  [
                                        "AuditLog",
-                                       "EntityChangeSet"
+                                       "EntityChangeSet",
+                                       "EntityNotes"
+                                   ]
+                    },
+                    {
+                        "order":  120,
+                        "schema":  "finance",
+                        "title":  "Finance",
+                        "lane":  "Operations",
+                        "subheading":  "Invoices, payments, payment plans and installments",
+                        "entryPoint":  "02__operations_dashboard.sql",
+                        "tableCount":  4,
+                        "tables":  [
+                                       "Invoices",
+                                       "PaymentPlanItems",
+                                       "PaymentPlans",
+                                       "Payments"
                                    ]
                     }
                 ],
