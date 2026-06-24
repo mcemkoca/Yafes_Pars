@@ -2,16 +2,6 @@ name: Database quality gate
 
 on:
   pull_request:
-    paths:
-      - "database/migrations/**"
-      - "database/ssms/**"
-      - "database/templates/**"
-      - "database/tools/**"
-      - "database/validation/**"
-      - "md/**"
-      - "README.md"
-      - ".gitignore"
-      - ".github/workflows/database-quality-gate.yml"
   push:
     branches:
       - main
