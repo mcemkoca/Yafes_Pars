@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yafes Pars — Kurulum Rehberi</title>
+<style>
+  :root {
+    --bg: #0d1117; --surface: #161b22; --surface2: #21262d;
+    --border: #30363d; --accent: #2f81f7; --accent-dim: #1f6feb;
+    --green: #3fb950; --green-dim: #238636; --green-bg: #0d1117;
+    --amber: #d29922; --red: #f85149; --purple: #a371f7;
+    --text: #e6edf3; --muted: #8b949e; --subtle: #484f58;
+    --code-bg: #161b22; --tag-bg: #1f3a1f;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; min-height: 100vh; }
+
+  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem; position: sticky; top: 0; z-index: 100; }
+  .logo { font-size: 1.1rem; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .logo-badge { background: var(--accent-dim); color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+  .header-progress { margin-left: auto; display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
+  .progress-bar { width: 120px; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--green); border-radius: 3px; transition: width .4s ease; }
+
+  .layout { display: grid; grid-template-columns: 240px 1fr; min-height: calc(100vh - 57px); }
+
+  .sidebar { background: var(--surface); border-right: 1px solid var(--border); padding: 1.5rem 0; position: sticky; top: 57px; height: calc(100vh - 57px); overflow-y: auto; }
+  .sidebar-section { padding: 0 1rem; margin-bottom: 0.5rem; }
+  .sidebar-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; padding: 0.5rem 0.5rem 0.25rem; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 13px; color: var(--muted); transition: all .15s; border: none; background: none; width: 100%; text-align: left; }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: var(--accent-dim); color: #fff; }
+  .nav-item.done { color: var(--green); }
+  .nav-item.done .step-dot { background: var(--green); }
+  .step-dot { width: 20px; height: 20px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; flex-shrink: 0; }
+  .nav-item.active .step-dot { background: var(--accent); color: #fff; }
+
+  .content { padding: 2rem 2.5rem; max-width: 860px; }
+
+  .step-page { display: none; }
+  .step-page.active { display: block; }
+
+  .step-header { margin-bottom: 2rem; }
+  .step-badge { font-size: 11px; color: var(--muted); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .step-badge::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  h1.step-title { font-size: 1.6rem; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+  .step-desc { color: var(--muted); font-size: 15px; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 8px; }
+  .tag { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+  .tag-green { background: #122114; color: var(--green); }
+  .tag-amber { background: #2d2007; color: var(--amber); }
+  .tag-blue { background: #0c1929; color: var(--accent); }
+  .tag-red { background: #2d0f0f; color: var(--red); }
+
+  .code-block { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; margin: 0.75rem 0; position: relative; }
+  .code-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+  .code-lang { font-size: 11px; color: var(--muted); font-family: monospace; }
+  .copy-btn { font-size: 11px; background: var(--surface); border: 1px solid var(--border); color: var(--muted); padding: 3px 10px; border-radius: 4px; cursor: pointer; transition: all .15s; }
+  .copy-btn:hover { color: var(--text); border-color: var(--accent); }
+  .copy-btn.copied { color: var(--green); border-color: var(--green); }
+  pre { padding: 1rem 1.25rem; font-size: 13px; font-family: 'SFMono-Regular', Consolas, monospace; overflow-x: auto; line-height: 1.7; color: var(--text); }
+  .kw { color: #ff7b72; }
+  .str { color: #a5d6ff; }
+  .cmt { color: var(--muted); font-style: italic; }
+  .var { color: #ffa657; }
+  .num { color: #79c0ff; }
+
+  .info-box { display: flex; gap: 12px; padding: 1rem 1.25rem; border-radius: 6px; margin: 1rem 0; font-size: 13px; }
+  .info-box.info { background: #0c1929; border: 1px solid #1f3a5f; }
+  .info-box.warn { background: #2d2007; border: 1px solid #5a3e0a; }
+  .info-box.success { background: #0d1f0e; border: 1px solid #1a4020; }
+  .info-box.danger { background: #2d0f0f; border: 1px solid #5a1a1a; }
+  .info-icon { font-size: 16px; flex-shrink: 0; line-height: 1.5; }
+  .info-text { color: var(--muted); line-height: 1.6; }
+  .info-text strong { color: var(--text); }
+
+  .check-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .check-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--muted); padding: 8px 12px; background: var(--surface2); border-radius: 6px; }
+  .check-list li .icon { font-size: 16px; flex-shrink: 0; }
+  .check-list li strong { color: var(--text); display: block; margin-bottom: 2px; }
+
+  table.info-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.info-table th { text-align: left; padding: 8px 12px; color: var(--muted); font-weight: 500; border-bottom: 1px solid var(--border); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+  table.info-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+  table.info-table tr:last-child td { border-bottom: none; }
+  table.info-table td code { background: var(--surface2); padding: 1px 6px; border-radius: 3px; font-size: 12px; font-family: monospace; }
+
+  .step-actions { display: flex; gap: 12px; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+  .btn { padding: 8px 18px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; transition: all .15s; }
+  .btn-primary { background: var(--green-dim); color: #fff; }
+  .btn-primary:hover { background: var(--green); }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--muted); }
+  .btn-danger { background: #3d1414; color: var(--red); border: 1px solid #5a1a1a; }
+
+  .terminal { background: #000; border-radius: 8px; border: 1px solid var(--border); overflow: hidden; margin: 1rem 0; }
+  .terminal-header { background: var(--surface2); padding: 8px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #ff5f56; }
+  .dot-yellow { background: #ffbd2e; }
+  .dot-green { background: #27c93f; }
+  .terminal-title { margin-left: 8px; font-size: 12px; color: var(--muted); }
+  .terminal pre { background: transparent; border: none; color: #e6edf3; font-size: 12.5px; padding: 1rem 1.25rem; }
+  .t-prompt { color: #57ab5a; }
+  .t-cmd { color: #e6edf3; }
+  .t-out { color: #8b949e; }
+  .t-ok { color: #3fb950; }
+  .t-err { color: #f85149; }
+
+  .ssms-window { background: #1e1e1e; border: 1px solid #3e3e42; border-radius: 8px; overflow: hidden; margin: 1rem 0; font-family: 'SFMono-Regular', Consolas, monospace; }
+  .ssms-titlebar { background: #2d2d30; padding: 6px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #3e3e42; }
+  .ssms-title { font-size: 12px; color: #999; }
+  .ssms-toolbar { background: #252526; border-bottom: 1px solid #3e3e42; padding: 4px 12px; display: flex; gap: 6px; }
+  .ssms-btn { font-size: 11px; background: transparent; border: 1px solid #3e3e42; color: #ccc; padding: 2px 10px; border-radius: 3px; cursor: default; }
+  .ssms-btn.run { background: #094771; border-color: #1f7abd; color: #fff; }
+  .ssms-editor { padding: 1rem 1.5rem; font-size: 12.5px; line-height: 1.8; min-height: 140px; }
+  .sql-kw { color: #569cd6; }
+  .sql-str { color: #ce9178; }
+  .sql-cmt { color: #6a9955; }
+  .sql-fn { color: #dcdcaa; }
+  .sql-var { color: #9cdcfe; }
+
+  .endpoint-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 8px; overflow: hidden; }
+  .endpoint-header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; }
+  .method { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; min-width: 44px; text-align: center; }
+  .method-get { background: #0c2d0c; color: #3fb950; }
+  .method-post { background: #0c1929; color: #79c0ff; }
+  .method-put { background: #2d2007; color: #d29922; }
+  .ep-path { font-family: monospace; font-size: 13px; color: var(--text); }
+  .ep-desc { font-size: 12px; color: var(--muted); margin-left: auto; }
+
+  .completion { text-align: center; padding: 3rem 1rem; }
+  .completion-icon { font-size: 64px; margin-bottom: 1rem; }
+  .completion h2 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+  .completion p { color: var(--muted); font-size: 15px; margin-bottom: 2rem; }
+  .completion-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; text-align: left; max-width: 480px; margin: 0 auto; }
+  .comp-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; }
+  .comp-card-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .comp-card-value { font-size: 14px; font-weight: 600; color: var(--green); }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2f81f7" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    Yafes Pars
+    <span class="logo-badge">SSMS Sigorta Sistemi</span>
+  </div>
+  <div class="header-progress">
+    <span id="progress-text">0 / 6 adım tamamlandı</span>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Kurulum Adımları</div>
+      <button class="nav-item active" onclick="goStep(0)">
+        <div class="step-dot" id="dot-0">1</div> Gereksinimler
+      </button>
+      <button class="nav-item" onclick="goStep(1)">
+        <div class="step-dot" id="dot-1">2</div> Docker Kurulum
+      </button>
+      <button class="nav-item" onclick="goStep(2)">
+        <div class="step-dot" id="dot-2">3</div> Veritabanı Kurulum
+      </button>
+      <button class="nav-item" onclick="goStep(3)">
+        <div class="step-dot" id="dot-3">4</div> API Yapılandırma
+      </button>
+      <button class="nav-item" onclick="goStep(4)">
+        <div class="step-dot" id="dot-4">5</div> SSMS Bağlantısı
+      </button>
+      <button class="nav-item" onclick="goStep(5)">
+        <div class="step-dot" id="dot-5">6</div> API Test & Doğrulama
+      </button>
+      <button class="nav-item" onclick="goStep(6)">
+        <div class="step-dot" id="dot-6">✓</div> Kurulum Tamamlandı
+      </button>
+    </div>
+    <div class="sidebar-section" style="margin-top:1rem;">
+      <div class="sidebar-label">Hızlı Bağlantılar</div>
+      <button class="nav-item" onclick="window.open('http://localhost:5000/swagger','_blank')">
+        <div class="step-dot" style="background:#533ab7">S</div> Swagger UI
+      </button>
+      <button class="nav-item" onclick="window.open('http://localhost:5000/health','_blank')">
+        <div class="step-dot" style="background:#1a6035">H</div> Health Check
+      </button>
+    </div>
+  </aside>
+
+  <main class="content">
+
+    <!-- ADIM 0: Gereksinimler -->
+    <div class="step-page active" id="step-0">
+      <div class="step-header">
+        <div class="step-badge">Adım 1 / 6</div>
+        <h1 class="step-title">Gereksinimler Kontrolü</h1>
+        <p class="step-desc">Başlamadan önce sisteminizde aşağıdaki araçların kurulu olduğunu doğrulayın.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Zorunlu Araçlar</div>
+        <ul class="check-list">
+          <li>
+            <span class="icon">🐳</span>
+            <div><strong>Docker Desktop 24+</strong>
+            SQL Server ve API container'larını çalıştırmak için gerekli. <a href="https://www.docker.com/products/docker-desktop/" style="color:var(--accent)">docker.com</a> adresinden indirin.</div>
+          </li>
+          <li>
+            <span class="icon">⚙️</span>
+            <div><strong>Git</strong>
+            Kaynak kodu indirmek için gerekli. <a href="https://git-scm.com" style="color:var(--accent)">git-scm.com</a> adresinden indirin.</div>
+          </li>
+          <li>
+            <span class="icon">🗃️</span>
+            <div><strong>SSMS 20+ (isteğe bağlı)</strong>
+            SQL Server'ı görsel yönetmek için. <a href="https://aka.ms/ssmsfullsetup" style="color:var(--accent)">Microsoft'tan indirin.</a></div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Sürüm Doğrulama</div>
+        <div class="terminal">
+          <div class="terminal-header">
+            <div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div>
+            <span class="terminal-title">Komut İstemi / PowerShell</span>
+          </div>
+          <pre><span class="t-prompt">$</span> <span class="t-cmd">docker --version</span>
+<span class="t-out">Docker version 27.x.x, build xxxxxxx</span>
+
+<span class="t-prompt">$</span> <span class="t-cmd">docker compose version</span>
+<span class="t-out">Docker Compose version v2.x.x</span>
+
+<span class="t-prompt">$</span> <span class="t-cmd">git --version</span>
+<span class="t-out">git version 2.4x.x.windows.x</span></pre>
+        </div>
+      </div>
+
+      <div class="info-box warn">
+        <span class="info-icon">⚠️</span>
+        <div class="info-text">Docker Desktop'un <strong>çalışır durumda</strong> olduğundan emin olun. Sistem tepsisinde Docker simgesinin yeşil göründüğünü kontrol edin.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Sistem Gereksinimleri</div>
+        <table class="info-table">
+          <tr><th>Kaynak</th><th>Minimum</th><th>Önerilen</th></tr>
+          <tr><td>RAM</td><td>4 GB</td><td>8 GB</td></tr>
+          <tr><td>Disk</td><td>10 GB</td><td>20 GB</td></tr>
+          <tr><td>İşlemci</td><td>2 çekirdek</td><td>4 çekirdek</td></tr>
+          <tr><td>İşletim Sistemi</td><td>Windows 10 / macOS 12 / Ubuntu 22</td><td>Windows 11</td></tr>
+        </table>
+      </div>
+
+      <div class="step-actions">
+        <button class="btn btn-primary" onclick="completeStep(0)">Gereksinimler Hazır, Devam Et →</button>
+      </div>
+    </div>
+
+    <!-- ADIM 1: Docker Kurulum -->
+    <div class="step-page" id="step-1">
+      <div class="step-header">
+        <div class="step-badge">Adım 2 / 6</div>
+        <h1 class="step-title">Docker ile Kurulum</h1>
+        <p class="step-desc">Projeyi GitHub'dan indirin ve tek komutla tüm servisleri başlatın.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">1. Projeyi İndirin</div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Kopyala</button></div>
+          <pre><span class="kw">git</span> clone https://github.com/mcemkoca/Yafes_Pars.git
+<span class="kw">cd</span> Yafes_Pars</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">2. Ortam Dosyasını Oluşturun</div>
+        <p style="font-size:13px; color:var(--muted); margin-bottom:10px;">
+          Proje kök dizininde <code>.env</code> adında bir dosya oluşturun:
+        </p>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">.env</span><button class="copy-btn" onclick="copyCode(this)">Kopyala</button></div>
+          <pre><span class="cmt"># SQL Server yönetici şifresi — en az 8 karakter, büyük/küçük harf + rakam</span>
+<span class="var">SA_PASSWORD</span>=YafesStr0ng!2024
+
+<span class="cmt"># JWT — geliştirme ortamında boş bırakın</span>
+<span class="var">AUTH_AUTHORITY</span>=
+<span class="var">AUTH_AUDIENCE</span>=</pre>
+        </div>
+        <div class="info-box warn">
+          <span class="info-icon">🔐</span>
+          <div class="info-text"><strong>SA_PASSWORD en az 8 karakter</strong> olmalı ve büyük harf, küçük harf, rakam içermelidir. Aksi hâlde SQL Server başlamaz.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">3. Servisleri Başlatın</div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Kopyala</button></div>
+          <pre><span class="kw">docker compose up -d</span></pre>
+        </div>
+        <div class="terminal" style="margin-top:10px;">
+          <div class="terminal-header">
+            <div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div>
+            <span class="terminal-title">Beklenen Çıktı</span>
+          </div>
+          <pre><span class="t-out">[+] Running 2/2</span>
+<span class="t-ok"> ✔  Container yafes-sql   Started</span>
+<span class="t-ok"> ✔  Container yafes-api   Started</span></pre>
+        </div>
+        <p style="font-size:13px; color:var(--muted); margin-top:10px;">İlk başlatmada SQL Server imajı indirilir (~1.5 GB). Bu işlem birkaç dakika sürebilir.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">4. Container Durumunu Kontrol Edin</div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Kopyala</button></div>
+          <pre><span class="kw">docker compose ps</span></pre>
+        </div>
+        <div class="terminal" style="margin-top:10px;">
+          <div class="terminal-header">
+            <div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div>
+            <span class="terminal-title">Beklenen Çıktı</span>
+          </div>
+          <pre><span class="t-out">NAME          STATUS          PORTS</span>
+<span class="t-ok">yafes-sql     Up (healthy)    0.0.0.0:1433->1433/tcp</span>
+<span class="t-ok">yafes-api     Up              0.0.0.0:5000->8080/tcp</span></pre>
+        </div>
+        <div class="info-box info">
+          <span class="info-icon">ℹ️</span>
+          <div class="info-text">Her iki container da <strong>Up</strong> durumunda olmalıdır. SQL container'ın <strong>healthy</strong> göstermesi 30–60 saniye sürebilir.</div>
+        </div>
+      </div>
+
+      <div class="step-actions">
+        <button class="btn btn-secondary" onclick="goStep(0)">← Geri</button>
+        <button class="btn btn-primary" onclick="completeStep(1)">Docker Çalışıyor, Devam Et →</button>
+      </div>
+    </div>
+
+    <!-- ADIM 2: Veritabanı Kurulum -->
+    <div class="step-page" id="step-2">
+      <div class="step-header">
+        <div class="step-badge">Adım 3 / 6</div>
+        <h1 class="step-title">Veritabanı Kurulumu</h1>
+        <p class="step-desc">21 migration dosyasını sırayla çalıştırarak veritabanını oluşturun.</p>
+      </div>
+
+      <div class="info-box info">
+        <span class="info-icon">ℹ️</span>
+        <div class="info-text">Migration'lar <strong>idempotent</strong>tir — hata olmadığı sürece tekrar çalıştırılabilir. Sıralama önemlidir: <strong>000 → 020</strong> sırasıyla çalıştırın.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Seçenek A — SSMS ile (Önerilen) <span class="tag tag-green">Görsel</span></div>
+        <ol style="font-size:13px; color:var(--muted); line-height:2; padding-left:1.25rem;">
+          <li>SSMS'i açın</li>
+          <li><strong style="color:var(--text)">Connect</strong> → Server name: <code style="background:var(--surface2); padding:1px 6px; border-radius:3px;">localhost,1433</code></li>
+          <li>Authentication: <strong style="color:var(--text)">SQL Server Authentication</strong> → Login: <code style="background:var(--surface2); padding:1px 6px; border-radius:3px;">sa</code> / Şifre: .env'deki SA_PASSWORD</li>
+          <li><strong style="color:var(--text)">File → Open</strong> ile <code style="background:var(--surface2); padding:1px 6px; border-radius:3px;">database/migrations/000__create_database.sql</code> dosyasını açın</li>
+          <li><kbd style="background:var(--surface2); border:1px solid var(--border); padding:2px 8px; border-radius:4px; font-size:12px;">F5</kbd> ile çalıştırın</li>
+          <li><strong style="color:var(--text)">000 → 020</strong> tüm dosyaları sırayla tekrarlayın (21 dosya)</li>
+        </ol>
+        <div class="ssms-window" style="margin-top:1rem;">
+          <div class="ssms-titlebar"><span class="ssms-title">Microsoft SQL Server Management Studio</span></div>
+          <div class="ssms-toolbar">
+            <button class="ssms-btn run">▶ Execute</button>
+            <button class="ssms-btn">New Query</button>
+            <button class="ssms-btn">Open File</button>
+          </div>
+          <div class="ssms-editor">
+            <span class="sql-cmt">-- 000__create_database.sql</span><br>
+            <span class="sql-kw">CREATE DATABASE</span> <span class="sql-var">[YafesPars]</span><br>
+            <span class="sql-kw">  COLLATE</span> <span class="sql-fn">SQL_Latin1_General_CP1_CI_AS</span>;<br>
+            <span class="sql-kw">GO</span><br><br>
+            <span class="sql-cmt">-- Migration tamamlandı</span><br>
+            <span class="sql-fn">PRINT</span> <span class="sql-str">'Database created.'</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Seçenek B — sqlcmd ile (Otomasyon) <span class="tag tag-blue">Komut satırı</span></div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">PowerShell</span><button class="copy-btn" onclick="copyCode(this)">Kopyala</button></div>
+          <pre><span class="cmt"># Proje kök dizininde çalıştırın</span>
+<span class="kw">Get-ChildItem</span> database\migrations\*.sql | Sort-Object Name | ForEach-Object {
+    <span class="kw">Write-Host</span> <span class="str">"Running: $($_.Name)"</span> -ForegroundColor Cyan
+    <span class="kw">sqlcmd</span> -S localhost,1433 -U sa -P <span class="str">"YafesStr0ng!2024"</span> \
+           -d master -i <span class="str">"$($_.FullName)"</span>
+}</pre>
+        </div>
+        <div class="info-box warn">
+          <span class="info-icon">⚠️</span>
+          <div class="info-text">SA_PASSWORD değerini kendi .env dosyanızdaki değerle değiştirin.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Kurulumu Doğrulayın</div>
+        <div class="ssms-window">
+          <div class="ssms-titlebar"><span class="ssms-title">SSMS — YafesPars Doğrulama Sorgusu</span></div>
+          <div class="ssms-toolbar"><button class="ssms-btn run">▶ Execute</button></div>
+          <div class="ssms-editor">
+            <span class="sql-kw">USE</span> <span class="sql-var">[YafesPars]</span>;<br><br>
+            <span class="sql-cmt">-- 12 schema görünmeli</span><br>
+            <span class="sql-kw">SELECT</span> schema_name <span class="sql-kw">FROM</span> information_schema.schemata<br>
+            <span class="sql-kw">WHERE</span> schema_name <span class="sql-kw">IN</span> (<span class="sql-str">'core','person','risk','policy','coverage',</span><br>
+            &nbsp;&nbsp;<span class="sql-str">'claim','document','tasking','audit','ref','finance','institution'</span>)<br>
+            <span class="sql-kw">ORDER BY</span> schema_name;<br><br>
+            <span class="sql-cmt">-- 115 tablo görünmeli</span><br>
+            <span class="sql-kw">SELECT COUNT</span>(*) <span class="sql-kw">AS</span> table_count <span class="sql-kw">FROM</span> sys.tables;
+          </div>
+        </div>
+        <div class="terminal" style="margin-top:10px;">
+          <div class="terminal-header">
+            <div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div>
+            <span class="terminal-title">Beklenen Sonuç</span>
+          </div>
+          <pre><span class="t-out">schema_name
+-----------</span>
+<span class="t-ok">audit
+claim
+core
+coverage
+document
+finance
+institution
+person
+policy
+ref
+risk
+tasking
+(12 rows affected)</span>
+
+<span class="t-out">table_count
+-----------</span>
+<span class="t-ok">115</span></pre>
+        </div>
+      </div>
+
+      <div class="step-actions">
+        <button class="btn btn-secondary" onclick="goStep(1)">← Geri</button>
+        <button class="btn btn-primary" onclick="completeStep(2)">Veritabanı Hazır, Devam Et →</button>
+      </div>
+    </div>
+
+    <!-- ADIM 3: API Yapılandırma -->
+    <div class="step-page" id="step-3">
+      <div class="step-header">
+        <div class="step-badge">Adım 4 / 6</div>
+        <h1 class="step-title">API Yapılandırma</h1>
+        <p class="step-desc">API'nin veritabanına bağlandığını ve sağlıklı çalıştığını doğrulayın.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Bağlantı Kontrolü</div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Kopyala</button></div>
+          <pre><span class="cmt"># API temel sağlık kontrolü</span>
+curl http://localhost:5000/health
+
+<span class="cmt"># Veritabanı bağlantı kontrolü</span>
+curl http://localhost:5000/health/db</pre>
+        </div>
+        <div class="terminal" style="margin-top:10px;">
+          <div class="terminal-header">
+            <div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div>
+            <span class="terminal-title">Beklenen Yanıt</span>
+          </div>
+          <pre><span class="t-ok">{"status":"Healthy","database":"Connected","version":"1.0.0"}</span></pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Swagger UI ile Keşfet</div>
+        <p style="font-size:13px; color:var(--muted); margin-bottom:10px;">
+          Tarayıcınızda aşağıdaki adresi açın — tüm endpoint'leri görsel olarak test edebilirsiniz:
+        </p>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">URL</span><button class="copy-btn" onclick="copyCode(this)">Kopyala</button></div>
+          <pre>http://localhost:5000/swagger</pre>
+        </div>
+        <div class="info-box success">
+          <span class="info-icon">✅</span>
+          <div class="info-text"><strong>Geliştirme ortamında JWT doğrulama zorunlu değildir.</strong> Swagger üzerinden Bearer token olmadan da istek gönderebilirsiniz.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Mevcut API Endpoint'leri</div>
+        <div class="endpoint-card">
+          <div class="endpoint-header"><span class="method method-get">GET</span><span class="ep-path">/api/policies</span><span class="ep-desc">Poliçe listesi</span></div>
+        </div>
+        <div class="endpoint-card">
+          <div class="endpoint-header"><span class="method method-get">GET</span><span class="ep-path">/api/claims</span><span class="ep-desc">Hasar listesi</span></div>
+        </div>
+        <div class="endpoint-card">
+          <div class="endpoint-header"><span class="method method-get">GET</span><span class="ep-path">/api/persons</span><span class="ep-desc">Müşteri listesi</span></div>
+        </div>
+        <div class="endpoint-card">
+          <div class="endpoint-header"><span class="method method-post">POST</span><span class="ep-path">/api/finance/invoices</span><span class="ep-desc">Fatura oluştur</span></div>
+        </div>
+        <div class="endpoint-card">
+          <div class="endpoint-header"><span class="method method-post">POST</span><span class="ep-path">/api/documents</span><span class="ep-desc">Doküman kayıt</span></div>
+        </div>
+        <div class="endpoint-card">
+          <div class="endpoint-header"><span class="method method-post">POST</span><span class="ep-path">/api/risk/vehicles</span><span class="ep-desc">Araç risk nesnesi</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Logları İzleyin</div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Kopyala</button></div>
+          <pre>docker compose logs -f api</pre>
+        </div>
+        <div class="terminal" style="margin-top:10px;">
+          <div class="terminal-header">
+            <div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div>
+            <span class="terminal-title">Beklenen Log Çıktısı</span>
+          </div>
+          <pre><span class="t-ok">[09:00:01 INF] Starting Yafes Pars API
+[09:00:02 INF] Application Insights configured
+[09:00:03 INF] Now listening on: http://[::]:8080</span></pre>
+        </div>
+      </div>
+
+      <div class="step-actions">
+        <button class="btn btn-secondary" onclick="goStep(2)">← Geri</button>
+        <button class="btn btn-primary" onclick="completeStep(3)">API Çalışıyor, Devam Et →</button>
+      </div>
+    </div>
+
+    <!-- ADIM 4: SSMS Bağlantısı -->
+    <div class="step-page" id="step-4">
+      <div class="step-header">
+        <div class="step-badge">Adım 5 / 6</div>
+        <h1 class="step-title">SSMS Operatör Workbench</h1>
+        <p class="step-desc">18 hazır operatör scriptiyle günlük sigorta işlemlerini SSMS üzerinden yönetin.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">SSMS Bağlantı Bilgileri</div>
+        <table class="info-table">
+          <tr><th>Alan</th><th>Değer</th></tr>
+          <tr><td>Server name</td><td><code>localhost,1433</code></td></tr>
+          <tr><td>Authentication</td><td>SQL Server Authentication</td></tr>
+          <tr><td>Login</td><td><code>sa</code></td></tr>
+          <tr><td>Password</td><td>.env dosyasındaki SA_PASSWORD değeri</td></tr>
+          <tr><td>Database</td><td><code>YafesPars</code></td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Hazır SSMS Scriptleri</div>
+        <table class="info-table">
+          <tr><th>Dosya</th><th>Açıklama</th><th>Tip</th></tr>
+          <tr><td><code>00__open_first_safety_check.sql</code></td><td>Güvenlik kontrolü — ilk çalıştırın</td><td><span class="tag tag-green">Zorunlu</span></td></tr>
+          <tr><td><code>02__operations_dashboard.sql</code></td><td>Günlük operasyon özeti</td><td><span class="tag tag-blue">Dashboard</span></td></tr>
+          <tr><td><code>03__create_renewal_tasks.sql</code></td><td>Yenileme görevleri oluştur</td><td><span class="tag tag-amber">İşlem</span></td></tr>
+          <tr><td><code>05__operator_dashboard_home.sql</code></td><td>Ana operatör ekranı</td><td><span class="tag tag-blue">Dashboard</span></td></tr>
+          <tr><td><code>07__data_entry_bridge_templates.sql</code></td><td>Veri giriş şablonları</td><td><span class="tag tag-amber">Veri Girişi</span></td></tr>
+          <tr><td><code>10__daily_operator_checklist.sql</code></td><td>Günlük kontrol listesi</td><td><span class="tag tag-blue">Kontrol</span></td></tr>
+        </table>
+        <div class="info-box info" style="margin-top:10px;">
+          <span class="info-icon">📁</span>
+          <div class="info-text">Tüm scriptler <code>database/ssms/</code> klasöründedir. <strong>SSMS → File → Open</strong> ile açın, parametreleri düzenleyin ve F5 ile çalıştırın.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">İlk Güvenlik Kontrolü — Zorunlu</div>
+        <div class="ssms-window">
+          <div class="ssms-titlebar"><span class="ssms-title">SSMS — 00__open_first_safety_check.sql</span></div>
+          <div class="ssms-toolbar"><button class="ssms-btn run">▶ Execute</button></div>
+          <div class="ssms-editor">
+            <span class="sql-cmt">-- Bu scripti her oturumda İLK çalıştırın</span><br>
+            <span class="sql-kw">:SETVAR</span> <span class="sql-var">TENANT_CODE</span> <span class="sql-str">"DEV-BE-BROKER"</span><br><br>
+            <span class="sql-kw">IF</span> <span class="sql-fn">DB_NAME</span>() <span class="sql-kw">NOT LIKE</span> <span class="sql-str">N'%DEV%'</span><br>
+            &nbsp;&nbsp;<span class="sql-kw">THROW</span> <span class="sql-fn">99001</span>, <span class="sql-str">'STOP: Bu ortam DEV değil!'</span>, <span class="sql-fn">1</span>;
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">SQL Agent Jobs (Otomatik Görevler)</div>
+        <p style="font-size:13px; color:var(--muted); margin-bottom:10px;">
+          <code>database/tools/create-sql-agent-jobs.sql</code> dosyasını çalıştırarak 4 otomatik görevi etkinleştirin:
+        </p>
+        <table class="info-table">
+          <tr><th>Job</th><th>Zamanlama</th></tr>
+          <tr><td>Daily Renewal Task Creation</td><td>Her gün 06:00</td></tr>
+          <tr><td>Overdue Invoice Status Update</td><td>Her gün 07:00</td></tr>
+          <tr><td>Audit Log Cleanup</td><td>Her Pazar 02:00</td></tr>
+          <tr><td>Weekly Database Backup</td><td>Her Cumartesi 01:00</td></tr>
+        </table>
+      </div>
+
+      <div class="step-actions">
+        <button class="btn btn-secondary" onclick="goStep(3)">← Geri</button>
+        <button class="btn btn-primary" onclick="completeStep(4)">SSMS Bağlandı, Devam Et →</button>
+      </div>
+    </div>
+
+    <!-- ADIM 5: API Test -->
+    <div class="step-page" id="step-5">
+      <div class="step-header">
+        <div class="step-badge">Adım 6 / 6</div>
+        <h1 class="step-title">API Test & Doğrulama</h1>
+        <p class="step-desc">Temel işlemleri test ederek kurulumun eksiksiz çalıştığını doğrulayın.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">1. Müşteri Listesi (GET)</div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">curl</span><button class="copy-btn" onclick="copyCode(this)">Kopyala</button></div>
+          <pre>curl -s http://localhost:5000/api/persons?take=5 | python -m json.tool</pre>
+        </div>
+        <div class="terminal" style="margin-top:8px;">
+          <div class="terminal-header">
+            <div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div>
+            <span class="terminal-title">Beklenen Yanıt</span>
+          </div>
+          <pre><span class="t-ok">[
+  { "personId": "...", "firstName": "Ahmet", "lastName": "Yılmaz", ... },
+  ...
+]</span></pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">2. Poliçe Arama (GET)</div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">curl</span><button class="copy-btn" onclick="copyCode(this)">Kopyala</button></div>
+          <pre>curl -s "http://localhost:5000/api/policies?search=AUT&take=5"</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">3. Araç Risk Nesnesi Oluştur (POST)</div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">curl</span><button class="copy-btn" onclick="copyCode(this)">Kopyala</button></div>
+          <pre>curl -s -X POST http://localhost:5000/api/risk/vehicles \
+  -H "Content-Type: application/json" \
+  -d '{
+    "plateNumber": "34 ABC 001",
+    "brand": "Toyota",
+    "model": "Corolla",
+    "modelYear": 2022,
+    "chassisNumber": "JTDBZ42E670018001"
+  }'</pre>
+        </div>
+        <div class="terminal" style="margin-top:8px;">
+          <div class="terminal-header">
+            <div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div>
+            <span class="terminal-title">Beklenen Yanıt</span>
+          </div>
+          <pre><span class="t-ok">HTTP 201 Created
+{"insurableObjectId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"}</span></pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">4. Fatura Oluştur (POST)</div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">curl</span><button class="copy-btn" onclick="copyCode(this)">Kopyala</button></div>
+          <pre>curl -s -X POST http://localhost:5000/api/finance/invoices \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contractId": "MEVCUT-CONTRACT-ID-BURAYA",
+    "issueDate": "2024-01-01",
+    "dueDate": "2024-02-01",
+    "amount": 2500.00,
+    "currencyCode": "TRY"
+  }'</pre>
+        </div>
+      </div>
+
+      <div class="info-box success">
+        <span class="info-icon">✅</span>
+        <div class="info-text"><strong>Tüm testler başarılıysa</strong> kurulum tamamlanmıştır. Sorun yaşarsanız <code>docker compose logs api</code> ile hata loglarını inceleyin.</div>
+      </div>
+
+      <div class="step-actions">
+        <button class="btn btn-secondary" onclick="goStep(4)">← Geri</button>
+        <button class="btn btn-primary" onclick="completeStep(5)">Testler Geçti, Tamamla →</button>
+      </div>
+    </div>
+
+    <!-- TAMAMLANDI -->
+    <div class="step-page" id="step-6">
+      <div class="completion">
+        <div class="completion-icon">🎉</div>
+        <h2>Kurulum Tamamlandı!</h2>
+        <p>Yafes Pars SSMS Sigorta Yönetim Sistemi başarıyla kuruldu ve çalışmaya hazır.</p>
+        <div class="completion-grid">
+          <div class="comp-card">
+            <div class="comp-card-label">Aktif servisler</div>
+            <div class="comp-card-value">2 container</div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-card-label">Veritabanı tabloları</div>
+            <div class="comp-card-value">115 tablo</div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-card-label">API endpoint'leri</div>
+            <div class="comp-card-value">~35 endpoint</div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-card-label">SSMS scriptleri</div>
+            <div class="comp-card-value">18 script</div>
+          </div>
+        </div>
+        <div style="margin-top:2rem; display:flex; gap:12px; justify-content:center;">
+          <button class="btn btn-secondary" onclick="window.open('http://localhost:5000/swagger','_blank')">Swagger UI Aç</button>
+          <button class="btn btn-primary" onclick="goStep(0); resetProgress()">Baştan Başla</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+let completed = new Set();
+const totalSteps = 6;
+
+function goStep(n) {
+  document.querySelectorAll('.step-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('step-' + n).classList.add('active');
+  document.querySelectorAll('.nav-item')[n].classList.add('active');
+}
+
+function completeStep(n) {
+  completed.add(n);
+  document.querySelectorAll('.nav-item')[n].classList.add('done');
+  document.getElementById('dot-' + n).textContent = '✓';
+  updateProgress();
+  goStep(n + 1);
+}
+
+function updateProgress() {
+  const pct = Math.round((completed.size / totalSteps) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = completed.size + ' / ' + totalSteps + ' adım tamamlandı';
+}
+
+function resetProgress() {
+  completed.clear();
+  updateProgress();
+  document.querySelectorAll('.nav-item').forEach((b,i) => {
+    b.classList.remove('done');
+    const d = document.getElementById('dot-' + i);
+    if (d) d.textContent = i + 1;
+  });
+}
+
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = 'Kopyalandı!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Kopyala'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>

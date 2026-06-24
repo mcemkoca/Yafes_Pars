@@ -141,13 +141,16 @@ Migrationlar `database/migrations/` klasöründe **sırayla** uygulanır:
 017__seed_lookup_data.sql             ← Lookup verileri (zorunlu)
 018__seed_demo_data.sql               ← SADECE dev/test ortamında çalıştırın
 019__add_finance_document_tables.sql  ← Fatura, ödeme, belge bağlantı tabloları
+020__add_write_stored_procedures.sql  ← Write SP'leri (person, risk, coverage, finance, document)
 ```
+
+> **Not:** Migration 020 Copilot ile SP body'leri rafine etmek için tasarlanmıştır. Stub'lar çalışır durumdadır.
 
 ### SSMS ile Migration Çalıştırma (Önerilen)
 
 1. SSMS'i açın, `localhost,1433` adresine `sa` kullanıcısıyla bağlanın
 2. **Query → SQLCMD Mode**'u açın (Ctrl+Shift+Q)
-3. Migration dosyalarını **000'dan 019'a** sırayla çalıştırın:
+3. Migration dosyalarını **000'dan 020'ye** sırayla çalıştırın:
 
 ```sql
 -- Her dosya için sırayla:
@@ -180,7 +183,7 @@ WHERE schema_name IN (
 )
 ORDER BY schema_name;
 
--- Tablo sayısını kontrol et (114 civarı)
+-- Tablo sayısını kontrol et (115 civarı)
 SELECT COUNT(*) AS table_count
 FROM information_schema.tables
 WHERE table_type = 'BASE TABLE';
@@ -306,7 +309,82 @@ curl -X POST http://localhost:8080/api/finance/invoices \
     "amount": 2500.00,
     "currencyCode": "TRY"
   }'
+
+# Ödeme kaydet
+curl -X POST http://localhost:8080/api/finance/invoices/{invoiceId}/payments \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "invoiceId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "paymentDate": "2026-06-24",
+    "amount": 2500.00,
+    "paymentMethodCode": "BANK_TRANSFER"
+  }'
+
+# Taksit planı oluştur
+curl -X POST http://localhost:8080/api/finance/payment-plans \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contractId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "installmentCount": 12,
+    "firstDueDate": "2026-07-01",
+    "totalAmount": 6000.00,
+    "currencyCode": "TRY"
+  }'
+
+# Araç risk nesnesi oluştur
+curl -X POST http://localhost:8080/api/risk/vehicles \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "plateNumber": "34 ABC 001",
+    "brand": "Toyota",
+    "model": "Corolla",
+    "modelYear": 2022,
+    "chassisNumber": "JTDBZ42E670018001"
+  }'
+
+# Mülk risk nesnesi oluştur
+curl -X POST http://localhost:8080/api/risk/properties \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "address": "Bağcılar Mah. Atatürk Cd. No:5 İstanbul",
+    "propertyTypeCode": "APARTMENT",
+    "constructionArea": 120.0,
+    "constructionYear": 2015,
+    "insuredValue": 1500000.00,
+    "currencyCode": "TRY"
+  }'
+
+# Teminat kalemi ekle
+curl -X POST http://localhost:8080/api/coverage/items \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contractId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "coverageTypeCode": "FIRE",
+    "coverageLimit": 500000.00,
+    "deductible": 5000.00,
+    "currencyCode": "TRY"
+  }'
+
+# Belge ekle
+curl -X POST http://localhost:8080/api/documents \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "documentTypeCode": "POLICY_PDF",
+    "fileName": "police-2026-001234.pdf",
+    "mimeType": "application/pdf",
+    "fileSizeBytes": 204800,
+    "description": "Poliçe belgesi"
+  }'
 ```
+
+> **Not:** Write endpoint'lerin iş kuralı mantığı (SP body'leri) Copilot ile geliştirilebilir.
+> `database/migrations/020__add_write_stored_procedures.sql` dosyasındaki SP'ler stub'dır ve çalışır durumdadır.
 
 ### Swagger ile Etkileşimli Test
 
@@ -730,6 +808,7 @@ ERROR: Cache export is not supported for the docker driver
 
 | Tarih | Versiyon | Değişiklik |
 |-------|----------|-----------|
+| 2026-06-24 | v1.5 | Migration 020: 14 write SP + coverage.ContractCoverageItem; kurulum rehberi (HTML simülasyon); write endpoint curl örnekleri; Dependabot güncellemeleri |
 | 2026-06-24 | v1.4 | Finance/Coverage/Risk/Document write endpoints; Migration 019; SQL Agent Jobs; Frontend UI; Application Insights yapılandırması; CI/CD düzeltmeleri |
 | 2026-06-23 | v1.3 | SSMS interaktif simülasyon; README yeniden tasarım; branch protection kuralları |
 | 2026-06-23 | v1.2 | Azure deploy pipeline; Key Vault entegrasyonu; Bicep IaC |
