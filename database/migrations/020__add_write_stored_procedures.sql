@@ -194,10 +194,12 @@ BEGIN
     BEGIN TRY
         BEGIN TRANSACTION;
 
+        DECLARE @prop_desc NVARCHAR(255) = ISNULL(@property_address, N'Property');
+
         EXEC risk.sp_CreateRiskObject
             @tenant_id           = @tenant_id,
             @object_type_code    = N'REAL_ESTATE',
-            @description         = ISNULL(@property_address, N'Property'),
+            @description         = @prop_desc,
             @created_by_user_id  = @created_by_user_id,
             @insurable_object_id = @insurable_object_id OUTPUT;
 
