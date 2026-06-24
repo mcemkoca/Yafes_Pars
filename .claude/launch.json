@@ -12,6 +12,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "frontend", "-p", "5501", "--no-clipboard"],
       "port": 5501
+    },
+    {
+      "name": "docs",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "docs", "-p", "5502", "--no-clipboard"],
+      "port": 5502
     }
   ]
 }
