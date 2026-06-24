@@ -3,7 +3,7 @@
 -- Adds: finance.Invoices, finance.PaymentPlans, finance.PaymentPlanItems,
 --       document.DocumentLinks, risk extended columns
 -- =============================================================================
-USE YafesPars;
+USE [YafesPars];
 GO
 
 -- ─── finance schema ───────────────────────────────────────────────────────────

@@ -101,7 +101,9 @@ public sealed class WriteEndpointTests
             .Select(e => e.RoutePattern.RawText)
             .ToHashSet();
 
-        Assert.Contains(expectedPath.TrimStart('/'), routes.Select(r => r?.TrimStart('/')));
+        Assert.Contains(
+            expectedPath.Trim('/'),
+            routes.Select(r => r?.Trim('/')));
     }
 
     // ── Stub ──────────────────────────────────────────────────────────────────
