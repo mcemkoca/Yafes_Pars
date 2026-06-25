@@ -29,6 +29,8 @@ param(
     [string]$GithubRepo      = "mcemkoca/Yafes_Pars",
     [string]$JwtAuthority    = "",
     [string]$JwtAudience     = "yafespars-api",
+    [string]$CorsOrigins     = "",
+    [string]$Environment     = "prod",
     [switch]$DryRun
 )
 
@@ -114,12 +116,18 @@ if (-not $roleExists) {
 # ─── 3. Bicep Deploy ──────────────────────────────────────
 Step "Bicep deploy: $ResourceGroup"
 $bicepPath = Join-Path $PSScriptRoot ".." "infra" "main.bicep"
+$appUrl    = "https://$AppName-$Environment.azurewebsites.net"
+$corsValue = if ($CorsOrigins) { $CorsOrigins } else { $appUrl }
+
 if (-not $DryRun) {
     az deployment group create `
         --resource-group $ResourceGroup `
         --template-file $bicepPath `
-        --parameters appName=$AppName `
+        --parameters environment=$Environment `
         --parameters location=$Location `
+        --parameters jwtAuthority=$JwtAuthority `
+        --parameters jwtAudience=$JwtAudience `
+        --parameters corsAllowedOrigins=$corsValue `
         --output none
     OK "Bicep deploy tamamlandı"
 } else {
@@ -128,13 +136,13 @@ if (-not $DryRun) {
 
 # Key Vault adını Bicep output'undan al
 $kvName = az keyvault list --resource-group $ResourceGroup --query "[0].name" -o tsv 2>$null
-if (-not $kvName) { $kvName = "kv-$AppName-prod" }
+if (-not $kvName) { $kvName = "kv-yafespars-$Environment" }
 OK "Key Vault: $kvName"
 
 # ─── 4. Key Vault Secrets ─────────────────────────────────
 Step "Key Vault secrets"
-$sqlServer = "$AppName-sql.database.windows.net"
-$connStr   = "Server=$sqlServer;Database=YafesPars;User Id=${AppName}_app;Password=$SqlPassword;TrustServerCertificate=False;Encrypt=True;"
+$sqlServerName = "sql-yafespars-$Environment"
+$connStr = "Server=${sqlServerName}.database.windows.net;Database=YafesPars;User Id=yafespars_app;Password=$SqlPassword;TrustServerCertificate=False;Encrypt=True;"
 
 if (-not $DryRun) {
     az keyvault secret set --vault-name $kvName --name "YafesParsConnectionString" --value $connStr | Out-Null
@@ -151,14 +159,15 @@ if (-not $DryRun) {
 Step "GitHub Secrets → $GithubRepo"
 $env:GH_TOKEN = $GithubToken
 
-$secrets = @{
+$secrets = [ordered]@{
     AZURE_CLIENT_ID       = $clientId
     AZURE_TENANT_ID       = $tenantId
     AZURE_SUBSCRIPTION_ID = $SubscriptionId
     AZURE_RESOURCE_GROUP  = $ResourceGroup
 }
-if ($JwtAuthority) { $secrets["JWT_AUTHORITY"] = $JwtAuthority }
-if ($JwtAudience)  { $secrets["JWT_AUDIENCE"]  = $JwtAudience  }
+if ($JwtAuthority) { $secrets["JWT_AUTHORITY"]      = $JwtAuthority }
+if ($JwtAudience)  { $secrets["JWT_AUDIENCE"]       = $JwtAudience  }
+                     $secrets["CORS_ALLOWED_ORIGINS"] = $corsValue
 
 foreach ($kv in $secrets.GetEnumerator()) {
     if (-not $DryRun) {
@@ -169,13 +178,15 @@ foreach ($kv in $secrets.GetEnumerator()) {
 
 # ─── ÖZET ─────────────────────────────────────────────────
 Write-Host ""
-Write-Host "════════════════════════════════════════" -ForegroundColor Blue
+Write-Host "════════════════════════════════════════════════" -ForegroundColor Blue
 Write-Host "  Kurulum tamamlandı!" -ForegroundColor Green
-Write-Host "════════════════════════════════════════" -ForegroundColor Blue
-Write-Host "  Client ID  : $clientId"
-Write-Host "  Tenant ID  : $tenantId"
-Write-Host "  Sub ID     : $SubscriptionId"
-Write-Host "  Rg         : $ResourceGroup"
-Write-Host "  Key Vault  : $kvName"
+Write-Host "════════════════════════════════════════════════" -ForegroundColor Blue
+Write-Host "  Client ID   : $clientId"
+Write-Host "  Tenant ID   : $tenantId"
+Write-Host "  Sub ID      : $SubscriptionId"
+Write-Host "  Rg          : $ResourceGroup"
+Write-Host "  Key Vault   : $kvName"
+Write-Host "  App URL     : $appUrl"
 Write-Host ""
-Write-Host "  Sonraki adım: GitHub Actions → deploy.yml → workflow_dispatch" -ForegroundColor Yellow
+Write-Host "  Sonraki adım: GitHub → Actions → deploy.yml → Run workflow" -ForegroundColor Yellow
+Write-Host "  Veya:         git push origin main   (backend değişikliği ile)" -ForegroundColor Yellow
