@@ -3,6 +3,8 @@ namespace YafesPars.Application.Commands;
 public sealed record CreateDocumentCommand(
     string DocumentTypeCode,
     string FileName,
+    string OwnerEntityType,
+    Guid OwnerEntityId,
     string? MimeType,
     long? FileSizeBytes,
     string? StorageUri,

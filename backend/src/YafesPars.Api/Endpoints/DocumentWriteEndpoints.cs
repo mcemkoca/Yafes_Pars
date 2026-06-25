@@ -22,9 +22,9 @@ public static class DocumentWriteEndpoints
             {
                 var id = await repo.ExecuteScalarAsync<Guid>(
                     "DECLARE @id UNIQUEIDENTIFIER; " +
-                    "EXEC document.sp_CreateDocument @tenant_id, @document_type_code, @file_name, @mime_type, @file_size_bytes, @storage_uri, @description, NULL, @id OUTPUT; " +
+                    "EXEC document.sp_CreateDocument @tenant_id, @document_type_code, @file_name, @mime_type, @file_size_bytes, @storage_uri, @description, NULL, @owner_entity_type, @owner_entity_id, @id OUTPUT; " +
                     "SELECT @id;",
-                    new { tenant_id = tenantId, document_type_code = cmd.DocumentTypeCode, file_name = cmd.FileName, mime_type = cmd.MimeType, file_size_bytes = cmd.FileSizeBytes, storage_uri = cmd.StorageUri, description = cmd.Description },
+                    new { tenant_id = tenantId, document_type_code = cmd.DocumentTypeCode, file_name = cmd.FileName, mime_type = cmd.MimeType, file_size_bytes = cmd.FileSizeBytes, storage_uri = cmd.StorageUri, description = cmd.Description, owner_entity_type = cmd.OwnerEntityType, owner_entity_id = cmd.OwnerEntityId },
                     ct);
                 return Results.Created($"/api/documents/{id}", new { documentId = id });
             }

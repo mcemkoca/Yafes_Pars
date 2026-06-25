@@ -132,6 +132,8 @@ try
             options.Authority = authority;
             options.Audience = audience;
             options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
+            options.TokenValidationParameters.ValidateIssuer = !string.IsNullOrWhiteSpace(authority);
+            options.TokenValidationParameters.ValidateAudience = !string.IsNullOrWhiteSpace(audience);
         });
 
     builder.Services.AddAuthorization(options =>
