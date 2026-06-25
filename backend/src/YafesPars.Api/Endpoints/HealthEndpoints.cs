@@ -16,13 +16,13 @@ public static class HealthEndpoints
         }));
 
         group.MapGet("/db", async (IReadRepository repository, CancellationToken cancellationToken) =>
-            {
-                var canConnect = await repository.CanConnectAsync(cancellationToken);
-                return canConnect
-                    ? Results.Ok(new { status = "ok", database = "reachable" })
-                    : Results.Problem("Database connectivity check failed.");
-            })
-            .RequireAuthorization();
+        {
+            var canConnect = await repository.CanConnectAsync(cancellationToken);
+            return canConnect
+                ? Results.Ok(new { status = "ok", database = "reachable" })
+                : Results.Problem("Database connectivity check failed.");
+        })
+            .AllowAnonymous();
 
         return app;
     }

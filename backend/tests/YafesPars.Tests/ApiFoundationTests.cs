@@ -68,7 +68,7 @@ public sealed class ApiFoundationTests
     }
 
     [Fact]
-    public void DatabaseHealthEndpointRequiresAuthorization()
+    public void DatabaseHealthEndpointIsPublic()
     {
         var builder = WebApplication.CreateBuilder();
         builder.Services.AddSingleton<IReadRepository, StubReadRepository>();
@@ -81,7 +81,8 @@ public sealed class ApiFoundationTests
             .OfType<RouteEndpoint>()
             .Single(candidate => candidate.RoutePattern.RawText == "/health/db");
 
-        Assert.Contains(endpoint.Metadata, metadata => metadata is IAuthorizeData);
+        // /health/db must be reachable by Azure App Service probes and monitoring tools
+        Assert.Contains(endpoint.Metadata, metadata => metadata is IAllowAnonymous);
     }
 
     private static ClaimsPrincipal CreateUser(params Claim[] claims)
