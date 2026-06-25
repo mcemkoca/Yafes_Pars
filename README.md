@@ -7,6 +7,10 @@
 
 <br/>
 
+<img src="docs/assets/logo.png" alt="Yafes Pars Logo" width="200"/>
+
+<br/><br/>
+
 [![SQL Server](https://img.shields.io/badge/SQL_Server-2022-CC2927?style=for-the-badge&logo=microsoftsqlserver&logoColor=white)](https://www.microsoft.com/sql-server)
 [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com)
 [![Azure](https://img.shields.io/badge/Azure-App_Service-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white)](https://azure.microsoft.com)
@@ -61,10 +65,10 @@ simulation/index.html
 ║           SQL Server 2022 — YafesPars                   ║
 ║                                                          ║
 ║  person  ·  policy  ·  claim  ·  task  ·  document      ║
-║  risk    ·  coverage ·  finance · security · audit       ║
-║  tenant                                                  ║
+║  risk    ·  coverage · finance · institution · audit     ║
+║  config  ·  identity                                     ║
 ║                                                          ║
-║       108 tablo  ·  19 migration  ·  11 şema            ║
+║       115 tablo  ·  21 migration  ·  12 şema            ║
 ╚═══════════════════════════╤══════════════════════════════╝
                             │
 ╔═══════════════════════════▼══════════════════════════════╗
@@ -104,8 +108,8 @@ Görev atama, yorum, öncelik ve durum takibi. Tüm entity tiplerine belge bağl
 ### 🔐 RBAC & Denetim
 Çok kiracılı rol/yetki matrisi, kullanıcı yönetimi ve tam audit trail. Least-privilege tasarımı.
 
-### 🔌 Backend API
-25+ endpoint, stored procedure entegrasyonu. JWT/OIDC, rate limiting, Application Insights.
+### 🔌 Backend API + Write SP'ler
+35+ endpoint, 14 write stored procedure (araç, mülk, sigorta, fatura, ödeme). JWT/OIDC, rate limiting, Application Insights.
 
 </td>
 </tr>
@@ -117,21 +121,45 @@ Görev atama, yorum, öncelik ve durum takibi. Tüm entity tiplerine belge bağl
 
 <div align="center">
 
-| Şema | Tablolar | Kapsam |
-|------|----------|--------|
-| `person` | NaturalPersons, LegalPersons, Addresses | Müşteri ve kurum bilgileri |
-| `policy` | Contracts, ContractParties, ContractObjects | Poliçe ve sözleşme |
-| `coverage` | CoverageItems, Premiums | Teminat ve prim |
-| `claim` | Claims, Payments, ClaimDocuments | Hasar ve ödeme |
-| `risk` | RiskObjects, Vehicles, Properties | Risk varlıkları |
-| `task` | Tasks, TaskComments, TaskDocuments | Görev yönetimi |
-| `document` | Documents, DocumentLinks | Belge arşivi |
-| `finance` | Invoices, PaymentPlans | Finansal işlemler |
-| `security` | Users, Roles, Permissions, UserRoles | RBAC |
-| `tenant` | Tenants, TenantSettings | Çok kiracılı yapı |
-| `audit` | AuditLogs, ChangeHistory | Denetim izi |
+| Şema | Kapsam |
+|------|--------|
+| `person` | Gerçek/tüzel kişi, adres yönetimi |
+| `policy` | Poliçe, sözleşme, taraf, nesne |
+| `coverage` | Teminat, prim, **ContractCoverageItem** |
+| `claim` | Hasar, ekspertiz, ödeme |
+| `risk` | Risk nesnesi, araç, mülk |
+| `task` | Görev, yorum, hatırlatma |
+| `document` | Belge, arşiv, bağlantı |
+| `finance` | Fatura, ödeme, ödeme planı |
+| `identity` | Kullanıcı, rol, tenant |
+| `institution` | Kurum, şube |
+| `config` | Sistem yapılandırması |
+| `audit` | Denetim izi, değişiklik geçmişi |
 
 </div>
+
+---
+
+## 📦 Write Stored Procedure'lar (v1.5)
+
+Migration `020__add_write_stored_procedures.sql` ile eklenen 14 SP:
+
+| SP | Şema | Açıklama |
+|----|------|----------|
+| `SP_CreateLegalPerson` | `person` | Tüzel kişi kaydı |
+| `sp_CreateRiskObject` | `risk` | Risk nesnesi oluştur |
+| `sp_CreateVehicle` | `risk` | Araç kaydı (plaka, şasi, marka) |
+| `sp_CreateProperty` | `risk` | Mülk kaydı (adres, tip, alan) |
+| `sp_LinkRiskToContract` | `risk` | Risk'i poliçeye bağla |
+| `sp_AddCoverageItem` | `coverage` | Teminat kalemi ekle |
+| `sp_SetPremium` | `coverage` | Prim, vergi, komisyon güncelle |
+| `sp_UpdateCoverage` | `coverage` | Limit ve muafiyet güncelle |
+| `sp_CreateInvoice` | `finance` | Fatura oluştur |
+| `sp_RecordPayment` | `finance` | Ödeme kaydet (tam ödemede otomatik kapat) |
+| `sp_CreatePaymentPlan` | `finance` | Taksit planı + taksit kalemleri |
+| `sp_CreateDocument` | `document` | Belge kaydı (storage_key, provider) |
+| `sp_LinkDocument` | `document` | Belgeyi entity'e bağla |
+| `sp_ArchiveDocument` | `document` | Belgeyi arşivle |
 
 ---
 
@@ -173,7 +201,7 @@ cp .env.example .env
 # Başlat (API + SQL Server 2022)
 docker compose up -d
 
-# Migration'ları çalıştır
+# Migration'ları çalıştır (000–020)
 $env:YAFES_SQL_SERVER   = "localhost,1433"
 $env:YAFES_SQL_DATABASE = "YafesPars_DEV"
 ./database/tools/run-dev-migrations.ps1
@@ -193,6 +221,8 @@ dotnet run
 
 ## ☁️ Azure Deploy
 
+Adım adım Azure kurulum rehberi için: **[`docs/azure-kurulum-rehberi.html`](docs/azure-kurulum-rehberi.html)** (20 sayfalık interaktif simülasyon)
+
 ```bash
 # Giriş yap
 az login
@@ -202,17 +232,39 @@ az group create \
   --name rg-yafespars-prod \
   --location westeurope
 
-# Bicep ile deploy
-az deployment group create \
+# SQL Server + veritabanı
+az sql server create \
+  --name sql-yafespars-prod \
   --resource-group rg-yafespars-prod \
-  --template-file infra/main.bicep \
-  --parameters @infra/main.bicepparam
+  --location westeurope \
+  --admin-user yafes_admin \
+  --admin-password "<güvenli-şifre>"
 
-# Key Vault'a connection string ekle
-az keyvault secret set \
-  --vault-name <vault-name> \
-  --name YafesParsConnectionString \
-  --value "Server=...;Database=YafesPars;..."
+az sql db create \
+  --server sql-yafespars-prod \
+  --resource-group rg-yafespars-prod \
+  --name YafesPars \
+  --service-objective S2 \
+  --collation Turkish_CI_AS
+
+# App Service + Web App (.NET 8)
+az appservice plan create \
+  --name asp-yafespars-prod \
+  --resource-group rg-yafespars-prod \
+  --sku B2 --is-linux
+
+az webapp create \
+  --name app-yafespars-prod \
+  --resource-group rg-yafespars-prod \
+  --plan asp-yafespars-prod \
+  --runtime "DOTNETCORE:8.0" \
+  --assign-identity SystemAssigned
+
+# Key Vault
+az keyvault create \
+  --name kv-yafespars-prod \
+  --resource-group rg-yafespars-prod \
+  --location westeurope
 ```
 
 ### GitHub Secrets (CI/CD için)
@@ -233,9 +285,8 @@ az keyvault secret set \
 ```
 Yafes_Pars/
 ├── 📂 database/
-│   ├── migrations/          # 001–018 sıralı migration scriptleri
+│   ├── migrations/          # 000–020 sıralı migration scriptleri
 │   ├── ssms/                # SSMS operator scriptleri (00–17)
-│   ├── stored-procedures/   # İş mantığı SP'leri
 │   └── tools/               # CI/CD ve migration araçları
 ├── 📂 backend/
 │   └── src/
@@ -248,28 +299,29 @@ Yafes_Pars/
 ├── 📂 simulation/
 │   └── index.html           # İnteraktif SSMS tutorial simülasyonu
 ├── 📂 docs/
-│   └── kullanim-kilavuzu.md
+│   ├── assets/logo.png               # Proje logosu
+│   ├── kullanim-kilavuzu.md          # Türkçe kullanım kılavuzu
+│   ├── kurulum-rehberi.html          # Docker kurulum simülasyonu (6 adım)
+│   └── azure-kurulum-rehberi.html    # Azure kurulum simülasyonu (20 adım)
 ├── 📂 md/                   # Teknik belgeler
 ├── 🐳 Dockerfile
 ├── 🐳 docker-compose.yml
-└── 📋 .github/workflows/    # CI/CD pipeline'ları
+└── 📋 .github/workflows/    # CI/CD pipeline'ları (4 workflow)
 ```
 
 ---
 
 ## 🔄 CI/CD Pipeline
 
+Tüm PR'larda (path filtresi yok) 4 check çalışır:
+
 ```
-git push → main
+git push → PR / main
     │
-    ├─▶ backend-build.yml          ✓ dotnet build + test
-    ├─▶ sql-server-validation.yml  ✓ Migration syntax kontrolü
-    ├─▶ database-quality-gate.yml  ✓ Destructive pattern tarama
-    └─▶ deploy.yml
-            │
-            ├─▶ Docker build → GHCR push
-            ├─▶ Azure Bicep → App Service deploy
-            └─▶ Smoke test (health check)
+    ├─▶ backend-build.yml              ✓ dotnet restore + build + test
+    ├─▶ sql-server-validation.yml      ✓ 21 migration · SP doğrulama
+    ├─▶ database-quality-gate.yml      ✓ SQL lint · destructive pattern tarama
+    └─▶ ssms-workbench-validation.yml  ✓ Manifest sayım · JS syntax · SSMS contract
 ```
 
 ---
@@ -278,7 +330,9 @@ git push → main
 
 | Döküman | İçerik |
 |---------|--------|
-| [`docs/kullanim-kilavuzu.md`](docs/kullanim-kilavuzu.md) | Tam Türkçe kullanım kılavuzu |
+| [`docs/kullanim-kilavuzu.md`](docs/kullanim-kilavuzu.md) | Tam Türkçe kullanım kılavuzu (v1.5) |
+| [`docs/kurulum-rehberi.html`](docs/kurulum-rehberi.html) | Docker kurulum simülasyonu |
+| [`docs/azure-kurulum-rehberi.html`](docs/azure-kurulum-rehberi.html) | Azure kurulum simülasyonu (20 adım) |
 | [`md/database/architecture.md`](md/database/architecture.md) | Veritabanı mimarisi |
 | [`md/database/domain-model.md`](md/database/domain-model.md) | Domain model |
 | [`md/ssms/operator-workbench.md`](md/ssms/operator-workbench.md) | SSMS operator kılavuzu |
@@ -290,11 +344,11 @@ git push → main
 ## ⚙️ Gereksinimler
 
 - **SQL Server 2022** — Developer Edition (yerel) veya Azure SQL (üretim)
-- **SSMS 19+** veya Azure Data Studio
+- **SSMS 20+** veya Azure Data Studio
 - **.NET 8 SDK** — backend için
 - **Docker Desktop** — isteğe bağlı
 - **PowerShell 7+** — migration araçları için
-- **Azure CLI** — bulut deploy için
+- **Azure CLI 2.60+** — bulut deploy için
 
 ---
 
@@ -305,6 +359,6 @@ git push → main
   <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0a84ff,50:007acc,100:0a1628&height=100&section=footer" alt="footer">
 </picture>
 
-**SQL Server 2022 · .NET 8 · Azure · MIT License**
+**SQL Server 2022 · .NET 8 · Azure · 115 Tablo · 21 Migration · MIT License**
 
 </div>

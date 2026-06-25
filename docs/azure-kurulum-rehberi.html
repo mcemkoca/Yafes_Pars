@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yafes Pars — Azure Kurulum Rehberi</title>
+<style>
+  :root {
+    --bg: #0d1117; --surface: #161b22; --surface2: #21262d;
+    --border: #30363d; --accent: #0078d4; --accent-dim: #005a9e;
+    --green: #3fb950; --green-dim: #238636;
+    --amber: #d29922; --red: #f85149; --purple: #a371f7;
+    --text: #e6edf3; --muted: #8b949e; --subtle: #484f58;
+    --azure: #0078d4; --azure-light: #50a0e0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: .9rem 2rem; display: flex; align-items: center; gap: 1rem; position: sticky; top: 0; z-index: 100; }
+  .logo { font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .logo-badge { background: var(--azure); color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 20px; }
+  .header-right { margin-left: auto; display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--muted); }
+  .progress-bar { width: 140px; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--azure); border-radius: 3px; transition: width .4s; }
+
+  .layout { display: grid; grid-template-columns: 248px 1fr; min-height: calc(100vh - 54px); }
+  .sidebar { background: var(--surface); border-right: 1px solid var(--border); padding: 1.2rem 0; position: sticky; top: 54px; height: calc(100vh - 54px); overflow-y: auto; }
+  .sidebar-group { margin-bottom: .25rem; }
+  .sidebar-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; padding: .6rem 1.2rem .2rem; }
+  .nav-item { display: flex; align-items: center; gap: 9px; padding: 5px 10px 5px 1.2rem; cursor: pointer; font-size: 12.5px; color: var(--muted); border: none; background: none; width: 100%; text-align: left; border-radius: 5px; transition: all .12s; }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: var(--accent-dim); color: #fff; }
+  .nav-item.done { color: var(--green); }
+  .step-num { width: 20px; height: 20px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; }
+  .nav-item.active .step-num { background: var(--azure); color: #fff; }
+  .nav-item.done .step-num { background: var(--green); color: #fff; }
+  .nav-item.done .step-num::after { content: '✓'; }
+  .nav-item.done .step-num span { display: none; }
+
+  .content { padding: 2rem 2.5rem; max-width: 880px; }
+  .step-page { display: none; }
+  .step-page.active { display: block; }
+
+  .step-badge { font-size: 11px; color: var(--muted); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .step-badge::before { content:''; width: 6px; height: 6px; border-radius: 50%; background: var(--azure); display: inline-block; }
+  h1.step-title { font-size: 1.55rem; font-weight: 600; margin-bottom: 8px; }
+  .step-desc { color: var(--muted); font-size: 14.5px; margin-bottom: 1.8rem; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.1rem 1.4rem; margin-bottom: 1rem; }
+  .card-title { font-size: 13px; font-weight: 600; margin-bottom: .6rem; display: flex; align-items: center; gap: 7px; }
+  .card-title .icon { font-size: 15px; }
+
+  .info { background: #0a1929; border: 1px solid #1565c0; border-radius: 6px; padding: .8rem 1rem; margin-bottom: 1rem; font-size: 13px; color: #90caf9; }
+  .warn { background: #1a1200; border: 1px solid #7a5c00; border-radius: 6px; padding: .8rem 1rem; margin-bottom: 1rem; font-size: 13px; color: var(--amber); }
+  .success { background: #0d1f0d; border: 1px solid #2a6b2a; border-radius: 6px; padding: .8rem 1rem; margin-bottom: 1rem; font-size: 13px; color: var(--green); }
+  .error { background: #1f0d0d; border: 1px solid #6b2a2a; border-radius: 6px; padding: .8rem 1rem; margin-bottom: 1rem; font-size: 13px; color: var(--red); }
+
+  pre { background: #010409; border: 1px solid var(--border); border-radius: 6px; padding: 1rem; font-family: 'Cascadia Code','Fira Code',monospace; font-size: 12.5px; overflow-x: auto; margin-bottom: 1rem; position: relative; line-height: 1.7; }
+  .copy-btn { position: absolute; top: 8px; right: 8px; background: var(--surface2); border: 1px solid var(--border); color: var(--muted); border-radius: 4px; padding: 2px 8px; font-size: 11px; cursor: pointer; }
+  .copy-btn:hover { color: var(--text); }
+
+  .badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 1px 7px; border-radius: 12px; }
+  .badge-blue { background: #0a2a4a; color: var(--azure-light); }
+  .badge-green { background: #0a1f0a; color: var(--green); }
+  .badge-amber { background: #1a1200; color: var(--amber); }
+  .badge-red { background: #1f0808; color: var(--red); }
+  .badge-purple { background: #1a0f2e; color: var(--purple); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 1rem; }
+  th { background: var(--surface2); padding: .5rem .8rem; text-align: left; font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; border: 1px solid var(--border); }
+  td { padding: .5rem .8rem; border: 1px solid var(--border); vertical-align: top; }
+  tr:hover td { background: var(--surface2); }
+
+  .step-list { list-style: none; counter-reset: steps; }
+  .step-list li { counter-increment: steps; display: flex; gap: 12px; margin-bottom: 1rem; }
+  .step-list li::before { content: counter(steps); min-width: 24px; height: 24px; border-radius: 50%; background: var(--azure); color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+
+  .arch-box { border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; background: var(--surface); display: flex; flex-direction: column; gap: 12px; margin-bottom: 1rem; }
+  .arch-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .arch-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 14px; font-size: 12.5px; display: flex; align-items: center; gap: 7px; }
+  .arch-arrow { color: var(--muted); font-size: 18px; }
+
+  .terminal { background: #010409; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 1rem; }
+  .terminal-bar { background: var(--surface2); padding: 6px 12px; display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); border-bottom: 1px solid var(--border); }
+  .terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .terminal-body { padding: 1rem; font-family: monospace; font-size: 12.5px; line-height: 1.8; }
+  .t-cmd { color: #79c0ff; }
+  .t-out { color: #8b949e; }
+  .t-ok { color: var(--green); }
+  .t-err { color: var(--red); }
+  .t-warn { color: var(--amber); }
+  .t-prompt { color: var(--purple); }
+
+  .portal-sim { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 1rem; }
+  .portal-bar { background: #001529; padding: 8px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
+  .portal-logo { color: var(--azure); font-size: 13px; font-weight: 600; }
+  .portal-nav { color: var(--muted); font-size: 12px; margin-left: auto; }
+  .portal-body { padding: 1.2rem; background: var(--surface); }
+  .portal-field { margin-bottom: .8rem; }
+  .portal-label { font-size: 11px; color: var(--muted); margin-bottom: 3px; }
+  .portal-input { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 5px 10px; font-size: 13px; width: 100%; color: var(--text); }
+  .portal-input.filled { border-color: var(--azure); }
+  .portal-btn { background: var(--azure); color: #fff; border: none; border-radius: 4px; padding: 6px 16px; font-size: 13px; cursor: default; margin-top: .5rem; }
+
+  .check-list { list-style: none; }
+  .check-list li { display: flex; gap: 10px; align-items: flex-start; padding: 5px 0; font-size: 13.5px; }
+  .check-list li .chk { width: 17px; height: 17px; border-radius: 3px; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; margin-top: 2px; }
+  .check-list li.ok .chk { background: var(--green); border-color: var(--green); color: #fff; }
+  .check-list li.ok .chk::after { content: '✓'; }
+  .check-list li.pending .chk { border-color: var(--amber); }
+  .check-list li.err .chk { background: var(--red); border-color: var(--red); color: #fff; }
+  .check-list li.err .chk::after { content: '✗'; }
+
+  .nav-btns { display: flex; gap: 10px; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+  .btn { padding: 7px 18px; border-radius: 6px; font-size: 13px; cursor: pointer; border: none; font-weight: 500; }
+  .btn-primary { background: var(--azure); color: #fff; }
+  .btn-primary:hover { background: var(--accent-dim); }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--border); }
+
+  .progress-steps { display: flex; gap: 0; margin-bottom: 2rem; }
+  .ps-item { flex: 1; text-align: center; position: relative; }
+  .ps-item::after { content:''; position: absolute; top: 11px; left: 50%; width: 100%; height: 2px; background: var(--border); z-index: 0; }
+  .ps-item:last-child::after { display: none; }
+  .ps-circle { width: 24px; height: 24px; border-radius: 50%; background: var(--border); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; margin: 0 auto 5px; font-size: 10px; font-weight: 700; position: relative; z-index: 1; }
+  .ps-item.done .ps-circle { background: var(--green); border-color: var(--green); color: #fff; }
+  .ps-item.active .ps-circle { background: var(--azure); border-color: var(--azure); color: #fff; }
+  .ps-item.done::after { background: var(--green); }
+  .ps-label { font-size: 10px; color: var(--muted); }
+  .ps-item.active .ps-label { color: var(--azure); }
+  .ps-item.done .ps-label { color: var(--green); }
+
+  .cost-table td:last-child { color: var(--green); font-weight: 600; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.2rem; text-align: center; }
+  .stat-num { font-size: 2rem; font-weight: 700; color: var(--azure); }
+  .stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  code { background: var(--surface2); padding: 1px 5px; border-radius: 3px; font-family: monospace; font-size: 12.5px; color: #79c0ff; }
+  h2 { font-size: 1.1rem; font-weight: 600; margin: 1.5rem 0 .7rem; color: var(--text); }
+  h3 { font-size: .95rem; font-weight: 600; margin: 1rem 0 .5rem; color: var(--muted); }
+  p { font-size: 13.5px; color: var(--text); margin-bottom: .7rem; }
+  ul { padding-left: 1.4rem; margin-bottom: .8rem; }
+  ul li { font-size: 13.5px; margin-bottom: .3rem; }
+
+  .error-box { background: #1f0d0d; border: 1px solid #6b2a2a; border-radius: 8px; padding: 1rem 1.2rem; margin-bottom: 1rem; }
+  .error-box .error-title { color: var(--red); font-weight: 600; font-size: 13.5px; margin-bottom: .5rem; display: flex; align-items: center; gap: 7px; }
+  .error-box .error-body { font-size: 13px; color: #e6c0c0; }
+  .solution-box { background: #0d1f0d; border: 1px solid #2a6b2a; border-radius: 8px; padding: 1rem 1.2rem; margin-bottom: 1rem; }
+  .solution-box .sol-title { color: var(--green); font-weight: 600; font-size: 13.5px; margin-bottom: .5rem; display: flex; align-items: center; gap: 7px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <svg width="20" height="20" viewBox="0 0 18 18" fill="none"><path d="M9 2L2 6v6l7 4 7-4V6L9 2z" fill="#0078d4" opacity=".9"/><path d="M9 2v14M2 6l7 4 7-4" stroke="#fff" stroke-width="1" stroke-opacity=".5"/></svg>
+    Yafes Pars
+    <span class="logo-badge">Azure Kurulum</span>
+  </div>
+  <div class="header-right">
+    <span id="progress-label">0 / 20 adım</span>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+</div>
+
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-group">
+    <div class="sidebar-label">Hazırlık</div>
+    <button class="nav-item active" onclick="goStep(0)" id="nav-0"><span class="step-num"><span>1</span></span>Genel Bakış</button>
+    <button class="nav-item" onclick="goStep(1)" id="nav-1"><span class="step-num"><span>2</span></span>Maliyet Planı</button>
+    <button class="nav-item" onclick="goStep(2)" id="nav-2"><span class="step-num"><span>3</span></span>Azure Hesabı</button>
+    <button class="nav-item" onclick="goStep(3)" id="nav-3"><span class="step-num"><span>4</span></span>Gereksinimler</button>
+  </div>
+  <div class="sidebar-group">
+    <div class="sidebar-label">Altyapı</div>
+    <button class="nav-item" onclick="goStep(4)" id="nav-4"><span class="step-num"><span>5</span></span>Resource Group</button>
+    <button class="nav-item" onclick="goStep(5)" id="nav-5"><span class="step-num"><span>6</span></span>Azure SQL Server</button>
+    <button class="nav-item" onclick="goStep(6)" id="nav-6"><span class="step-num"><span>7</span></span>Güvenlik Duvarı</button>
+    <button class="nav-item" onclick="goStep(7)" id="nav-7"><span class="step-num"><span>8</span></span>Veritabanı Oluştur</button>
+  </div>
+  <div class="sidebar-group">
+    <div class="sidebar-label">Uygulama</div>
+    <button class="nav-item" onclick="goStep(8)" id="nav-8"><span class="step-num"><span>9</span></span>App Service Plan</button>
+    <button class="nav-item" onclick="goStep(9)" id="nav-9"><span class="step-num"><span>10</span></span>Web App Oluştur</button>
+    <button class="nav-item" onclick="goStep(10)" id="nav-10"><span class="step-num"><span>11</span></span>Env Variables</button>
+    <button class="nav-item" onclick="goStep(11)" id="nav-11"><span class="step-num"><span>12</span></span>GitHub Deploy</button>
+  </div>
+  <div class="sidebar-group">
+    <div class="sidebar-label">Veritabanı</div>
+    <button class="nav-item" onclick="goStep(12)" id="nav-12"><span class="step-num"><span>13</span></span>Migration Çalıştır</button>
+    <button class="nav-item" onclick="goStep(13)" id="nav-13"><span class="step-num"><span>14</span></span>Seed Verisi</button>
+    <button class="nav-item" onclick="goStep(14)" id="nav-14"><span class="step-num"><span>15</span></span>SP Doğrulama</button>
+  </div>
+  <div class="sidebar-group">
+    <div class="sidebar-label">Güvenlik & İzleme</div>
+    <button class="nav-item" onclick="goStep(15)" id="nav-15"><span class="step-num"><span>16</span></span>Key Vault</button>
+    <button class="nav-item" onclick="goStep(16)" id="nav-16"><span class="step-num"><span>17</span></span>App Insights</button>
+    <button class="nav-item" onclick="goStep(17)" id="nav-17"><span class="step-num"><span>18</span></span>Hata Senaryoları</button>
+  </div>
+  <div class="sidebar-group">
+    <div class="sidebar-label">Son</div>
+    <button class="nav-item" onclick="goStep(18)" id="nav-18"><span class="step-num"><span>19</span></span>Sağlık Kontrolleri</button>
+    <button class="nav-item" onclick="goStep(19)" id="nav-19"><span class="step-num"><span>20</span></span>Tamamlandı</button>
+  </div>
+</nav>
+
+<main class="content">
+
+<!-- ═══════════════════════════════════════════ SAYFA 0 ══ -->
+<div class="step-page active" id="page-0">
+  <div class="step-badge">Genel Bakış · Adım 1 / 20</div>
+  <h1 class="step-title">Azure Üzerinde Yafes Pars Kurulumu</h1>
+  <p class="step-desc">Bu rehber, Yafes Pars sigorta API sistemini Microsoft Azure üzerinde sıfırdan production-ready hale getirmenizi sağlar. Her adım simüle edilmiştir — gerçek Azure portalında birebir aynı adımları takip edin.</p>
+
+  <div class="arch-box">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600;">SİSTEM MİMARİSİ</div>
+    <div class="arch-row">
+      <div class="arch-item">🌐 İnternet</div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-item">🔒 Azure APIM / HTTPS</div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-item">⚙️ App Service (API)</div>
+    </div>
+    <div class="arch-row" style="margin-left:120px;">
+      <div class="arch-arrow">↓</div>
+    </div>
+    <div class="arch-row">
+      <div class="arch-item">🔑 Key Vault</div>
+      <div class="arch-arrow">←</div>
+      <div class="arch-item">⚙️ App Service (API)</div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-item">🗄️ Azure SQL Database</div>
+    </div>
+    <div class="arch-row" style="margin-left:120px;">
+      <div class="arch-arrow">↓</div>
+    </div>
+    <div class="arch-row" style="margin-left:60px;">
+      <div class="arch-item">📊 Application Insights</div>
+      <div class="arch-arrow">+</div>
+      <div class="arch-item">📋 Log Analytics</div>
+    </div>
+  </div>
+
+  <div class="grid3">
+    <div class="stat-card"><div class="stat-num">20</div><div class="stat-label">Kurulum Adımı</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--green)">21</div><div class="stat-label">SQL Migration</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--amber)">~45dk</div><div class="stat-label">Tahmini Süre</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">🏗️</span> Kullanılacak Azure Kaynakları</div>
+    <table>
+      <tr><th>Kaynak</th><th>Amaç</th><th>Katman</th></tr>
+      <tr><td>Resource Group</td><td>Tüm kaynakların mantıksal konteyneri</td><td><span class="badge badge-blue">Ücretsiz</span></td></tr>
+      <tr><td>Azure SQL Server + DB</td><td>Üretim veritabanı (21 migration)</td><td><span class="badge badge-amber">S2 ~50₺/ay</span></td></tr>
+      <tr><td>App Service Plan</td><td>.NET 8 API hosting</td><td><span class="badge badge-amber">B1 ~80₺/ay</span></td></tr>
+      <tr><td>App Service (Web App)</td><td>API çalışma ortamı</td><td><span class="badge badge-blue">Plan dahili</span></td></tr>
+      <tr><td>Key Vault</td><td>Connection string gizli saklama</td><td><span class="badge badge-green">~5₺/ay</span></td></tr>
+      <tr><td>Application Insights</td><td>Log, metrik, hata izleme</td><td><span class="badge badge-green">5GB ücretsiz</span></td></tr>
+    </table>
+  </div>
+
+  <div class="info">ℹ️ Bu rehberi tamamlamak için <strong>Azure aboneliği</strong>, <strong>GitHub hesabı</strong> ve <strong>Azure CLI</strong> kurulu bir bilgisayar gereklidir.</div>
+
+  <div class="nav-btns">
+    <button class="btn btn-primary" onclick="completeStep(0)">Başla →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ SAYFA 1 ══ -->
+<div class="step-page" id="page-1">
+  <div class="step-badge">Hazırlık · Adım 2 / 20</div>
+  <h1 class="step-title">Maliyet Planı</h1>
+  <p class="step-desc">Azure kaynaklarının aylık maliyet tahmini. Geliştirme ortamı için düşük katmanlar, production için ölçeklenebilir seçenekler gösterilmiştir.</p>
+
+  <h2>Geliştirme / Test Ortamı</h2>
+  <table class="cost-table">
+    <tr><th>Kaynak</th><th>SKU</th><th>Özellik</th><th>Aylık Tahmini</th></tr>
+    <tr><td>Azure SQL Database</td><td>Basic (5 DTU)</td><td>2 GB, tek bölge</td><td>~$5</td></tr>
+    <tr><td>App Service Plan</td><td>Free F1</td><td>60dk CPU/gün, 1 GB RAM</td><td>$0</td></tr>
+    <tr><td>Key Vault</td><td>Standard</td><td>10.000 işlem/ay dahil</td><td>~$0.50</td></tr>
+    <tr><td>Application Insights</td><td>Pay-as-you-go</td><td>5 GB/ay ücretsiz</td><td>$0</td></tr>
+    <tr><td colspan="3" style="text-align:right;font-weight:600;">Toplam (Dev)</td><td>~$5.50/ay</td></tr>
+  </table>
+
+  <h2>Production Ortamı (Önerilen)</h2>
+  <table class="cost-table">
+    <tr><th>Kaynak</th><th>SKU</th><th>Özellik</th><th>Aylık Tahmini</th></tr>
+    <tr><td>Azure SQL Database</td><td>S2 (50 DTU)</td><td>250 GB, zone-redundant yedek</td><td>~$75</td></tr>
+    <tr><td>App Service Plan</td><td>B2</td><td>2 core, 3.5 GB RAM, custom domain+SSL</td><td>~$75</td></tr>
+    <tr><td>Key Vault</td><td>Standard</td><td>Soft-delete, purge protection</td><td>~$1</td></tr>
+    <tr><td>Application Insights</td><td>Pay-as-you-go</td><td>~10 GB/ay</td><td>~$5</td></tr>
+    <tr><td colspan="3" style="text-align:right;font-weight:600;">Toplam (Prod)</td><td>~$156/ay</td></tr>
+  </table>
+
+  <div class="warn">⚠️ Fiyatlar Doğu ABD bölgesi için USD cinsindendir. Azure Pricing Calculator ile kendi bölgeniz için güncel fiyat alın.</div>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">💡</span> Maliyet Optimizasyon İpuçları</div>
+    <ul>
+      <li>Dev ortamında SQL Database'i hafta sonları durdurun (Pause özelliği Serverless SKU ile gelir)</li>
+      <li>App Service için <strong>Reserved Instance</strong> satın alarak %40'a kadar indirim elde edin</li>
+      <li>Application Insights'ta sampling oranını %10'a düşürerek log maliyetini azaltın</li>
+      <li>Birden fazla proje için aynı App Service Plan'ı paylaşın</li>
+    </ul>
+  </div>
+
+  <div class="nav-btns">
+    <button class="btn btn-secondary" onclick="goStep(0)">← Geri</button>
+    <button class="btn btn-primary" onclick="completeStep(1)">Devam →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ SAYFA 2 ══ -->
+<div class="step-page" id="page-2">
+  <div class="step-badge">Hazırlık · Adım 3 / 20</div>
+  <h1 class="step-title">Azure Hesabı ve Abonelik</h1>
+  <p class="step-desc">Azure Portal'a giriş yapın ve aboneliğinizi doğrulayın. İlk kez kullanıyorsanız $200 ücretsiz kredi mevcuttur.</p>
+
+  <div class="portal-sim">
+    <div class="portal-bar">
+      <div class="portal-logo">Microsoft Azure</div>
+      <div class="portal-nav">portal.azure.com</div>
+    </div>
+    <div class="portal-body">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:1rem;">Oturum açılıyor...</div>
+      <div class="portal-field">
+        <div class="portal-label">E-posta adresi</div>
+        <div class="portal-input filled">admin@sirketiniz.onmicrosoft.com</div>
+      </div>
+      <div class="portal-field">
+        <div class="portal-label">Şifre</div>
+        <div class="portal-input filled">••••••••••••</div>
+      </div>
+      <div class="portal-btn">Oturum Aç</div>
+    </div>
+  </div>
+
+  <h2>Azure CLI ile Giriş</h2>
+  <p>Komut satırından işlem yapacaksanız Azure CLI kurun ve giriş yapın:</p>
+
+  <div class="terminal">
+    <div class="terminal-bar">
+      <div class="terminal-dot" style="background:#ff5f57"></div>
+      <div class="terminal-dot" style="background:#febc2e"></div>
+      <div class="terminal-dot" style="background:#28c840"></div>
+      <span style="margin-left:8px;">PowerShell</span>
+    </div>
+    <div class="terminal-body">
+      <div><span class="t-prompt">PS&gt;</span> <span class="t-cmd">az login</span></div>
+      <div class="t-out">A web browser has been opened at https://login.microsoftonline.com/...</div>
+      <div class="t-ok">✓ Signed in as: admin@sirketiniz.onmicrosoft.com</div>
+      <div style="margin-top:8px;"><span class="t-prompt">PS&gt;</span> <span class="t-cmd">az account show --output table</span></div>
+      <div class="t-out">Name                   CloudName    SubscriptionId                        State</div>
+      <div class="t-out">---------------------  -----------  ------------------------------------  ------</div>
+      <div class="t-ok">Yafes Sigorta Prod     AzureCloud   xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx  Enabled</div>
+      <div style="margin-top:8px;"><span class="t-prompt">PS&gt;</span> <span class="t-cmd">az account set --subscription "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"</span></div>
+      <div class="t-ok">✓ Abonelik ayarlandı</div>
+    </div>
+  </div>
+
+  <div class="info">ℹ️ Subscription ID'yi not alın — ilerleyen adımlarda GitHub Secrets'a eklenecek.</div>
+
+  <div class="nav-btns">
+    <button class="btn btn-secondary" onclick="goStep(1)">← Geri</button>
+    <button class="btn btn-primary" onclick="completeStep(2)">Devam →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ SAYFA 3 ══ -->
+<div class="step-page" id="page-3">
+  <div class="step-badge">Hazırlık · Adım 4 / 20</div>
+  <h1 class="step-title">Gereksinim Kontrolü</h1>
+  <p class="step-desc">Kuruluma başlamadan önce geliştirici makinenizde aşağıdaki araçların kurulu ve güncel olduğunu doğrulayın.</p>
+
+  <ul class="check-list">
+    <li class="ok"><div class="chk"></div><div><strong>Azure CLI ≥ 2.60</strong> — <code>az --version</code> ile kontrol edin</div></li>
+    <li class="ok"><div class="chk"></div><div><strong>Git ≥ 2.40</strong> — kaynak kodu çekmek için</div></li>
+    <li class="ok"><div class="chk"></div><div><strong>.NET 8 SDK</strong> — yerel derleme ve test için</div></li>
+    <li class="ok"><div class="chk"></div><div><strong>sqlcmd (ODBC 18)</strong> — migration çalıştırmak için</div></li>
+    <li class="pending"><div class="chk"></div><div><strong>GitHub CLI (gh)</strong> — Actions ve Secrets yönetimi için <span class="badge badge-amber">İsteğe bağlı</span></div></li>
+    <li class="pending"><div class="chk"></div><div><strong>SSMS ≥ 20</strong> — veritabanı operatör arayüzü için <span class="badge badge-amber">İsteğe bağlı</span></div></li>
+  </ul>
+
+  <h2>Hızlı Kurulum (Winget)</h2>
+  <pre><button class="copy-btn" onclick="copyCode(this)">Kopyala</button>winget install Microsoft.AzureCLI
+winget install Git.Git
+winget install Microsoft.DotNet.SDK.8
+winget install Microsoft.SQLServerManagementStudio
+winget install GitHub.cli</pre>
+
+  <h2>macOS / Linux</h2>
+  <pre><button class="copy-btn" onclick="copyCode(this)">Kopyala</button># macOS (Homebrew)
+brew install azure-cli git dotnet@8 gh
+
+# Ubuntu/Debian
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+sudo apt install git dotnet-sdk-8.0 gh</pre>
+
+  <div class="success">✓ Tüm gereksinimler karşılandığında bir sonraki adıma geçebilirsiniz.</div>
+
+  <div class="nav-btns">
+    <button class="btn btn-secondary" onclick="goStep(2)">← Geri</button>
+    <button class="btn btn-primary" onclick="completeStep(3)">Devam →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ SAYFA 4 ══ -->
+<div class="step-page" id="page-4">
+  <div class="step-badge">Altyapı · Adım 5 / 20</div>
+  <h1 class="step-title">Resource Group Oluştur</h1>
+  <p class="step-desc">Tüm Azure kaynakları tek bir Resource Group altında toplanır. Bu, fatura takibi ve toplu silme işlemlerini kolaylaştırır.</p>
+
+  <div class="portal-sim">
+    <div class="portal-bar">
+      <div class="portal-logo">Azure Portal — Resource Groups</div>
+    </div>
+    <div class="portal-body">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Home &gt; Resource groups &gt; Create</div>
+      <div class="portal-field">
+        <div class="portal-label">Subscription *</div>
+        <div class="portal-input filled">Yafes Sigorta Prod</div>
+      </div>
+      <div class="portal-field">
+        <div class="portal-label">Resource group name *</div>
+        <div class="portal-input filled">rg-yafespars-prod</div>
+      </div>
+      <div class="portal-field">
+        <div class="portal-label">Region *</div>
+        <div class="portal-input filled">(Europe) West Europe</div>
+      </div>
+      <div class="portal-btn">Review + Create</div>
+    </div>
+  </div>
+
+  <h2>CLI ile Oluştur</h2>
+  <pre><button class="copy-btn" onclick="copyCode(this)">Kopyala</button>az group create \
+  --name rg-yafespars-prod \
+  --location westeurope \
+  --tags Project=YafesPars Env=Production Owner=DevOps</pre>
+
+  <div class="terminal">
+    <div class="terminal-bar"><span>Azure CLI</span></div>
+    <div class="terminal-body">
+      <div class="t-out">{</div>
+      <div class="t-out">&nbsp;&nbsp;"id": "/subscriptions/xxxx/resourceGroups/rg-yafespars-prod",</div>
+      <div class="t-out">&nbsp;&nbsp;"location": "westeurope",</div>
+      <div class="t-out">&nbsp;&nbsp;"name": "rg-yafespars-prod",</div>
+      <div class="t-ok">&nbsp;&nbsp;"properties": { "provisioningState": "Succeeded" }</div>
+      <div class="t-out">}</div>
+    </div>
+  </div>
+
+  <div class="info">ℹ️ Bölge seçerken müşterilerinize en yakın Azure bölgesini tercih edin. Türkiye için <code>germanywestcentral</code> veya <code>westeurope</code> öneririz.</div>
+
+  <div class="nav-btns">
+    <button class="btn btn-secondary" onclick="goStep(3)">← Geri</button>
+    <button class="btn btn-primary" onclick="completeStep(4)">Devam →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ SAYFA 5 ══ -->
+<div class="step-page" id="page-5">
+  <div class="step-badge">Altyapı · Adım 6 / 20</div>
+  <h1 class="step-title">Azure SQL Server Oluştur</h1>
+  <p class="step-desc">Yafes Pars'ın 12 şema ve 115 tablosunu barındıracak Azure SQL Server mantıksal sunucusunu oluşturun.</p>
+
+  <div class="warn">⚠️ SQL Server admin şifresini <strong>not alın</strong>. En az 8 karakter, büyük/küçük harf ve rakam içermelidir. Bu şifreyi Key Vault'ta saklayacaksınız.</div>
+
+  <pre><button class="copy-btn" onclick="copyCode(this)">Kopyala</button>az sql server create \
+  --name sql-yafespars-prod \
+  --resource-group rg-yafespars-prod \
+  --location westeurope \
+  --admin-user yafes_admin \
+  --admin-password "YafesProd2024!Secure#" \
+  --enable-public-network true</pre>
+
+  <div class="terminal">
+    <div class="terminal-bar"><span>Azure CLI — Çıktı</span></div>
+    <div class="terminal-body">
+      <div class="t-out">Creating SQL Server sql-yafespars-prod...</div>
+      <div class="t-out">  - Allocating logical server resources...</div>
+      <div class="t-out">  - Configuring TLS 1.2 minimum version...</div>
+      <div class="t-ok">✓ SQL Server created successfully</div>
+      <div class="t-out">  FQDN: sql-yafespars-prod.database.windows.net</div>
+      <div class="t-out">  Admin: yafes_admin</div>
+      <div class="t-out">  TLS: 1.2</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">🔐</span> Güvenlik Ayarları (Önerilen)</div>
+    <ul>
+      <li>Minimum TLS sürümü: <strong>1.2</strong> (varsayılan)</li>
+      <li>Public network access: Sadece belirli IP'ler</li>
+      <li>Azure AD authentication: Admin hesap için aktif edin</li>
+      <li>Auditing: Storage Account'a SQL log gönderimi</li>
+    </ul>
+  </div>
+
+  <h2>Azure AD Entegrasyonu (İsteğe Bağlı)</h2>
+  <pre><button class="copy-btn" onclick="copyCode(this)">Kopyala</button>az sql server ad-admin create \
+  --server-name sql-yafespars-prod \
+  --resource-group rg-yafespars-prod \
+  --display-name "Yafes DB Admins" \
+  --object-id "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"</pre>
+
+  <div class="nav-btns">
+    <button class="btn btn-secondary" onclick="goStep(4)">← Geri</button>
+    <button class="btn btn-primary" onclick="completeStep(5)">Devam →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ SAYFA 6 ══ -->
+<div class="step-page" id="page-6">
+  <div class="step-badge">Altyapı · Adım 7 / 20</div>
+  <h1 class="step-title">Güvenlik Duvarı Kuralları</h1>
+  <p class="step-desc">Azure SQL Server varsayılan olarak tüm bağlantıları engeller. Migration ve SSMS bağlantıları için izin kuralı ekleyin.</p>
+
+  <div class="error-box">
+    <div class="error-title">🚫 Sık Karşılaşılan Hata</div>
+    <div class="error-body">
+      <code>Cannot open server 'sql-yafespars-prod' requested by the login. Client with IP address '85.x.x.x' is not allowed to access the server.</code>
+      <br><br>Bu hata, IP adresinizin güvenlik duvarında kayıtlı olmadığı anlamına gelir.
+    </div>
+  </div>
+
+  <div class="solution-box">
+    <div class="sol-title">✓ Çözüm: IP Kuralı Ekle</div>
+    <pre style="margin:0"><button class="copy-btn" onclick="copyCode(this)">Kopyala</button># Kendi IP'nizi öğrenin
+curl -s https://api.ipify.org
+
+# Güvenlik duvarı kuralı ekleyin
+az sql server firewall-rule create \
+  --server sql-yafespars-prod \
+  --resource-group rg-yafespars-prod \
+  --name AllowDeveloperIP \
+  --start-ip-address 85.100.200.50 \
+  --end-ip-address 85.100.200.50</pre>
+  </div>
+
+  <h2>Azure Servisleri İçin Erişim</h2>
+  <pre><button class="copy-btn" onclick="copyCode(this)">Kopyala</button># App Service → SQL bağlantısı için Azure servislerine izin ver
+az sql server firewall-rule create \
+  --server sql-yafespars-prod \
+  --resource-group rg-yafespars-prod \
+  --name AllowAzureServices \
+  --start-ip-address 0.0.0.0 \
+  --end-ip-address 0.0.0.0</pre>
+
+  <div class="warn">⚠️ <code>0.0.0.0 - 0.0.0.0</code> kuralı tüm Azure IP'lerine izin verir. Production'da daha kısıtlayıcı Virtual Network kuralı kullanın.</div>
+
+  <h2>Mevcut Kuralları Listele</h2>
+  <pre><button class="copy-btn" onclick="copyCode(this)">Kopyala</button>az sql server firewall-rule list \
+  --server sql-yafespars-prod \
+  --resource-group rg-yafespars-prod \
+  --output table</pre>
+
+  <div class="terminal">
+    <div class="terminal-bar"><span>Çıktı</span></div>
+    <div class="terminal-body">
+      <div class="t-out">Name                 StartIpAddress  EndIpAddress</div>
+      <div class="t-out">-------------------  --------------  ------------</div>
+      <div class="t-ok">AllowDeveloperIP     85.100.200.50   85.100.200.50</div>
+      <div class="t-ok">AllowAzureServices   0.0.0.0         0.0.0.0</div>
+    </div>
+  </div>
+
+  <div class="nav-btns">
+    <button class="btn btn-secondary" onclick="goStep(5)">← Geri</button>
+    <button class="btn btn-primary" onclick="completeStep(6)">Devam →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ SAYFA 7 ══ -->
+<div class="step-page" id="page-7">
+  <div class="step-badge">Altyapı · Adım 8 / 20</div>
+  <h1 class="step-title">Azure SQL Veritabanı Oluştur</h1>
+  <p class="step-desc">Mantıksal sunucu üzerinde asıl veritabanını oluşturun. Yafes Pars için S2 katmanı 115 tablo ve 21 migration için yeterlidir.</p>
+
+  <pre><button class="copy-btn" onclick="copyCode(this)">Kopyala</button>az sql db create \
+  --server sql-yafespars-prod \
+  --resource-group rg-yafespars-prod \
+  --name YafesPars \
+  --service-objective S2 \
+  --collation Turkish_CI_AS \
+  --backup-storage-redundancy Geo \
+  --zone-redundant false</pre>
+
+  <div class="terminal">
+    <div class="terminal-bar"><span>Azure CLI — Oluşturma Çıktısı (~2dk)</span></div>
+    <div class="terminal-body">
+      <div class="t-out">Creating database YafesPars...</div>
+      <div class="t-out">  - Selecting storage cluster...</div>
+      <div class="t-out">  - Setting collation: Turkish_CI_AS</div>
+      <div class="t-out">  - Configuring backup policy (geo-redundant)...</div>
+      <div class="t-out">  - Setting service objective S2 (50 DTU)...</div>
+      <div class="t-ok">✓ Database 'YafesPars' created successfully</div>
+      <div class="t-out">  Server:    sql-yafespars-prod.database.windows.net</div>
+      <div class="t-out">  Database:  YafesPars</div>
+      <div class="t-out">  SKU:       S2 (50 DTU, 250 GB)</div>
+      <div class="t-out">  Collation: Turkish_CI_AS</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">📌</span> Bağlantı Dizesi (Not Alın)</div>
+    <pre style="margin:0">Server=sql-yafespars-prod.database.windows.net;
+Database=YafesPars;
+User Id=yafes_admin;
+Password=YafesProd2024!Secure#;
+TrustServerCertificate=False;
+Encrypt=True;</pre>
+  </div>
+
+  <div class="info">ℹ️ Collation olarak <strong>Turkish_CI_AS</strong> seçilmesi, Türkçe karakter sıralaması (İ/i, Ş/ş, vb.) için önemlidir.</div>
+
+  <div class="nav-btns">
+    <button class="btn btn-secondary" onclick="goStep(6)">← Geri</button>
+    <button class="btn btn-primary" onclick="completeStep(7)">Devam →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ SAYFA 8 ══ -->
+<div class="step-page" id="page-8">
+  <div class="step-badge">Uygulama · Adım 9 / 20</div>
+  <h1 class="step-title">App Service Plan</h1>
+  <p class="step-desc">API uygulamasının çalışacağı sanal makine havuzunu oluşturun.</p>
+
+  <pre><button class="copy-btn" onclick="copyCode(this)">Kopyala</button>az appservice plan create \
+  --name asp-yafespars-prod \
+  --resource-group rg-yafespars-prod \
+  --location westeurope \
+  --sku B2 \
+  --is-linux</pre>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">📊</span> SKU Karşılaştırması</div>
+    <table>
+      <tr><th>Plan</th><th>CPU</th><th>RAM</th><th>Disk</th><th>Fiyat</th><th>Kullanım</th></tr>
+      <tr><td>F1 (Free)</td><td>Paylaşımlı</td><td>1 GB</td><td>1 GB</td><td>$0</td><td>Demo/Test</td></tr>
+      <tr><td>B1</td><td>1 core</td><td>1.75 GB</td><td>10 GB</td><td>~$13</td><td>Düşük trafik</td></tr>
+      <tr><td><strong>B2</strong></td><td><strong>2 core</strong></td><td><strong>3.5 GB</strong></td><td><strong>10 GB</strong></td><td><strong>~$55</strong></td><td><strong>Önerilen</strong></td></tr>
+      <tr><td>S2</td><td>2 core</td><td>3.5 GB</td><td>50 GB</td><td>~$100</td><td>Auto-scale</td></tr>
+      <tr><td>P2v3</td><td>2 core</td><td>8 GB</td><td>250 GB</td><td>~$170</td><td>Yüksek yük</td></tr>
+    </table>
+  </div>
+
+  <div class="terminal">
+    <div class="terminal-bar"><span>Çıktı</span></div>
+    <div class="terminal-body">
+      <div class="t-ok">✓ App Service Plan created</div>
+      <div class="t-out">  Name:      asp-yafespars-prod</div>
+      <div class="t-out">  SKU:       B2</div>
+      <div class="t-out">  OS:        Linux</div>
+      <div class="t-out">  Workers:   1</div>
+      <div class="t-out">  Location:  West Europe</div>
+    </div>
+  </div>
+
+  <div class="nav-btns">
+    <button class="btn btn-secondary" onclick="goStep(7)">← Geri</button>
+    <button class="btn btn-primary" onclick="completeStep(8)">Devam →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ SAYFA 9 ══ -->
+<div class="step-page" id="page-9">
+  <div class="step-badge">Uygulama · Adım 10 / 20</div>
+  <h1 class="step-title">Web App (API) Oluştur</h1>
+  <p class="step-desc">.NET 8 Minimal API'yi çalıştıracak App Service uygulamasını oluşturun.</p>
+
+  <pre><button class="copy-btn" onclick="copyCode(this)">Kopyala</button>az webapp create \
+  --name app-yafespars-prod \
+  --resource-group rg-yafespars-prod \
+  --plan asp-yafespars-prod \
+  --runtime "DOTNETCORE:8.0" \
+  --assign-identity SystemAssigned</pre>
+
+  <div class="terminal">
+    <div class="terminal-bar"><span>Çıktı</span></div>
+    <div class="terminal-body">
+      <div class="t-out">Creating Web App app-yafespars-prod...</div>
+      <div class="t-ok">✓ Web App created</div>
+      <div class="t-out">  URL:      https://app-yafespars-prod.azurewebsites.net</div>
+      <div class="t-out">  Runtime:  .NET 8</div>
+      <div class="t-out">  Identity: SystemAssigned (Principal ID: xxxxxxxx)</div>
+    </div>
+  </div>
+
+  <h2>HTTPS ve Custom Domain</h2>
+  <pre><button class="copy-btn" onclick="copyCode(this)">Kopyala</button># HTTPS yalnızca zorla
+az webapp update \
+  --name app-yafespars-prod \
+  --resource-group rg-yafespars-prod \
+  --https-only true
+
+# Custom domain ekle (isteğe bağlı)
+az webapp config hostname add \
+  --webapp-name app-yafespars-prod \
+  --resource-group rg-yafespars-prod \
+  --hostname api.yafespars.com</pre>
+
+  <div class="success">✓ <code>https://app-yafespars-prod.azurewebsites.net/health</code> adresi birkaç dakika içinde erişilebilir olacaktır (kod deploy edilmeden önce 404 döner — normaldir).</div>
+
+  <div class="nav-btns">
+    <button class="btn btn-secondary" onclick="goStep(8)">← Geri</button>
+    <button class="btn btn-primary" onclick="completeStep(9)">Devam →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ SAYFA 10 ══ -->
+<div class="step-page" id="page-10">
+  <div class="step-badge">Uygulama · Adım 11 / 20</div>
+  <h1 class="step-title">Environment Variables (Uygulama Ayarları)</h1>
+  <p class="step-desc">API'nin veritabanına ve diğer servislere bağlanabilmesi için App Service'e ortam değişkenleri ekleyin.</p>
+
+  <div class="warn">⚠️ Connection string'i doğrudan buraya YAZMAYIN. Bir sonraki adımda Key Vault entegrasyonu yapılacak — bu adımda geçici değer kullanın.</div>
+
+  <pre><button class="copy-btn" onclick="copyCode(this)">Kopyala</button>az webapp config appsettings set \
+  --name app-yafespars-prod \
+  --resource-group rg-yafespars-prod \
+  --settings \
+    ASPNETCORE_ENVIRONMENT=Production \
+    ASPNETCORE_URLS="http://+:8080" \
+    Jwt__Issuer="https://app-yafespars-prod.azurewebsites.net" \
+    Jwt__Audience="yafespars-api" \
+    Jwt__ExpiryMinutes="60" \
+    RateLimit__WritePerMinute="30" \
+    RateLimit__ReadPerMinute="100"</pre>
+
+  <h2>Connection String (Geçici)</h2>
+  <pre><button class="copy-btn" onclick="copyCode(this)">Kopyala</button>az webapp config connection-string set \
+  --name app-yafespars-prod \
+  --resource-group rg-yafespars-prod \
+  --connection-string-type SQLAzure \
+  --settings DefaultConnection="Server=sql-yafespars-prod.database.windows.net;Database=YafesPars;User Id=yafes_admin;Password=YafesProd2024!Secure#;Encrypt=True;"</pre>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">⚙️</span> appsettings.Production.json ile Eşleşme</div>
+    <table>
+      <tr><th>App Setting Adı</th><th>appsettings.json Karşılığı</th></tr>
+      <tr><td>ConnectionStrings__DefaultConnection</td><td><code>ConnectionStrings.DefaultConnection</code></td></tr>
+      <tr><td>Jwt__Issuer</td><td><code>Jwt.Issuer</code></td></tr>
+      <tr><td>APPINSIGHTS_INSTRUMENTATIONKEY</td><td><code>ApplicationInsights.InstrumentationKey</code></td></tr>
+    </table>
+  </div>
+
+  <div class="nav-btns">
+    <button class="btn btn-secondary" onclick="goStep(9)">← Geri</button>
+    <button class="btn btn-primary" onclick="completeStep(10)">Devam →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ SAYFA 11 ══ -->
+<div class="step-page" id="page-11">
+  <div class="step-badge">Uygulama · Adım 12 / 20</div>
+  <h1 class="step-title">GitHub Actions ile Otomatik Deploy</h1>
+  <p class="step-desc">GitHub Actions workflow'u Azure'a kod göndermek için Service Principal ile yapılandırın.</p>
+
+  <h2>1. Service Principal Oluştur</h2>
+  <pre><button class="copy-btn" onclick="copyCode(this)">Kopyala</button>az ad sp create-for-rbac \
+  --name sp-yafespars-github \
+  --role Contributor \
+  --scopes /subscriptions/SUBSCRIPTION_ID/resourceGroups/rg-yafespars-prod \
+  --json-auth</pre>
+
+  <div class="terminal">
+    <div class="terminal-bar"><span>Çıktı — GitHub Secrets'a Eklenecek JSON</span></div>
+    <div class="terminal-body">
+      <div class="t-out">{</div>
+      <div class="t-out">&nbsp;&nbsp;"clientId":       "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",</div>
+      <div class="t-out">&nbsp;&nbsp;"clientSecret":   "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",</div>
+      <div class="t-out">&nbsp;&nbsp;"subscriptionId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",</div>
+      <div class="t-out">&nbsp;&nbsp;"tenantId":       "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"</div>
+      <div class="t-out">}</div>
+    </div>
+  </div>
+
+  <h2>2. GitHub Secrets'a Ekle</h2>
+  <pre><button class="copy-btn" onclick="copyCode(this)">Kopyala</button>gh secret set AZURE_CREDENTIALS --body '{...yukarıdaki JSON...}'
+gh secret set AZURE_SUBSCRIPTION_ID --body "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+gh secret set AZURE_CLIENT_ID       --body "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+gh secret set AZURE_TENANT_ID       --body "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"</pre>
+
+  <h2>3. Deploy Workflow (.github/workflows/deploy.yml)</h2>
+  <pre><button class="copy-btn" onclick="copyCode(this)">Kopyala</button>name: Deploy to Azure
+on:
+  push:
+    branches: [main]
+    paths: [backend/**]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Build and Publish
+        run: |
+          dotnet publish backend/src/YafesPars.Api/YafesPars.Api.csproj \
+            -c Release -o ./publish
+
+      - name: Deploy to App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: app-yafespars-prod
+          package: ./publish</pre>
+
+  <div class="success">✓ main branch'e push yapıldığında otomatik deploy tetiklenir.</div>
+
+  <div class="nav-btns">
+    <button class="btn btn-secondary" onclick="goStep(10)">← Geri</button>
+    <button class="btn btn-primary" onclick="completeStep(11)">Devam →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ SAYFA 12 ══ -->
+<div class="step-page" id="page-12">
+  <div class="step-badge">Veritabanı · Adım 13 / 20</div>
+  <h1 class="step-title">Migration Çalıştır (000 → 020)</h1>
+  <p class="step-desc">21 SQL migration dosyasını Azure SQL Database üzerine çalıştırın. Bu işlem 12 şema, 115 tablo ve tüm stored procedure'ları oluşturur.</p>
+
+  <div class="progress-steps">
+    <div class="ps-item done"><div class="ps-circle">✓</div><div class="ps-label">000-005</div></div>
+    <div class="ps-item done"><div class="ps-circle">✓</div><div class="ps-label">006-010</div></div>
+    <div class="ps-item done"><div class="ps-circle">✓</div><div class="ps-label">011-015</div></div>
+    <div class="ps-item active"><div class="ps-circle">16</div><div class="ps-label">016-020</div></div>
+  </div>
+
+  <h2>PowerShell ile Çalıştır</h2>
+  <pre><button class="copy-btn" onclick="copyCode(this)">Kopyala</button>$server   = "sql-yafespars-prod.database.windows.net"
+$database = "YafesPars"
+$user     = "yafes_admin"
+$password = "YafesProd2024!Secure#"
+
+$migrations = Get-ChildItem "database/migrations/*.sql" | Sort-Object Name
+
+foreach ($file in $migrations) {
+    Write-Host "Running: $($file.Name)" -ForegroundColor Cyan
+    $result = sqlcmd -S $server -d $database -U $user -P $password `
+        -i $file.FullName -b -I -r 1 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "FAILED: $($file.Name)"
+        Write-Host $result
+        break
+    }
+    Write-Host "  ✓ OK" -ForegroundColor Green
+}</pre>
+
+  <div class="terminal">
+    <div class="terminal-bar"><span>Migration Çıktısı</span></div>
+    <div class="terminal-body">
+      <div><span class="t-ok">✓</span> <span class="t-out">000__create_database.sql</span></div>
+      <div><span class="t-ok">✓</span> <span class="t-out">001__create_schemas.sql — 12 schemas</span></div>
+      <div><span class="t-ok">✓</span> <span class="t-out">002__create_core_infrastructure.sql</span></div>
+      <div><span class="t-ok">✓</span> <span class="t-out">003__create_person_domain.sql</span></div>
+      <div><span class="t-ok">✓</span> <span class="t-out">004__create_institution_domain.sql</span></div>
+      <div><span class="t-ok">✓</span> <span class="t-out">005__create_object_domain.sql</span></div>
+      <div><span class="t-ok">✓</span> <span class="t-out">006__create_contract_domain.sql</span></div>
+      <div><span class="t-ok">✓</span> <span class="t-out">007__create_coverage_domain.sql</span></div>
+      <div><span class="t-ok">✓</span> <span class="t-out">008__create_claim_domain.sql</span></div>
+      <div><span class="t-ok">✓</span> <span class="t-out">009__create_document_domain.sql</span></div>
+      <div><span class="t-ok">✓</span> <span class="t-out">010__create_task_domain.sql</span></div>
+      <div><span class="t-ok">✓</span> <span class="t-out">011__create_audit_domain.sql</span></div>
+      <div><span class="t-ok">✓</span> <span class="t-out">012__add_constraints.sql</span></div>
+      <div><span class="t-ok">✓</span> <span class="t-out">013__add_indexes.sql</span></div>
+      <div><span class="t-ok">✓</span> <span class="t-out">014__add_triggers.sql</span></div>
+      <div><span class="t-ok">✓</span> <span class="t-out">015__add_views.sql</span></div>
+      <div><span class="t-ok">✓</span> <span class="t-out">016__add_stored_procedures.sql</span></div>
+      <div><span class="t-ok">✓</span> <span class="t-out">017__seed_lookup_data.sql</span></div>
+      <div><span class="t-ok">✓</span> <span class="t-out">018__seed_demo_data.sql</span></div>
+      <div><span class="t-ok">✓</span> <span class="t-out">019__add_finance_document_tables.sql</span></div>
+      <div><span class="t-ok">✓</span> <span class="t-out">020__add_write_stored_procedures.sql — coverage.ContractCoverageItem created, 14 SPs created</span></div>
+      <div style="margin-top:8px;" class="t-ok">✓ All 21 migrations completed successfully</div>
+      <div class="t-out">  Tables: 115 | Schemas: 12 | Stored Procs: 30+</div>
+    </div>
+  </div>
+
+  <div class="nav-btns">
+    <button class="btn btn-secondary" onclick="goStep(11)">← Geri</button>
+    <button class="btn btn-primary" onclick="completeStep(12)">Devam →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ SAYFA 13 ══ -->
+<div class="step-page" id="page-13">
+  <div class="step-badge">Veritabanı · Adım 14 / 20</div>
+  <h1 class="step-title">Seed Verisi ve Demo Tenant</h1>
+  <p class="step-desc">Migration 017 ve 018 lookup verilerini ve demo tenant'ı otomatik ekler. Bu adımda kurulumu doğrulayın.</p>
+
+  <pre><button class="copy-btn" onclick="copyCode(this)">Kopyala</button>-- Şema ve tablo sayısı kontrolü
+SELECT
+    s.name AS schema_name,
+    COUNT(t.object_id) AS table_count
+FROM sys.schemas s
+LEFT JOIN sys.tables t ON t.schema_id = s.schema_id
+WHERE s.name NOT IN ('sys','INFORMATION_SCHEMA','guest','db_owner')
+GROUP BY s.name
+ORDER BY s.name;</pre>
+
+  <div class="terminal">
+    <div class="terminal-bar"><span>Beklenen Çıktı</span></div>
+    <div class="terminal-body">
+      <div class="t-out">schema_name    table_count</div>
+      <div class="t-out">-----------    -----------</div>
+      <div class="t-ok">audit          3</div>
+      <div class="t-ok">claim          4</div>
+      <div class="t-ok">config         2</div>
+      <div class="t-ok">coverage       5</div>
+      <div class="t-ok">document       3</div>
+      <div class="t-ok">finance        4</div>
+      <div class="t-ok">identity       3</div>
+      <div class="t-ok">person         4</div>
+      <div class="t-ok">policy         5</div>
+      <div class="t-ok">risk           4</div>
+      <div class="t-ok">task           2</div>
+      <div class="t-ok">institution    2</div>
+      <div class="t-out">               ---</div>
+      <div class="t-ok">TOPLAM         115 tablo / 12 şema</div>
+    </div>
+  </div>
+
+  <h2>Demo Tenant Kontrolü</h2>
+  <pre><button class="copy-btn" onclick="copyCode(this)">Kopyala</button>SELECT tenant_id, tenant_code, tenant_name, is_active
+FROM identity.Tenant
+ORDER BY created_at_utc;</pre>
+
+  <div class="terminal">
+    <div class="terminal-bar"><span>Beklenen Sonuç</span></div>
+    <div class="terminal-body">
+      <div class="t-ok">1  DEMO  Demo Sigorta A.Ş.  1</div>
+    </div>
+  </div>
+
+  <div class="nav-btns">
+    <button class="btn btn-secondary" onclick="goStep(12)">← Geri</button>
+    <button class="btn btn-primary" onclick="completeStep(13)">Devam →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ SAYFA 14 ══ -->
+<div class="step-page" id="page-14">
+  <div class="step-badge">Veritabanı · Adım 15 / 20</div>
+  <h1 class="step-title">Stored Procedure Doğrulama</h1>
+  <p class="step-desc">Migration 020'de oluşturulan 14 write SP'yi test edin. Her SP çağrısının başarıyla dönmesi gerekir.</p>
+
+  <h2>SP Listesi Kontrolü</h2>
+  <pre><button class="copy-btn" onclick="copyCode(this)">Kopyala</button>SELECT
+    s.name + '.' + p.name AS procedure_name,
+    p.create_date,
+    p.modify_date
+FROM sys.procedures p
+JOIN sys.schemas s ON s.schema_id = p.schema_id
+WHERE s.name IN ('risk','coverage','finance','document','person')
+ORDER BY s.name, p.name;</pre>
+
+  <div class="terminal">
+    <div class="terminal-bar"><span>Beklenen 14 SP</span></div>
+    <div class="terminal-body">
+      <div class="t-ok">coverage.sp_AddCoverageItem</div>
+      <div class="t-ok">coverage.sp_SetPremium</div>
+      <div class="t-ok">coverage.sp_UpdateCoverage</div>
+      <div class="t-ok">document.sp_ArchiveDocument</div>
+      <div class="t-ok">document.sp_CreateDocument</div>
+      <div class="t-ok">document.sp_LinkDocument</div>
+      <div class="t-ok">finance.sp_CreateInvoice</div>
+      <div class="t-ok">finance.sp_CreatePaymentPlan</div>
+      <div class="t-ok">finance.sp_RecordPayment</div>
+      <div class="t-ok">person.SP_CreateLegalPerson</div>
+      <div class="t-ok">risk.sp_CreateProperty</div>
+      <div class="t-ok">risk.sp_CreateRiskObject</div>
+      <div class="t-ok">risk.sp_CreateVehicle</div>
+      <div class="t-ok">risk.sp_LinkRiskToContract</div>
+    </div>
+  </div>
+
+  <h2>Smoke Test — Araç Oluşturma</h2>
+  <pre><button class="copy-btn" onclick="copyCode(this)">Kopyala</button>DECLARE @new_object_id INT;
+EXEC risk.sp_CreateVehicle
+    @tenant_id         = 1,
+    @plate_number      = N'34YF0001',
+    @brand             = N'Toyota',
+    @model             = N'Corolla',
+    @model_year        = 2022,
+    @chassis_number    = N'TEST0000001',
+    @new_object_id     = @new_object_id OUTPUT;
+
+SELECT @new_object_id AS created_object_id;</pre>
+
+  <div class="terminal">
+    <div class="terminal-bar"><span>Çıktı</span></div>
+    <div class="terminal-body">
+      <div class="t-out">(1 rows affected)</div>
+      <div class="t-ok">created_object_id: 1</div>
+    </div>
+  </div>
+
+  <div class="nav-btns">
+    <button class="btn btn-secondary" onclick="goStep(13)">← Geri</button>
+    <button class="btn btn-primary" onclick="completeStep(14)">Devam →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ SAYFA 15 ══ -->
+<div class="step-page" id="page-15">
+  <div class="step-badge">Güvenlik · Adım 16 / 20</div>
+  <h1 class="step-title">Azure Key Vault</h1>
+  <p class="step-desc">Connection string ve JWT secret'ı Key Vault'ta saklayın. App Service, Managed Identity ile Key Vault'a erişecek — kod içinde şifre olmayacak.</p>
+
+  <h2>1. Key Vault Oluştur</h2>
+  <pre><button class="copy-btn" onclick="copyCode(this)">Kopyala</button>az keyvault create \
+  --name kv-yafespars-prod \
+  --resource-group rg-yafespars-prod \
+  --location westeurope \
+  --enable-soft-delete true \
+  --soft-delete-retention-days 90 \
+  --enable-purge-protection true</pre>
+
+  <h2>2. Secret'ları Ekle</h2>
+  <pre><button class="copy-btn" onclick="copyCode(this)">Kopyala</button>az keyvault secret set \
+  --vault-name kv-yafespars-prod \
+  --name "DefaultConnection" \
+  --value "Server=sql-yafespars-prod.database.windows.net;Database=YafesPars;User Id=yafes_admin;Password=YafesProd2024!Secure#;Encrypt=True;"
+
+az keyvault secret set \
+  --vault-name kv-yafespars-prod \
+  --name "JwtSecret" \
+  --value "$(openssl rand -base64 64)"</pre>
+
+  <h2>3. App Service'e Key Vault Erişimi Ver</h2>
+  <pre><button class="copy-btn" onclick="copyCode(this)">Kopyala</button># App Service'in Managed Identity Principal ID'sini al
+$principalId = az webapp identity show \
+  --name app-yafespars-prod \
+  --resource-group rg-yafespars-prod \
+  --query principalId -o tsv
+
+# Key Vault'a okuma erişimi ver
+az keyvault set-policy \
+  --name kv-yafespars-prod \
+  --object-id $principalId \
+  --secret-permissions get list</pre>
+
+  <h2>4. App Service'te Key Vault Referansı</h2>
+  <pre><button class="copy-btn" onclick="copyCode(this)">Kopyala</button>az webapp config appsettings set \
+  --name app-yafespars-prod \
+  --resource-group rg-yafespars-prod \
+  --settings \
+    "ConnectionStrings__DefaultConnection=@Microsoft.KeyVault(VaultName=kv-yafespars-prod;SecretName=DefaultConnection)" \
+    "Jwt__Secret=@Microsoft.KeyVault(VaultName=kv-yafespars-prod;SecretName=JwtSecret)"</pre>
+
+  <div class="success">✓ Artık connection string kodda veya ortam değişkeninde düz metin olarak bulunmayacak.</div>
+
+  <div class="nav-btns">
+    <button class="btn btn-secondary" onclick="goStep(14)">← Geri</button>
+    <button class="btn btn-primary" onclick="completeStep(15)">Devam →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ SAYFA 16 ══ -->
+<div class="step-page" id="page-16">
+  <div class="step-badge">İzleme · Adım 17 / 20</div>
+  <h1 class="step-title">Application Insights Kurulumu</h1>
+  <p class="step-desc">API logları, exception'lar, performans metrikleri ve istek istatistiklerini Azure Monitor üzerinden izleyin.</p>
+
+  <h2>Log Analytics Workspace</h2>
+  <pre><button class="copy-btn" onclick="copyCode(this)">Kopyala</button">az monitor log-analytics workspace create \
+  --workspace-name law-yafespars-prod \
+  --resource-group rg-yafespars-prod \
+  --location westeurope \
+  --retention-time 90</pre>
+
+  <h2>Application Insights Oluştur</h2>
+  <pre><button class="copy-btn" onclick="copyCode(this)">Kopyala</button>$workspaceId = az monitor log-analytics workspace show \
+  --workspace-name law-yafespars-prod \
+  --resource-group rg-yafespars-prod \
+  --query id -o tsv
+
+az monitor app-insights component create \
+  --app ai-yafespars-prod \
+  --resource-group rg-yafespars-prod \
+  --location westeurope \
+  --workspace $workspaceId \
+  --kind web</pre>
+
+  <h2>Instrumentation Key'i App Service'e Ekle</h2>
+  <pre><button class="copy-btn" onclick="copyCode(this)">Kopyala</button">$connStr = az monitor app-insights component show \
+  --app ai-yafespars-prod \
+  --resource-group rg-yafespars-prod \
+  --query connectionString -o tsv
+
+az webapp config appsettings set \
+  --name app-yafespars-prod \
+  --resource-group rg-yafespars-prod \
+  --settings APPLICATIONINSIGHTS_CONNECTION_STRING="$connStr"</pre>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">📊</span> İzlenecek Metrikler</div>
+    <table>
+      <tr><th>Metrik</th><th>Normal Değer</th><th>Alarm Eşiği</th></tr>
+      <tr><td>HTTP 5xx hata oranı</td><td>%0</td><td>%1 üzeri</td></tr>
+      <tr><td>Ortalama yanıt süresi</td><td>&lt;200ms</td><td>500ms üzeri</td></tr>
+      <tr><td>Başarısız istek sayısı</td><td>0/dk</td><td>5/dk üzeri</td></tr>
+      <tr><td>CPU kullanımı</td><td>%20-40</td><td>%80 üzeri</td></tr>
+      <tr><td>Bellek kullanımı</td><td>%40-60</td><td>%85 üzeri</td></tr>
+    </table>
+  </div>
+
+  <div class="nav-btns">
+    <button class="btn btn-secondary" onclick="goStep(15)">← Geri</button>
+    <button class="btn btn-primary" onclick="completeStep(16)">Devam →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ SAYFA 17 ══ -->
+<div class="step-page" id="page-17">
+  <div class="step-badge">Sorun Giderme · Adım 18 / 20</div>
+  <h1 class="step-title">Yaygın Hata Senaryoları ve Çözümler</h1>
+  <p class="step-desc">Azure kurulumunda en sık karşılaşılan hatalar ve adım adım çözümleri.</p>
+
+  <div class="error-box">
+    <div class="error-title">🔴 Hata 1: Migration — sp_CreateProperty Sözdizimi Hatası</div>
+    <div class="error-body">
+      <code>Msg 102, Level 15, State 1, Procedure sp_CreateProperty, Line 27<br>Incorrect syntax near '@property_address'.</code>
+    </div>
+  </div>
+  <div class="solution-box">
+    <div class="sol-title">✓ Çözüm</div>
+    <p style="font-size:13px;margin:0">Bu hata <strong>migration 020 v1'de</strong> mevcuttu — <code>@address</code> SQL Server reserved keyword'üdür, <code>@property_address</code> ile yeniden adlandırıldı. Ayrıca <code>EXEC</code> içinde <code>ISNULL()</code> çağrısı kullanılamaz; geçici değişkene atanması gerekir. Güncel <code>020__add_write_stored_procedures.sql</code> dosyasında her iki düzeltme de mevcuttur.</p>
+  </div>
+
+  <div class="error-box">
+    <div class="error-title">🔴 Hata 2: App Service — Connection Timeout</div>
+    <div class="error-body">
+      <code>System.Data.SqlClient.SqlException: A network-related or instance-specific error occurred while establishing a connection to SQL Server.</code>
+    </div>
+  </div>
+  <div class="solution-box">
+    <div class="sol-title">✓ Çözüm</div>
+    <ul style="font-size:13px;margin:.5rem 0 0 1rem">
+      <li>SQL Server güvenlik duvarında <code>AllowAzureServices</code> kuralını doğrulayın</li>
+      <li>Connection string'deki server adını kontrol edin: <code>.database.windows.net</code> ekli olmalı</li>
+      <li><code>Encrypt=True</code> ve <code>TrustServerCertificate=False</code> olmalı</li>
+      <li>Key Vault referansının çözüldüğünü: App Service → Configuration → Secret status: Resolved</li>
+    </ul>
+  </div>
+
+  <div class="error-box">
+    <div class="error-title">🔴 Hata 3: GitHub Actions — AZURE_CREDENTIALS Invalid</div>
+    <div class="error-body">
+      <code>Error: The service principal either doesn't exist or one of its properties has changed.</code>
+    </div>
+  </div>
+  <div class="solution-box">
+    <div class="sol-title">✓ Çözüm</div>
+    <ul style="font-size:13px;margin:.5rem 0 0 1rem">
+      <li>Service Principal'ın süresi dolmuş olabilir — <code>az ad sp credential reset --name sp-yafespars-github</code></li>
+      <li>GitHub Secret'ı güncel JSON ile yenileyin</li>
+      <li>SP'nin Resource Group üzerinde Contributor yetkisi olduğunu doğrulayın</li>
+    </ul>
+  </div>
+
+  <div class="error-box">
+    <div class="error-title">🔴 Hata 4: JWT 401 Unauthorized</div>
+    <div class="error-body">
+      <code>HTTP 401 Unauthorized — Bearer token validation failed.</code>
+    </div>
+  </div>
+  <div class="solution-box">
+    <div class="sol-title">✓ Çözüm</div>
+    <ul style="font-size:13px;margin:.5rem 0 0 1rem">
+      <li><code>Jwt__Issuer</code> değerinin API URL'si ile birebir eşleştiğini kontrol edin</li>
+      <li><code>Jwt__Secret</code> Key Vault'tan doğru okunuyor mu: App Service Log Stream'den doğrulayın</li>
+      <li>Token'ın süresinin dolmadığını kontrol edin (<code>ExpiryMinutes</code>)</li>
+    </ul>
+  </div>
+
+  <div class="error-box">
+    <div class="error-title">🔴 Hata 5: Key Vault — Access Denied</div>
+    <div class="error-body">
+      <code>Azure.RequestFailedException: The user, group or application does not have secrets get permission on key vault 'kv-yafespars-prod'.</code>
+    </div>
+  </div>
+  <div class="solution-box">
+    <div class="sol-title">✓ Çözüm</div>
+    <pre style="margin:0;font-size:12px">az keyvault set-policy \
+  --name kv-yafespars-prod \
+  --object-id $(az webapp identity show \
+    --name app-yafespars-prod \
+    --resource-group rg-yafespars-prod \
+    --query principalId -o tsv) \
+  --secret-permissions get list</pre>
+  </div>
+
+  <div class="error-box">
+    <div class="error-title">🔴 Hata 6: Migration — Invalid Column 'added_by_user_id'</div>
+    <div class="error-body">
+      <code>Msg 207, Level 16, State 1, Procedure sp_LinkRiskToContract, Line 22 Invalid column name 'added_by_user_id'</code>
+    </div>
+  </div>
+  <div class="solution-box">
+    <div class="sol-title">✓ Çözüm</div>
+    <p style="font-size:13px;margin:0"><code>policy.ContractObject</code> tablosunda <code>added_by_user_id</code> kolonu yoktur. Güncel SP yalnızca <code>contract_id</code>, <code>insurable_object_id</code>, <code>contract_object_status_code</code> kolonlarına yazar. Bu düzeltme migration 020'nin güncel sürümünde mevcuttur.</p>
+  </div>
+
+  <div class="nav-btns">
+    <button class="btn btn-secondary" onclick="goStep(16)">← Geri</button>
+    <button class="btn btn-primary" onclick="completeStep(17)">Devam →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ SAYFA 18 ══ -->
+<div class="step-page" id="page-18">
+  <div class="step-badge">Son · Adım 19 / 20</div>
+  <h1 class="step-title">Sağlık Kontrolleri</h1>
+  <p class="step-desc">Tüm bileşenlerin çalıştığını doğrulayan son kontrol listesi.</p>
+
+  <h2>API Health Check</h2>
+  <pre><button class="copy-btn" onclick="copyCode(this)">Kopyala</button>curl -s https://app-yafespars-prod.azurewebsites.net/health | python3 -m json.tool</pre>
+
+  <div class="terminal">
+    <div class="terminal-bar"><span>Beklenen Yanıt</span></div>
+    <div class="terminal-body">
+      <div class="t-out">{</div>
+      <div class="t-out">&nbsp;&nbsp;"status": <span class="t-ok">"Healthy"</span>,</div>
+      <div class="t-out">&nbsp;&nbsp;"totalDuration": "00:00:00.0234567",</div>
+      <div class="t-out">&nbsp;&nbsp;"entries": {</div>
+      <div class="t-out">&nbsp;&nbsp;&nbsp;&nbsp;"sql": { "status": <span class="t-ok">"Healthy"</span> },</div>
+      <div class="t-out">&nbsp;&nbsp;&nbsp;&nbsp;"self": { "status": <span class="t-ok">"Healthy"</span> }</div>
+      <div class="t-out">&nbsp;&nbsp;}</div>
+      <div class="t-out">}</div>
+    </div>
+  </div>
+
+  <h2>Endpoint Testleri</h2>
+  <pre><button class="copy-btn" onclick="copyCode(this)">Kopyala</button">BASE="https://app-yafespars-prod.azurewebsites.net"
+
+# Token al
+TOKEN=$(curl -s -X POST $BASE/auth/token \
+  -H "Content-Type: application/json" \
+  -d '{"tenantCode":"DEMO","username":"admin","password":"admin123"}' \
+  | jq -r .token)
+
+# Kişi listesi
+curl -s $BASE/api/persons \
+  -H "Authorization: Bearer $TOKEN" | jq '.totalCount'
+
+# Poliçe listesi
+curl -s $BASE/api/policies \
+  -H "Authorization: Bearer $TOKEN" | jq '.totalCount'
+
+# Yeni araç kaydı (write endpoint)
+curl -s -X POST $BASE/api/risk/vehicles \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"plateNumber":"34YF0001","brand":"Toyota","model":"Corolla","modelYear":2022,"chassisNumber":"TEST001"}' \
+  | jq '{status: .status, objectId: .insuredObjectId}'</pre>
+
+  <div class="terminal">
+    <div class="terminal-bar"><span>Beklenen Çıktı</span></div>
+    <div class="terminal-body">
+      <div class="t-out">totalCount: 3</div>
+      <div class="t-out">totalCount: 1</div>
+      <div class="t-out">{</div>
+      <div class="t-ok">&nbsp;&nbsp;"status": "created",</div>
+      <div class="t-ok">&nbsp;&nbsp;"objectId": 4</div>
+      <div class="t-out">}</div>
+    </div>
+  </div>
+
+  <h2>Swagger UI</h2>
+  <p>API belgelerine tarayıcıdan erişin: <code>https://app-yafespars-prod.azurewebsites.net/swagger</code></p>
+
+  <ul class="check-list">
+    <li class="ok"><div class="chk"></div><div><strong>/health</strong> → Healthy döndürüyor</div></li>
+    <li class="ok"><div class="chk"></div><div><strong>/swagger</strong> → UI açılıyor</div></li>
+    <li class="ok"><div class="chk"></div><div><strong>Auth token</strong> alınıyor</div></li>
+    <li class="ok"><div class="chk"></div><div><strong>GET /api/persons</strong> sonuç döndürüyor</div></li>
+    <li class="ok"><div class="chk"></div><div><strong>POST /api/risk/vehicles</strong> yeni kayıt oluşturuyor</div></li>
+    <li class="ok"><div class="chk"></div><div><strong>Application Insights</strong> log alıyor</div></li>
+  </ul>
+
+  <div class="nav-btns">
+    <button class="btn btn-secondary" onclick="goStep(17)">← Geri</button>
+    <button class="btn btn-primary" onclick="completeStep(18)">Tamamlandı →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ SAYFA 19 ══ -->
+<div class="step-page" id="page-19">
+  <div class="step-badge">Tamamlandı · Adım 20 / 20</div>
+  <h1 class="step-title">🎉 Azure Kurulumu Tamamlandı</h1>
+  <p class="step-desc">Yafes Pars sigorta sistemi Azure üzerinde production-ready olarak çalışıyor.</p>
+
+  <div class="grid3">
+    <div class="stat-card"><div class="stat-num">20</div><div class="stat-label">Adım Tamamlandı</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--green)">21</div><div class="stat-label">Migration Başarılı</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--purple)">14</div><div class="stat-label">Write SP Aktif</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">🏁</span> Oluşturulan Azure Kaynakları</div>
+    <table>
+      <tr><th>Kaynak Adı</th><th>Tür</th><th>Durum</th></tr>
+      <tr><td>rg-yafespars-prod</td><td>Resource Group</td><td><span class="badge badge-green">✓ Aktif</span></td></tr>
+      <tr><td>sql-yafespars-prod</td><td>SQL Server</td><td><span class="badge badge-green">✓ Aktif</span></td></tr>
+      <tr><td>YafesPars</td><td>SQL Database (S2)</td><td><span class="badge badge-green">✓ Aktif</span></td></tr>
+      <tr><td>asp-yafespars-prod</td><td>App Service Plan (B2)</td><td><span class="badge badge-green">✓ Aktif</span></td></tr>
+      <tr><td>app-yafespars-prod</td><td>Web App (.NET 8)</td><td><span class="badge badge-green">✓ Aktif</span></td></tr>
+      <tr><td>kv-yafespars-prod</td><td>Key Vault</td><td><span class="badge badge-green">✓ Aktif</span></td></tr>
+      <tr><td>ai-yafespars-prod</td><td>Application Insights</td><td><span class="badge badge-green">✓ Aktif</span></td></tr>
+      <tr><td>law-yafespars-prod</td><td>Log Analytics Workspace</td><td><span class="badge badge-green">✓ Aktif</span></td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">🔗</span> Önemli URL'ler</div>
+    <table>
+      <tr><th>Servis</th><th>URL</th></tr>
+      <tr><td>API</td><td><code>https://app-yafespars-prod.azurewebsites.net</code></td></tr>
+      <tr><td>Health Check</td><td><code>https://app-yafespars-prod.azurewebsites.net/health</code></td></tr>
+      <tr><td>Swagger UI</td><td><code>https://app-yafespars-prod.azurewebsites.net/swagger</code></td></tr>
+      <tr><td>Azure Portal</td><td><code>portal.azure.com → rg-yafespars-prod</code></td></tr>
+      <tr><td>App Insights</td><td><code>portal.azure.com → ai-yafespars-prod</code></td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">📋</span> Sonraki Adımlar</div>
+    <ul>
+      <li>Custom domain ve SSL sertifikası ekleyin (<code>api.yafespars.com</code>)</li>
+      <li>Azure SQL için otomatik yedekleme politikası tanımlayın</li>
+      <li>Application Insights'ta alarm kuralları oluşturun</li>
+      <li>Staging slot ekleyerek blue-green deployment yapılandırın</li>
+      <li>SSMS Operator Workbench'i Azure SQL'e bağlayın (<code>sql-yafespars-prod.database.windows.net</code>)</li>
+    </ul>
+  </div>
+
+  <div class="success">✓ Sistem production'a hazır. Detaylı operatör kılavuzu için <strong>docs/kullanim-kilavuzu.md</strong> dosyasına bakın.</div>
+
+  <div class="nav-btns">
+    <button class="btn btn-secondary" onclick="goStep(18)">← Geri</button>
+    <button class="btn btn-secondary" onclick="resetProgress()">Başa Dön</button>
+  </div>
+</div>
+
+</main>
+</div>
+
+<script>
+let completed = new Set();
+const TOTAL = 20;
+
+function goStep(n) {
+  document.querySelectorAll('.step-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + n).classList.add('active');
+  const nav = document.getElementById('nav-' + n);
+  if (nav) { nav.classList.add('active'); nav.scrollIntoView({block:'nearest'}); }
+}
+
+function completeStep(n) {
+  completed.add(n);
+  const nav = document.getElementById('nav-' + n);
+  if (nav) { nav.classList.add('done'); nav.classList.remove('active'); }
+  updateProgress();
+  goStep(n + 1);
+}
+
+function updateProgress() {
+  const pct = Math.round((completed.size / TOTAL) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = completed.size + ' / ' + TOTAL + ' adım';
+}
+
+function resetProgress() {
+  completed.clear();
+  document.querySelectorAll('.nav-item').forEach(b => { b.classList.remove('done','active'); });
+  updateProgress();
+  goStep(0);
+  document.getElementById('nav-0').classList.add('active');
+}
+
+function copyCode(btn) {
+  const pre = btn.parentElement;
+  const text = pre.textContent.replace('Kopyala','').trim();
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Kopyalandı!';
+    setTimeout(() => btn.textContent = 'Kopyala', 1800);
+  });
+}
+</script>
+</body>
+</html>
