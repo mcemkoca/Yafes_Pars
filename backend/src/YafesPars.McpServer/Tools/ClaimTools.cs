@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Text.Json;
+using Microsoft.Data.SqlClient;
 using ModelContextProtocol.Server;
 using YafesPars.Application.Abstractions;
 using YafesPars.McpServer;
@@ -20,10 +21,12 @@ public sealed class ClaimTools
         _ctx = ctx;
     }
 
-    [McpServerTool, Description("Bir poliçenin hasar dosyalarını listele.")]
+    [McpServerTool, Description(
+        "Haal schadedossiers op van een polis. / Bir poliçenin hasar dosyalarını listele.\n" +
+        "Statussen / Durumlar: OPEN, IN_PROGRESS, CLOSED, PENDING.")]
     public async Task<string> GetClaims(
-        [Description("Poliçe ID'si (UUID)")] Guid contractId,
-        [Description("Durum filtresi: OPEN, CLOSED, PENDING, IN_PROGRESS")] string? statusCode = null,
+        [Description("Polis-ID (UUID)")] Guid contractId,
+        [Description("Statusfilter: OPEN, CLOSED, PENDING, IN_PROGRESS")] string? statusCode = null,
         CancellationToken ct = default)
     {
         var sql = """
@@ -47,16 +50,18 @@ public sealed class ClaimTools
             : JsonSerializer.Serialize(rows, JsonOpts.Default);
     }
 
-    [McpServerTool, Description("Yeni hasar bildirimi oluştur.")]
+    [McpServerTool, Description(
+        "Registreer een nieuw schadegeval. / Yeni hasar bildirimi oluştur.\n" +
+        "Dekkingscodes: BA_AUTO, OMNIUM, FIRE_BUILDING, FIRE_CONTENTS, HOSPITALIZATION, enz.")]
     public async Task<string> CreateClaim(
-        [Description("Poliçe ID'si (UUID)")] Guid contractId,
-        [Description("Hasar tarihi (yyyy-MM-dd)")] DateOnly incidentDate,
-        [Description("Hasar açıklaması")] string description,
-        [Description("Teminat kodu (örn: KASKO, TRAFIK)")] string? coverageCode = null,
-        [Description("Tahmini hasar tutarı")] decimal? reservedAmount = null,
+        [Description("Polis-ID (UUID)")] Guid contractId,
+        [Description("Datum van het schadegeval (YYYY-MM-DD)")] DateOnly incidentDate,
+        [Description("Beschrijving van de schade / Hasar açıklaması")] string description,
+        [Description("Dekkingscode bijv. BA_AUTO, OMNIUM, FIRE_BUILDING")] string? coverageCode = null,
+        [Description("Geraamd schadebedrag / Tahmini hasar tutarı")] decimal? reservedAmount = null,
         CancellationToken ct = default)
     {
-        var claimNumber = $"H{DateTime.UtcNow:yyyyMMdd}-{Random.Shared.Next(1000, 9999)}";
+        var claimNumber = $"S{DateTime.UtcNow:yyyyMMdd}-{Random.Shared.Next(1000, 9999)}";
 
         var sql = """
             INSERT INTO claim.Claim
@@ -71,34 +76,49 @@ public sealed class ClaimTools
         var id = await _write.ExecuteScalarAsync<Guid>(sql,
             new { tenantId = _ctx.TenantId, contractId, claimNumber, coverageCode, incidentDate, reservedAmount }, ct);
 
-        return $"Hasar bildirimi oluşturuldu. ClaimId: {id} — Numara: {claimNumber}";
+        return JsonSerializer.Serialize(new
+        {
+            success = true,
+            claimId = id,
+            claimNumber,
+            message = $"Schadedossier aangemaakt: {claimNumber} (ID: {id})"
+        }, JsonOpts.Default);
     }
 
-    [McpServerTool, Description("Operatör görevlerini listele. Bekleyen ve süresi dolan görevler önce gelir.")]
-    public async Task<string> GetPendingTasks(
-        [Description("Döndürülecek maksimum kayıt sayısı (varsayılan 15)")] int limit = 15,
+    [McpServerTool, Description(
+        "Sluit een schadedossier af. / Hasar dosyasını kapat.\n" +
+        "Vereist: claimId en betaald bedrag. Status wordt CLOSED.")]
+    public async Task<string> CloseClaim(
+        [Description("Schadedossier-ID (UUID)")] Guid claimId = default,
+        [Description("Uitbetaald bedrag / Ödenen tutar")] decimal? paidAmount = null,
+        [Description("Afsluitreden bijv. VERGOED, AFGEWEZEN, INGETROKKEN")] string? closureReason = null,
         CancellationToken ct = default)
     {
-        var sql = """
-            SELECT TOP (@limit)
-                t.task_id, t.title, t.task_priority_code, t.task_status_code,
-                t.related_entity_type, t.related_entity_id,
-                t.due_at_utc,
-                u.display_name AS assigned_to_name
-            FROM tasking.Task t
-            LEFT JOIN core.AppUser u ON u.user_id = t.assigned_to_user_id
-            WHERE t.tenant_id = @tenantId
-              AND t.task_status_code IN ('OPEN', 'IN_PROGRESS')
-            ORDER BY
-                CASE t.task_priority_code WHEN 'HIGH' THEN 1 WHEN 'MEDIUM' THEN 2 ELSE 3 END,
-                t.due_at_utc ASC
-            """;
+        if (claimId == default)
+            return "Fout: claimId is verplicht.";
 
-        var rows = await _read.QueryAsync<dynamic>(sql,
-            new { tenantId = _ctx.TenantId, limit }, ct);
+        try
+        {
+            await _write.ExecuteAsync(
+                "EXEC claim.sp_CloseClaim @tenant_id, @claim_id, @paid_amount, @closure_reason, NULL;",
+                new
+                {
+                    tenant_id = _ctx.TenantId,
+                    claim_id = claimId,
+                    paid_amount = paidAmount,
+                    closure_reason = closureReason
+                },
+                ct);
 
-        return rows.Count == 0
-            ? "Bekleyen görev yok."
-            : JsonSerializer.Serialize(rows, JsonOpts.Default);
+            return JsonSerializer.Serialize(new
+            {
+                success = true,
+                message = $"Schadedossier {claimId} afgesloten. Betaald: {paidAmount?.ToString("N2") ?? "n.v.t."}"
+            }, JsonOpts.Default);
+        }
+        catch (SqlException ex)
+        {
+            return $"Databasefout {ex.Number}: {ex.Message}";
+        }
     }
 }
