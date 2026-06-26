@@ -100,13 +100,13 @@ public sealed class ClaimTools
         try
         {
             await _write.ExecuteAsync(
-                "EXEC claim.sp_CloseClaim @tenant_id, @claim_id, @paid_amount, @closure_reason, NULL;",
+                "EXEC claim.SP_CloseClaim @tenant_id, @claim_id, @closed_date, @paid_amount, NULL, NULL, NULL;",
                 new
                 {
                     tenant_id = _ctx.TenantId,
                     claim_id = claimId,
-                    paid_amount = paidAmount,
-                    closure_reason = closureReason
+                    closed_date = DateOnly.FromDateTime(DateTime.UtcNow),
+                    paid_amount = paidAmount
                 },
                 ct);
 

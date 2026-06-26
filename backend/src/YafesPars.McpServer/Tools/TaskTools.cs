@@ -72,16 +72,15 @@ public sealed class TaskTools
         {
             var taskId = await _write.ExecuteScalarAsync<Guid>(
                 "DECLARE @id UNIQUEIDENTIFIER; " +
-                "EXEC tasking.sp_CreateTask " +
-                "@tenant_id, @task_type_code, @subject, @description, @priority_code, @related_entity_type, @related_entity_id, @due_at_utc, NULL, @id OUTPUT; " +
+                "EXEC tasking.SP_CreateTask " +
+                "@tenant_id, @title, @description, @related_entity_type, @related_entity_id, NULL, NULL, @task_priority_code, N'OPEN', @due_at_utc, @id OUTPUT; " +
                 "SELECT @id;",
                 new
                 {
                     tenant_id = _ctx.TenantId,
-                    task_type_code = taskTypeCode,
-                    subject,
+                    title = subject,
                     description,
-                    priority_code = priorityCode,
+                    task_priority_code = priorityCode,
                     related_entity_type = relatedEntityType,
                     related_entity_id = relatedEntityId,
                     due_at_utc = dueAt
@@ -115,7 +114,8 @@ public sealed class TaskTools
         try
         {
             await _write.ExecuteAsync(
-                "EXEC tasking.sp_AddTaskComment @tenant_id, @task_id, @comment_text, NULL;",
+                "DECLARE @cid UNIQUEIDENTIFIER; " +
+                "EXEC tasking.SP_AddTaskComment @tenant_id, @task_id, @comment_text, NULL, @cid OUTPUT;",
                 new { tenant_id = _ctx.TenantId, task_id = taskId, comment_text = comment },
                 ct);
 
