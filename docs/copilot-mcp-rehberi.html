@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yafes Pars — Copilot MCP Kurulum Rehberi</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#e6edf3;--muted:#8b949e;--accent:#1d9e75;--azure:#0078d4;--warn:#d29922;--danger:#f85149;--code-bg:#1f2428}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.6;display:flex;min-height:100vh}
+aside{width:260px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);padding:24px 0;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0}
+aside h2{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;padding:0 20px 8px}
+nav a{display:block;padding:7px 20px;color:var(--muted);text-decoration:none;font-size:13px;border-left:2px solid transparent;transition:.15s}
+nav a:hover{color:var(--text);background:rgba(255,255,255,.04)}
+nav a.active{color:var(--accent);border-left-color:var(--accent);background:rgba(29,158,117,.08)}
+nav .group{margin-top:16px}
+main{flex:1;padding:48px 64px;max-width:860px}
+h1{font-size:28px;font-weight:600;margin-bottom:8px}
+.subtitle{color:var(--muted);margin-bottom:36px;font-size:14px}
+h2{font-size:20px;font-weight:600;margin:40px 0 16px;padding-top:8px}
+h3{font-size:15px;font-weight:600;margin:24px 0 10px;color:var(--text)}
+p{color:#c9d1d9;margin-bottom:14px}
+.step-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px 24px;margin-bottom:20px}
+.step-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step-title{font-size:16px;font-weight:600}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:14px 16px;overflow-x:auto;margin:10px 0 16px;position:relative}
+code{font-family:'Cascadia Code','Fira Code',monospace;font-size:13px;color:#e6edf3}
+.inline-code{background:rgba(110,118,129,.2);border-radius:4px;padding:2px 6px;font-family:monospace;font-size:13px}
+.badge{display:inline-block;font-size:11px;font-weight:600;border-radius:4px;padding:2px 8px;margin-left:6px}
+.badge-green{background:rgba(29,158,117,.15);color:var(--accent)}
+.badge-blue{background:rgba(0,120,212,.15);color:#58a6ff}
+.badge-warn{background:rgba(210,153,34,.15);color:var(--warn)}
+.badge-red{background:rgba(248,81,73,.15);color:var(--danger)}
+.tool-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+.tool-card{background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:12px 14px}
+.tool-name{font-family:monospace;font-size:13px;color:var(--accent);font-weight:600;margin-bottom:4px}
+.tool-desc{font-size:12px;color:var(--muted)}
+.dialog-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin:12px 0}
+.dialog-user{color:#58a6ff;font-size:13px;margin-bottom:8px}
+.dialog-user::before{content:"👤 Operatör: ";font-weight:600}
+.dialog-ai{color:var(--accent);font-size:13px}
+.dialog-ai::before{content:"🤖 Copilot: ";font-weight:600}
+.copy-btn{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:4px;color:var(--muted);padding:3px 8px;font-size:11px;cursor:pointer}
+.copy-btn:hover{color:var(--text)}
+.progress-bar{background:rgba(255,255,255,.06);border-radius:4px;height:6px;overflow:hidden;margin:6px 0 16px}
+.progress-fill{height:100%;border-radius:4px;background:var(--accent)}
+.info-box{background:rgba(0,120,212,.08);border:1px solid rgba(0,120,212,.3);border-radius:6px;padding:12px 16px;margin:12px 0;font-size:13px;color:#58a6ff}
+.warn-box{background:rgba(210,153,34,.08);border:1px solid rgba(210,153,34,.3);border-radius:6px;padding:12px 16px;margin:12px 0;font-size:13px;color:var(--warn)}
+.arch-flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:14px 0;margin:12px 0}
+.arch-box{background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:8px 14px;font-size:13px;text-align:center}
+.arch-arrow{color:var(--muted);font-size:18px}
+</style>
+</head>
+<body>
+<aside>
+  <h2>İçindekiler</h2>
+  <nav>
+    <div class="group"><h2>Genel Bakış</h2>
+      <a href="#mimari" class="active">Mimari</a>
+      <a href="#tools">Mevcut Tool'lar</a>
+    </div>
+    <div class="group"><h2>Kurulum</h2>
+      <a href="#gereksinimler">Gereksinimler</a>
+      <a href="#build">Projeyi Derle</a>
+      <a href="#config">Konfigürasyon</a>
+      <a href="#claude">Claude Desktop</a>
+      <a href="#vscode">VS Code Copilot</a>
+      <a href="#github">GitHub Copilot</a>
+    </div>
+    <div class="group"><h2>Kullanım</h2>
+      <a href="#ornek-1">Müşteri sorgulama</a>
+      <a href="#ornek-2">Araç kaydı</a>
+      <a href="#ornek-3">Fatura & ödeme</a>
+      <a href="#ornek-4">Hasar bildirimi</a>
+      <a href="#ornek-5">Dashboard</a>
+    </div>
+    <div class="group"><h2>Azure</h2>
+      <a href="#azure-deploy">Azure'a deploy</a>
+      <a href="#sorun">Sorun giderme</a>
+    </div>
+  </nav>
+</aside>
+
+<main>
+  <h1>Yafes Pars — Copilot MCP Rehberi</h1>
+  <p class="subtitle">Model Context Protocol · Operatör Yapay Zeka Asistanı · Sürüm 1.0</p>
+
+  <!-- MİMARİ -->
+  <h2 id="mimari">Mimari</h2>
+  <div class="step-card">
+    <p>Operatör doğal dil ile çalışır. AI (Copilot / Claude) bu isteği MCP tool call'a çevirir. MCP Server SQL Server'a doğrudan bağlanır ve sonucu AI'ya iletir. AI yanıtı kullanıcıya özetler.</p>
+    <div class="arch-flow">
+      <div class="arch-box">👤<br><small>Operatör</small></div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box" style="border-color:#1d9e75">🤖<br><small>AI (Copilot)</small></div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box" style="border-color:#378add">⚙️<br><small>MCP Server</small></div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box" style="border-color:#e24b4a">🗄️<br><small>SQL Server</small></div>
+    </div>
+    <p style="margin-top:8px;font-size:13px;color:var(--muted)">Yanıt yönü: SQL Server → MCP Server → AI → Operatör</p>
+    <div class="info-box" style="margin-top:12px">
+      MCP Server, mevcut <span class="inline-code">YafesPars.Infrastructure</span> katmanını kullanır. Ayrı bir API çağrısı yapmaz — doğrudan veritabanına bağlanır. JWT gerektirmez, tenant_id config'den alınır.
+    </div>
+  </div>
+
+  <!-- TOOL'LAR -->
+  <h2 id="tools">Mevcut Tool'lar (11 adet)</h2>
+  <div class="tool-grid">
+    <div class="tool-card"><div class="tool-name">search_contracts</div><div class="tool-desc">Poliçe numarası veya duruma göre arama</div></div>
+    <div class="tool-card"><div class="tool-name">get_contracts_by_person</div><div class="tool-desc">Müşterinin tüm poliçelerini listele</div></div>
+    <div class="tool-card"><div class="tool-name">search_persons</div><div class="tool-desc">Ad, soyad, dosya no veya e-posta ile müşteri ara</div></div>
+    <div class="tool-card"><div class="tool-name">get_person</div><div class="tool-desc">Müşteri detaylarını getir</div></div>
+    <div class="tool-card"><div class="tool-name">get_invoices</div><div class="tool-desc">Poliçenin faturalarını listele</div></div>
+    <div class="tool-card"><div class="tool-name">create_invoice</div><div class="tool-desc">Yeni fatura oluştur</div></div>
+    <div class="tool-card"><div class="tool-name">record_payment</div><div class="tool-desc">Ödeme kaydet, fatura PAID olarak güncellenir</div></div>
+    <div class="tool-card"><div class="tool-name">create_payment_plan</div><div class="tool-desc">Taksit planı oluştur</div></div>
+    <div class="tool-card"><div class="tool-name">register_vehicle</div><div class="tool-desc">Araç kaydı yap</div></div>
+    <div class="tool-card"><div class="tool-name">find_vehicle_by_plate</div><div class="tool-desc">Plaka ile araç sorgula</div></div>
+    <div class="tool-card"><div class="tool-name">create_claim</div><div class="tool-desc">Hasar bildirimi oluştur</div></div>
+    <div class="tool-card"><div class="tool-name">get_pending_tasks</div><div class="tool-desc">Bekleyen operatör görevleri</div></div>
+    <div class="tool-card"><div class="tool-name">get_dashboard</div><div class="tool-desc">Anlık özet: poliçe, hasar, görev, fatura</div></div>
+    <div class="tool-card"><div class="tool-name">get_monthly_financial_summary</div><div class="tool-desc">Aylık tahsilat ve prim özeti</div></div>
+  </div>
+
+  <!-- GEREKSİNİMLER -->
+  <h2 id="gereksinimler">1. Gereksinimler</h2>
+  <div class="step-card">
+    <div class="step-header"><div class="step-num">✓</div><div class="step-title">Sistem gereksinimleri</div></div>
+    <ul style="color:#c9d1d9;font-size:14px;padding-left:18px;line-height:2">
+      <li>.NET 8 SDK</li>
+      <li>SQL Server 2019+ (YafesPars veritabanı migration 000–021 çalışmış olmalı)</li>
+      <li>Claude Desktop <strong>veya</strong> VS Code + GitHub Copilot</li>
+    </ul>
+  </div>
+
+  <!-- DERLEME -->
+  <h2 id="build">2. Projeyi Derle</h2>
+  <div class="step-card">
+    <div class="step-header"><div class="step-num">1</div><div class="step-title">Repo'yu klonla ve derle</div></div>
+    <pre><button class="copy-btn" onclick="this.innerText='✓';setTimeout(()=>this.innerText='kopyala',2000)">kopyala</button><code>git clone https://github.com/mcemkoca/Yafes_Pars.git
+cd Yafes_Pars
+
+dotnet build backend/src/YafesPars.McpServer/YafesPars.McpServer.csproj</code></pre>
+
+    <div class="step-header" style="margin-top:16px"><div class="step-num">2</div><div class="step-title">Test et — stdio'da başlat</div></div>
+    <pre><code>dotnet run --project backend/src/YafesPars.McpServer/YafesPars.McpServer.csproj</code></pre>
+    <p style="font-size:13px;color:var(--muted)">Hata yoksa cursor bekler (MCP sunucu hazır, stdin bekliyor). Ctrl+C ile çık.</p>
+  </div>
+
+  <!-- KONFİGÜRASYON -->
+  <h2 id="config">3. Konfigürasyon</h2>
+  <div class="step-card">
+    <div class="step-header"><div class="step-num">!</div><div class="step-title">appsettings.json düzenle</div></div>
+    <p style="font-size:13px">Dosya: <span class="inline-code">backend/src/YafesPars.McpServer/appsettings.json</span></p>
+    <pre><code>{
+  "ConnectionStrings": {
+    "YafesPars": "Server=SUNUCU_ADI;Database=YafesPars;
+                  User Id=kullanici;Password=sifre;
+                  TrustServerCertificate=True;"
+  },
+  "McpServer": {
+    "TenantId": "GERÇEK-TENANT-GUID-BURAYA"
+  }
+}</code></pre>
+    <div class="warn-box">TenantId'yi veritabanındaki gerçek tenant GUID'i ile değiştir.<br>
+    Sorgu: <span class="inline-code">SELECT tenant_id, name FROM core.Tenant</span></div>
+  </div>
+
+  <!-- CLAUDE DESKTOP -->
+  <h2 id="claude">4a. Claude Desktop ile Kullanım</h2>
+  <div class="step-card">
+    <div class="step-header"><div class="step-num">1</div><div class="step-title">Claude Desktop config dosyasını aç</div></div>
+    <pre><code># Windows
+%APPDATA%\Claude\claude_desktop_config.json
+
+# macOS
+~/Library/Application Support/Claude/claude_desktop_config.json</code></pre>
+
+    <div class="step-header" style="margin-top:16px"><div class="step-num">2</div><div class="step-title">mcpServers bloğunu ekle</div></div>
+    <pre><code>{
+  "mcpServers": {
+    "yafes-pars": {
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "C:\\Yafes_Pars\\backend\\src\\YafesPars.McpServer\\YafesPars.McpServer.csproj",
+        "--no-launch-profile"
+      ],
+      "env": {
+        "ConnectionStrings__YafesPars": "Server=localhost;Database=YafesPars;Integrated Security=True;TrustServerCertificate=True;",
+        "McpServer__TenantId": "TENANT-GUID-BURAYA"
+      }
+    }
+  }
+}</code></pre>
+
+    <div class="step-header" style="margin-top:16px"><div class="step-num">3</div><div class="step-title">Claude Desktop'ı yeniden başlat</div></div>
+    <p style="font-size:13px;color:var(--muted)">Sol altta 🔧 simgesi görünüyorsa MCP bağlantısı başarılı.</p>
+  </div>
+
+  <!-- VS CODE -->
+  <h2 id="vscode">4b. VS Code + GitHub Copilot ile Kullanım</h2>
+  <div class="step-card">
+    <div class="step-header"><div class="step-num">1</div><div class="step-title">Proje kökünde mcp.json zaten hazır</div></div>
+    <p style="font-size:13px">Repo'da <span class="inline-code">mcp.json</span> dosyası mevcut. VS Code GitHub Copilot bunu otomatik algılar.</p>
+
+    <div class="step-header" style="margin-top:16px"><div class="step-num">2</div><div class="step-title">VS Code settings.json'a ekle (gerekirse)</div></div>
+    <pre><code>{
+  "github.copilot.chat.mcp.enabled": true
+}</code></pre>
+
+    <div class="step-header" style="margin-top:16px"><div class="step-num">3</div><div class="step-title">Copilot Chat'i aç → Agent modu seç</div></div>
+    <p style="font-size:13px;color:var(--muted)">Ctrl+Shift+I → üstten <strong>Agent</strong> modunu seç → yafes-pars tool'ları görünür.</p>
+  </div>
+
+  <!-- GITHUB COPILOT -->
+  <h2 id="github">4c. GitHub Copilot Extension (İleri Düzey)</h2>
+  <div class="step-card">
+    <div class="info-box">GitHub Copilot Extension, MCP yerine Copilot API'sini kullanır. Sunucu bir webhook endpoint'e ihtiyaç duyar (Azure App Service veya ngrok).</div>
+    <div class="step-header" style="margin-top:12px"><div class="step-num">1</div><div class="step-title">Mevcut API'yi Copilot Extension endpoint'i olarak kullan</div></div>
+    <pre><code># Yafes Pars API'yi başlat
+dotnet run --project backend/src/YafesPars.Api/YafesPars.Api.csproj
+
+# ngrok ile dışa aç (geliştirme ortamı)
+ngrok http 5000</code></pre>
+    <div class="step-header" style="margin-top:16px"><div class="step-num">2</div><div class="step-title">GitHub → Settings → Developer Settings → GitHub Apps → New</div></div>
+    <p style="font-size:13px;color:var(--muted)">Callback URL: ngrok URL'in + <span class="inline-code">/api/copilot/callback</span><br>
+    Copilot: ✅ Copilot Chat Enabled</p>
+    <div class="warn-box">Bu seçenek MCP'ye göre daha karmaşık. Üretim ortamı için MCP (4a veya 4b) önerilir.</div>
+  </div>
+
+  <!-- ÖRNEK 1 -->
+  <h2 id="ornek-1">Örnek 1 — Müşteri Sorgulama</h2>
+  <div class="step-card">
+    <div class="dialog-box">
+      <p class="dialog-user">"Ali Yılmaz adlı müşterileri bul"</p>
+      <p class="dialog-ai">search_persons(name: "Ali Yılmaz") çağrılıyor…<br><br>
+      Bulunan 2 müşteri:<br>
+      • Ali Yılmaz — ID: a1b2c3d4 — Dosya: 2024/001 — ali@email.com<br>
+      • Ali Mehmet Yılmaz — ID: e5f6g7h8 — Dosya: 2023/045</p>
+    </div>
+    <div class="dialog-box" style="margin-top:8px">
+      <p class="dialog-user">"İlkinin poliçelerini göster"</p>
+      <p class="dialog-ai">get_contracts_by_person(personId: "a1b2c3d4") çağrılıyor…<br><br>
+      3 aktif poliçe bulundu:<br>
+      • 2024/KSK/001 — Kasko — AKTİF — 01.01.2024–31.12.2024<br>
+      • 2024/TRF/012 — Trafik — AKTİF — 01.03.2024–28.02.2025<br>
+      • 2023/KNT/088 — Konut — SÜRESİ GEÇMİŞ — 01.01.2023–31.12.2023</p>
+    </div>
+  </div>
+
+  <!-- ÖRNEK 2 -->
+  <h2 id="ornek-2">Örnek 2 — Araç Kaydı ve Poliçeye Bağlama</h2>
+  <div class="step-card">
+    <div class="dialog-box">
+      <p class="dialog-user">"34 ABC 123 plakalı 2022 Toyota Corolla'yı kaydet ve 2024/KSK/001 poliçesine bağla"</p>
+      <p class="dialog-ai">
+      1. register_vehicle(plateNumber: "34ABC123", brand: "Toyota", model: "Corolla", modelYear: 2022) → ObjectId: x9y8z7…<br>
+      2. search_contracts(contractNumber: "2024/KSK/001") → ContractId: f1e2d3…<br>
+      3. link_risk_to_contract(contractId: "f1e2d3…", insurableObjectId: "x9y8z7…")<br><br>
+      ✅ Araç kaydedildi ve poliçeye bağlandı.</p>
+    </div>
+  </div>
+
+  <!-- ÖRNEK 3 -->
+  <h2 id="ornek-3">Örnek 3 — Fatura ve Ödeme</h2>
+  <div class="step-card">
+    <div class="dialog-box">
+      <p class="dialog-user">"2024/KSK/001 poliçesi için 15.000 TL fatura oluştur, vade tarihi 15 Temmuz"</p>
+      <p class="dialog-ai">create_invoice(contractId: "f1e2d3…", issueDate: 2024-06-25, dueDate: 2024-07-15, amount: 15000, currencyCode: "TRY")<br><br>
+      ✅ Fatura oluşturuldu. InvoiceId: inv-001</p>
+    </div>
+    <div class="dialog-box" style="margin-top:8px">
+      <p class="dialog-user">"Müşteri 5.000 TL ödedi, banka havalesi ile"</p>
+      <p class="dialog-ai">record_payment(invoiceId: "inv-001", paymentDate: 2024-06-25, amount: 5000, paymentMethodCode: "BANK_TRANSFER")<br><br>
+      ✅ Ödeme kaydedildi. Kalan: 10.000 TL</p>
+    </div>
+    <div class="dialog-box" style="margin-top:8px">
+      <p class="dialog-user">"Kalanı 3 taksitle ödesin"</p>
+      <p class="dialog-ai">create_payment_plan(contractId: "f1e2d3…", installmentCount: 3, firstDueDate: 2024-07-15, totalAmount: 10000)<br><br>
+      ✅ 3 taksitli plan oluşturuldu. Her taksit: ~3.333,33 TL</p>
+    </div>
+  </div>
+
+  <!-- ÖRNEK 4 -->
+  <h2 id="ornek-4">Örnek 4 — Hasar Bildirimi</h2>
+  <div class="step-card">
+    <div class="dialog-box">
+      <p class="dialog-user">"34ABC123 plakalı araç 20 Haziran'da kaza geçirdi, hasar bildirimi aç"</p>
+      <p class="dialog-ai">
+      1. find_vehicle_by_plate(plate: "34ABC123") → ContractId alındı<br>
+      2. create_claim(contractId: "f1e2d3…", incidentDate: 2024-06-20, description: "Trafik kazası", coverageCode: "KASKO")<br><br>
+      ✅ Hasar dosyası oluşturuldu. Dosya No: H20240620-7823</p>
+    </div>
+  </div>
+
+  <!-- ÖRNEK 5 -->
+  <h2 id="ornek-5">Örnek 5 — Dashboard</h2>
+  <div class="step-card">
+    <div class="dialog-box">
+      <p class="dialog-user">"Günün özeti nedir?"</p>
+      <p class="dialog-ai">get_dashboard() çağrılıyor…<br><br>
+      📊 Güncel Durum:<br>
+      • Aktif Poliçe: 142<br>
+      • Açık Hasar: 8<br>
+      • Bekleyen Görev: 5<br>
+      • Vadesi Geçen Fatura: 3 (Toplam: 42.500 TL)<br>
+      • Toplam Müşteri: 289</p>
+    </div>
+  </div>
+
+  <!-- AZURE DEPLOY -->
+  <h2 id="azure-deploy">Azure'a Deploy</h2>
+  <div class="step-card">
+    <div class="step-header"><div class="step-num">1</div><div class="step-title">MCP Server'ı Container Image olarak paketle</div></div>
+    <pre><code>cd backend/src/YafesPars.McpServer
+dotnet publish -c Release -o publish/
+
+# Docker image oluştur
+docker build -t yafespars-mcp:latest -f Dockerfile.mcp .</code></pre>
+
+    <div class="step-header" style="margin-top:16px"><div class="step-num">2</div><div class="step-title">Azure Container Instance olarak deploy et</div></div>
+    <pre><code>az container create \
+  --resource-group rg-yafespars-prod \
+  --name yafespars-mcp \
+  --image ghcr.io/mcemkoca/yafes_pars-mcp:latest \
+  --environment-variables \
+    McpServer__TenantId="TENANT-GUID" \
+  --secure-environment-variables \
+    ConnectionStrings__YafesPars="..." \
+  --restart-policy Always</code></pre>
+
+    <div class="step-header" style="margin-top:16px"><div class="step-num">3</div><div class="step-title">Claude Desktop'ı remote MCP ile yapılandır</div></div>
+    <pre><code>{
+  "mcpServers": {
+    "yafes-pars": {
+      "url": "https://yafespars-mcp.westeurope.azurecontainer.io/mcp",
+      "transport": "sse"
+    }
+  }
+}</code></pre>
+    <div class="info-box">SSE (Server-Sent Events) transport ile MCP sunucu remote çalışabilir. Azure Container Instance'a public IP verilmeli.</div>
+  </div>
+
+  <!-- SORUN GİDERME -->
+  <h2 id="sorun">Sorun Giderme</h2>
+  <div class="step-card">
+    <h3>MCP sunucu başlamıyor</h3>
+    <p style="font-size:13px">TenantId geçerli GUID formatında değil. <span class="inline-code">appsettings.json</span>'ı kontrol et.</p>
+    <pre><code>SELECT tenant_id, name FROM core.Tenant -- doğru GUID'i bul</code></pre>
+
+    <h3 style="margin-top:16px">Bağlantı hatası</h3>
+    <p style="font-size:13px">Connection string kontrol et:</p>
+    <pre><code>sqlcmd -S SUNUCU -d YafesPars -Q "SELECT 1"</code></pre>
+
+    <h3 style="margin-top:16px">Claude Desktop tool'ları görmüyor</h3>
+    <p style="font-size:13px">Log dosyasını incele:</p>
+    <pre><code># Windows
+%APPDATA%\Claude\logs\mcp-server-yafes-pars.log</code></pre>
+
+    <h3 style="margin-top:16px">ModelContextProtocol NuGet bulunamadı</h3>
+    <pre><code>dotnet nuget add source https://api.nuget.org/v3/index.json
+dotnet restore</code></pre>
+  </div>
+
+  <div style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)">
+    Yafes Pars SSMS · MCP Server v1.0 · .NET 8 · Model Context Protocol
+  </div>
+</main>
+
+<script>
+document.querySelectorAll('nav a').forEach(a=>{
+  a.addEventListener('click',()=>{
+    document.querySelectorAll('nav a').forEach(x=>x.classList.remove('active'));
+    a.classList.add('active');
+  });
+});
+document.querySelectorAll('.copy-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const code=btn.parentElement.querySelector('code').innerText;
+    navigator.clipboard.writeText(code).catch(()=>{});
+    btn.innerText='✓ Kopyalandı';
+    setTimeout(()=>btn.innerText='kopyala',2000);
+  });
+});
+</script>
+</body>
+</html>
