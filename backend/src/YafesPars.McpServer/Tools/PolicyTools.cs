@@ -19,11 +19,11 @@ public sealed class PolicyTools
         _ctx = ctx;
     }
 
-    [McpServerTool, Description("Sigorta poliçelerini ara. Poliçe numarası, durum kodu veya sözleşme türüne göre filtrele.")]
+    [McpServerTool, Description("Zoek verzekeringspolissen op nummer, status of type. / Poliçe ara.")]
     public async Task<string> SearchContracts(
-        [Description("Poliçe numarası (kısmi eşleşme, örn: '2024/001')")] string? contractNumber = null,
-        [Description("Durum kodu: ACTIVE, EXPIRED, CANCELLED, PENDING")] string? statusCode = null,
-        [Description("Döndürülecek maksimum kayıt sayısı (varsayılan 20)")] int limit = 20,
+        [Description("Polisnummer (gedeeltelijk, bijv. '2026/AUTO/001') / Poliçe numarası")] string? contractNumber = null,
+        [Description("Status: ACTIVE, EXPIRED, CANCELLED, PENDING")] string? statusCode = null,
+        [Description("Max resultaten (standaard 20)")] int limit = 20,
         CancellationToken ct = default)
     {
         var sql = """
@@ -48,13 +48,13 @@ public sealed class PolicyTools
             new { tenantId = _ctx.TenantId, contractNumber, statusCode, limit }, ct);
 
         return rows.Count == 0
-            ? "Poliçe bulunamadı."
+            ? "Geen polis gevonden. / Poliçe bulunamadı."
             : JsonSerializer.Serialize(rows, JsonOpts.Default);
     }
 
-    [McpServerTool, Description("Bir kişinin tüm poliçelerini listele.")]
+    [McpServerTool, Description("Lijst alle polissen van een persoon. / Bir kişinin poliçelerini listele.")]
     public async Task<string> GetContractsByPerson(
-        [Description("Kişinin person_id değeri (UUID)")] Guid personId,
+        [Description("Persoon-ID (UUID) / Kişi ID")] Guid personId,
         CancellationToken ct = default)
     {
         var sql = """
@@ -71,7 +71,7 @@ public sealed class PolicyTools
             new { tenantId = _ctx.TenantId, personId }, ct);
 
         return rows.Count == 0
-            ? "Bu kişiye ait poliçe bulunamadı."
+            ? "Geen polis voor deze persoon. / Bu kişiye ait poliçe yok."
             : JsonSerializer.Serialize(rows, JsonOpts.Default);
     }
 }

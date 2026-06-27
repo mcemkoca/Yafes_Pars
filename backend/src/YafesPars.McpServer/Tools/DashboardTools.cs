@@ -18,7 +18,7 @@ public sealed class DashboardTools
         _ctx = ctx;
     }
 
-    [McpServerTool, Description("Operatör dashboard özeti: aktif poliçe sayısı, açık hasar, bekleyen görev, vadesi gelen faturalar.")]
+    [McpServerTool, Description("Operator-dashboard: actieve polissen, open schaden, openstaande taken, vervallen facturen. / Dashboard özeti.")]
     public async Task<string> GetDashboard(CancellationToken ct = default)
     {
         var sql = """
@@ -41,10 +41,10 @@ public sealed class DashboardTools
         return JsonSerializer.Serialize(rows[0], JsonOpts.Default);
     }
 
-    [McpServerTool, Description("Bu ayki prim ve ödeme özetini getir.")]
+    [McpServerTool, Description("Maandelijks premie- en betalingsoverzicht. / Aylık prim ve ödeme özeti.")]
     public async Task<string> GetMonthlyFinancialSummary(
-        [Description("Yıl (varsayılan: bu yıl)")] int? year = null,
-        [Description("Ay (1-12, varsayılan: bu ay)")] int? month = null,
+        [Description("Jaar (standaard: dit jaar) / Yıl")] int? year = null,
+        [Description("Maand (1-12, standaard: deze maand) / Ay")] int? month = null,
         CancellationToken ct = default)
     {
         var y = year  ?? DateTime.UtcNow.Year;

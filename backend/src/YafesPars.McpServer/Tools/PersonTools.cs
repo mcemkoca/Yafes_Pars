@@ -19,12 +19,12 @@ public sealed class PersonTools
         _ctx = ctx;
     }
 
-    [McpServerTool, Description("Müşteri ara. Ad, soyad, dosya numarası veya e-posta ile arama yapılabilir.")]
+    [McpServerTool, Description("Zoek een klant op naam, dossier of e-mail. / Müşteri ara.")]
     public async Task<string> SearchPersons(
-        [Description("Ad veya soyad (kısmi eşleşme)")] string? name = null,
-        [Description("Dosya/dossier numarası")] string? dossier = null,
-        [Description("E-posta adresi")] string? email = null,
-        [Description("Döndürülecek maksimum kayıt sayısı (varsayılan 20)")] int limit = 20,
+        [Description("Voor- of achternaam (gedeeltelijk) / Ad veya soyad")] string? name = null,
+        [Description("Dossiernummer / Dosya numarası")] string? dossier = null,
+        [Description("E-mailadres / E-posta")] string? email = null,
+        [Description("Max resultaten (standaard 20)")] int limit = 20,
         CancellationToken ct = default)
     {
         var sql = """
@@ -58,9 +58,9 @@ public sealed class PersonTools
             : JsonSerializer.Serialize(rows, JsonOpts.Default);
     }
 
-    [McpServerTool, Description("Belirli bir müşterinin detay bilgilerini getir.")]
+    [McpServerTool, Description("Haal de details van een klant op. / Müşteri detayını getir.")]
     public async Task<string> GetPerson(
-        [Description("Müşterinin person_id değeri (UUID)")] Guid personId,
+        [Description("Persoon-ID (UUID) / Müşteri ID")] Guid personId,
         CancellationToken ct = default)
     {
         var sql = """
