@@ -34,8 +34,8 @@ BEGIN TRANSACTION;
                                        N'SAGLIK', N'HAYAT', N'SORUMLULUK',
                                        N'SEYAHAT', N'ISE_IADE', N'FERDI_KAZA');
 
-        INSERT INTO core.SchemaMigration (migration_name, applied_at_utc)
-        VALUES (N'022__belgian_adaptations', SYSUTCDATETIME());
+        INSERT INTO core.SchemaMigration (migration_name, execution_status)
+        VALUES (N'022__belgian_adaptations', N'SUCCESS');
 
     END
 
