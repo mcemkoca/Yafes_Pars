@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yafes Pars — Kurulum & Veri Yükleme Akışı</title>
+<style>
+  :root{
+    --bg:#0b1020;--panel:#161e38;--panel2:#1c2746;--line:#2a3760;
+    --txt:#e8ecf8;--txt2:#9aa6c8;--txt3:#6b78a0;
+    --accent:#7f77dd;--ok:#1d9e75;--amber:#ef9f27;--blue:#378add;--pink:#d4537e;
+    --glow:rgba(127,119,221,.45);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:linear-gradient(160deg,#0b1020,#0e1428 60%,#0b1020);color:var(--txt);
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;min-height:100vh}
+  .wrap{max-width:760px;margin:0 auto;padding:28px 20px 70px}
+
+  header{text-align:center;margin-bottom:24px}
+  .logo{display:inline-flex;align-items:center;gap:11px;margin-bottom:10px}
+  .mark{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--amber));
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;color:#fff;box-shadow:0 8px 24px var(--glow)}
+  h1{font-size:24px;font-weight:700;letter-spacing:-.4px}
+  .sub{color:var(--txt2);font-size:14px;margin-top:4px}
+
+  /* stepper */
+  .steps{display:flex;align-items:center;justify-content:center;gap:0;margin:18px 0 26px}
+  .st{display:flex;align-items:center;gap:9px}
+  .sc{width:32px;height:32px;border-radius:50%;background:var(--panel2);border:2px solid var(--line);
+    display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--txt3);transition:.4s}
+  .sc.on{border-color:var(--accent);color:#fff;background:var(--accent);box-shadow:0 0 0 5px var(--glow)}
+  .sc.done{border-color:var(--ok);color:#fff;background:var(--ok)}
+  .sl{width:54px;height:2px;background:var(--line);transition:.4s}
+  .sl.done{background:var(--ok)}
+  .stt{font-size:12px;color:var(--txt3);margin-left:-2px;transition:.3s}
+  .stt.on{color:var(--txt)}
+
+  .stage{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:26px;min-height:330px;
+    position:relative;overflow:hidden}
+  .stage-h{font-size:17px;font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:9px}
+  .stage-d{font-size:13px;color:var(--txt2);margin-bottom:20px}
+
+  /* ── stage 1: kurulum ── */
+  .inst{display:flex;flex-direction:column;gap:11px}
+  .ir{display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--panel2);border:1px solid var(--line);
+    border-radius:11px;opacity:.4;transition:.5s}
+  .ir.active{opacity:1;border-color:var(--accent)}
+  .ir.ok{opacity:1;border-color:rgba(29,158,117,.5)}
+  .ir-ic{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;
+    background:rgba(127,119,221,.15);color:var(--accent)}
+  .ir.ok .ir-ic{background:rgba(29,158,117,.18);color:var(--ok)}
+  .ir-t{font-size:13.5px;font-weight:500}
+  .ir-s{font-size:11.5px;color:var(--txt3);margin-top:1px}
+  .ir-st{margin-left:auto;font-size:11px;color:var(--txt3)}
+  .spin{width:15px;height:15px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;
+    animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .chk{color:var(--ok);font-size:16px}
+
+  /* ── stage 2: veri talebi (copilot) ── */
+  .chat{display:flex;flex-direction:column;gap:12px;margin-bottom:18px}
+  .msg{max-width:84%;padding:11px 15px;border-radius:14px;font-size:13.5px;line-height:1.5}
+  .msg.bot{align-self:flex-start;background:var(--panel2);border:1px solid var(--line);border-bottom-left-radius:4px}
+  .msg.usr{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:4px}
+  .msg .who{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;opacity:.6;margin-bottom:3px}
+  .form{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+  .fg{display:flex;flex-direction:column;gap:5px}
+  .fg.full{grid-column:1/-1}
+  label{font-size:11.5px;color:var(--txt2)}
+  input,select{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:9px 11px;
+    color:var(--txt);font-size:13px;font-family:inherit;transition:.2s}
+  input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--glow)}
+  .drop{grid-column:1/-1;border:2px dashed var(--line);border-radius:12px;padding:18px;text-align:center;
+    color:var(--txt3);font-size:13px;cursor:pointer;transition:.25s}
+  .drop:hover{border-color:var(--accent);color:var(--txt2);background:rgba(127,119,221,.05)}
+  .drop.has{border-color:var(--ok);color:var(--ok);border-style:solid}
+
+  /* ── stage 3: yükleme ── */
+  .upload{text-align:center;padding:8px 0}
+  .ring{width:120px;height:120px;margin:6px auto 18px;position:relative}
+  .ring svg{transform:rotate(-90deg)}
+  .ring-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:26px;font-weight:700}
+  .ulist{display:flex;flex-direction:column;gap:8px;margin-top:6px;text-align:left}
+  .ul{display:flex;align-items:center;gap:11px;padding:9px 13px;background:var(--panel2);border:1px solid var(--line);
+    border-radius:10px;font-size:13px;opacity:.35;transition:.4s}
+  .ul.active{opacity:1;border-color:var(--accent)}
+  .ul.ok{opacity:1;border-color:rgba(29,158,117,.5)}
+  .ul-ic{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;
+    background:rgba(55,138,221,.15);color:var(--blue)}
+  .ul.ok .ul-ic{background:rgba(29,158,117,.18);color:var(--ok)}
+  .ul-x{margin-left:auto;font-size:11px;color:var(--txt3);font-family:monospace}
+  .done-card{text-align:center;padding:14px 0}
+  .done-ic{width:62px;height:62px;border-radius:50%;background:rgba(29,158,117,.15);color:var(--ok);
+    display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 14px;
+    animation:pop .5s cubic-bezier(.2,1.4,.4,1)}
+  @keyframes pop{0%{transform:scale(0)}100%{transform:scale(1)}}
+
+  .bar{display:flex;justify-content:space-between;align-items:center;margin-top:22px}
+  .btn{padding:11px 24px;border-radius:11px;border:1px solid var(--line);background:var(--panel2);color:var(--txt);
+    font-size:14px;font-weight:500;cursor:pointer;transition:.22s;display:inline-flex;align-items:center;gap:8px}
+  .btn:hover:not(:disabled){border-color:var(--accent);background:rgba(127,119,221,.12)}
+  .btn.primary{background:linear-gradient(135deg,var(--accent),#6a62c9);border-color:transparent}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .ghost{background:transparent;border-color:transparent;color:var(--txt3)}
+
+  @media(max-width:560px){.form{grid-template-columns:1fr}.stt{display:none}.sl{width:30px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo">
+      <div class="mark">YP</div>
+      <div style="text-align:left"><h1>Yafes Pars</h1><div class="sub">Kurulum & operatör veri yükleme akışı</div></div>
+    </div>
+  </header>
+
+  <div class="steps">
+    <div class="st"><div class="sc on" id="sc1">1</div><span class="stt on" id="stt1">Kurulum</span></div>
+    <div class="sl" id="sl1"></div>
+    <div class="st"><div class="sc" id="sc2">2</div><span class="stt" id="stt2">Veri talebi</span></div>
+    <div class="sl" id="sl2"></div>
+    <div class="st"><div class="sc" id="sc3">3</div><span class="stt" id="stt3">Yükleme</span></div>
+  </div>
+
+  <!-- ── STAGE 1: KURULUM ── -->
+  <div class="stage" id="stage1">
+    <div class="stage-h"><i>⚙️</i> Sistem kuruluyor</div>
+    <div class="stage-d">Copilot, Azure altyapısını ve veritabanını hazırlıyor. Bu adım tamamlanınca sistem sizden veri isteyecek.</div>
+    <div class="inst" id="instList"></div>
+  </div>
+
+  <!-- ── STAGE 2: VERİ TALEBİ ── -->
+  <div class="stage" id="stage2" style="display:none">
+    <div class="stage-h"><i>🤖</i> Sistem hazır — veri istiyor</div>
+    <div class="stage-d">Kurulum tamamlandı. Operatör verisini girin; Copilot doğru MCP araçlarıyla sisteme işleyecek.</div>
+    <div class="chat">
+      <div class="msg bot"><div class="who">Copilot</div>Sistem kuruldu ve hazır. Yeni bir poliçe oluşturmak için müşteri ve araç bilgilerini paylaşır mısınız?</div>
+    </div>
+    <div class="form">
+      <div class="fg"><label>Müşteri adı (voornaam + achternaam)</label><input id="f_name" value="Jan Janssens"></div>
+      <div class="fg"><label>Rijksregisternummer (RRN)</label><input id="f_rrn" value="90.02.15-123.45"></div>
+      <div class="fg"><label>Poliçe türü</label>
+        <select id="f_type"><option>AUTO_FULL — BA Auto + Omnium</option><option>AUTO_BASIC — BA Auto</option><option>HOME_FULL — Woning volledig</option></select></div>
+      <div class="fg"><label>Nummerplaat</label><input id="f_plate" value="1-ABC-123"></div>
+      <div class="fg"><label>Voertuig</label><input id="f_car" value="Volkswagen Golf 2022"></div>
+      <div class="fg"><label>Premie (EUR)</label><input id="f_prem" value="1.500"></div>
+      <div class="drop" id="drop">📎 Belge ekle — kimlik / aanvraagformulier (sürükle-bırak veya tıkla)</div>
+    </div>
+  </div>
+
+  <!-- ── STAGE 3: YÜKLEME ── -->
+  <div class="stage" id="stage3" style="display:none">
+    <div id="uploadView">
+      <div class="stage-h"><i>⏳</i> Veri sisteme yükleniyor</div>
+      <div class="stage-d">Copilot, girdiğiniz veriyi MCP araçlarıyla SQL Server'a işliyor. Her adım stored procedure ile doğrulanıyor.</div>
+      <div class="upload">
+        <div class="ring">
+          <svg width="120" height="120" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="#2a3760" stroke-width="8"/>
+            <circle id="ringFill" cx="60" cy="60" r="52" fill="none" stroke="#7f77dd" stroke-width="8"
+              stroke-linecap="round" stroke-dasharray="327" stroke-dashoffset="327"/>
+          </svg>
+          <div class="ring-pct" id="pct">0%</div>
+        </div>
+      </div>
+      <div class="ulist" id="ulist"></div>
+    </div>
+
+    <div class="done-card" id="doneView" style="display:none">
+      <div class="done-ic">✓</div>
+      <div class="stage-h" style="justify-content:center">Yükleme tamamlandı</div>
+      <div class="stage-d" id="doneSummary">Tüm kayıtlar oluşturuldu.</div>
+    </div>
+  </div>
+
+  <div class="bar">
+    <button class="btn ghost" id="btnBack" onclick="goBack()" style="visibility:hidden">← Geri</button>
+    <button class="btn primary" id="btnNext" onclick="goNext()" disabled>Kurulum bekleniyor…</button>
+  </div>
+
+</div>
+
+<script>
+let stage = 1, uploaded = false;
+
+/* ── STAGE 1: kurulum adımları ── */
+const installSteps = [
+  {ic:'☁️', t:'Azure girişi (azure_login)', s:'Cihaz kodu doğrulandı'},
+  {ic:'📦', t:'Resource group (create_resource_group)', s:'rg-yafespars-prod · westeurope'},
+  {ic:'🏗️', t:'Bicep deploy (deploy_infrastructure)', s:'App Service + Key Vault + App Insights'},
+  {ic:'🗄️', t:'Migration (run_database_migrations)', s:'000 → 023 · 24 migration'},
+  {ic:'🔑', t:'GitHub Secrets (set_git_hub_secrets)', s:'CI/CD pipeline aktif'},
+];
+const instList = document.getElementById('instList');
+installSteps.forEach((s,i)=>{
+  instList.insertAdjacentHTML('beforeend',
+    `<div class="ir" id="ir${i}"><div class="ir-ic">${s.ic}</div>
+     <div><div class="ir-t">${s.t}</div><div class="ir-s">${s.s}</div></div>
+     <div class="ir-st" id="irst${i}">bekliyor</div></div>`);
+});
+
+function runInstall(){
+  let i = 0;
+  const next = () => {
+    if(i >= installSteps.length){ finishInstall(); return; }
+    const row = document.getElementById('ir'+i), st = document.getElementById('irst'+i);
+    row.classList.add('active'); st.innerHTML = '<div class="spin"></div>';
+    setTimeout(()=>{
+      row.classList.remove('active'); row.classList.add('ok');
+      st.innerHTML = '<span class="chk">✓</span>';
+      i++; next();
+    }, 720 + Math.random()*420);
+  };
+  next();
+}
+function finishInstall(){
+  const b = document.getElementById('btnNext');
+  b.disabled = false; b.textContent = 'Sistem hazır — veri gir →';
+}
+
+/* ── STAGE 3: yükleme adımları ── */
+const uploadSteps = [
+  {ic:'👤', t:'Müşteri oluşturuluyor', x:'create_natural_person', sp:'SP_CreateNaturalPerson'},
+  {ic:'📋', t:'Poliçe açılıyor', x:'create_policy', sp:'SP_CreateContract'},
+  {ic:'🛡️', t:'Teminatlar ekleniyor', x:'add_coverage_item', sp:'sp_AddCoverageItem'},
+  {ic:'🚗', t:'Araç kaydı', x:'register_vehicle', sp:'sp_CreateVehicle'},
+  {ic:'🔗', t:'Araç poliçeye bağlanıyor', x:'link_risk_to_contract', sp:'sp_LinkRiskToContract'},
+  {ic:'💶', t:'Fatura oluşturuluyor', x:'create_invoice', sp:'sp_CreateInvoice'},
+  {ic:'📎', t:'Belge yükleniyor', x:'upload_document', sp:'Azure Blob + sp_CreateDocument'},
+];
+const ulist = document.getElementById('ulist');
+const ringFill = document.getElementById('ringFill'), pctEl = document.getElementById('pct');
+const C = 327;
+
+function buildUpload(){
+  ulist.innerHTML = '';
+  uploadSteps.forEach((s,i)=>{
+    ulist.insertAdjacentHTML('beforeend',
+      `<div class="ul" id="ul${i}"><div class="ul-ic">${s.ic}</div>
+       <div><div>${s.t}</div></div><div class="ul-x" id="ulx${i}">${s.x}</div></div>`);
+  });
+}
+function runUpload(){
+  buildUpload();
+  let i = 0;
+  const total = uploadSteps.length;
+  const next = () => {
+    if(i >= total){ finishUpload(); return; }
+    const row = document.getElementById('ul'+i), x = document.getElementById('ulx'+i);
+    row.classList.add('active'); x.textContent = '⏳ ' + uploadSteps[i].sp;
+    setTimeout(()=>{
+      row.classList.remove('active'); row.classList.add('ok');
+      x.innerHTML = '✓ ' + uploadSteps[i].sp;
+      i++;
+      const p = Math.round(i/total*100);
+      ringFill.style.transition = 'stroke-dashoffset .5s ease';
+      ringFill.style.strokeDashoffset = C - (C*p/100);
+      pctEl.textContent = p + '%';
+      next();
+    }, 620 + Math.random()*360);
+  };
+  next();
+}
+function finishUpload(){
+  setTimeout(()=>{
+    document.getElementById('uploadView').style.display = 'none';
+    const name = document.getElementById('f_name').value;
+    const plate = document.getElementById('f_plate').value;
+    document.getElementById('doneSummary').innerHTML =
+      `<strong>${name}</strong> için poliçe <strong>2026/AUTO/${Math.floor(100+Math.random()*900)}</strong> oluşturuldu.<br>` +
+      `Araç ${plate} bağlandı · fatura kesildi · belge Azure Blob'a yüklendi.<br>` +
+      `<span style="color:var(--txt3);font-size:12px">7 MCP aracı · 7 stored procedure · tek operatör cümlesinden.</span>`;
+    document.getElementById('doneView').style.display = 'block';
+    const b = document.getElementById('btnNext');
+    b.disabled = false; b.textContent = '↻ Baştan oynat';
+    b.onclick = restart;
+  }, 500);
+}
+
+/* ── navigation ── */
+function setStage(n){
+  stage = n;
+  for(let i=1;i<=3;i++) document.getElementById('stage'+i).style.display = (i===n?'block':'none');
+  // stepper
+  for(let i=1;i<=3;i++){
+    const sc = document.getElementById('sc'+i), stt = document.getElementById('stt'+i);
+    sc.classList.toggle('on', i===n);
+    stt.classList.toggle('on', i===n);
+    sc.classList.toggle('done', i<n);
+    if(i<n) sc.innerHTML='✓'; else sc.innerHTML=i;
+  }
+  document.getElementById('sl1').classList.toggle('done', n>1);
+  document.getElementById('sl2').classList.toggle('done', n>2);
+  document.getElementById('btnBack').style.visibility = (n>1 && !uploaded ? 'visible':'hidden');
+}
+
+function goNext(){
+  if(stage===1){ setStage(2); const b=document.getElementById('btnNext'); b.textContent='Veriyi yükle →'; b.disabled=false; }
+  else if(stage===2){ setStage(3); const b=document.getElementById('btnNext'); b.disabled=true; b.textContent='Yükleniyor…'; uploaded=true; document.getElementById('btnBack').style.visibility='hidden'; runUpload(); }
+}
+function goBack(){ if(stage===2) setStage(1); }
+function restart(){
+  uploaded=false; ringFill.style.strokeDashoffset=C; pctEl.textContent='0%';
+  document.getElementById('uploadView').style.display='block';
+  document.getElementById('doneView').style.display='none';
+  // reset install rows
+  installSteps.forEach((_,i)=>{const r=document.getElementById('ir'+i);r.classList.remove('ok','active');document.getElementById('irst'+i).textContent='bekliyor';});
+  const b=document.getElementById('btnNext'); b.onclick=goNext; b.disabled=true; b.textContent='Kurulum bekleniyor…';
+  setStage(1); runInstall();
+}
+
+/* drop interaction */
+document.getElementById('drop').addEventListener('click',function(){
+  this.classList.add('has'); this.innerHTML='✓ identiteitskaart_jan.pdf eklendi (214 KB)';
+});
+
+/* boot */
+setStage(1);
+runInstall();
+</script>
+</body>
+</html>
