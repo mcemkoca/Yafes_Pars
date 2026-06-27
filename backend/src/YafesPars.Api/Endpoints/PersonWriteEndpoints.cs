@@ -85,7 +85,9 @@ public static class PersonWriteEndpoints
             var personId = await repository.ExecuteScalarAsync<Guid>(
                 "DECLARE @id UNIQUEIDENTIFIER; " +
                 "EXEC person.SP_CreateLegalPerson " +
-                "@tenant_id, @dossier, @language_code, @legal_name, @legal_form, @vat_number, NULL, @id OUTPUT; " +
+                "@tenant_id = @tenant_id, @dossier = @dossier, @language_code = @language_code, " +
+                "@legal_name = @legal_name, @legal_form = @legal_form, @vat_number = @vat_number, " +
+                "@created_person_id = @id OUTPUT; " +
                 "SELECT @id;",
                 new
                 {

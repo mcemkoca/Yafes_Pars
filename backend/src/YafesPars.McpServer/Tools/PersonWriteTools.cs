@@ -94,7 +94,9 @@ public sealed class PersonWriteTools
             var personId = await _write.ExecuteScalarAsync<Guid>(
                 "DECLARE @id UNIQUEIDENTIFIER; " +
                 "EXEC person.SP_CreateLegalPerson " +
-                "@tenant_id, @dossier, @language_code, @legal_name, @legal_form, @vat_number, NULL, @id OUTPUT; " +
+                "@tenant_id = @tenant_id, @dossier = @dossier, @language_code = @language_code, " +
+                "@legal_name = @legal_name, @legal_form = @legal_form, @vat_number = @vat_number, " +
+                "@kbo_number = @kbo_number, @created_person_id = @id OUTPUT; " +
                 "SELECT @id;",
                 new
                 {
@@ -103,7 +105,8 @@ public sealed class PersonWriteTools
                     language_code = languageCode,
                     legal_name = legalName,
                     legal_form = legalForm,
-                    vat_number = vatNumber
+                    vat_number = vatNumber,
+                    kbo_number = kboNumber
                 },
                 ct);
 

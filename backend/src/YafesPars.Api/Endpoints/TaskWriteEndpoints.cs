@@ -51,7 +51,10 @@ public static class TaskWriteEndpoints
             var taskId = await repository.ExecuteScalarAsync<Guid>(
                 "DECLARE @id UNIQUEIDENTIFIER; " +
                 "EXEC tasking.SP_CreateTask " +
-                "@tenant_id, @title, @description, @task_priority_code, @related_entity_type, @related_entity_id, @assigned_to_user_id, @due_at_utc, NULL, @id OUTPUT; " +
+                "@tenant_id = @tenant_id, @title = @title, @description = @description, " +
+                "@related_entity_type = @related_entity_type, @related_entity_id = @related_entity_id, " +
+                "@assigned_to_user_id = @assigned_to_user_id, @task_priority_code = @task_priority_code, " +
+                "@due_at_utc = @due_at_utc, @created_task_id = @id OUTPUT; " +
                 "SELECT @id;",
                 new
                 {
@@ -92,8 +95,10 @@ public static class TaskWriteEndpoints
         try
         {
             await repository.ExecuteAsync(
-                "EXEC tasking.SP_AddTaskComment @tenant_id, @task_id, @body, NULL;",
-                new { tenant_id = tenantId, task_id = taskId, body = cmd.Body },
+                "DECLARE @cid UNIQUEIDENTIFIER; " +
+                "EXEC tasking.SP_AddTaskComment @tenant_id = @tenant_id, @task_id = @task_id, " +
+                "@comment_text = @comment_text, @created_task_comment_id = @cid OUTPUT;",
+                new { tenant_id = tenantId, task_id = taskId, comment_text = cmd.Body },
                 cancellationToken);
 
             return Results.NoContent();

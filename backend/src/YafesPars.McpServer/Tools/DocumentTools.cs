@@ -127,7 +127,7 @@ public sealed class DocumentTools
         try
         {
             await _write.ExecuteAsync(
-                "EXEC document.sp_LinkDocument @tenant_id, @document_id, @entity_type, @entity_id, NULL;",
+                "EXEC document.sp_LinkDocument @tenant_id, @document_id, @entity_type, @entity_id;",
                 new
                 {
                     tenant_id = _ctx.TenantId,

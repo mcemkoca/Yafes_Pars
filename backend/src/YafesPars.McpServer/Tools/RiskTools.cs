@@ -28,7 +28,7 @@ public sealed class RiskTools
         [Description("Model yılı (örn: 2022)")] int? modelYear = null,
         [Description("Şasi numarası")] string? chassisNumber = null,
         [Description("Piyasa değeri")] decimal? marketValue = null,
-        [Description("Para birimi (varsayılan: TRY)")] string currencyCode = "TRY",
+        [Description("Para birimi (varsayılan: EUR)")] string currencyCode = "EUR",
         CancellationToken ct = default)
     {
         var sql = """
@@ -42,7 +42,6 @@ public sealed class RiskTools
                 @chassis_number = @chassisNumber,
                 @market_value = @marketValue,
                 @currency_code = @currencyCode,
-                NULL,
                 @insurable_object_id = @id OUTPUT;
             SELECT @id;
             """;
@@ -60,7 +59,7 @@ public sealed class RiskTools
         [Description("İnşaat alanı (m²)")] decimal? constructionArea = null,
         [Description("İnşaat yılı")] int? constructionYear = null,
         [Description("Sigortalı değer")] decimal? insuredValue = null,
-        [Description("Para birimi (varsayılan: TRY)")] string currencyCode = "TRY",
+        [Description("Para birimi (varsayılan: EUR)")] string currencyCode = "EUR",
         CancellationToken ct = default)
     {
         var sql = """
@@ -73,7 +72,6 @@ public sealed class RiskTools
                 @construction_year  = @constructionYear,
                 @insured_value      = @insuredValue,
                 @currency_code      = @currencyCode,
-                NULL,
                 @insurable_object_id = @id OUTPUT;
             SELECT @id;
             """;

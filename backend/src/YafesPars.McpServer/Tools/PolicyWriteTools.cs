@@ -46,7 +46,9 @@ public sealed class PolicyWriteTools
             var contractId = await _write.ExecuteScalarAsync<Guid>(
                 "DECLARE @id UNIQUEIDENTIFIER; " +
                 "EXEC policy.SP_CreateContract " +
-                "@tenant_id, @contract_domain_code, @contract_type_code, @start_date, @end_date, @insurer_institution_code, NULL, @id OUTPUT; " +
+                "@tenant_id = @tenant_id, @contract_domain_code = @contract_domain_code, " +
+                "@contract_type_code = @contract_type_code, @start_date = @start_date, @end_date = @end_date, " +
+                "@insurer_institution_code = @insurer_institution_code, @created_contract_id = @id OUTPUT; " +
                 "SELECT @id;",
                 new
                 {
@@ -87,7 +89,8 @@ public sealed class PolicyWriteTools
         try
         {
             await _write.ExecuteAsync(
-                "EXEC policy.SP_AddContractParty @tenant_id, @contract_id, @person_id, @role_code, NULL;",
+                "EXEC policy.SP_AddContractParty @tenant_id = @tenant_id, @contract_id = @contract_id, " +
+                "@person_id = @person_id, @contract_party_role_code = @role_code, @is_primary = 0;",
                 new { tenant_id = _ctx.TenantId, contract_id = contractId, person_id = personId, role_code = roleCode },
                 ct);
 
@@ -117,7 +120,8 @@ public sealed class PolicyWriteTools
         try
         {
             await _write.ExecuteAsync(
-                "EXEC policy.SP_AddContractObject @tenant_id, @contract_id, @insurable_object_id, NULL;",
+                "EXEC policy.SP_AddContractObject @tenant_id = @tenant_id, @contract_id = @contract_id, " +
+                "@insurable_object_id = @insurable_object_id, @contract_object_status_code = N'ACTIVE';",
                 new { tenant_id = _ctx.TenantId, contract_id = contractId, insurable_object_id = insurableObjectId },
                 ct);
 
