@@ -10,8 +10,9 @@ IF OBJECT_ID(N'document.Document', N'U') IS NULL
 IF OBJECT_ID(N'document.DocumentType', N'U') IS NULL
     THROW 50802, 'Missing table: document.DocumentType', 1;
 
-IF OBJECT_ID(N'document.DocumentLink', N'U') IS NULL
-    THROW 50803, 'Missing table: document.DocumentLink', 1;
+-- Migration 021: document.DocumentLink → _obsolete_DocumentLink; DocumentLinks is the active table
+IF OBJECT_ID(N'document.DocumentLinks', N'U') IS NULL
+    THROW 50803, 'Missing table: document.DocumentLinks', 1;
 
 IF OBJECT_ID(N'document.DocumentVersion', N'U') IS NULL
     THROW 50804, 'Missing table: document.DocumentVersion', 1;
