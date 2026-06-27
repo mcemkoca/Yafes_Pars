@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Text;
 using System.Text.Json;
 using Microsoft.Data.SqlClient;
 using ModelContextProtocol.Server;
@@ -14,12 +13,14 @@ public sealed class DocumentTools
     private readonly IWriteRepository _write;
     private readonly IReadRepository _read;
     private readonly OperatorContext _ctx;
+    private readonly BlobStorageService _blob;
 
-    public DocumentTools(IWriteRepository write, IReadRepository read, OperatorContext ctx)
+    public DocumentTools(IWriteRepository write, IReadRepository read, OperatorContext ctx, BlobStorageService blob)
     {
         _write = write;
         _read = read;
         _ctx = ctx;
+        _blob = blob;
     }
 
     [McpServerTool, Description(
@@ -49,15 +50,27 @@ public sealed class DocumentTools
 
         if (!string.IsNullOrWhiteSpace(contentBase64) && string.IsNullOrWhiteSpace(storageUri))
         {
-            try
+            byte[] bytes;
+            try { bytes = Convert.FromBase64String(contentBase64); }
+            catch { return "Fout: ongeldige base64-inhoud."; }
+
+            if (_blob.IsConfigured)
             {
-                var bytes = Convert.FromBase64String(contentBase64);
-                resolvedSize ??= bytes.Length;
-                resolvedUri = $"inline://{_ctx.TenantId}/{Guid.NewGuid()}/{fileName}";
+                try
+                {
+                    var (uri, size) = await _blob.UploadAsync(fileName, bytes, mimeType, _ctx.TenantId, ct);
+                    resolvedUri  = uri;
+                    resolvedSize = size;
+                }
+                catch (Exception ex)
+                {
+                    return $"Azure Blob upload mislukt: {ex.Message}";
+                }
             }
-            catch
+            else
             {
-                return "Fout: ongeldige base64-inhoud.";
+                resolvedSize ??= bytes.Length;
+                resolvedUri = $"local://{_ctx.TenantId}/{Guid.NewGuid()}/{fileName}";
             }
         }
 

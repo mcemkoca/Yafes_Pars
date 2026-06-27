@@ -74,6 +74,7 @@ code{font-family:'Cascadia Code','Fira Code',monospace;font-size:13px;color:#e6e
       <a href="#ornek-3">Fatura & ödeme</a>
       <a href="#ornek-4">Hasar bildirimi</a>
       <a href="#ornek-5">Dashboard</a>
+      <a href="#ornek-6">Azure kurulumu (Copilot)</a>
     </div>
     <div class="group"><h2>Azure</h2>
       <a href="#azure-deploy">Azure'a deploy</a>
@@ -84,7 +85,7 @@ code{font-family:'Cascadia Code','Fira Code',monospace;font-size:13px;color:#e6e
 
 <main>
   <h1>Yafes Pars — Copilot MCP Rehberi</h1>
-  <p class="subtitle">Model Context Protocol · Operatör Yapay Zeka Asistanı · Sürüm 1.0</p>
+  <p class="subtitle">Model Context Protocol · Operatör Yapay Zeka Asistanı · Sürüm 2.0 (37 araç · Belçika)</p>
 
   <!-- MİMARİ -->
   <h2 id="mimari">Mimari</h2>
@@ -106,23 +107,79 @@ code{font-family:'Cascadia Code','Fira Code',monospace;font-size:13px;color:#e6e
   </div>
 
   <!-- TOOL'LAR -->
-  <h2 id="tools">Mevcut Tool'lar (11 adet)</h2>
+  <h2 id="tools">Mevcut Tool'lar (37 adet)</h2>
+  <p style="color:var(--muted);font-size:13px;margin-bottom:8px">Tüm tool açıklamaları Felemenkçe (NL) birincil, Türkçe ikincildir. Varsayılan dil kodu <code>NL</code>, para birimi <code>EUR</code>.</p>
+
+  <h3 style="color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px">Kişi · Persoon</h3>
+  <div class="tool-grid">
+    <div class="tool-card"><div class="tool-name">search_persons</div><div class="tool-desc">Ad, soyad, dosya no veya e-posta ile müşteri ara</div></div>
+    <div class="tool-card"><div class="tool-name">get_person</div><div class="tool-desc">Müşteri detaylarını getir</div></div>
+    <div class="tool-card"><div class="tool-name">create_natural_person</div><div class="tool-desc">Gerçek kişi oluştur — rrn (Rijksregisternummer), civil_status, NL/FR dil</div></div>
+    <div class="tool-card"><div class="tool-name">create_legal_person</div><div class="tool-desc">Tüzel kişi (NV/BV/VZW) — KBO + BTW numarası</div></div>
+  </div>
+
+  <h3 style="color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px">Poliçe · Polis</h3>
   <div class="tool-grid">
     <div class="tool-card"><div class="tool-name">search_contracts</div><div class="tool-desc">Poliçe numarası veya duruma göre arama</div></div>
     <div class="tool-card"><div class="tool-name">get_contracts_by_person</div><div class="tool-desc">Müşterinin tüm poliçelerini listele</div></div>
-    <div class="tool-card"><div class="tool-name">search_persons</div><div class="tool-desc">Ad, soyad, dosya no veya e-posta ile müşteri ara</div></div>
-    <div class="tool-card"><div class="tool-name">get_person</div><div class="tool-desc">Müşteri detaylarını getir</div></div>
+    <div class="tool-card"><div class="tool-name">create_policy</div><div class="tool-desc">Yeni poliçe — domein AUTO/FIRE/HEALTH/LIFE</div></div>
+    <div class="tool-card"><div class="tool-name">add_policy_party</div><div class="tool-desc">Taraf ekle — POLICYHOLDER / INSURED / BENEFICIARY</div></div>
+    <div class="tool-card"><div class="tool-name">add_policy_object</div><div class="tool-desc">Sigortalı nesneyi poliçeye bağla</div></div>
+    <div class="tool-card"><div class="tool-name">add_coverage_item</div><div class="tool-desc">Teminat ekle — BA_AUTO, OMNIUM, FIRE_BUILDING…</div></div>
+  </div>
+
+  <h3 style="color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px">Finans · Financiën</h3>
+  <div class="tool-grid">
     <div class="tool-card"><div class="tool-name">get_invoices</div><div class="tool-desc">Poliçenin faturalarını listele</div></div>
-    <div class="tool-card"><div class="tool-name">create_invoice</div><div class="tool-desc">Yeni fatura oluştur</div></div>
+    <div class="tool-card"><div class="tool-name">create_invoice</div><div class="tool-desc">Yeni fatura oluştur (EUR)</div></div>
     <div class="tool-card"><div class="tool-name">record_payment</div><div class="tool-desc">Ödeme kaydet, fatura PAID olarak güncellenir</div></div>
     <div class="tool-card"><div class="tool-name">create_payment_plan</div><div class="tool-desc">Taksit planı oluştur</div></div>
+  </div>
+
+  <h3 style="color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px">Risk · Object</h3>
+  <div class="tool-grid">
     <div class="tool-card"><div class="tool-name">register_vehicle</div><div class="tool-desc">Araç kaydı yap</div></div>
+    <div class="tool-card"><div class="tool-name">register_property</div><div class="tool-desc">Gayrimenkul (woning) kaydı yap</div></div>
     <div class="tool-card"><div class="tool-name">find_vehicle_by_plate</div><div class="tool-desc">Plaka ile araç sorgula</div></div>
-    <div class="tool-card"><div class="tool-name">create_claim</div><div class="tool-desc">Hasar bildirimi oluştur</div></div>
+    <div class="tool-card"><div class="tool-name">link_risk_to_contract</div><div class="tool-desc">Riski poliçeye bağla</div></div>
+  </div>
+
+  <h3 style="color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px">Hasar · Schade</h3>
+  <div class="tool-grid">
+    <div class="tool-card"><div class="tool-name">get_claims</div><div class="tool-desc">Poliçenin hasar dosyalarını listele</div></div>
+    <div class="tool-card"><div class="tool-name">create_claim</div><div class="tool-desc">Hasar bildirimi oluştur (SP_CreateClaim)</div></div>
+    <div class="tool-card"><div class="tool-name">close_claim</div><div class="tool-desc">Hasar dosyasını kapat, ödenen tutarı kaydet</div></div>
+  </div>
+
+  <h3 style="color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px">Belge · Document</h3>
+  <div class="tool-grid">
+    <div class="tool-card"><div class="tool-name">upload_document</div><div class="tool-desc">Belge yükle — base64 veya URI, Azure Blob'a yazar</div></div>
+    <div class="tool-card"><div class="tool-name">link_document</div><div class="tool-desc">Belgeyi ek varlığa bağla</div></div>
+    <div class="tool-card"><div class="tool-name">archive_document</div><div class="tool-desc">Belgeyi arşivle</div></div>
+    <div class="tool-card"><div class="tool-name">search_documents</div><div class="tool-desc">Sahip veya türe göre belge ara</div></div>
+  </div>
+
+  <h3 style="color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px">Görev · Taak + Dashboard</h3>
+  <div class="tool-grid">
     <div class="tool-card"><div class="tool-name">get_pending_tasks</div><div class="tool-desc">Bekleyen operatör görevleri</div></div>
+    <div class="tool-card"><div class="tool-name">create_task</div><div class="tool-desc">Görev oluştur — URGENT/HIGH/MEDIUM/LOW</div></div>
+    <div class="tool-card"><div class="tool-name">add_task_comment</div><div class="tool-desc">Göreve yorum/not ekle</div></div>
     <div class="tool-card"><div class="tool-name">get_dashboard</div><div class="tool-desc">Anlık özet: poliçe, hasar, görev, fatura</div></div>
     <div class="tool-card"><div class="tool-name">get_monthly_financial_summary</div><div class="tool-desc">Aylık tahsilat ve prim özeti</div></div>
   </div>
+
+  <h3 style="color:var(--azure);font-size:13px;text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px">Azure · Deploy (Copilot ile altyapı kurulumu)</h3>
+  <div class="tool-grid">
+    <div class="tool-card"><div class="tool-name" style="color:var(--azure)">check_azure_status</div><div class="tool-desc">Azure CLI + giriş durumunu kontrol et</div></div>
+    <div class="tool-card"><div class="tool-name" style="color:var(--azure)">azure_login</div><div class="tool-desc">Cihaz kodu ile Azure'a giriş</div></div>
+    <div class="tool-card"><div class="tool-name" style="color:var(--azure)">create_resource_group</div><div class="tool-desc">Resource group oluştur (rg-yafespars-prod)</div></div>
+    <div class="tool-card"><div class="tool-name" style="color:var(--azure)">deploy_infrastructure</div><div class="tool-desc">Bicep deploy — App Service + Key Vault</div></div>
+    <div class="tool-card"><div class="tool-name" style="color:var(--azure)">run_database_migrations</div><div class="tool-desc">000→022 migration'ları Azure SQL'de çalıştır</div></div>
+    <div class="tool-card"><div class="tool-name" style="color:var(--azure)">set_git_hub_secrets</div><div class="tool-desc">CI/CD secret'larını ayarla</div></div>
+    <div class="tool-card"><div class="tool-name" style="color:var(--azure)">check_app_status</div><div class="tool-desc">App Service deployment durumu</div></div>
+  </div>
+
+  <div class="info-box" style="margin-top:16px"><strong>Belçika teminat kodları:</strong> BA_AUTO (zorunlu trafik), OMNIUM, MINI_OMNIUM, FIRE_BUILDING, FIRE_CONTENTS, FAMILY_LIABILITY, LEGAL_PROTECTION, LEGAL_PROTECTION_AUTO, HOSPITALIZATION, LIFE_COVER. Türkçe kodlar (KASKO, TRAFIK, DASK) migration 022 ile pasife alındı.</div>
 
   <!-- GEREKSİNİMLER -->
   <h2 id="gereksinimler">1. Gereksinimler</h2>
@@ -236,19 +293,19 @@ ngrok http 5000</code></pre>
   <h2 id="ornek-1">Örnek 1 — Müşteri Sorgulama</h2>
   <div class="step-card">
     <div class="dialog-box">
-      <p class="dialog-user">"Ali Yılmaz adlı müşterileri bul"</p>
-      <p class="dialog-ai">search_persons(name: "Ali Yılmaz") çağrılıyor…<br><br>
+      <p class="dialog-user">"Jan Janssens adlı müşterileri bul"</p>
+      <p class="dialog-ai">search_persons(name: "Jan Janssens") çağrılıyor…<br><br>
       Bulunan 2 müşteri:<br>
-      • Ali Yılmaz — ID: a1b2c3d4 — Dosya: 2024/001 — ali@email.com<br>
-      • Ali Mehmet Yılmaz — ID: e5f6g7h8 — Dosya: 2023/045</p>
+      • Jan Janssens — ID: a1b2c3d4 — Dossier: 2026/001 — jan@email.be<br>
+      • Jan Peter Janssens — ID: e5f6g7h8 — Dossier: 2025/045</p>
     </div>
     <div class="dialog-box" style="margin-top:8px">
       <p class="dialog-user">"İlkinin poliçelerini göster"</p>
       <p class="dialog-ai">get_contracts_by_person(personId: "a1b2c3d4") çağrılıyor…<br><br>
-      3 aktif poliçe bulundu:<br>
-      • 2024/KSK/001 — Kasko — AKTİF — 01.01.2024–31.12.2024<br>
-      • 2024/TRF/012 — Trafik — AKTİF — 01.03.2024–28.02.2025<br>
-      • 2023/KNT/088 — Konut — SÜRESİ GEÇMİŞ — 01.01.2023–31.12.2023</p>
+      3 poliçe bulundu:<br>
+      • 2026/AUTO/001 — BA Auto + Omnium — ACTIEF — 01.01.2026–31.12.2026<br>
+      • 2026/FIRE/012 — Brand gebouw + inhoud — ACTIEF — 01.03.2026–28.02.2027<br>
+      • 2025/FAM/088 — Familiale BA — VERVALLEN — 01.01.2025–31.12.2025</p>
     </div>
   </div>
 
@@ -256,12 +313,12 @@ ngrok http 5000</code></pre>
   <h2 id="ornek-2">Örnek 2 — Araç Kaydı ve Poliçeye Bağlama</h2>
   <div class="step-card">
     <div class="dialog-box">
-      <p class="dialog-user">"34 ABC 123 plakalı 2022 Toyota Corolla'yı kaydet ve 2024/KSK/001 poliçesine bağla"</p>
+      <p class="dialog-user">"1-ABC-123 plakalı 2022 Volkswagen Golf'ü kaydet ve 2026/AUTO/001 poliçesine bağla"</p>
       <p class="dialog-ai">
-      1. register_vehicle(plateNumber: "34ABC123", brand: "Toyota", model: "Corolla", modelYear: 2022) → ObjectId: x9y8z7…<br>
-      2. search_contracts(contractNumber: "2024/KSK/001") → ContractId: f1e2d3…<br>
+      1. register_vehicle(plate: "1-ABC-123", brand: "Volkswagen", model: "Golf", modelYear: 2022) → ObjectId: x9y8z7…<br>
+      2. search_contracts(contractNumber: "2026/AUTO/001") → ContractId: f1e2d3…<br>
       3. link_risk_to_contract(contractId: "f1e2d3…", insurableObjectId: "x9y8z7…")<br><br>
-      ✅ Araç kaydedildi ve poliçeye bağlandı.</p>
+      ✅ Voertuig geregistreerd en gekoppeld aan polis.</p>
     </div>
   </div>
 
@@ -269,19 +326,19 @@ ngrok http 5000</code></pre>
   <h2 id="ornek-3">Örnek 3 — Fatura ve Ödeme</h2>
   <div class="step-card">
     <div class="dialog-box">
-      <p class="dialog-user">"2024/KSK/001 poliçesi için 15.000 TL fatura oluştur, vade tarihi 15 Temmuz"</p>
-      <p class="dialog-ai">create_invoice(contractId: "f1e2d3…", issueDate: 2024-06-25, dueDate: 2024-07-15, amount: 15000, currencyCode: "TRY")<br><br>
-      ✅ Fatura oluşturuldu. InvoiceId: inv-001</p>
+      <p class="dialog-user">"2026/AUTO/001 poliçesi için 1.500 EUR fatura oluştur, vade tarihi 15 Temmuz"</p>
+      <p class="dialog-ai">create_invoice(contractId: "f1e2d3…", issueDate: 2026-06-25, dueDate: 2026-07-15, amount: 1500, currencyCode: "EUR")<br><br>
+      ✅ Factuur aangemaakt. InvoiceId: inv-001</p>
     </div>
     <div class="dialog-box" style="margin-top:8px">
-      <p class="dialog-user">"Müşteri 5.000 TL ödedi, banka havalesi ile"</p>
-      <p class="dialog-ai">record_payment(invoiceId: "inv-001", paymentDate: 2024-06-25, amount: 5000, paymentMethodCode: "BANK_TRANSFER")<br><br>
-      ✅ Ödeme kaydedildi. Kalan: 10.000 TL</p>
+      <p class="dialog-user">"Müşteri 500 EUR ödedi, banka havalesi ile"</p>
+      <p class="dialog-ai">record_payment(invoiceId: "inv-001", paymentDate: 2026-06-25, amount: 500, paymentMethodCode: "BANK_TRANSFER")<br><br>
+      ✅ Betaling geregistreerd. Openstaand: 1.000 EUR</p>
     </div>
     <div class="dialog-box" style="margin-top:8px">
       <p class="dialog-user">"Kalanı 3 taksitle ödesin"</p>
-      <p class="dialog-ai">create_payment_plan(contractId: "f1e2d3…", installmentCount: 3, firstDueDate: 2024-07-15, totalAmount: 10000)<br><br>
-      ✅ 3 taksitli plan oluşturuldu. Her taksit: ~3.333,33 TL</p>
+      <p class="dialog-ai">create_payment_plan(contractId: "f1e2d3…", installmentCount: 3, firstDueDate: 2026-07-15, totalAmount: 1000)<br><br>
+      ✅ 3 termijnen aangemaakt. Per termijn: ~333,33 EUR</p>
     </div>
   </div>
 
@@ -289,11 +346,11 @@ ngrok http 5000</code></pre>
   <h2 id="ornek-4">Örnek 4 — Hasar Bildirimi</h2>
   <div class="step-card">
     <div class="dialog-box">
-      <p class="dialog-user">"34ABC123 plakalı araç 20 Haziran'da kaza geçirdi, hasar bildirimi aç"</p>
+      <p class="dialog-user">"1-ABC-123 plakalı araç 20 Haziran'da kaza geçirdi, hasar bildirimi aç"</p>
       <p class="dialog-ai">
-      1. find_vehicle_by_plate(plate: "34ABC123") → ContractId alındı<br>
-      2. create_claim(contractId: "f1e2d3…", incidentDate: 2024-06-20, description: "Trafik kazası", coverageCode: "KASKO")<br><br>
-      ✅ Hasar dosyası oluşturuldu. Dosya No: H20240620-7823</p>
+      1. find_vehicle_by_plate(plate: "1-ABC-123") → ContractId alındı<br>
+      2. create_claim(contractId: "f1e2d3…", incidentDate: 2026-06-20, description: "Aanrijding", coverageCode: "OMNIUM")<br><br>
+      ✅ Schadedossier aangemaakt. Dossier No: S20260620-7823</p>
     </div>
   </div>
 
@@ -303,12 +360,28 @@ ngrok http 5000</code></pre>
     <div class="dialog-box">
       <p class="dialog-user">"Günün özeti nedir?"</p>
       <p class="dialog-ai">get_dashboard() çağrılıyor…<br><br>
-      📊 Güncel Durum:<br>
-      • Aktif Poliçe: 142<br>
-      • Açık Hasar: 8<br>
-      • Bekleyen Görev: 5<br>
-      • Vadesi Geçen Fatura: 3 (Toplam: 42.500 TL)<br>
-      • Toplam Müşteri: 289</p>
+      📊 Actuele status:<br>
+      • Actieve polissen: 142<br>
+      • Open schaden: 8<br>
+      • Openstaande taken: 5<br>
+      • Vervallen facturen: 3 (Totaal: 4.250 EUR)<br>
+      • Totaal klanten: 289</p>
+    </div>
+  </div>
+
+  <!-- ÖRNEK 6 — AZURE -->
+  <h2 id="ornek-6">Örnek 6 — Copilot ile Azure Kurulumu</h2>
+  <div class="step-card">
+    <div class="info-box">Operatör tek cümleyle tüm altyapıyı kurabilir — Copilot adımları sırayla yürütür.</div>
+    <div class="dialog-box" style="margin-top:8px">
+      <p class="dialog-user">"Sistemi Azure prod ortamına kur ve veritabanını hazırla"</p>
+      <p class="dialog-ai">
+      1. check_azure_status() → Azure CLI mevcut, aangemeld als operator@yafespars.be<br>
+      2. create_resource_group(name: "rg-yafespars-prod", location: "westeurope") → ✅<br>
+      3. deploy_infrastructure(resourceGroupName: "rg-yafespars-prod", environment: "prod", jwtAuthority: "…", jwtAudience: "api://yafespars") → App Service + Key Vault + App Insights<br>
+      4. run_database_migrations(server: "sql-yafespars-prod.database.windows.net", username: "…") → 23 migratie (000→022) toegepast<br>
+      5. set_git_hub_secrets(repository: "mcemkoca/Yafes_Pars", azureClientId: "…", …) → CI/CD geconfigureerd<br><br>
+      ✅ Implementatie voltooid. App live: https://app-yafespars-prod.azurewebsites.net</p>
     </div>
   </div>
 

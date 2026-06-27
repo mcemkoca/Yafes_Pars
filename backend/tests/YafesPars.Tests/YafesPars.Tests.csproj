@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <ProjectReference Include="..\..\src\YafesPars.Api\YafesPars.Api.csproj" />
+    <ProjectReference Include="..\..\src\YafesPars.McpServer\YafesPars.McpServer.csproj" />
   </ItemGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
