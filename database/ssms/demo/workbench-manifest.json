@@ -18,8 +18,8 @@
                    "environmentLabel":  "DEV"
                },
     "migrations":  {
-                       "count":  23,
-                       "latest":  "022__belgian_adaptations.sql",
+                       "count":  24,
+                       "latest":  "023__fix_write_procedures.sql",
                        "files":  [
                                      "000__create_database.sql",
                                      "001__create_schemas.sql",
@@ -43,7 +43,8 @@
                                      "019__add_finance_document_tables.sql",
                                      "020__add_write_stored_procedures.sql",
                                      "021__fix_document_and_coverage.sql",
-                                     "022__belgian_adaptations.sql"
+                                     "022__belgian_adaptations.sql",
+                                     "023__fix_write_procedures.sql"
                                  ]
                    },
     "validations":  {

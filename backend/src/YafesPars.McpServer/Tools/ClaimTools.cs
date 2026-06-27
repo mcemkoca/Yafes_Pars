@@ -68,7 +68,9 @@ public sealed class ClaimTools
         var id = await _write.ExecuteScalarAsync<Guid>(
             "DECLARE @id UNIQUEIDENTIFIER; " +
             "EXEC claim.SP_CreateClaim " +
-            "@tenant_id, @claim_number, @contract_id, N'OPEN', @reported_date, @coverage_code, NULL, @incident_date, @description, NULL, @id OUTPUT; " +
+            "@tenant_id = @tenant_id, @contract_id = @contract_id, @reported_date = @reported_date, " +
+            "@incident_date = @incident_date, @coverage_code = @coverage_code, @description = @description, " +
+            "@reserved_amount = @reserved_amount, @claim_number = @claim_number, @created_claim_id = @id OUTPUT; " +
             "SELECT @id;",
             new
             {
@@ -78,7 +80,8 @@ public sealed class ClaimTools
                 reported_date = DateOnly.FromDateTime(DateTime.UtcNow),
                 coverage_code = coverageCode,
                 incident_date = incidentDate,
-                description
+                description,
+                reserved_amount = reservedAmount
             },
             ct);
 

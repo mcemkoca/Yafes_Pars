@@ -49,7 +49,9 @@ public static class ClaimWriteEndpoints
             var claimId = await repository.ExecuteScalarAsync<Guid>(
                 "DECLARE @id UNIQUEIDENTIFIER; " +
                 "EXEC claim.SP_CreateClaim " +
-                "@tenant_id, @contract_id, @coverage_code, @incident_date, @reported_date, @description, @reserved_amount, NULL, @id OUTPUT; " +
+                "@tenant_id = @tenant_id, @contract_id = @contract_id, @reported_date = @reported_date, " +
+                "@incident_date = @incident_date, @coverage_code = @coverage_code, @description = @description, " +
+                "@reserved_amount = @reserved_amount, @created_claim_id = @id OUTPUT; " +
                 "SELECT @id;",
                 new
                 {
@@ -89,13 +91,14 @@ public static class ClaimWriteEndpoints
         try
         {
             await repository.ExecuteAsync(
-                "EXEC claim.SP_CloseClaim @tenant_id, @claim_id, @paid_amount, @close_reason, NULL;",
+                "EXEC claim.SP_CloseClaim @tenant_id = @tenant_id, @claim_id = @claim_id, " +
+                "@closed_date = @closed_date, @paid_amount = @paid_amount;",
                 new
                 {
                     tenant_id = tenantId,
                     claim_id = claimId,
-                    paid_amount = cmd.PaidAmount,
-                    close_reason = cmd.CloseReason
+                    closed_date = DateOnly.FromDateTime(DateTime.UtcNow),
+                    paid_amount = cmd.PaidAmount
                 },
                 cancellationToken);
 

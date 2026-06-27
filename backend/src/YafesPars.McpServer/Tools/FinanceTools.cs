@@ -47,7 +47,7 @@ public sealed class FinanceTools
         [Description("Fatura düzenleme tarihi (yyyy-MM-dd)")] DateOnly issueDate,
         [Description("Vade tarihi (yyyy-MM-dd)")] DateOnly dueDate,
         [Description("Fatura tutarı")] decimal amount,
-        [Description("Para birimi kodu (varsayılan: TRY)")] string currencyCode = "TRY",
+        [Description("Para birimi kodu (varsayılan: EUR)")] string currencyCode = "EUR",
         CancellationToken ct = default)
     {
         var sql = """
@@ -101,7 +101,7 @@ public sealed class FinanceTools
         [Description("Taksit sayısı (1-12)")] short installmentCount,
         [Description("İlk taksit tarihi (yyyy-MM-dd)")] DateOnly firstDueDate,
         [Description("Toplam prim tutarı")] decimal totalAmount,
-        [Description("Para birimi kodu (varsayılan: TRY)")] string currencyCode = "TRY",
+        [Description("Para birimi kodu (varsayılan: EUR)")] string currencyCode = "EUR",
         CancellationToken ct = default)
     {
         var sql = """
