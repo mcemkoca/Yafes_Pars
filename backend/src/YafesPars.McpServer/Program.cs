@@ -10,6 +10,7 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services.AddInfrastructure();
 builder.Services.AddSingleton<OperatorContext>();
+builder.Services.AddSingleton<BlobStorageService>();
 
 builder.Services
     .AddMcpServer()
