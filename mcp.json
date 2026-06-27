@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "yafes-pars": {
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "backend/src/YafesPars.McpServer/YafesPars.McpServer.csproj",
+        "--no-launch-profile"
+      ],
+      "env": {
+        "ConnectionStrings__YafesPars": "Server=localhost;Database=YafesPars;Integrated Security=True;TrustServerCertificate=True;",
+        "McpServer__TenantId": "00000000-0000-0000-0000-000000000001"
+      }
+    }
+  }
+}
