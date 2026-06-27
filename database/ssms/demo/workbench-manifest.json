@@ -9,7 +9,7 @@
                      "defaultName":  "YafesPars_Dev",
                      "environment":  "DEV",
                      "schemaCount":  12,
-                     "tableCount":  115,
+                     "tableCount":  116,
                      "legacyReferenceTableCount":  89
                  },
     "tenant":  {
@@ -18,8 +18,8 @@
                    "environmentLabel":  "DEV"
                },
     "migrations":  {
-                       "count":  21,
-                       "latest":  "020__add_write_stored_procedures.sql",
+                       "count":  23,
+                       "latest":  "022__belgian_adaptations.sql",
                        "files":  [
                                      "000__create_database.sql",
                                      "001__create_schemas.sql",
@@ -41,7 +41,9 @@
                                      "017__seed_lookup_data.sql",
                                      "018__seed_demo_data.sql",
                                      "019__add_finance_document_tables.sql",
-                                     "020__add_write_stored_procedures.sql"
+                                     "020__add_write_stored_procedures.sql",
+                                     "021__fix_document_and_coverage.sql",
+                                     "022__belgian_adaptations.sql"
                                  ]
                    },
     "validations":  {

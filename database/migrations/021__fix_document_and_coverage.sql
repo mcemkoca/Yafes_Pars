@@ -35,10 +35,10 @@ BEGIN TRY
               AND existing.EntityId    = dl.owner_entity_id
         );
 
-        -- Drop legacy table (FK in sp_LinkDocument will be switched below)
-        DROP TABLE document.DocumentLink;
+        -- Rename legacy table to _obsolete_ prefix (data preserved, avoids destructive DDL)
+        EXEC sp_rename 'document.DocumentLink', '_obsolete_DocumentLink';
 
-        PRINT 'document.DocumentLink migrated to document.DocumentLinks and dropped.';
+        PRINT 'document.DocumentLink migrated to document.DocumentLinks and renamed to _obsolete_DocumentLink.';
     END;
 
     -- ── 2. Drop also the IX_DocumentLink_owner index (was on dropped table) ───
