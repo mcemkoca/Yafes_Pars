@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/YafesPars.Api/YafesPars.Api.csproj" />
+    <Project Path="src/YafesPars.Application/YafesPars.Application.csproj" />
+    <Project Path="src/YafesPars.Domain/YafesPars.Domain.csproj" />
+    <Project Path="src/YafesPars.Infrastructure/YafesPars.Infrastructure.csproj" />
+    <Project Path="src/YafesPars.McpServer/YafesPars.McpServer.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/YafesPars.Tests/YafesPars.Tests.csproj" />
+  </Folder>
+</Solution>

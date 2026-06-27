@@ -63,18 +63,24 @@ public sealed class ClaimTools
     {
         var claimNumber = $"S{DateTime.UtcNow:yyyyMMdd}-{Random.Shared.Next(1000, 9999)}";
 
-        var sql = """
-            INSERT INTO claim.Claim
-                (tenant_id, contract_id, claim_number, claim_status_code,
-                 coverage_code, incident_date, reported_date, reserved_amount)
-            OUTPUT inserted.claim_id
-            VALUES
-                (@tenantId, @contractId, @claimNumber, 'OPEN',
-                 @coverageCode, @incidentDate, CAST(SYSUTCDATETIME() AS DATE), @reservedAmount);
-            """;
-
-        var id = await _write.ExecuteScalarAsync<Guid>(sql,
-            new { tenantId = _ctx.TenantId, contractId, claimNumber, coverageCode, incidentDate, reservedAmount }, ct);
+        try
+        {
+        var id = await _write.ExecuteScalarAsync<Guid>(
+            "DECLARE @id UNIQUEIDENTIFIER; " +
+            "EXEC claim.SP_CreateClaim " +
+            "@tenant_id, @claim_number, @contract_id, N'OPEN', @reported_date, @coverage_code, NULL, @incident_date, @description, NULL, @id OUTPUT; " +
+            "SELECT @id;",
+            new
+            {
+                tenant_id    = _ctx.TenantId,
+                claim_number = claimNumber,
+                contract_id  = contractId,
+                reported_date = DateOnly.FromDateTime(DateTime.UtcNow),
+                coverage_code = coverageCode,
+                incident_date = incidentDate,
+                description
+            },
+            ct);
 
         return JsonSerializer.Serialize(new
         {
@@ -83,6 +89,11 @@ public sealed class ClaimTools
             claimNumber,
             message = $"Schadedossier aangemaakt: {claimNumber} (ID: {id})"
         }, JsonOpts.Default);
+        }
+        catch (SqlException ex)
+        {
+            return $"Databasefout {ex.Number}: {ex.Message}";
+        }
     }
 
     [McpServerTool, Description(

@@ -32,6 +32,8 @@ public sealed class PersonWriteTools
         [Description("Geboortedatum (YYYY-MM-DD) / Doğum tarihi")] DateOnly? birthDate = null,
         [Description("Rijksregisternummer 11 cijfers / Ulusal kimlik numarası")] string? nationalNumber = null,
         [Description("Aanspreektitel: DHR, MVR, X / Unvan")] string? titleCode = null,
+        [Description("Rijksregisternummer 11 cijfers / RRN")] string? rrn = null,
+        [Description("Burgerlijke staat: ONGEHUWD, GEHUWD, WETTELIJK_SAMENWONEND, FEITELIJK_SAMENWONEND, GESCHEIDEN, WEDUWE_WEDUWNAAR")] string? civilStatus = null,
         CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(firstName) && string.IsNullOrWhiteSpace(lastName))
@@ -42,7 +44,7 @@ public sealed class PersonWriteTools
             var personId = await _write.ExecuteScalarAsync<Guid>(
                 "DECLARE @id UNIQUEIDENTIFIER; " +
                 "EXEC person.SP_CreateNaturalPerson " +
-                "@tenant_id, @dossier, @language_code, @nationality, @first_name, @last_name, @birth_date, @title_code, NULL, @id OUTPUT; " +
+                "@tenant_id, @dossier, @language_code, @nationality, @first_name, @last_name, @birth_date, @title_code, NULL, @id OUTPUT, @rrn, @civil_status; " +
                 "SELECT @id;",
                 new
                 {
@@ -53,7 +55,9 @@ public sealed class PersonWriteTools
                     first_name = firstName,
                     last_name = lastName,
                     birth_date = birthDate,
-                    title_code = titleCode
+                    title_code = titleCode,
+                    rrn,
+                    civil_status = civilStatus
                 },
                 ct);
 
@@ -77,7 +81,7 @@ public sealed class PersonWriteTools
         [Description("Volledige juridische naam / Ticari ünvan")] string legalName = "",
         [Description("Rechtsvorm: NV, BV, VZW, CVBA / Hukuki form")] string? legalForm = null,
         [Description("BTW-nummer bijv. BE0123456789 / KDV numarası")] string? vatNumber = null,
-        [Description("KBO-nummer 10 cijfers / KBO numarası")] string? kboNumber = null,
+        [Description("KBO-nummer 10 cijfers bijv. 0123456789 / KBO numarası")] string? kboNumber = null,
         [Description("Taalcode: NL (standaard), FR, DE")] string languageCode = "NL",
         [Description("Dossiernummer / Dosya numarası")] string? dossier = null,
         CancellationToken ct = default)
