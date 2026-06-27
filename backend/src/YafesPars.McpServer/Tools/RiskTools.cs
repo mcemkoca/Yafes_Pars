@@ -20,15 +20,15 @@ public sealed class RiskTools
         _ctx = ctx;
     }
 
-    [McpServerTool, Description("Araç kaydı yap ve poliçeye bağla. Plaka ve poliçe ID'si gereklidir.")]
+    [McpServerTool, Description("Registreer een voertuig. / Araç kaydı yap. Kentekenplaat is verplicht.")]
     public async Task<string> RegisterVehicle(
-        [Description("Plaka (örn: 34ABC123)")] string plateNumber,
-        [Description("Marka (örn: Toyota)")] string? brand = null,
-        [Description("Model (örn: Corolla)")] string? model = null,
-        [Description("Model yılı (örn: 2022)")] int? modelYear = null,
-        [Description("Şasi numarası")] string? chassisNumber = null,
-        [Description("Piyasa değeri")] decimal? marketValue = null,
-        [Description("Para birimi (varsayılan: EUR)")] string currencyCode = "EUR",
+        [Description("Nummerplaat bijv. 1-ABC-123 / Plaka")] string plateNumber,
+        [Description("Merk bijv. Volkswagen / Marka")] string? brand = null,
+        [Description("Model bijv. Golf / Model")] string? model = null,
+        [Description("Bouwjaar bijv. 2022 / Model yılı")] int? modelYear = null,
+        [Description("Chassisnummer / Şasi numarası")] string? chassisNumber = null,
+        [Description("Marktwaarde / Piyasa değeri")] decimal? marketValue = null,
+        [Description("Valuta (standaard: EUR)")] string currencyCode = "EUR",
         CancellationToken ct = default)
     {
         var sql = """
@@ -52,14 +52,14 @@ public sealed class RiskTools
         return $"Araç kaydedildi. InsurableObjectId: {id} — Plaka: {plateNumber}";
     }
 
-    [McpServerTool, Description("Taşınmaz (ev, işyeri) kaydı yap.")]
+    [McpServerTool, Description("Registreer een eigendom (woning, handelspand). / Taşınmaz kaydı yap.")]
     public async Task<string> RegisterProperty(
-        [Description("Taşınmaz adresi")] string? address = null,
-        [Description("Tür: HOUSE, APARTMENT, COMMERCIAL, LAND (varsayılan: HOUSE)")] string propertyTypeCode = "HOUSE",
-        [Description("İnşaat alanı (m²)")] decimal? constructionArea = null,
-        [Description("İnşaat yılı")] int? constructionYear = null,
-        [Description("Sigortalı değer")] decimal? insuredValue = null,
-        [Description("Para birimi (varsayılan: EUR)")] string currencyCode = "EUR",
+        [Description("Adres van het eigendom / Taşınmaz adresi")] string? address = null,
+        [Description("Type: HOUSE, APARTMENT, COMMERCIAL, LAND (standaard: HOUSE)")] string propertyTypeCode = "HOUSE",
+        [Description("Bewoonbare oppervlakte (m²) / İnşaat alanı")] decimal? constructionArea = null,
+        [Description("Bouwjaar / İnşaat yılı")] int? constructionYear = null,
+        [Description("Verzekerde waarde / Sigortalı değer")] decimal? insuredValue = null,
+        [Description("Valuta (standaard: EUR)")] string currencyCode = "EUR",
         CancellationToken ct = default)
     {
         var sql = """
@@ -82,10 +82,10 @@ public sealed class RiskTools
         return $"Taşınmaz kaydedildi. InsurableObjectId: {id}";
     }
 
-    [McpServerTool, Description("Risk nesnesini (araç/taşınmaz) bir poliçeye bağla.")]
+    [McpServerTool, Description("Koppel een risico-object (voertuig/eigendom) aan een polis. / Riski poliçeye bağla.")]
     public async Task<string> LinkRiskToContract(
-        [Description("Poliçe ID'si (UUID)")] Guid contractId,
-        [Description("Risk nesnesi ID'si (UUID — RegisterVehicle veya RegisterProperty'den döner)")] Guid insurableObjectId,
+        [Description("Polis-ID (UUID)")] Guid contractId,
+        [Description("Object-ID (UUID — uit RegisterVehicle/RegisterProperty)")] Guid insurableObjectId,
         CancellationToken ct = default)
     {
         await _write.ExecuteAsync(
@@ -95,9 +95,9 @@ public sealed class RiskTools
         return $"Risk nesnesi poliçeye bağlandı. ContractId: {contractId} — ObjectId: {insurableObjectId}";
     }
 
-    [McpServerTool, Description("Plaka ile araç ara.")]
+    [McpServerTool, Description("Zoek een voertuig op nummerplaat. / Plaka ile araç ara.")]
     public async Task<string> FindVehicleByPlate(
-        [Description("Plaka (kısmi eşleşme)")] string plate,
+        [Description("Nummerplaat (gedeeltelijke match) / Plaka")] string plate,
         CancellationToken ct = default)
     {
         var sql = """

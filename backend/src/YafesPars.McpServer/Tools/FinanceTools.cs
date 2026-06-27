@@ -20,9 +20,9 @@ public sealed class FinanceTools
         _ctx = ctx;
     }
 
-    [McpServerTool, Description("Bir poliçenin faturalarını listele.")]
+    [McpServerTool, Description("Lijst de facturen van een polis. / Bir poliçenin faturalarını listele.")]
     public async Task<string> GetInvoices(
-        [Description("Poliçe ID'si (UUID)")] Guid contractId,
+        [Description("Polis-ID (UUID)")] Guid contractId,
         CancellationToken ct = default)
     {
         var sql = """
@@ -41,12 +41,12 @@ public sealed class FinanceTools
             : JsonSerializer.Serialize(rows, JsonOpts.Default);
     }
 
-    [McpServerTool, Description("Yeni fatura oluştur. Poliçe (contract_id), düzenleme tarihi, vade tarihi ve tutar gereklidir.")]
+    [McpServerTool, Description("Maak een nieuwe factuur. / Yeni fatura oluştur. Polis, datums en bedrag verplicht.")]
     public async Task<string> CreateInvoice(
-        [Description("Poliçe ID'si (UUID)")] Guid contractId,
-        [Description("Fatura düzenleme tarihi (yyyy-MM-dd)")] DateOnly issueDate,
-        [Description("Vade tarihi (yyyy-MM-dd)")] DateOnly dueDate,
-        [Description("Fatura tutarı")] decimal amount,
+        [Description("Polis-ID (UUID)")] Guid contractId,
+        [Description("Factuurdatum (yyyy-MM-dd) / Düzenleme tarihi")] DateOnly issueDate,
+        [Description("Vervaldatum (yyyy-MM-dd) / Vade tarihi")] DateOnly dueDate,
+        [Description("Bedrag / Tutar")] decimal amount,
         [Description("Para birimi kodu (varsayılan: EUR)")] string currencyCode = "EUR",
         CancellationToken ct = default)
     {
@@ -69,12 +69,12 @@ public sealed class FinanceTools
         return $"Fatura oluşturuldu. InvoiceId: {id}";
     }
 
-    [McpServerTool, Description("Fatura ödemesi kaydet.")]
+    [McpServerTool, Description("Registreer een betaling op een factuur. / Fatura ödemesi kaydet.")]
     public async Task<string> RecordPayment(
-        [Description("Fatura ID'si (UUID)")] Guid invoiceId,
-        [Description("Ödeme tarihi (yyyy-MM-dd)")] DateOnly paymentDate,
-        [Description("Ödeme tutarı")] decimal amount,
-        [Description("Ödeme yöntemi: CASH, BANK_TRANSFER, CREDIT_CARD (varsayılan: BANK_TRANSFER)")] string paymentMethodCode = "BANK_TRANSFER",
+        [Description("Factuur-ID (UUID)")] Guid invoiceId,
+        [Description("Betaaldatum (yyyy-MM-dd) / Ödeme tarihi")] DateOnly paymentDate,
+        [Description("Bedrag / Tutar")] decimal amount,
+        [Description("Betaalwijze: CASH, BANK_TRANSFER, CREDIT_CARD (standaard: BANK_TRANSFER)")] string paymentMethodCode = "BANK_TRANSFER",
         CancellationToken ct = default)
     {
         var sql = """
@@ -95,12 +95,12 @@ public sealed class FinanceTools
         return $"Ödeme kaydedildi. PaymentId: {id}";
     }
 
-    [McpServerTool, Description("Taksit planı oluştur. Toplam tutar eşit taksitlere bölünür.")]
+    [McpServerTool, Description("Maak een afbetalingsplan. / Taksit planı oluştur. Totaal wordt gelijk verdeeld.")]
     public async Task<string> CreatePaymentPlan(
-        [Description("Poliçe ID'si (UUID)")] Guid contractId,
-        [Description("Taksit sayısı (1-12)")] short installmentCount,
-        [Description("İlk taksit tarihi (yyyy-MM-dd)")] DateOnly firstDueDate,
-        [Description("Toplam prim tutarı")] decimal totalAmount,
+        [Description("Polis-ID (UUID)")] Guid contractId,
+        [Description("Aantal termijnen (1-12) / Taksit sayısı")] short installmentCount,
+        [Description("Eerste vervaldatum (yyyy-MM-dd) / İlk taksit tarihi")] DateOnly firstDueDate,
+        [Description("Totaalbedrag / Toplam tutar")] decimal totalAmount,
         [Description("Para birimi kodu (varsayılan: EUR)")] string currencyCode = "EUR",
         CancellationToken ct = default)
     {
