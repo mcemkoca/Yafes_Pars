@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YafesPars_Dev - Microsoft SQL Server Management Studio</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --ssms-chrome:#eeeef2; --ssms-chrome2:#f6f6f6; --ssms-border:#cccedb;
+    --ssms-blue:#005ba1; --ssms-titlebar:#2d2d30; --ssms-select:#cce8ff; --ssms-selbd:#9bd1ff;
+    --kw:#0000ff; --str:#a31515; --com:#008000; --fn:#a31599; --num:#098658; --type:#2b91af;
+    --grid-hd:#e6e6e6; --grid-line:#d4d4d4;
+  }
+  html,body{height:100%;font-family:'Segoe UI',Tahoma,sans-serif;font-size:12px;color:#1e1e1e;
+    background:#f0f0f0;overflow:hidden}
+  .app{display:flex;flex-direction:column;height:100vh;min-height:600px}
+
+  /* ── title bar ── */
+  .titlebar{background:var(--ssms-titlebar);color:#f1f1f1;height:30px;display:flex;align-items:center;
+    padding:0 10px;font-size:12px;flex-shrink:0;justify-content:space-between}
+  .titlebar .tl{display:flex;align-items:center;gap:8px}
+  .titlebar .ico{width:15px;height:15px;background:linear-gradient(135deg,#e8a33d,#d4691e);border-radius:2px;
+    display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff}
+  .winbtns{display:flex;gap:0}
+  .winbtns span{width:34px;height:30px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#ccc}
+  .winbtns span:hover{background:#3e3e42}
+  .winbtns .close:hover{background:#e81123;color:#fff}
+
+  /* ── menu bar ── */
+  .menubar{background:var(--ssms-chrome);height:24px;display:flex;align-items:center;padding:0 4px;
+    border-bottom:1px solid var(--ssms-border);flex-shrink:0;font-size:12px}
+  .menubar span{padding:3px 8px;cursor:default;border-radius:2px}
+  .menubar span:hover{background:#c9def5}
+
+  /* ── toolbar ── */
+  .toolbar{background:var(--ssms-chrome2);min-height:30px;display:flex;align-items:center;gap:3px;
+    padding:2px 6px;border-bottom:1px solid var(--ssms-border);flex-shrink:0;flex-wrap:wrap}
+  .tbtn{display:flex;align-items:center;gap:5px;padding:3px 8px;border:1px solid transparent;border-radius:3px;
+    cursor:pointer;font-size:12px;white-space:nowrap}
+  .tbtn:hover{background:#c9def5;border-color:#a8cef0}
+  .tbtn.exec{color:#178600;font-weight:600}
+  .tbtn .pl{color:#178600;font-size:11px}
+  .dbsel{display:flex;align-items:center;gap:5px;border:1px solid #b9b9c2;background:#fff;border-radius:2px;
+    padding:2px 6px;min-width:150px;font-size:12px}
+  .dbsel .db-ico{color:#d4691e}
+  .sep{width:1px;height:18px;background:var(--ssms-border);margin:0 3px}
+
+  /* ── body split ── */
+  .body{flex:1;display:flex;min-height:0}
+
+  /* object explorer */
+  .oe{width:280px;background:#fff;border-right:1px solid var(--ssms-border);display:flex;flex-direction:column;flex-shrink:0}
+  .oe-hd{background:var(--ssms-chrome2);height:26px;display:flex;align-items:center;justify-content:space-between;
+    padding:0 8px;border-bottom:1px solid var(--ssms-border);font-weight:600}
+  .oe-hd .x{color:#888;cursor:pointer}
+  .oe-tb{height:24px;background:var(--ssms-chrome2);border-bottom:1px solid var(--ssms-border);display:flex;
+    align-items:center;gap:8px;padding:0 8px;color:#444}
+  .oe-tree{flex:1;overflow:auto;padding:4px 0;font-size:12px}
+  .node{display:flex;align-items:center;gap:4px;padding:2px 4px;cursor:pointer;white-space:nowrap;user-select:none}
+  .node:hover{background:#e9f3fd}
+  .node.sel{background:var(--ssms-select);border:1px solid var(--ssms-selbd);padding:1px 3px}
+  .tw{display:inline-block;width:12px;text-align:center;color:#666;font-size:9px}
+  .ico-folder{color:#dcb67a}.ico-db{color:#d4691e}.ico-table{color:#6a8759}.ico-sp{color:#9876aa}
+  .ico-srv{color:#3a8ec9}.ico-view{color:#4a90d9}.ico-col{color:#888}
+  .children{overflow:hidden}
+  .collapsed > .children{display:none}
+
+  /* query area */
+  .qarea{flex:1;display:flex;flex-direction:column;min-width:0;background:#fff}
+  .qtabs{height:26px;background:var(--ssms-chrome2);display:flex;align-items:stretch;border-bottom:1px solid var(--ssms-border);flex-shrink:0}
+  .qtab{display:flex;align-items:center;gap:7px;padding:0 14px;background:#fff;border-right:1px solid var(--ssms-border);
+    font-size:12px;border-top:2px solid var(--ssms-blue)}
+  .qtab .x{color:#999;font-size:11px}
+  .qtab .dot{color:#666}
+  .qsplit{flex:1;display:flex;flex-direction:column;min-height:0}
+  .editor{flex:1;display:flex;overflow:auto;min-height:120px;background:#fff;position:relative}
+  .gutter{background:#f4f4f4;color:#2b91af;text-align:right;padding:6px 8px 6px 4px;user-select:none;
+    font-family:Consolas,'Courier New',monospace;font-size:13px;line-height:1.5;border-right:1px solid #e4e4e4;min-width:38px}
+  .code{padding:6px 12px;font-family:Consolas,'Courier New',monospace;font-size:13px;line-height:1.5;
+    white-space:pre;flex:1;tab-size:4}
+  .code .kw{color:var(--kw)}.code .str{color:var(--str)}.code .com{color:var(--com)}
+  .code .fn{color:var(--fn)}.code .num{color:var(--num)}.code .type{color:var(--type)}
+
+  /* results */
+  .results{height:230px;border-top:2px solid var(--ssms-border);display:flex;flex-direction:column;flex-shrink:0;background:#fff}
+  .rtabs{height:24px;background:var(--ssms-chrome2);display:flex;align-items:stretch;border-bottom:1px solid var(--ssms-border)}
+  .rtab{padding:0 14px;display:flex;align-items:center;font-size:12px;border-right:1px solid var(--ssms-border);cursor:pointer}
+  .rtab.act{background:#fff;border-top:2px solid var(--ssms-blue)}
+  .rbody{flex:1;overflow:auto}
+  table.grid{border-collapse:collapse;font-size:12px;width:100%}
+  table.grid th{background:var(--grid-hd);border:1px solid var(--grid-line);padding:3px 10px;text-align:left;
+    font-weight:400;color:#333;position:sticky;top:0}
+  table.grid th .rowh{color:#888}
+  table.grid td{border:1px solid var(--grid-line);padding:3px 10px;white-space:nowrap}
+  table.grid td.rn{background:var(--grid-hd);color:#888;text-align:right;width:30px}
+  .msg{padding:10px 14px;font-family:Consolas,monospace;font-size:12px;color:#1e1e1e;line-height:1.6;white-space:pre-wrap}
+  .msg .ok{color:#178600}
+
+  /* status bar */
+  .statusbar{height:23px;background:var(--ssms-blue);color:#fff;display:flex;align-items:center;font-size:11px;
+    padding:0 10px;gap:18px;flex-shrink:0}
+  .statusbar .grow{flex:1}
+  .statusbar .seg{display:flex;align-items:center;gap:5px}
+
+  /* ── tutorial overlay ── */
+  .tut-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:50;display:none}
+  .tut-overlay.on{display:block}
+  .spotlight{position:absolute;border:2px solid #ffb900;border-radius:4px;box-shadow:0 0 0 4000px rgba(0,0,0,.55);
+    transition:.35s ease;pointer-events:none}
+  .tut-card{position:absolute;background:#fff;border-radius:8px;box-shadow:0 12px 40px rgba(0,0,0,.4);
+    width:340px;padding:18px 20px;z-index:52;transition:.35s ease}
+  .tut-step{font-size:11px;color:#0a7;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px}
+  .tut-title{font-size:15px;font-weight:600;margin-bottom:7px;color:#1e1e1e}
+  .tut-text{font-size:13px;line-height:1.55;color:#444;margin-bottom:14px}
+  .tut-text code{background:#f0f0f0;padding:1px 5px;border-radius:3px;font-family:Consolas,monospace;font-size:12px;color:#a31515}
+  .tut-actions{display:flex;align-items:center;justify-content:space-between}
+  .tut-dots{display:flex;gap:5px}
+  .tut-dots i{width:7px;height:7px;border-radius:50%;background:#d4d4d4}
+  .tut-dots i.on{background:var(--ssms-blue);width:18px;border-radius:4px}
+  .tut-btns{display:flex;gap:8px}
+  .tbn{padding:6px 15px;border-radius:6px;border:1px solid var(--ssms-border);background:#fff;font-size:13px;cursor:pointer}
+  .tbn.pri{background:var(--ssms-blue);color:#fff;border-color:var(--ssms-blue)}
+  .tbn:hover{filter:brightness(.96)}
+
+  .launch{position:fixed;bottom:18px;right:18px;z-index:40;background:var(--ssms-blue);color:#fff;border:none;
+    padding:11px 18px;border-radius:8px;font-size:13px;cursor:pointer;box-shadow:0 6px 18px rgba(0,91,161,.4);
+    display:flex;align-items:center;gap:8px}
+  .launch:hover{filter:brightness(1.08)}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TITLE BAR -->
+  <div class="titlebar">
+    <div class="tl"><span class="ico">▦</span><span>YafesPars_Dev - Microsoft SQL Server Management Studio</span></div>
+    <div class="winbtns"><span>—</span><span>▢</span><span class="close">✕</span></div>
+  </div>
+
+  <!-- MENU -->
+  <div class="menubar">
+    <span>File</span><span>Edit</span><span>View</span><span>Query</span><span>Project</span>
+    <span>Tools</span><span>Window</span><span>Help</span>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="tbtn" id="tb-newquery"><span style="color:#c9a227">🗋</span> New Query</div>
+    <div class="sep"></div>
+    <div class="tbtn exec" id="tb-exec"><span class="pl">▶</span> Execute</div>
+    <span style="color:#c00;font-weight:700">■</span>
+    <span style="color:#178600">✓</span>
+    <div class="sep"></div>
+    <div class="dbsel"><span class="db-ico">🛢</span> YafesPars_Dev ▾</div>
+    <div class="sep"></div>
+    <div class="tbtn">🔍 Debug</div>
+    <div class="tbtn">✎</div>
+  </div>
+
+  <!-- BODY -->
+  <div class="body">
+
+    <!-- OBJECT EXPLORER -->
+    <div class="oe">
+      <div class="oe-hd">Object Explorer <span class="x">▾ ✕</span></div>
+      <div class="oe-tb"><span>🔌 Connect ▾</span><span>⟳</span><span>⊟</span><span>⊞</span></div>
+      <div class="oe-tree" id="tree">
+        <div class="treenode" data-k="server">
+          <div class="node sel"><span class="tw">▾</span><span class="ico-srv">🖥</span> YAFES-SQL01 (SQL Server 16.0.1000 - sa)</div>
+          <div class="children">
+            <div class="treenode" data-k="databases">
+              <div class="node" style="padding-left:18px"><span class="tw">▾</span><span class="ico-folder">📁</span> Databases</div>
+              <div class="children">
+                <div class="node" style="padding-left:34px"><span class="tw"> </span><span class="ico-folder">📁</span> System Databases</div>
+                <div class="treenode" data-k="ypdb">
+                  <div class="node" id="n-db" style="padding-left:34px"><span class="tw">▾</span><span class="ico-db">🛢</span> YafesPars_Dev</div>
+                  <div class="children">
+                    <div class="treenode" data-k="tables">
+                      <div class="node" id="n-tables" style="padding-left:50px"><span class="tw">▸</span><span class="ico-folder">📁</span> Tables</div>
+                      <div class="children collapsed-c" style="display:none">
+                        <div class="node" style="padding-left:68px"><span class="tw"> </span><span class="ico-table">▦</span> person.Person</div>
+                        <div class="node" style="padding-left:68px"><span class="tw"> </span><span class="ico-table">▦</span> person.NaturalPerson</div>
+                        <div class="node" style="padding-left:68px"><span class="tw"> </span><span class="ico-table">▦</span> person.LegalPerson</div>
+                        <div class="node" style="padding-left:68px"><span class="tw"> </span><span class="ico-table">▦</span> policy.Contract</div>
+                        <div class="node" style="padding-left:68px"><span class="tw"> </span><span class="ico-table">▦</span> coverage.ContractCoverageItem</div>
+                        <div class="node" style="padding-left:68px"><span class="tw"> </span><span class="ico-table">▦</span> claim.Claim</div>
+                        <div class="node" style="padding-left:68px"><span class="tw"> </span><span class="ico-table">▦</span> risk.InsurableVehicle</div>
+                        <div class="node" style="padding-left:68px"><span class="tw"> </span><span class="ico-table">▦</span> finance.Invoices</div>
+                        <div class="node" style="padding-left:68px"><span class="tw"> </span><span class="ico-table">▦</span> document.Document</div>
+                      </div>
+                    </div>
+                    <div class="node" style="padding-left:50px"><span class="tw">▸</span><span class="ico-folder">📁</span> Views</div>
+                    <div class="treenode" data-k="prog">
+                      <div class="node" id="n-prog" style="padding-left:50px"><span class="tw">▸</span><span class="ico-folder">📁</span> Programmability</div>
+                      <div class="children collapsed-c" style="display:none">
+                        <div class="treenode" data-k="sps">
+                          <div class="node" id="n-sps" style="padding-left:68px"><span class="tw">▸</span><span class="ico-folder">📁</span> Stored Procedures</div>
+                          <div class="children collapsed-c" style="display:none">
+                            <div class="node sp-node" style="padding-left:86px"><span class="tw"> </span><span class="ico-sp">◈</span> person.SP_CreateNaturalPerson</div>
+                            <div class="node sp-node" id="n-sp-contract" style="padding-left:86px"><span class="tw"> </span><span class="ico-sp">◈</span> policy.SP_CreateContract</div>
+                            <div class="node sp-node" style="padding-left:86px"><span class="tw"> </span><span class="ico-sp">◈</span> coverage.sp_AddCoverageItem</div>
+                            <div class="node sp-node" style="padding-left:86px"><span class="tw"> </span><span class="ico-sp">◈</span> claim.SP_CreateClaim</div>
+                            <div class="node sp-node" style="padding-left:86px"><span class="tw"> </span><span class="ico-sp">◈</span> finance.sp_CreateInvoice</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="node" style="padding-left:18px"><span class="tw">▸</span><span class="ico-folder">📁</span> Security</div>
+            <div class="node" style="padding-left:18px"><span class="tw">▸</span><span class="ico-folder">📁</span> Server Objects</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUERY AREA -->
+    <div class="qarea">
+      <div class="qtabs">
+        <div class="qtab"><span class="dot">●</span> SQLQuery1.sql - YAFES-SQL01.YafesPars_Dev (sa (54)) <span class="x">✕</span></div>
+      </div>
+      <div class="qsplit">
+        <div class="editor">
+          <div class="gutter" id="gutter"></div>
+          <div class="code" id="code"></div>
+        </div>
+        <div class="results" id="results" style="display:none">
+          <div class="rtabs">
+            <div class="rtab act" id="rt-results" onclick="showTab('results')">▦ Results</div>
+            <div class="rtab" id="rt-messages" onclick="showTab('messages')">✉ Messages</div>
+          </div>
+          <div class="rbody" id="rbody"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="statusbar">
+    <div class="seg" id="st-state">● Connected</div>
+    <div class="grow"></div>
+    <div class="seg">YAFES-SQL01 (16.0 RTM)</div>
+    <div class="seg">sa</div>
+    <div class="seg">YafesPars_Dev</div>
+    <div class="seg" id="st-rows">00:00:00  0 rows</div>
+  </div>
+</div>
+
+<!-- TUTORIAL -->
+<div class="tut-overlay" id="tutOverlay">
+  <div class="spotlight" id="spotlight"></div>
+  <div class="tut-card" id="tutCard">
+    <div class="tut-step" id="tutStep">Adım 1 / 6</div>
+    <div class="tut-title" id="tutTitle"></div>
+    <div class="tut-text" id="tutText"></div>
+    <div class="tut-actions">
+      <div class="tut-dots" id="tutDots"></div>
+      <div class="tut-btns">
+        <button class="tbn" id="tutSkip" onclick="endTutorial()">Atla</button>
+        <button class="tbn pri" id="tutNext" onclick="tutNext()">İleri →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="launch" onclick="startTutorial()">▶ Tutorial'ı başlat</button>
+
+<script>
+/* ── SQL içeriği (syntax highlight) ── */
+const sqlLines = [
+  {h:'<span class="com">-- Yeni Belçika auto-poliçesi: müşteri + poliçe + teminat + fatura</span>'},
+  {h:'<span class="kw">DECLARE</span> <span class="type">@tenant</span> <span class="kw">UNIQUEIDENTIFIER</span> = <span class="str">\'10000000-0000-0000-0000-000000000001\'</span>;'},
+  {h:'<span class="kw">DECLARE</span> <span class="type">@personId</span> <span class="kw">UNIQUEIDENTIFIER</span>, <span class="type">@contractId</span> <span class="kw">UNIQUEIDENTIFIER</span>;'},
+  {h:''},
+  {h:'<span class="com">-- 1) Verzekeringnemer (natuurlijke persoon)</span>'},
+  {h:'<span class="kw">EXEC</span> person.SP_CreateNaturalPerson'},
+  {h:'     <span class="type">@tenant_id</span> = <span class="type">@tenant</span>, <span class="type">@language_code</span> = <span class="str">N\'NL\'</span>,'},
+  {h:'     <span class="type">@first_name</span> = <span class="str">N\'Jan\'</span>, <span class="type">@last_name</span> = <span class="str">N\'Janssens\'</span>,'},
+  {h:'     <span class="type">@rrn</span> = <span class="str">N\'90021512345\'</span>, <span class="type">@created_person_id</span> = <span class="type">@personId</span> <span class="kw">OUTPUT</span>;'},
+  {h:''},
+  {h:'<span class="com">-- 2) Polis (MOTOR + AUTO_BA, status ACTIVE, auto nummer)</span>'},
+  {h:'<span class="kw">EXEC</span> policy.SP_CreateContract'},
+  {h:'     <span class="type">@tenant_id</span> = <span class="type">@tenant</span>, <span class="type">@contract_domain_code</span> = <span class="str">N\'MOTOR\'</span>,'},
+  {h:'     <span class="type">@contract_type_code</span> = <span class="str">N\'AUTO_BA\'</span>, <span class="type">@start_date</span> = <span class="str">\'2026-01-01\'</span>,'},
+  {h:'     <span class="type">@created_contract_id</span> = <span class="type">@contractId</span> <span class="kw">OUTPUT</span>;'},
+  {h:''},
+  {h:'<span class="com">-- 3) Dekkingen: BA Auto (verplicht) + Omnium</span>'},
+  {h:'<span class="kw">EXEC</span> coverage.sp_AddCoverageItem <span class="type">@tenant</span>, <span class="type">@contractId</span>, <span class="str">N\'BA_AUTO\'</span>, <span class="num">2500000</span>, <span class="kw">NULL</span>, <span class="str">N\'EUR\'</span>, <span class="kw">NULL</span>;'},
+  {h:'<span class="kw">EXEC</span> coverage.sp_AddCoverageItem <span class="type">@tenant</span>, <span class="type">@contractId</span>, <span class="str">N\'OMNIUM\'</span>,  <span class="num">35000</span>, <span class="num">500</span>, <span class="str">N\'EUR\'</span>, <span class="kw">NULL</span>;'},
+  {h:''},
+  {h:'<span class="com">-- 4) Eerste premie-factuur</span>'},
+  {h:'<span class="kw">EXEC</span> finance.sp_CreateInvoice <span class="type">@tenant</span>, <span class="type">@contractId</span>, <span class="str">\'2026-01-01\'</span>, <span class="str">\'2026-01-15\'</span>, <span class="num">1500</span>, <span class="str">N\'EUR\'</span>, <span class="kw">NULL</span>;'},
+  {h:''},
+  {h:'<span class="kw">SELECT</span> <span class="str">\'Polis aangemaakt\'</span> <span class="kw">AS</span> resultaat, <span class="type">@contractId</span> <span class="kw">AS</span> contract_id;'},
+];
+const gutter = document.getElementById('gutter'), code = document.getElementById('code');
+gutter.innerHTML = sqlLines.map((_,i)=>i+1).join('\n');
+code.innerHTML = sqlLines.map(l=>l.h||' ').join('\n');
+
+/* ── execute simülasyonu ── */
+let executed = false;
+function runQuery(){
+  const results = document.getElementById('results');
+  results.style.display = 'flex';
+  document.getElementById('st-state').innerHTML = '● Executing query...';
+  showTab('messages');
+  const rbody = document.getElementById('rbody');
+  rbody.innerHTML = '<div class="msg">Commands completing...</div>';
+
+  const steps = [
+    '(1 row affected)',
+    '(1 row affected)',
+    '(1 row affected)',
+    '(1 row affected)',
+    '(1 row affected)',
+  ];
+  let i=0, txt='';
+  const iv = setInterval(()=>{
+    if(i<steps.length){ txt += steps[i] + '\n'; rbody.innerHTML = '<div class="msg">'+txt+'</div>'; i++; }
+    else{
+      clearInterval(iv);
+      var ts = new Date().toISOString().slice(0,19).replace("T"," ");
+      txt += '\n<span class="ok">Polis aangemaakt — contract_id: 7F3A9C12-… (2026/MOTOR/4471)</span>\n';
+      txt += '<span class="ok">Completion time: ' + ts + '</span>';
+      rbody.innerHTML = '<div class="msg">'+txt+'</div>';
+      document.getElementById('st-state').innerHTML = '● Query executed successfully';
+      document.getElementById('st-rows').textContent = '00:00:00  1 rows';
+      executed = true;
+      setTimeout(()=>showTab('results'), 600);
+    }
+  }, 420);
+}
+function showTab(which){
+  const rbody = document.getElementById('rbody');
+  document.getElementById('rt-results').classList.toggle('act', which==='results');
+  document.getElementById('rt-messages').classList.toggle('act', which==='messages');
+  if(which==='results'){
+    rbody.innerHTML = `<table class="grid">
+      <tr><th class="rowh"></th><th>resultaat</th><th>contract_id</th></tr>
+      <tr><td class="rn">1</td><td>Polis aangemaakt</td><td>7F3A9C12-8B4D-4E1A-9F2C-1A2B3C4D5E6F</td></tr>
+    </table>`;
+  }
+}
+document.getElementById('tb-exec').addEventListener('click', runQuery);
+document.getElementById('tb-newquery').addEventListener('click', ()=>{
+  document.getElementById('results').style.display='none';
+});
+
+/* ── object explorer expand/collapse ── */
+document.querySelectorAll('.oe-tree .node').forEach(n=>{
+  n.addEventListener('click', function(e){
+    document.querySelectorAll('.oe-tree .node').forEach(x=>x.classList.remove('sel'));
+    this.classList.add('sel');
+    const tw = this.querySelector('.tw');
+    const wrap = this.parentElement;
+    const kids = wrap.querySelector(':scope > .children');
+    if(kids && tw && (tw.textContent.includes('▸')||tw.textContent.includes('▾'))){
+      const hidden = kids.style.display==='none';
+      kids.style.display = hidden ? 'block':'none';
+      tw.textContent = hidden ? '▾':'▸';
+    }
+    e.stopPropagation();
+  });
+});
+
+/* ── TUTORIAL ── */
+const steps = [
+  { el:'#tree', title:'Object Explorer', pos:'right',
+    text:'Sol panelde sunucuya bağlısınız: <code>YAFES-SQL01</code>. Veritabanları, tablolar ve stored procedure\'lar burada. Operatör tüm işlemleri buradan yönetir.' },
+  { el:'#n-db', title:'YafesPars_Dev veritabanı', pos:'right',
+    text:'Sigorta sisteminin veritabanı. İçinde <code>person</code>, <code>policy</code>, <code>claim</code>, <code>finance</code> şemaları ve 26 migration ile kurulmuş tüm tablolar var.' },
+  { el:'#n-sps', title:'Stored Procedures', pos:'right',
+    text:'Tüm yazma işlemleri stored procedure üzerinden yapılır — <code>SP_CreateContract</code>, <code>sp_AddCoverageItem</code>, <code>SP_CreateClaim</code>. Tenant doğrulaması ve iş kuralları SP içinde.' },
+  { el:'#code', title:'Sorgu editörü', pos:'left',
+    text:'Burada bir Belçika auto-poliçesi uçtan uca oluşturuluyor: müşteri → poliçe (MOTOR + AUTO_BA) → teminatlar (BA_AUTO + OMNIUM) → premie-factuur. Hepsi tek script.' },
+  { el:'#tb-exec', title:'Execute (F5)', pos:'bottom',
+    text:'Yeşil <code>Execute</code> ile script çalışır. Her SP bir kayıt oluşturur, tenant_id ile izole edilir. Şimdi çalıştıralım.', action:'exec' },
+  { el:'#results', title:'Sonuçlar', pos:'top',
+    text:'Results sekmesinde poliçenin oluşturulduğunu ve <code>contract_id</code>\'sini görüyorsunuz. Aynı işlem Copilot ile tek cümleyle de yapılabilir.' },
+];
+let cur = 0;
+const overlay=document.getElementById('tutOverlay'), spot=document.getElementById('spotlight'),
+      card=document.getElementById('tutCard'), dots=document.getElementById('tutDots');
+dots.innerHTML = steps.map((_,i)=>`<i class="${i===0?'on':''}"></i>`).join('');
+
+function positionStep(){
+  const s = steps[cur];
+  const el = document.querySelector(s.el);
+  const r = el.getBoundingClientRect();
+  const pad=6;
+  spot.style.left=(r.left-pad)+'px'; spot.style.top=(r.top-pad)+'px';
+  spot.style.width=(r.width+pad*2)+'px'; spot.style.height=(r.height+pad*2)+'px';
+  document.getElementById('tutStep').textContent = `Adım ${cur+1} / ${steps.length}`;
+  document.getElementById('tutTitle').textContent = s.title;
+  document.getElementById('tutText').innerHTML = s.text;
+  document.getElementById('tutNext').textContent = cur===steps.length-1 ? 'Bitir ✓' : 'İleri →';
+  dots.querySelectorAll('i').forEach((d,i)=>d.classList.toggle('on',i===cur));
+  // card placement
+  let cl, ct;
+  const cw=340, ch=190;
+  if(s.pos==='right'){ cl=Math.min(r.right+16, innerWidth-cw-12); ct=Math.max(12,r.top); }
+  else if(s.pos==='left'){ cl=Math.max(12, r.left - cw - 16); ct=Math.max(12,r.top); }
+  else if(s.pos==='bottom'){ cl=Math.min(r.left, innerWidth-cw-12); ct=r.bottom+14; }
+  else { cl=Math.min(r.left, innerWidth-cw-12); ct=Math.max(12, r.top - ch - 14); }
+  card.style.left=cl+'px'; card.style.top=ct+'px';
+}
+function startTutorial(){ cur=0; overlay.classList.add('on'); document.getElementById('results').style.display='none'; positionStep(); }
+function tutNext(){
+  const s = steps[cur];
+  if(s.action==='exec' && !executed){ runQuery(); }
+  if(cur < steps.length-1){ cur++; setTimeout(positionStep, s.action==='exec'?2600:0); }
+  else endTutorial();
+}
+function endTutorial(){ overlay.classList.remove('on'); }
+window.addEventListener('resize',()=>{ if(overlay.classList.contains('on')) positionStep(); });
+</script>
+</body>
+</html>
