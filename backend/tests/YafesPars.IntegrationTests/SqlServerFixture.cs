@@ -35,6 +35,8 @@ public sealed class SqlServerFixture : IAsyncLifetime
     public async Task InitializeAsync()
     {
         Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
+        Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
+        Dapper.SqlMapper.AddTypeHandler(new TimeOnlyTypeHandler());
 
         var baseConn = Environment.GetEnvironmentVariable("YAFES_SQL_INTEGRATION");
         if (string.IsNullOrWhiteSpace(baseConn))
