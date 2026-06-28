@@ -21,12 +21,12 @@ public sealed class PolicyWriteTools
 
     [McpServerTool, Description(
         "Maak een nieuwe polis aan. / Yeni poliçe oluştur.\n" +
-        "Domeincodes: AUTO, MOTOR, FIRE, FAMILY, LIABILITY, LEGAL_PROTECTION, HEALTH, LIFE, LOAN, BUSINESS.\n" +
-        "Typecodes (policy.ContractType): AUTO_BA, FIRE_HOME, FAMILY_RC, LOAN_PROTECTION.\n" +
+        "Geldige domein+type combinaties (verplicht gekoppeld):\n" +
+        "  MOTOR + AUTO_BA, FIRE + FIRE_HOME, FAMILY + FAMILY_RC, LOAN + LOAN_PROTECTION.\n" +
         "Startdatum verplicht. Einddatum optioneel (geen einddatum = doorlopend).")]
     public async Task<string> CreatePolicy(
-        [Description("Domeincode: AUTO, MOTOR, FIRE, FAMILY, LIABILITY, HEALTH, LIFE, LOAN, BUSINESS")] string contractDomainCode = "",
-        [Description("Typecode: AUTO_BA, FIRE_HOME, FAMILY_RC, LOAN_PROTECTION")] string contractTypeCode = "",
+        [Description("Domeincode: MOTOR, FIRE, FAMILY, LOAN (gekoppeld aan typecode)")] string contractDomainCode = "",
+        [Description("Typecode: AUTO_BA (MOTOR), FIRE_HOME (FIRE), FAMILY_RC (FAMILY), LOAN_PROTECTION (LOAN)")] string contractTypeCode = "",
         [Description("Ingangsdatum (YYYY-MM-DD) / Başlangıç tarihi")] DateOnly startDate = default,
         [Description("Vervaldatum (YYYY-MM-DD, optioneel) / Bitiş tarihi")] DateOnly? endDate = null,
         [Description("Maatschappijcode (optioneel) / Sigorta şirket kodu")] string? insurerCode = null,
