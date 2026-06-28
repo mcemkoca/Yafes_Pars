@@ -27,7 +27,7 @@ public sealed class GdprErasureTests
         // Klant met PII aanmaken
         var created = await Persons.CreateNaturalPerson("Sophie", "Dubois", "FR",
             null, "BE", new DateOnly(1985, 3, 12), null, "85031212345");
-        Assert.DoesNotContain("Fout", created);
+        Assert.True(created.TrimStart().StartsWith("{"), $"CreateNaturalPerson gaf geen JSON terug: {created}");
         var personId = ExtractGuid(created, "personId");
 
         // Anonimiseren
