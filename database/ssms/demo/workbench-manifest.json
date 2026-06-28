@@ -9,7 +9,7 @@
                      "defaultName":  "YafesPars_Dev",
                      "environment":  "DEV",
                      "schemaCount":  12,
-                     "tableCount":  116,
+                     "tableCount":  117,
                      "legacyReferenceTableCount":  89
                  },
     "tenant":  {
