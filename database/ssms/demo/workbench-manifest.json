@@ -18,8 +18,8 @@
                    "environmentLabel":  "DEV"
                },
     "migrations":  {
-                       "count":  27,
-                       "latest":  "026__tenant_provisioning.sql",
+                       "count":  28,
+                       "latest":  "027__gdpr_erasure.sql",
                        "files":  [
                                      "000__create_database.sql",
                                      "001__create_schemas.sql",
@@ -47,7 +47,8 @@
                                      "023__fix_write_procedures.sql",
                                      "024__seed_belgian_coverage_types.sql",
                                      "025__fix_vehicle_defaults.sql",
-                                     "026__tenant_provisioning.sql"
+                                     "026__tenant_provisioning.sql",
+                                     "027__gdpr_erasure.sql"
                                  ]
                    },
     "validations":  {

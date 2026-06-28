@@ -30,9 +30,8 @@ public sealed class PersonWriteTools
         [Description("Dossiernummer (optioneel) / Dosya numarası")] string? dossier = null,
         [Description("Nationaliteit bijv. BE, NL / Uyruk")] string? nationality = null,
         [Description("Geboortedatum (YYYY-MM-DD) / Doğum tarihi")] DateOnly? birthDate = null,
-        [Description("Rijksregisternummer 11 cijfers / Ulusal kimlik numarası")] string? nationalNumber = null,
         [Description("Aanspreektitel: DHR, MVR, X / Unvan")] string? titleCode = null,
-        [Description("Rijksregisternummer 11 cijfers / RRN")] string? rrn = null,
+        [Description("Rijksregisternummer 11 cijfers / RRN (Belçika ulusal kimlik no)")] string? rrn = null,
         [Description("Burgerlijke staat: ONGEHUWD, GEHUWD, WETTELIJK_SAMENWONEND, FEITELIJK_SAMENWONEND, GESCHEIDEN, WEDUWE_WEDUWNAAR")] string? civilStatus = null,
         CancellationToken ct = default)
     {
