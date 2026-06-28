@@ -33,3 +33,7 @@ obj/
 dist/
 build/
 coverage/
+
+# Local helper/scratch files
+_*.sh
+_index_dump.txt

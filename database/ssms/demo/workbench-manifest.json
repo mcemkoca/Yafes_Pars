@@ -18,8 +18,8 @@
                    "environmentLabel":  "DEV"
                },
     "migrations":  {
-                       "count":  24,
-                       "latest":  "023__fix_write_procedures.sql",
+                       "count":  25,
+                       "latest":  "024__seed_belgian_coverage_types.sql",
                        "files":  [
                                      "000__create_database.sql",
                                      "001__create_schemas.sql",
@@ -44,7 +44,8 @@
                                      "020__add_write_stored_procedures.sql",
                                      "021__fix_document_and_coverage.sql",
                                      "022__belgian_adaptations.sql",
-                                     "023__fix_write_procedures.sql"
+                                     "023__fix_write_procedures.sql",
+                                     "024__seed_belgian_coverage_types.sql"
                                  ]
                    },
     "validations":  {
