@@ -125,23 +125,64 @@ try
         });
     });
 
+    var devSigningKey = builder.Configuration["Authentication:DevSigningKey"];
+
     builder.Services
         .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options =>
         {
-            options.Authority = authority;
-            options.Audience = audience;
-            options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
-            options.TokenValidationParameters.ValidateIssuer = !string.IsNullOrWhiteSpace(authority);
-            options.TokenValidationParameters.ValidateAudience = !string.IsNullOrWhiteSpace(audience);
+            // Claimtypes (tenant_id, role, sub) ongewijzigd laten — geen URI-mapping.
+            options.MapInboundClaims = false;
+
+            if (!string.IsNullOrWhiteSpace(devSigningKey))
+            {
+                // Development/demo: lokaal ondertekende HS256 tokens (DevTokenIssuer).
+                options.RequireHttpsMetadata = false;
+                options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = DevTokenIssuer.Issuer,
+                    ValidateAudience = !string.IsNullOrWhiteSpace(audience),
+                    ValidAudience = audience,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+                        System.Text.Encoding.UTF8.GetBytes(devSigningKey)),
+                    ValidateLifetime = true,
+                    RoleClaimType = AuthRoles.RoleClaimType
+                };
+            }
+            else
+            {
+                // Productie: externe OIDC IdP (Azure AD B2C / Auth0 / Keycloak).
+                options.Authority = authority;
+                options.Audience = audience;
+                options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
+                options.TokenValidationParameters.ValidateIssuer = !string.IsNullOrWhiteSpace(authority);
+                options.TokenValidationParameters.ValidateAudience = !string.IsNullOrWhiteSpace(audience);
+                options.TokenValidationParameters.RoleClaimType = AuthRoles.RoleClaimType;
+            }
         });
 
     builder.Services.AddAuthorization(options =>
     {
-        options.AddPolicy("TenantUser", policy =>
+        options.AddPolicy(AuthRoles.TenantUserPolicy, policy =>
         {
             policy.RequireAuthenticatedUser();
             policy.RequireAssertion(context => TenantClaims.TryGetTenantId(context.User, out _));
+        });
+
+        options.AddPolicy(AuthRoles.AdminPolicy, policy =>
+        {
+            policy.RequireAuthenticatedUser();
+            policy.RequireAssertion(context => TenantClaims.TryGetTenantId(context.User, out _));
+            policy.RequireRole(AuthRoles.Admin);
+        });
+
+        options.AddPolicy(AuthRoles.AuditorPolicy, policy =>
+        {
+            policy.RequireAuthenticatedUser();
+            policy.RequireAssertion(context => TenantClaims.TryGetTenantId(context.User, out _));
+            policy.RequireRole(AuthRoles.Auditor, AuthRoles.Admin);
         });
     });
 
