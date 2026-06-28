@@ -59,7 +59,7 @@ public sealed class WriteFlowTests
 
     private async Task<Guid> NewPolicyAsync()
     {
-        var res = await Policies.CreatePolicy("AUTO", "AUTO_FULL", new DateOnly(2026, 1, 1));
+        var res = await Policies.CreatePolicy("AUTO", "AUTO_BA", new DateOnly(2026, 1, 1));
         AssertNoError(res);
         return ExtractGuid(res, "contractId");
     }
