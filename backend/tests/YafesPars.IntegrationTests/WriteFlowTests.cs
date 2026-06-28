@@ -186,7 +186,7 @@ public sealed class WriteFlowTests
 
         var contractId = await NewPolicyAsync();
         var res = await Documents.UploadDocument(
-            "polis.pdf", "CONTRACT", "POLICY", contractId,
+            "polis.pdf", "POLICY_DOCUMENT", "POLICY", contractId,
             "application/pdf", null, null, 1024, "Testpolis");
         AssertNoError(res);
         var documentId = ExtractGuid(res, "documentId");

@@ -27,10 +27,10 @@ public sealed class DocumentTools
         "Registreer een document en sla de inhoud op. / Belge kaydet ve içeriği yükle.\n" +
         "Geef bestandsinhoud mee als base64 of als opslagpad (Azure Blob URI).\n" +
         "Eigenaartypes: POLICY (polis), CLAIM (schade), PERSON (klant), RISK_OBJECT (object).\n" +
-        "Documenttypes: CONTRACT, ID_CARD, INVOICE, DAMAGE_REPORT, PHOTO, OTHER.")]
+        "Documenttypes: POLICY_DOCUMENT, SIGNED_CONTRACT, ID_CARD, PASSPORT, GREEN_CARD, CLAIM_REPORT, INVOICE, PHOTO, BANK_DOCUMENT, EMAIL_ATTACHMENT.")]
     public async Task<string> UploadDocument(
         [Description("Bestandsnaam met extensie bijv. polis_2024.pdf / Dosya adı")] string fileName = "",
-        [Description("Documenttype: CONTRACT, ID_CARD, INVOICE, DAMAGE_REPORT, PHOTO, OTHER")] string documentTypeCode = "OTHER",
+        [Description("Documenttype: POLICY_DOCUMENT, SIGNED_CONTRACT, ID_CARD, CLAIM_REPORT, INVOICE, PHOTO, BANK_DOCUMENT, EMAIL_ATTACHMENT")] string documentTypeCode = "EMAIL_ATTACHMENT",
         [Description("Eigenaartype: POLICY, CLAIM, PERSON, RISK_OBJECT")] string ownerEntityType = "POLICY",
         [Description("Eigenaar-ID (UUID van de polis, klant, schade, ...) / Sahip ID")] Guid ownerEntityId = default,
         [Description("MIME-type bijv. application/pdf, image/jpeg")] string? mimeType = null,
@@ -184,7 +184,7 @@ public sealed class DocumentTools
     public async Task<string> SearchDocuments(
         [Description("Eigenaartype: POLICY, CLAIM, PERSON, RISK_OBJECT (optioneel)")] string? ownerEntityType = null,
         [Description("Eigenaar-ID (UUID, optioneel)")] Guid? ownerEntityId = null,
-        [Description("Documenttype: CONTRACT, ID_CARD, INVOICE, enz. (optioneel)")] string? documentTypeCode = null,
+        [Description("Documenttype: POLICY_DOCUMENT, ID_CARD, INVOICE, enz. (optioneel)")] string? documentTypeCode = null,
         [Description("Max resultaten (standaard 20)")] int limit = 20,
         CancellationToken ct = default)
     {
