@@ -8,8 +8,8 @@
     "database":  {
                      "defaultName":  "YafesPars_Dev",
                      "environment":  "DEV",
-                     "schemaCount":  12,
-                     "tableCount":  117,
+                     "schemaCount":  13,
+                     "tableCount":  119,
                      "legacyReferenceTableCount":  89
                  },
     "tenant":  {
@@ -18,8 +18,8 @@
                    "environmentLabel":  "DEV"
                },
     "migrations":  {
-                       "count":  28,
-                       "latest":  "027__gdpr_erasure.sql",
+                       "count":  31,
+                       "latest":  "030__add_import_staging.sql",
                        "files":  [
                                      "000__create_database.sql",
                                      "001__create_schemas.sql",
@@ -48,12 +48,15 @@
                                      "024__seed_belgian_coverage_types.sql",
                                      "025__fix_vehicle_defaults.sql",
                                      "026__tenant_provisioning.sql",
-                                     "027__gdpr_erasure.sql"
+                                     "027__gdpr_erasure.sql",
+                                     "028__add_commission_tables.sql",
+                                     "029__add_portfolio_summary_view.sql",
+                                     "030__add_import_staging.sql"
                                  ]
                    },
     "validations":  {
-                        "count":  17,
-                        "latest":  "017__validate_demo_data.sql",
+                        "count":  20,
+                        "latest":  "020__validate_import_staging.sql",
                         "files":  [
                                       "001__validate_core_infrastructure.sql",
                                       "002__validate_person_domain.sql",
@@ -71,99 +74,102 @@
                                       "014__validate_views.sql",
                                       "015__validate_stored_procedures.sql",
                                       "016__validate_seed_data.sql",
-                                      "017__validate_demo_data.sql"
+                                      "017__validate_demo_data.sql",
+                                      "018__validate_commission.sql",
+                                      "019__validate_portfolio_summary.sql",
+                                      "020__validate_import_staging.sql"
                                   ]
                     },
     "ssmsScripts":  [
                         {
                             "fileName":  "00__open_first_safety_check.sql",
                             "path":  "database/ssms/00__open_first_safety_check.sql",
-                            "sizeBytes":  1728
+                            "sizeBytes":  1778
                         },
                         {
                             "fileName":  "01__run_all_dev_migrations_sqlcmd.sql",
                             "path":  "database/ssms/01__run_all_dev_migrations_sqlcmd.sql",
-                            "sizeBytes":  2568
+                            "sizeBytes":  2627
                         },
                         {
                             "fileName":  "02__operations_dashboard.sql",
                             "path":  "database/ssms/02__operations_dashboard.sql",
-                            "sizeBytes":  8212
+                            "sizeBytes":  8489
                         },
                         {
                             "fileName":  "03__create_renewal_tasks.sql",
                             "path":  "database/ssms/03__create_renewal_tasks.sql",
-                            "sizeBytes":  1998
+                            "sizeBytes":  2062
                         },
                         {
                             "fileName":  "04__admin_security_audit_queries.sql",
                             "path":  "database/ssms/04__admin_security_audit_queries.sql",
-                            "sizeBytes":  3889
+                            "sizeBytes":  4037
                         },
                         {
                             "fileName":  "05__operator_dashboard_home.sql",
                             "path":  "database/ssms/05__operator_dashboard_home.sql",
-                            "sizeBytes":  9394
+                            "sizeBytes":  9555
                         },
                         {
                             "fileName":  "06__query_library_shortcuts.sql",
                             "path":  "database/ssms/06__query_library_shortcuts.sql",
-                            "sizeBytes":  3877
+                            "sizeBytes":  4012
                         },
                         {
                             "fileName":  "07__data_entry_bridge_templates.sql",
                             "path":  "database/ssms/07__data_entry_bridge_templates.sql",
-                            "sizeBytes":  34031
+                            "sizeBytes":  34763
                         },
                         {
                             "fileName":  "08__data_editing_guardrails.sql",
                             "path":  "database/ssms/08__data_editing_guardrails.sql",
-                            "sizeBytes":  9545
+                            "sizeBytes":  9835
                         },
                         {
                             "fileName":  "09__graph_report_pack.sql",
                             "path":  "database/ssms/09__graph_report_pack.sql",
-                            "sizeBytes":  5434
+                            "sizeBytes":  5593
                         },
                         {
                             "fileName":  "10__daily_operator_checklist.sql",
                             "path":  "database/ssms/10__daily_operator_checklist.sql",
-                            "sizeBytes":  5231
+                            "sizeBytes":  5386
                         },
                         {
                             "fileName":  "11__schema_working_logic_map.sql",
                             "path":  "database/ssms/11__schema_working_logic_map.sql",
-                            "sizeBytes":  11316
+                            "sizeBytes":  11480
                         },
                         {
                             "fileName":  "12__table_catalog_and_relationships.sql",
                             "path":  "database/ssms/12__table_catalog_and_relationships.sql",
-                            "sizeBytes":  8721
+                            "sizeBytes":  8901
                         },
                         {
                             "fileName":  "13__visual_workflow_board.sql",
                             "path":  "database/ssms/13__visual_workflow_board.sql",
-                            "sizeBytes":  25134
+                            "sizeBytes":  25501
                         },
                         {
                             "fileName":  "14__admin_role_permission_matrix.sql",
                             "path":  "database/ssms/14__admin_role_permission_matrix.sql",
-                            "sizeBytes":  12856
+                            "sizeBytes":  13168
                         },
                         {
                             "fileName":  "15__monitoring_and_job_readiness.sql",
                             "path":  "database/ssms/15__monitoring_and_job_readiness.sql",
-                            "sizeBytes":  13356
+                            "sizeBytes":  13696
                         },
                         {
                             "fileName":  "16__delivery_gap_register.sql",
                             "path":  "database/ssms/16__delivery_gap_register.sql",
-                            "sizeBytes":  16977
+                            "sizeBytes":  17262
                         },
                         {
                             "fileName":  "17__remaining_work_cockpit.sql",
                             "path":  "database/ssms/17__remaining_work_cockpit.sql",
-                            "sizeBytes":  14496
+                            "sizeBytes":  14655
                         }
                     ],
     "shortcuts":  [
@@ -329,13 +335,14 @@
                         "lane":  "Foundation",
                         "subheading":  "Tenant, users, RBAC, migration ledger",
                         "entryPoint":  "04__admin_security_audit_queries.sql",
-                        "tableCount":  7,
+                        "tableCount":  8,
                         "tables":  [
                                        "AppUser",
                                        "Permission",
                                        "Role",
                                        "RolePermission",
                                        "SchemaMigration",
+                                       "SystemSetting",
                                        "Tenant",
                                        "UserRole"
                                    ]
@@ -480,12 +487,14 @@
                         "lane":  "Insurance Core",
                         "subheading":  "Coverage catalog, domains, packages",
                         "entryPoint":  "09__graph_report_pack.sql",
-                        "tableCount":  4,
+                        "tableCount":  6,
                         "tables":  [
+                                       "ContractCoverageItem",
                                        "Coverage",
                                        "CoverageDomain",
                                        "CoveragePackage",
-                                       "CoveragePackageItem"
+                                       "CoveragePackageItem",
+                                       "CoverageType"
                                    ]
                     },
                     {
@@ -514,10 +523,11 @@
                         "lane":  "Operations",
                         "subheading":  "Metadata, links, versions, external storage keys",
                         "entryPoint":  "08__data_editing_guardrails.sql",
-                        "tableCount":  4,
+                        "tableCount":  5,
                         "tables":  [
                                        "Document",
                                        "DocumentLink",
+                                       "DocumentLinks",
                                        "DocumentType",
                                        "DocumentVersion"
                                    ]
@@ -543,7 +553,7 @@
                         "schema":  "audit",
                         "title":  "Audit",
                         "lane":  "Control",
-                        "subheading":  "Audit log, change details, entity notes",
+                        "subheading":  "Audit log and change details",
                         "entryPoint":  "04__admin_security_audit_queries.sql",
                         "tableCount":  3,
                         "tables":  [
@@ -556,15 +566,28 @@
                         "order":  120,
                         "schema":  "finance",
                         "title":  "Finance",
-                        "lane":  "Operations",
-                        "subheading":  "Invoices, payments, payment plans and installments",
-                        "entryPoint":  "02__operations_dashboard.sql",
-                        "tableCount":  4,
+                        "lane":  "Finance",
+                        "subheading":  "Invoices, payments, payment plans, commissions",
+                        "entryPoint":  "09__graph_report_pack.sql",
+                        "tableCount":  5,
                         "tables":  [
+                                       "Commissions",
                                        "Invoices",
                                        "PaymentPlanItems",
                                        "PaymentPlans",
                                        "Payments"
+                                   ]
+                    },
+                    {
+                        "order":  130,
+                        "schema":  "import",
+                        "title":  "Import",
+                        "lane":  "Operations",
+                        "subheading":  "Bulk policy import staging and validation",
+                        "entryPoint":  "06__query_library_shortcuts.sql",
+                        "tableCount":  1,
+                        "tables":  [
+                                       "PolicyImport"
                                    ]
                     }
                 ],
