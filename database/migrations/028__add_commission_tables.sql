@@ -135,7 +135,7 @@ SELECT
     ct.contract_domain_code                          AS tak,
     ct.contract_type_code                            AS productcode,
     pp.first_name + N' ' + pp.last_name              AS broker_naam,
-    inst.institution_name                            AS broker_kantoor,
+    inst.name                                         AS broker_kantoor,
     c.gross_premium_eur,
     c.rate_pct,
     c.commission_eur,
@@ -144,8 +144,6 @@ SELECT
 FROM finance.Commissions c
 INNER JOIN policy.Contract ct
     ON ct.contract_id = c.contract_id
-LEFT JOIN person.Person bp
-    ON bp.person_id = c.broker_person_id
 LEFT JOIN person.NaturalPerson pp
     ON pp.person_id = c.broker_person_id
 LEFT JOIN institution.Institution inst
