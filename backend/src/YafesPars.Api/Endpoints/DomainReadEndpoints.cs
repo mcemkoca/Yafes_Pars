@@ -24,6 +24,7 @@ public static class DomainReadEndpoints
         api.MapGet("/tasks", QueryTasksAsync);
         api.MapGet("/coverage", QueryCoverageAsync);
         api.MapGet("/settings/lookups", QueryLookupHealthAsync);
+        api.MapGet("/audit-log", QueryAuditLogAsync);
 
         return app;
     }
@@ -256,6 +257,40 @@ public static class DomainReadEndpoints
             UNION ALL SELECT 'claim.ClaimStatus', COUNT_BIG(*) FROM claim.ClaimStatus;
             """,
             cancellationToken: cancellationToken);
+        return Results.Ok(rows);
+    }
+
+    private static async Task<IResult> QueryAuditLogAsync(
+        ClaimsPrincipal user,
+        string? tableName,
+        string? actionType,
+        int? take,
+        IReadRepository repository,
+        CancellationToken cancellationToken)
+    {
+        var tenantId = TenantClaims.GetRequiredTenantId(user);
+        var limit = Math.Clamp(take.GetValueOrDefault(50), 1, 200);
+
+        var sql = $"""
+            SELECT TOP (@limit)
+                audit_log_id      AS AuditLogId,
+                schema_name       AS SchemaName,
+                table_name        AS TableName,
+                primary_key_value AS PrimaryKeyValue,
+                action_type       AS ActionType,
+                changed_at_utc    AS ChangedAtUtc,
+                changed_by_name   AS ChangedByName,
+                changed_by_user_id AS ChangedByUserId,
+                source_system     AS SourceSystem
+            FROM audit.AuditLog
+            WHERE tenant_id = @tenantId
+              {(tableName is not null ? "AND table_name = @tableName" : "")}
+              {(actionType is not null ? "AND action_type = @actionType" : "")}
+            ORDER BY changed_at_utc DESC
+            """;
+
+        var rows = await repository.QueryAsync<AuditLogRow>(sql,
+            new { tenantId, tableName, actionType, limit }, cancellationToken);
         return Results.Ok(rows);
     }
 

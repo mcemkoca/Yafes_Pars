@@ -593,6 +593,7 @@
                 ],
     "backend":  {
                     "apiRoutes":  [
+                                      "/api/audit-log",
                                       "/api/claims",
                                       "/api/coverage",
                                       "/api/documents",
