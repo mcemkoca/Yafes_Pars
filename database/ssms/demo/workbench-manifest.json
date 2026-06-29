@@ -18,8 +18,8 @@
                    "environmentLabel":  "DEV"
                },
     "migrations":  {
-                       "count":  29,
-                       "latest":  "028__add_commission_tables.sql",
+                       "count":  30,
+                       "latest":  "029__add_portfolio_summary_view.sql",
                        "files":  [
                                      "000__create_database.sql",
                                      "001__create_schemas.sql",
@@ -49,12 +49,13 @@
                                      "025__fix_vehicle_defaults.sql",
                                      "026__tenant_provisioning.sql",
                                      "027__gdpr_erasure.sql",
-                                     "028__add_commission_tables.sql"
+                                     "028__add_commission_tables.sql",
+                                     "029__add_portfolio_summary_view.sql"
                                  ]
                    },
     "validations":  {
-                        "count":  18,
-                        "latest":  "018__validate_commission.sql",
+                        "count":  19,
+                        "latest":  "019__validate_portfolio_summary.sql",
                         "files":  [
                                       "001__validate_core_infrastructure.sql",
                                       "002__validate_person_domain.sql",
@@ -73,7 +74,8 @@
                                       "015__validate_stored_procedures.sql",
                                       "016__validate_seed_data.sql",
                                       "017__validate_demo_data.sql",
-                                      "018__validate_commission.sql"
+                                      "018__validate_commission.sql",
+                                      "019__validate_portfolio_summary.sql"
                                   ]
                     },
     "ssmsScripts":  [
