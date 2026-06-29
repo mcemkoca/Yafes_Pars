@@ -82,6 +82,7 @@ $domainMetadata = [ordered]@{
     tasking = [ordered]@{ order = 100; lane = "Operations"; title = "Tasking"; subheading = "Tasks, comments, reminders, priority/status"; entryPoint = "10__daily_operator_checklist.sql" }
     audit = [ordered]@{ order = 110; lane = "Control"; title = "Audit"; subheading = "Audit log and change details"; entryPoint = "04__admin_security_audit_queries.sql" }
     finance = [ordered]@{ order = 120; lane = "Finance"; title = "Finance"; subheading = "Invoices, payments, payment plans, commissions"; entryPoint = "09__graph_report_pack.sql" }
+    import  = [ordered]@{ order = 130; lane = "Operations"; title = "Import"; subheading = "Bulk policy import staging and validation"; entryPoint = "06__query_library_shortcuts.sql" }
 }
 
 $schemas = foreach ($schemaName in $domainMetadata.Keys) {

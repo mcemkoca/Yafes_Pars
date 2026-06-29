@@ -8,8 +8,8 @@
     "database":  {
                      "defaultName":  "YafesPars_Dev",
                      "environment":  "DEV",
-                     "schemaCount":  12,
-                     "tableCount":  118,
+                     "schemaCount":  13,
+                     "tableCount":  119,
                      "legacyReferenceTableCount":  89
                  },
     "tenant":  {
@@ -18,8 +18,8 @@
                    "environmentLabel":  "DEV"
                },
     "migrations":  {
-                       "count":  30,
-                       "latest":  "029__add_portfolio_summary_view.sql",
+                       "count":  31,
+                       "latest":  "030__add_import_staging.sql",
                        "files":  [
                                      "000__create_database.sql",
                                      "001__create_schemas.sql",
@@ -50,12 +50,13 @@
                                      "026__tenant_provisioning.sql",
                                      "027__gdpr_erasure.sql",
                                      "028__add_commission_tables.sql",
-                                     "029__add_portfolio_summary_view.sql"
+                                     "029__add_portfolio_summary_view.sql",
+                                     "030__add_import_staging.sql"
                                  ]
                    },
     "validations":  {
-                        "count":  19,
-                        "latest":  "019__validate_portfolio_summary.sql",
+                        "count":  20,
+                        "latest":  "020__validate_import_staging.sql",
                         "files":  [
                                       "001__validate_core_infrastructure.sql",
                                       "002__validate_person_domain.sql",
@@ -75,7 +76,8 @@
                                       "016__validate_seed_data.sql",
                                       "017__validate_demo_data.sql",
                                       "018__validate_commission.sql",
-                                      "019__validate_portfolio_summary.sql"
+                                      "019__validate_portfolio_summary.sql",
+                                      "020__validate_import_staging.sql"
                                   ]
                     },
     "ssmsScripts":  [
@@ -574,6 +576,18 @@
                                        "PaymentPlanItems",
                                        "PaymentPlans",
                                        "Payments"
+                                   ]
+                    },
+                    {
+                        "order":  130,
+                        "schema":  "import",
+                        "title":  "Import",
+                        "lane":  "Operations",
+                        "subheading":  "Bulk policy import staging and validation",
+                        "entryPoint":  "06__query_library_shortcuts.sql",
+                        "tableCount":  1,
+                        "tables":  [
+                                       "PolicyImport"
                                    ]
                     }
                 ],
