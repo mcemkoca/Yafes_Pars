@@ -1,5 +1,4 @@
 using System.Net.Http.Json;
-using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using YafesPars.Application.Abstractions;
@@ -8,8 +7,9 @@ namespace YafesPars.Infrastructure.Email;
 
 /// <summary>
 /// Verstuurt transactionele e-mails via de SendGrid Web API v3.
-/// Wanneer SendGrid:ApiKey ontbreekt → stub-modus: log en retourneer succesvol
-/// zodat development-omgevingen zonder externe configuratie werken.
+/// Stub-modus (log + Success=true) is uitsluitend actief in Development.
+/// In productie/staging zonder SendGrid:ApiKey wordt Success=false gereturnd
+/// zodat de audit-log eerlijk FAILED registreert.
 /// </summary>
 internal sealed class SendGridEmailService : IEmailService
 {
@@ -29,15 +29,25 @@ internal sealed class SendGridEmailService : IEmailService
 
     public async Task<EmailSendResult> SendAsync(EmailMessage message, CancellationToken ct = default)
     {
-        var apiKey   = _config["SendGrid:ApiKey"];
-        var fromAddr = _config["SendGrid:FromAddress"] ?? "noreply@yafespars.be";
-        var fromName = _config["SendGrid:FromName"]    ?? "Yafes Pars";
+        var apiKey      = _config["SendGrid:ApiKey"];
+        var fromAddr    = _config["SendGrid:FromAddress"] ?? "noreply@yafespars.be";
+        var fromName    = _config["SendGrid:FromName"]    ?? "Yafes Pars";
+        var environment = _config["ASPNETCORE_ENVIRONMENT"] ?? _config["DOTNET_ENVIRONMENT"] ?? "Production";
+        var isDev       = environment.Equals("Development", StringComparison.OrdinalIgnoreCase);
 
         if (string.IsNullOrWhiteSpace(apiKey))
         {
-            _log.LogWarning("SendGrid:ApiKey ontbreekt — stub-modus; e-mail NIET verstuurd naar {To}: {Subject}",
-                message.ToAddress, message.Subject);
-            return new EmailSendResult(true, $"stub_{Guid.NewGuid():N}", null);
+            if (isDev)
+            {
+                _log.LogWarning("SendGrid:ApiKey ontbreekt — stub-modus (Development); e-mail NIET verstuurd naar {To}: {Subject}",
+                    message.ToAddress, message.Subject);
+                return new EmailSendResult(true, $"stub_{Guid.NewGuid():N}", null);
+            }
+
+            // Niet-Development zonder API key: fail closed voor eerlijke audit-trail.
+            _log.LogError("SendGrid:ApiKey niet geconfigureerd in {Env}; e-mail naar {To} NIET verstuurd.",
+                environment, message.ToAddress);
+            return new EmailSendResult(false, null, "SendGrid:ApiKey is niet geconfigureerd.");
         }
 
         var payload = new

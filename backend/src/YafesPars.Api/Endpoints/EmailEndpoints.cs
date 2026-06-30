@@ -72,17 +72,24 @@ public static class EmailEndpoints
         var tenantId = TenantClaims.GetRequiredTenantId(user);
         var limit    = Math.Clamp(body.Limit.GetValueOrDefault(50), 1, 200);
 
+        // Email via person.Person (tenant_id) -> person.Email (is_primary)
+        // Name via person.NaturalPerson (first_name, last_name)
         var invoices = await read.QueryAsync<OverdueInvoiceRow>(
             """
             SELECT TOP (@limit)
                 i.InvoiceId         AS InvoiceId,
                 i.Amount            AS Amount,
                 i.DueDate           AS DueDate,
-                p.email_address     AS RecipientEmail,
-                p.first_name        AS FirstName,
-                p.last_name         AS LastName
+                e.email             AS RecipientEmail,
+                np.first_name       AS FirstName,
+                np.last_name        AS LastName
             FROM finance.Invoices i
-            INNER JOIN person.NaturalPerson p ON p.tenant_id = i.TenantId
+            INNER JOIN person.Person p
+                ON p.tenant_id = i.TenantId AND p.is_deleted = 0
+            INNER JOIN person.Email e
+                ON e.person_id = p.person_id AND e.is_primary = 1 AND e.is_deleted = 0
+            LEFT JOIN person.NaturalPerson np
+                ON np.person_id = p.person_id AND np.is_deleted = 0
             WHERE i.TenantId  = @tenantId AND i.StatusCode = N'OVERDUE'
             ORDER BY i.DueDate ASC
             """,
@@ -95,15 +102,16 @@ public static class EmailEndpoints
         int sent = 0;
         foreach (var inv in invoices)
         {
+            var recipientName = $"{inv.FirstName} {inv.LastName}".Trim();
             var subject = $"Herinnering: openstaande factuur van €{inv.Amount:F2} — {inv.DueDate:d}";
             var html    = $"""
-                <p>Beste {inv.FirstName} {inv.LastName},</p>
-                <p>Uw factuur van <strong>€{inv.Amount:F2}</strong> (vervaldatum {inv.DueDate:d}) is nog onbetaald.</p>
+                <p>Beste {recipientName},</p>
+                <p>Uw factuur van <strong>&euro;{inv.Amount:F2}</strong> (vervaldatum {inv.DueDate:d}) is nog onbetaald.</p>
                 <p>Met vriendelijke groeten,<br/>Yafes Pars Verzekeringen</p>
                 """;
 
             var result = await email.SendAsync(
-                new EmailMessage(inv.RecipientEmail, $"{inv.FirstName} {inv.LastName}", subject, html),
+                new EmailMessage(inv.RecipientEmail, recipientName, subject, html),
                 cancellationToken);
 
             await write.ExecuteAsync(
@@ -112,7 +120,7 @@ public static class EmailEndpoints
                 {
                     tenant_id           = tenantId,
                     recipient_email     = inv.RecipientEmail,
-                    recipient_name      = $"{inv.FirstName} {inv.LastName}",
+                    recipient_name      = recipientName,
                     subject,
                     template_code       = "OVERDUE_REMINDER",
                     related_entity_type = "Invoice",
@@ -143,11 +151,16 @@ public static class EmailEndpoints
             """
             SELECT TOP 1
                 i.Amount        AS Amount,
-                p.email_address AS RecipientEmail,
-                p.first_name    AS FirstName,
-                p.last_name     AS LastName
+                e.email         AS RecipientEmail,
+                np.first_name   AS FirstName,
+                np.last_name    AS LastName
             FROM finance.Invoices i
-            INNER JOIN person.NaturalPerson p ON p.tenant_id = i.TenantId
+            INNER JOIN person.Person p
+                ON p.tenant_id = i.TenantId AND p.is_deleted = 0
+            INNER JOIN person.Email e
+                ON e.person_id = p.person_id AND e.is_primary = 1 AND e.is_deleted = 0
+            LEFT JOIN person.NaturalPerson np
+                ON np.person_id = p.person_id AND np.is_deleted = 0
             WHERE i.InvoiceId = @invoiceId AND i.TenantId = @tenantId
             """,
             new { invoiceId, tenantId },
@@ -156,15 +169,16 @@ public static class EmailEndpoints
         var row = rows.FirstOrDefault();
         if (row is null) return Results.NotFound(new { error = "Factuur niet gevonden." });
 
+        var recipientName = $"{row.FirstName} {row.LastName}".Trim();
         var subject = $"Betaling ontvangen: €{row.Amount:F2}";
         var html    = $"""
-            <p>Beste {row.FirstName} {row.LastName},</p>
-            <p>Wij bevestigen ontvangst van uw betaling van <strong>€{row.Amount:F2}</strong>.</p>
+            <p>Beste {recipientName},</p>
+            <p>Wij bevestigen ontvangst van uw betaling van <strong>&euro;{row.Amount:F2}</strong>.</p>
             <p>Met vriendelijke groeten,<br/>Yafes Pars Verzekeringen</p>
             """;
 
         var result = await email.SendAsync(
-            new EmailMessage(row.RecipientEmail, $"{row.FirstName} {row.LastName}", subject, html),
+            new EmailMessage(row.RecipientEmail, recipientName, subject, html),
             cancellationToken);
 
         await write.ExecuteAsync(
@@ -173,7 +187,7 @@ public static class EmailEndpoints
             {
                 tenant_id           = tenantId,
                 recipient_email     = row.RecipientEmail,
-                recipient_name      = $"{row.FirstName} {row.LastName}",
+                recipient_name      = recipientName,
                 subject,
                 template_code       = "PAYMENT_CONFIRM",
                 related_entity_type = "Invoice",
@@ -202,14 +216,19 @@ public static class EmailEndpoints
         var rows = await read.QueryAsync<ContractPersonRow>(
             """
             SELECT TOP 1
-                c.contract_number   AS ContractNumber,
-                c.end_date          AS EndDate,
-                c.insurance_domain  AS Domain,
-                p.email_address     AS RecipientEmail,
-                p.first_name        AS FirstName,
-                p.last_name         AS LastName
+                c.contract_number       AS ContractNumber,
+                c.end_date              AS EndDate,
+                c.contract_domain_code  AS Domain,
+                e.email                 AS RecipientEmail,
+                np.first_name           AS FirstName,
+                np.last_name            AS LastName
             FROM policy.Contract c
-            INNER JOIN person.NaturalPerson p ON p.tenant_id = c.tenant_id
+            INNER JOIN person.Person p
+                ON p.tenant_id = c.tenant_id AND p.is_deleted = 0
+            INNER JOIN person.Email e
+                ON e.person_id = p.person_id AND e.is_primary = 1 AND e.is_deleted = 0
+            LEFT JOIN person.NaturalPerson np
+                ON np.person_id = p.person_id AND np.is_deleted = 0
             WHERE c.contract_id = @contractId AND c.tenant_id = @tenantId AND c.is_deleted = 0
             """,
             new { contractId, tenantId },
@@ -218,16 +237,17 @@ public static class EmailEndpoints
         var row = rows.FirstOrDefault();
         if (row is null) return Results.NotFound(new { error = "Contract niet gevonden." });
 
+        var recipientName = $"{row.FirstName} {row.LastName}".Trim();
         var subject = $"Verlengingsherinnering: polis {row.ContractNumber} loopt af op {row.EndDate:d}";
         var html    = $"""
-            <p>Beste {row.FirstName} {row.LastName},</p>
+            <p>Beste {recipientName},</p>
             <p>Uw <strong>{row.Domain}</strong>-polis (nr. {row.ContractNumber}) loopt af op <strong>{row.EndDate:d}</strong>.</p>
             <p>Neem contact op om uw dekking te verlengen.</p>
             <p>Met vriendelijke groeten,<br/>Yafes Pars Verzekeringen</p>
             """;
 
         var result = await email.SendAsync(
-            new EmailMessage(row.RecipientEmail, $"{row.FirstName} {row.LastName}", subject, html),
+            new EmailMessage(row.RecipientEmail, recipientName, subject, html),
             cancellationToken);
 
         await write.ExecuteAsync(
@@ -236,7 +256,7 @@ public static class EmailEndpoints
             {
                 tenant_id           = tenantId,
                 recipient_email     = row.RecipientEmail,
-                recipient_name      = $"{row.FirstName} {row.LastName}",
+                recipient_name      = recipientName,
                 subject,
                 template_code       = "RENEWAL_NOTICE",
                 related_entity_type = "Contract",
@@ -257,8 +277,8 @@ public static class EmailEndpoints
         string TemplateCode, string? EntityType, Guid? EntityId, string StatusCode,
         string? ProviderMessageId, DateTime? SentAtUtc, DateTime CreatedAtUtc);
     private sealed record OverdueInvoiceRow(Guid InvoiceId, decimal Amount, DateOnly DueDate,
-        string RecipientEmail, string FirstName, string LastName);
-    private sealed record InvoicePersonRow(decimal Amount, string RecipientEmail, string FirstName, string LastName);
-    private sealed record ContractPersonRow(string ContractNumber, DateOnly EndDate, string Domain,
-        string RecipientEmail, string FirstName, string LastName);
+        string RecipientEmail, string? FirstName, string? LastName);
+    private sealed record InvoicePersonRow(decimal Amount, string RecipientEmail, string? FirstName, string? LastName);
+    private sealed record ContractPersonRow(string ContractNumber, DateOnly? EndDate, string Domain,
+        string RecipientEmail, string? FirstName, string? LastName);
 }

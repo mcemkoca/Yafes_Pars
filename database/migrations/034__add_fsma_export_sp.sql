@@ -1,6 +1,6 @@
 -- =============================================================================
 -- Migration 034: reporting.SP_FsmaExport
--- FSMA (Autoriteit voor Financiële Diensten en Markten) periodiek rapport.
+-- FSMA (Autoriteit voor Financiele Diensten en Markten) periodiek rapport.
 -- Geeft per tenant geaggregeerde data terug voor regelgevende rapportage.
 -- =============================================================================
 USE [YafesPars];
@@ -29,37 +29,37 @@ BEGIN TRY
     IF @period_end < @period_start
         THROW 54001, '@period_end mag niet voor @period_start liggen.', 1;
 
-    -- Actieve polissen per tak (branche) in de rapportageperiode.
+    -- Actieve polissen per tak (contract_domain_code) in de rapportageperiode.
     SELECT
         'policy_summary'            AS section,
-        ISNULL(p.insurance_domain, N'ONBEKEND') AS branche,
+        ISNULL(c.contract_domain_code, N'ONBEKEND') AS branche,
         COUNT(*)                    AS aantal_polissen,
-        SUM(CAST(p.annual_premium AS DECIMAL(18,4))) AS totaal_premie_eur,
+        CAST(0 AS DECIMAL(18,4))    AS totaal_premie_eur,
         CONVERT(NVARCHAR(10), @period_start, 120)   AS periode_van,
         CONVERT(NVARCHAR(10), @period_end,   120)   AS periode_tot
-    FROM policy.Contract p
-    WHERE p.tenant_id = @tenant_id
-      AND p.is_deleted = 0
-      AND p.start_date <= @period_end
-      AND (p.end_date IS NULL OR p.end_date >= @period_start)
-    GROUP BY p.insurance_domain
+    FROM policy.Contract c
+    WHERE c.tenant_id = @tenant_id
+      AND c.is_deleted = 0
+      AND c.start_date <= @period_end
+      AND (c.end_date IS NULL OR c.end_date >= @period_start)
+    GROUP BY c.contract_domain_code
 
     UNION ALL
 
-    -- Provisietotalen per maand.
+    -- Provisietotalen per maand (commission_eur = netto provisie).
     SELECT
         'commission_summary'        AS section,
-        FORMAT(c.commission_date, 'yyyy-MM')    AS branche,
+        FORMAT(cm.commission_date, 'yyyy-MM')  AS branche,
         COUNT(*)                    AS aantal_polissen,
-        SUM(c.net_commission_eur)   AS totaal_premie_eur,
-        CONVERT(NVARCHAR(10), MIN(c.commission_date), 120) AS periode_van,
-        CONVERT(NVARCHAR(10), MAX(c.commission_date), 120) AS periode_tot
-    FROM finance.Commissions c
-    WHERE c.tenant_id = @tenant_id
-      AND c.is_deleted = 0
-      AND c.commission_date >= @period_start
-      AND c.commission_date <= @period_end
-    GROUP BY FORMAT(c.commission_date, 'yyyy-MM')
+        SUM(CAST(cm.commission_eur AS DECIMAL(18,4))) AS totaal_premie_eur,
+        CONVERT(NVARCHAR(10), MIN(cm.commission_date), 120) AS periode_van,
+        CONVERT(NVARCHAR(10), MAX(cm.commission_date), 120) AS periode_tot
+    FROM finance.Commissions cm
+    WHERE cm.tenant_id = @tenant_id
+      AND cm.is_deleted = 0
+      AND cm.commission_date >= @period_start
+      AND cm.commission_date <= @period_end
+    GROUP BY FORMAT(cm.commission_date, 'yyyy-MM')
 
     UNION ALL
 

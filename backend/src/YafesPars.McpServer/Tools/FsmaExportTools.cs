@@ -123,6 +123,7 @@ public sealed class FsmaExportTools
         return value;
     }
 
+    // SP retourneert kolomnamen zonder alias-prefix — Dapper matcht op kolomnaam.
     private sealed record FsmaRow(
         string  Section,
         string  Branche,
