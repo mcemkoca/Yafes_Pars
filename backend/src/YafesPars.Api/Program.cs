@@ -278,6 +278,7 @@ try
     app.MapTenantManagementEndpoints();
     app.MapComplaintEndpoints();
     app.MapRenewalEndpoints();
+    app.MapPremiumEndpoints();
 
     app.Run();
 }

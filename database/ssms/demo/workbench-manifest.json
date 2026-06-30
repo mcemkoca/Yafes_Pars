@@ -9,7 +9,7 @@
         "defaultName": "YafesPars_Dev",
         "environment": "DEV",
         "schemaCount": 14,
-        "tableCount": 123,
+        "tableCount": 124,
         "legacyReferenceTableCount": 89
     },
     "tenant": {
@@ -18,8 +18,8 @@
         "environmentLabel": "DEV"
     },
     "migrations": {
-        "count": 41,
-        "latest": "040__add_renewal_pipeline.sql",
+        "count": 42,
+        "latest": "041__add_premium_calculator.sql",
         "files": [
             "000__create_database.sql",
             "001__create_schemas.sql",
@@ -61,7 +61,8 @@
             "037__add_tenant_management_sps.sql",
             "038__add_production_readiness_sp.sql",
             "039__add_complaint_management.sql",
-            "040__add_renewal_pipeline.sql"
+            "040__add_renewal_pipeline.sql",
+            "041__add_premium_calculator.sql"
         ]
     },
     "validations": {
@@ -595,14 +596,15 @@
             "lane": "Finance",
             "subheading": "Invoices, payments, payment plans, commissions",
             "entryPoint": "09__graph_report_pack.sql",
-            "tableCount": 6,
+            "tableCount": 7,
             "tables": [
                 "Commissions",
                 "Invoices",
                 "PaymentPlanItems",
                 "PaymentPlans",
+                "PaymentTransaction",
                 "Payments",
-                "PaymentTransaction"
+                "TariffRate"
             ]
         },
         {
