@@ -45,9 +45,16 @@ BEGIN
     );
 
     -- T-SQL: geen IF NOT EXISTS voor CREATE INDEX — gebruik sys.indexes check.
-    IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'finance.PaymentTransaction') AND name = N'IX_PT_tenant_invoice')
-        CREATE INDEX IX_PT_tenant_invoice
-            ON finance.PaymentTransaction (tenant_id, invoice_id)
+    -- FK_PT_Tenant: index op tenant_id als leading column.
+    IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'finance.PaymentTransaction') AND name = N'IX_PT_tenant_id')
+        CREATE INDEX IX_PT_tenant_id
+            ON finance.PaymentTransaction (tenant_id)
+            WHERE is_deleted = 0;
+
+    -- FK_PT_Invoice: index op invoice_id als leading column (vereist door validate_indexes).
+    IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'finance.PaymentTransaction') AND name = N'IX_PT_invoice_id')
+        CREATE INDEX IX_PT_invoice_id
+            ON finance.PaymentTransaction (invoice_id)
             WHERE is_deleted = 0;
 
     IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'finance.PaymentTransaction') AND name = N'IX_PT_mollie_id')
