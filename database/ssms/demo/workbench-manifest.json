@@ -18,8 +18,8 @@
         "environmentLabel": "DEV"
     },
     "migrations": {
-        "count": 37,
-        "latest": "036__add_operational_dashboard_sps.sql",
+        "count": 38,
+        "latest": "037__add_tenant_management_sps.sql",
         "files": [
             "000__create_database.sql",
             "001__create_schemas.sql",
@@ -57,11 +57,12 @@
             "033__add_email_log.sql",
             "034__add_fsma_export_sp.sql",
             "035__add_audit_query_sps.sql",
-            "036__add_operational_dashboard_sps.sql"
+            "036__add_operational_dashboard_sps.sql",
+            "037__add_tenant_management_sps.sql"
         ]
     },
     "validations": {
-        "count": 26,
+        "count": 27,
         "latest": "025__validate_audit_sps.sql",
         "files": [
             "001__validate_core_infrastructure.sql",
@@ -89,7 +90,8 @@
             "023__validate_email_log.sql",
             "024__validate_fsma_export.sql",
             "025__validate_audit_sps.sql",
-            "026__validate_operational_dashboard.sql"
+            "026__validate_operational_dashboard.sql",
+            "027__validate_tenant_management_sps.sql"
         ]
     },
     "ssmsScripts": [

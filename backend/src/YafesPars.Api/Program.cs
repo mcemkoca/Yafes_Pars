@@ -264,6 +264,7 @@ try
     app.MapReportingEndpoints();
     app.MapAuditEndpoints();
     app.MapMonitoringEndpoints();
+    app.MapTenantManagementEndpoints();
 
     app.Run();
 }
