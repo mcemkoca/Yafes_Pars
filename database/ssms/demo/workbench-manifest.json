@@ -8,7 +8,7 @@
     "database":  {
                      "defaultName":  "YafesPars_Dev",
                      "environment":  "DEV",
-                     "schemaCount":  13,
+                     "schemaCount":  14,
                      "tableCount":  121,
                      "legacyReferenceTableCount":  89
                  },
@@ -602,6 +602,18 @@
                         "tableCount":  1,
                         "tables":  [
                                        "PolicyImport"
+                                   ]
+                    },
+                    {
+                        "order":  140,
+                        "schema":  "communication",
+                        "title":  "Communication",
+                        "lane":  "Operations",
+                        "subheading":  "Transactionele e-maillog, compliance-trail voor alle berichten",
+                        "entryPoint":  "06__query_library_shortcuts.sql",
+                        "tableCount":  1,
+                        "tables":  [
+                                       "EmailLog"
                                    ]
                     }
                 ],
