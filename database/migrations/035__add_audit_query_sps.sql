@@ -57,6 +57,8 @@ END CATCH;
 GO
 
 -- SP: Varlık değişiklik geçmişi — belirli bir kayıt için kolon bazlı diff.
+-- P2: INNER JOIN -> LEFT JOIN: EntityChangeSet satırı olmayan AuditLog kayıtları da döner.
+--     Kolon bazlı diff yoksa old/new JSON fallback olarak AuditLog.old_values_json kullanılır.
 CREATE OR ALTER PROCEDURE audit.SP_GetEntityHistory
     @tenant_id      UNIQUEIDENTIFIER,
     @schema_name    SYSNAME,
@@ -72,11 +74,11 @@ BEGIN TRY
         al.action_type          AS ActionType,
         al.changed_at_utc       AS ChangedAtUtc,
         al.changed_by_name      AS ChangedByName,
-        cs.column_name          AS ColumnName,
-        cs.old_value            AS OldValue,
-        cs.new_value            AS NewValue
+        ISNULL(cs.column_name,  N'(volledig record)')   AS ColumnName,
+        ISNULL(cs.old_value,    al.old_values_json)     AS OldValue,
+        ISNULL(cs.new_value,    al.new_values_json)     AS NewValue
     FROM audit.AuditLog al
-    INNER JOIN audit.EntityChangeSet cs
+    LEFT JOIN audit.EntityChangeSet cs
         ON cs.audit_log_id = al.audit_log_id
     WHERE al.tenant_id          = @tenant_id
       AND al.schema_name        = @schema_name
@@ -90,7 +92,10 @@ END CATCH;
 GO
 
 -- SP: GDPR Article 15 — kişi bazlı tüm veri özeti (inzagerecht / recht op toegang).
--- Kişiye ait tüm kayıtları schema bazlı özetler; silerek anonimleştirilen kayıtlar dahil.
+-- P1 güvenlik: tüm alt sorgular person.Person üzerinden tenant_id ile izole edilir.
+--   Başka tenant'ın person_id'si bilinse bile o tenant'ın verileri dönmez.
+-- P1 tip: audit_log_id BIGINT — UNIQUEIDENTIFIER'a cast edilemez.
+--   Audit satırları için entity_id = NULL (C# GdprDataRow.EntityId nullable yapıldı).
 CREATE OR ALTER PROCEDURE audit.SP_GdprDataAccessReport
     @tenant_id  UNIQUEIDENTIFIER,
     @person_id  UNIQUEIDENTIFIER
@@ -98,7 +103,7 @@ AS
 SET NOCOUNT ON;
 SET XACT_ABORT ON;
 BEGIN TRY
-    -- Temel kişi bilgileri
+    -- Temel kişi bilgileri — tenant_id burada kontrol edilir.
     SELECT
         'person'            AS data_category,
         'Persoonsgegevens'  AS label,
@@ -113,7 +118,7 @@ BEGIN TRY
 
     UNION ALL
 
-    -- E-mailadressen
+    -- E-mailadressen — person.Person join ile tenant izolasyonu sağlanır.
     SELECT
         'person.email'      AS data_category,
         'E-mailadres'       AS label,
@@ -124,11 +129,13 @@ BEGIN TRY
         CAST(e.updated_at_utc AS NVARCHAR(30)) AS updated_at,
         e.is_deleted        AS is_anonymised
     FROM person.Email e
+    INNER JOIN person.Person p
+        ON p.person_id = e.person_id AND p.tenant_id = @tenant_id
     WHERE e.person_id = @person_id
 
     UNION ALL
 
-    -- Telefoonnummers
+    -- Telefoonnummers — tenant izolasyonu.
     SELECT
         'person.phone'      AS data_category,
         'Telefoonnummer'    AS label,
@@ -139,11 +146,13 @@ BEGIN TRY
         CAST(ph.updated_at_utc AS NVARCHAR(30)) AS updated_at,
         ph.is_deleted       AS is_anonymised
     FROM person.Phone ph
+    INNER JOIN person.Person p
+        ON p.person_id = ph.person_id AND p.tenant_id = @tenant_id
     WHERE ph.person_id = @person_id
 
     UNION ALL
 
-    -- Adressen
+    -- Adressen — tenant izolasyonu.
     SELECT
         'person.address'    AS data_category,
         'Adres'             AS label,
@@ -154,17 +163,19 @@ BEGIN TRY
         CAST(a.updated_at_utc AS NVARCHAR(30)) AS updated_at,
         a.is_deleted        AS is_anonymised
     FROM person.Address a
+    INNER JOIN person.Person p
+        ON p.person_id = a.person_id AND p.tenant_id = @tenant_id
     WHERE a.person_id = @person_id
 
     UNION ALL
 
-    -- Audit kayıtları (bu kişi için yapılan değişiklikler)
-    -- audit_log_id BIGINT'tir; UNIQUEIDENTIFIER'a cast edilemez, NVARCHAR üzerinden NEWID ile temsil edilir.
+    -- Audit kayıtları — audit_log_id BIGINT olduğu için entity_id NULL döner.
+    -- C# tarafında GdprDataRow.EntityId nullable (Guid?) olarak tanımlanmıştır.
     SELECT TOP 50
         'audit'             AS data_category,
         'Auditlog'          AS label,
-        CAST(HASHBYTES('MD5', CAST(al.audit_log_id AS NVARCHAR(36))) AS UNIQUEIDENTIFIER) AS entity_id,
-        al.table_name       AS detail_1,
+        NULL                AS entity_id,
+        CONCAT(al.schema_name, '.', al.table_name) AS detail_1,
         al.action_type      AS detail_2,
         CAST(al.changed_at_utc AS NVARCHAR(30)) AS created_at,
         CAST(al.changed_at_utc AS NVARCHAR(30)) AS updated_at,

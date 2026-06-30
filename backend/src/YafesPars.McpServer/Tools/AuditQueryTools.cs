@@ -170,7 +170,7 @@ public sealed class AuditQueryTools
     private sealed record GdprDataRow(
         string    DataCategory,
         string    Label,
-        Guid      EntityId,
+        Guid?     EntityId,      // audit satırları için NULL (audit_log_id BIGINT)
         string?   Detail1,
         string?   Detail2,
         string?   CreatedAt,
