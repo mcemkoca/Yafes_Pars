@@ -12,8 +12,8 @@ BEGIN TRANSACTION;
 COMMIT TRANSACTION;
 GO
 
--- SP_ProvisionTenant: migration 026'dan uzatıldı — sonuç satırı döndürecek şekilde.
--- CREATE OR ALTER mevcut tanımı korur, sadece SELECT çıkışını ekler.
+-- SP_ProvisionTenant: migration 026'dan uzatıldı — SELECT çıkışı eklendi.
+-- Orijinal OUTPUT parametreleri ve mantık korundu; sonunda bir SELECT satırı eklendi.
 CREATE OR ALTER PROCEDURE core.SP_ProvisionTenant
     @tenant_code               NVARCHAR(80),
     @legal_name                NVARCHAR(200),
@@ -22,21 +22,26 @@ CREATE OR ALTER PROCEDURE core.SP_ProvisionTenant
     @admin_email               NVARCHAR(320),
     @admin_display_name        NVARCHAR(160)    = NULL,
     @admin_external_subject_id NVARCHAR(200)    = NULL,
-    @auth_provider             NVARCHAR(40)     = NULL
+    @auth_provider             NVARCHAR(40)     = N'EXTERNAL',
+    @tenant_id                 UNIQUEIDENTIFIER OUTPUT,
+    @admin_user_id             UNIQUEIDENTIFIER OUTPUT
 AS
-SET NOCOUNT ON;
-SET XACT_ABORT ON;
 BEGIN
-    DECLARE @tenant_id    UNIQUEIDENTIFIER;
-    DECLARE @admin_user_id UNIQUEIDENTIFIER;
-    DECLARE @adminRoleId  UNIQUEIDENTIFIER;
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
 
-    SELECT @adminRoleId = role_id
-    FROM core.Role
-    WHERE role_code = N'Admin'
-      AND tenant_id IN (
-          SELECT tenant_id FROM core.Tenant WHERE tenant_code = N'SYSTEM' AND is_active = 1
-      );
+    IF NULLIF(LTRIM(RTRIM(@tenant_code)), N'') IS NULL
+        THROW 51900, 'tenant_code is verplicht.', 1;
+    IF NULLIF(LTRIM(RTRIM(@legal_name)), N'') IS NULL
+        THROW 51901, 'legal_name is verplicht.', 1;
+    IF NULLIF(LTRIM(RTRIM(@admin_email)), N'') IS NULL
+        THROW 51902, 'admin_email is verplicht.', 1;
+    IF EXISTS (SELECT 1 FROM core.Tenant WHERE tenant_code = @tenant_code)
+        THROW 51903, 'tenant_code bestaat al voor een andere tenant.', 1;
+
+    DECLARE @adminRoleId UNIQUEIDENTIFIER =
+        (SELECT TOP 1 role_id FROM core.Role
+         WHERE role_code = N'BROKER_ADMIN' AND tenant_id IS NULL AND is_active = 1);
 
     BEGIN TRY
         BEGIN TRANSACTION;
@@ -63,6 +68,7 @@ BEGIN
         THROW;
     END CATCH
 
+    -- Faz 10 eklentisi: sonuç satırı döndür (MCP / REST entegrasyonu için).
     SELECT
         @tenant_id      AS TenantId,
         @tenant_code    AS TenantCode,

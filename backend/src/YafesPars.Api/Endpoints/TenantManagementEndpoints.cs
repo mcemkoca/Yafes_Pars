@@ -56,16 +56,20 @@ public static class TenantManagementEndpoints
             return Results.BadRequest(new { error = "adminEmail zorunludur." });
 
         var rows = await repository.QueryAsync<TenantProvisionRow>(
-            "core.SP_ProvisionTenant",
+            "DECLARE @tid UNIQUEIDENTIFIER, @uid UNIQUEIDENTIFIER; " +
+            "EXEC core.SP_ProvisionTenant " +
+            "@tenant_code=@tenant_code, @legal_name=@legal_name, @display_name=@display_name, " +
+            "@vat_number=@vat_number, @admin_email=@admin_email, @admin_display_name=@admin_display_name, " +
+            "@admin_external_subject_id=NULL, " +
+            "@tenant_id=@tid OUTPUT, @admin_user_id=@uid OUTPUT",
             new
             {
-                tenant_code               = request.TenantCode.Trim().ToUpperInvariant(),
-                legal_name                = request.LegalName.Trim(),
-                display_name              = request.DisplayName?.Trim(),
-                vat_number                = request.VatNumber?.Trim(),
-                admin_email               = request.AdminEmail.Trim().ToLowerInvariant(),
-                admin_display_name        = request.AdminDisplayName?.Trim(),
-                admin_external_subject_id = (string?)null,
+                tenant_code        = request.TenantCode.Trim().ToUpperInvariant(),
+                legal_name         = request.LegalName.Trim(),
+                display_name       = request.DisplayName?.Trim(),
+                vat_number         = request.VatNumber?.Trim(),
+                admin_email        = request.AdminEmail.Trim().ToLowerInvariant(),
+                admin_display_name = request.AdminDisplayName?.Trim(),
             },
             cancellationToken);
 

@@ -57,17 +57,23 @@ public sealed class TenantManagementTools
         if (string.IsNullOrWhiteSpace(adminEmail))
             return JsonSerializer.Serialize(new { error = "adminEmail zorunludur." });
 
+        // OUTPUT parametreli SP: DECLARE ile OUTPUT değişkenleri tanımla, SP'yi EXEC et.
+        // Migration 037'de eklenen SELECT ile sonuç satırı alınır.
         var rows = await _read.QueryAsync<TenantProvisionRow>(
-            "core.SP_ProvisionTenant",
+            "DECLARE @tid UNIQUEIDENTIFIER, @uid UNIQUEIDENTIFIER; " +
+            "EXEC core.SP_ProvisionTenant " +
+            "@tenant_code=@tenant_code, @legal_name=@legal_name, @display_name=@display_name, " +
+            "@vat_number=@vat_number, @admin_email=@admin_email, @admin_display_name=@admin_display_name, " +
+            "@admin_external_subject_id=NULL, " +
+            "@tenant_id=@tid OUTPUT, @admin_user_id=@uid OUTPUT",
             new
             {
-                tenant_code               = tenantCode.Trim().ToUpperInvariant(),
-                legal_name                = legalName.Trim(),
-                display_name              = displayName?.Trim(),
-                vat_number                = vatNumber?.Trim(),
-                admin_email               = adminEmail.Trim().ToLowerInvariant(),
-                admin_display_name        = adminDisplayName?.Trim(),
-                admin_external_subject_id = (string?)null,
+                tenant_code    = tenantCode.Trim().ToUpperInvariant(),
+                legal_name     = legalName.Trim(),
+                display_name   = displayName?.Trim(),
+                vat_number     = vatNumber?.Trim(),
+                admin_email    = adminEmail.Trim().ToLowerInvariant(),
+                admin_display_name = adminDisplayName?.Trim(),
             },
             cancellationToken);
 

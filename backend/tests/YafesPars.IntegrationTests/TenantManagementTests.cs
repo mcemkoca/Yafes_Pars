@@ -61,7 +61,7 @@ public sealed class TenantManagementTests
     public async Task ProvisionTenant_NewTenant_ReturnsTenantId()
     {
         Skip.IfNot(_fx.Available, _fx.SkipReason);
-        var code  = $"TEST-{Guid.NewGuid():N[..6]}";
+        var code  = $"T-{Guid.NewGuid():N}"[..12];
         var res   = await Mgmt.ProvisionTenant(
             tenantCode:    code,
             legalName:     "Faz 10 Test NV",
