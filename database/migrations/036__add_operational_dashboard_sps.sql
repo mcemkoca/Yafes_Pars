@@ -32,7 +32,7 @@ BEGIN TRY
     FROM policy.Contract c
     WHERE c.tenant_id = @tenant_id
       AND c.is_deleted = 0
-      AND c.status_code IN (N'ACTIVE', N'IN_FORCE')
+      AND c.contract_status_code = N'ACTIVE'
     GROUP BY c.contract_domain_code
 
     UNION ALL
@@ -54,15 +54,15 @@ BEGIN TRY
     -- Açık hasarlar (durum bazlı)
     SELECT
         'claims_by_status'              AS MetricCategory,
-        cl.status_code                  AS Dimension,
+        cl.claim_status_code            AS Dimension,
         COUNT(*)                        AS MetricValue,
-        SUM(ISNULL(cl.reserve_amount, 0)) AS MetricAmount,
+        SUM(ISNULL(cl.reserved_amount, 0)) AS MetricAmount,
         CAST(GETUTCDATE() AS DATE)      AS AsOfDate
     FROM claim.Claim cl
     WHERE cl.tenant_id = @tenant_id
       AND cl.is_deleted = 0
-      AND cl.status_code NOT IN (N'CLOSED', N'REJECTED')
-    GROUP BY cl.status_code
+      AND cl.claim_status_code NOT IN (N'CLOSED', N'REJECTED', N'PAID')
+    GROUP BY cl.claim_status_code
 
     UNION ALL
 
@@ -111,14 +111,14 @@ BEGIN TRY
     DECLARE @active_contracts INT = (
         SELECT COUNT(*) FROM policy.Contract
         WHERE tenant_id = @tenant_id AND is_deleted = 0
-          AND status_code IN (N'ACTIVE', N'IN_FORCE')
+          AND contract_status_code = N'ACTIVE'
     );
 
     -- Açık hasar
     DECLARE @open_claims INT = (
         SELECT COUNT(*) FROM claim.Claim
         WHERE tenant_id = @tenant_id AND is_deleted = 0
-          AND status_code NOT IN (N'CLOSED', N'REJECTED')
+          AND claim_status_code NOT IN (N'CLOSED', N'REJECTED', N'PAID')
     );
 
     -- Vadesi geçmiş fatura
@@ -140,7 +140,7 @@ BEGIN TRY
     DECLARE @expiring_soon INT = (
         SELECT COUNT(*) FROM policy.Contract
         WHERE tenant_id = @tenant_id AND is_deleted = 0
-          AND status_code IN (N'ACTIVE', N'IN_FORCE')
+          AND contract_status_code = N'ACTIVE'
           AND end_date BETWEEN @today AND DATEADD(DAY, 30, @today)
     );
 
