@@ -18,8 +18,8 @@
                    "environmentLabel":  "DEV"
                },
     "migrations":  {
-                       "count":  35,
-                       "latest":  "034__add_fsma_export_sp.sql",
+                       "count":  36,
+                       "latest":  "035__add_audit_query_sps.sql",
                        "files":  [
                                      "000__create_database.sql",
                                      "001__create_schemas.sql",
@@ -55,12 +55,13 @@
                                      "031__add_overdue_invoice_sp.sql",
                                      "032__add_payment_transactions.sql",
                                      "033__add_email_log.sql",
-                                     "034__add_fsma_export_sp.sql"
+                                     "034__add_fsma_export_sp.sql",
+                                     "035__add_audit_query_sps.sql"
                                  ]
                    },
     "validations":  {
-                        "count":  24,
-                        "latest":  "024__validate_fsma_export.sql",
+                        "count":  25,
+                        "latest":  "025__validate_audit_sps.sql",
                         "files":  [
                                       "001__validate_core_infrastructure.sql",
                                       "002__validate_person_domain.sql",
@@ -85,7 +86,8 @@
                                       "021__validate_overdue_invoice_sp.sql",
                                       "022__validate_payment_transactions.sql",
                                       "023__validate_email_log.sql",
-                                      "024__validate_fsma_export.sql"
+                                      "024__validate_fsma_export.sql",
+                                      "025__validate_audit_sps.sql"
                                   ]
                     },
     "ssmsScripts":  [
