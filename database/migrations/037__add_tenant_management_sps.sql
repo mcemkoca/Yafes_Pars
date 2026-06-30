@@ -67,13 +67,6 @@ BEGIN
         IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
         THROW;
     END CATCH
-
-    -- Faz 10 eklentisi: sonuç satırı döndür (MCP / REST entegrasyonu için).
-    SELECT
-        @tenant_id      AS TenantId,
-        @tenant_code    AS TenantCode,
-        @admin_user_id  AS AdminUserId,
-        @admin_email    AS AdminEmail;
 END;
 GO
 

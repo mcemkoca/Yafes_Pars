@@ -61,7 +61,8 @@ public static class TenantManagementEndpoints
             "@tenant_code=@tenant_code, @legal_name=@legal_name, @display_name=@display_name, " +
             "@vat_number=@vat_number, @admin_email=@admin_email, @admin_display_name=@admin_display_name, " +
             "@admin_external_subject_id=NULL, " +
-            "@tenant_id=@tid OUTPUT, @admin_user_id=@uid OUTPUT",
+            "@tenant_id=@tid OUTPUT, @admin_user_id=@uid OUTPUT; " +
+            "SELECT @tid AS TenantId, @tenant_code AS TenantCode, @uid AS AdminUserId, @admin_email AS AdminEmail;",
             new
             {
                 tenant_code        = request.TenantCode.Trim().ToUpperInvariant(),
