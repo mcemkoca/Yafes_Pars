@@ -28,9 +28,9 @@ GO
 
 -- Safety: alleen uitvoeren op DEV of indien expliciet toegestaan
 DECLARE @db SYSNAME = N'$(YAFES_SQL_DATABASE)';
-IF @db NOT LIKE N'%Dev%' AND @db NOT LIKE N'%Test%' AND @db NOT LIKE N'%Acc%'
+IF @db NOT LIKE N'%DEV%' AND @db NOT LIKE N'%TEST%' AND @db NOT LIKE N'%ACC%'
 BEGIN
-    PRINT 'WARN: Database name does not contain Dev/Test/Acc. Verify target before running.';
+    PRINT 'WARN: Target database name must contain DEV/TEST/ACC. Verify target before running.';
 END
 GO
 
