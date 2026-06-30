@@ -262,6 +262,7 @@ try
     app.MapPaymentEndpoints();
     app.MapEmailEndpoints();
     app.MapReportingEndpoints();
+    app.MapAuditEndpoints();
 
     app.Run();
 }
