@@ -260,6 +260,8 @@ try
     app.MapPortfolioEndpoints();
     app.MapImportEndpoints();
     app.MapPaymentEndpoints();
+    app.MapEmailEndpoints();
+    app.MapReportingEndpoints();
 
     app.Run();
 }

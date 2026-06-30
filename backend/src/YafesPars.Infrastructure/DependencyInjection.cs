@@ -1,6 +1,7 @@
 using Dapper;
 using Microsoft.Extensions.DependencyInjection;
 using YafesPars.Application.Abstractions;
+using YafesPars.Infrastructure.Email;
 using YafesPars.Infrastructure.Mollie;
 using YafesPars.Infrastructure.Sql;
 
@@ -22,6 +23,10 @@ public static class DependencyInjection
         // Mollie-betalingsservice: HttpClient met base address voor testbaarheid.
         services.AddHttpClient("Mollie", c => c.BaseAddress = new Uri("https://api.mollie.com/v2/"));
         services.AddScoped<IMolliePaymentService, MolliePaymentService>();
+
+        // E-mailservice via SendGrid Web API v3.
+        services.AddHttpClient("SendGrid", c => c.BaseAddress = new Uri("https://api.sendgrid.com/v3/"));
+        services.AddScoped<IEmailService, SendGridEmailService>();
 
         return services;
     }
