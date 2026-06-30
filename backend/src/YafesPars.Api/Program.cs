@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.OpenApi.Models;
+using Azure.Monitor.OpenTelemetry.AspNetCore;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Serilog;
 using Serilog.Events;
 using YafesPars.Api.Endpoints;
@@ -104,6 +107,27 @@ try
         builder.Services.AddApplicationInsightsTelemetry(o => o.ConnectionString = aiConnectionStr);
 
     builder.Services.AddInfrastructure();
+
+    // OpenTelemetry distributed tracing
+    // Azure Monitor exporteert naar Application Insights wanneer connection string aanwezig is.
+    // Zonder connection string: tracing actief maar geen export (development mode).
+    var otelBuilder = builder.Services.AddOpenTelemetry()
+        .ConfigureResource(res => res
+            .AddService("YafesPars.Api")
+            .AddAttributes(new Dictionary<string, object>
+            {
+                ["deployment.environment"] = builder.Environment.EnvironmentName
+            }))
+        .WithTracing(tracing => tracing
+            .AddAspNetCoreInstrumentation(opts => opts.RecordException = true)
+            .AddSqlClientInstrumentation(opts =>
+            {
+                opts.SetDbStatementForText = false; // geen SQL-tekst in traces (privacy)
+                opts.RecordException = true;
+            }));
+
+    if (!string.IsNullOrWhiteSpace(aiConnectionStr))
+        otelBuilder.UseAzureMonitor(opts => opts.ConnectionString = aiConnectionStr);
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(options =>
     {
