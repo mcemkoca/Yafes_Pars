@@ -259,6 +259,7 @@ try
     app.MapCommissionEndpoints();
     app.MapPortfolioEndpoints();
     app.MapImportEndpoints();
+    app.MapPaymentEndpoints();
 
     app.Run();
 }

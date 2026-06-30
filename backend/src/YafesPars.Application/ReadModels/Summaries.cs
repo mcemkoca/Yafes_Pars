@@ -164,3 +164,16 @@ public sealed class AuditLogRow
     public Guid? ChangedByUserId { get; init; }
     public string? SourceSystem { get; init; }
 }
+
+public sealed class PaymentTransactionRow
+{
+    public Guid TransactionId { get; init; }
+    public Guid InvoiceId { get; init; }
+    public string? MolliePaymentId { get; init; }
+    public string? CheckoutUrl { get; init; }
+    public decimal AmountEur { get; init; }
+    public string StatusCode { get; init; } = "";
+    public string? PaymentMethod { get; init; }
+    public DateTime CreatedAtUtc { get; init; }
+    public DateTime? PaidAtUtc { get; init; }
+}

@@ -1,6 +1,7 @@
 using Dapper;
 using Microsoft.Extensions.DependencyInjection;
 using YafesPars.Application.Abstractions;
+using YafesPars.Infrastructure.Mollie;
 using YafesPars.Infrastructure.Sql;
 
 namespace YafesPars.Infrastructure;
@@ -17,6 +18,11 @@ public static class DependencyInjection
         services.AddScoped<ISqlConnectionFactory, SqlConnectionFactory>();
         services.AddScoped<IReadRepository, DapperReadRepository>();
         services.AddScoped<IWriteRepository, DapperWriteRepository>();
+
+        // Mollie-betalingsservice: HttpClient met base address voor testbaarheid.
+        services.AddHttpClient("Mollie", c => c.BaseAddress = new Uri("https://api.mollie.com/v2/"));
+        services.AddScoped<IMolliePaymentService, MolliePaymentService>();
+
         return services;
     }
 }
