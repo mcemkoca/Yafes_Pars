@@ -97,3 +97,70 @@ public sealed class CoverageSummary
     public string? LabelTr { get; init; }
     public string? Description { get; init; }
 }
+
+public sealed class CommissionRow
+{
+    public Guid CommissionId { get; init; }
+    public DateOnly CommissionDate { get; init; }
+    public string CommissionTypeCode { get; init; } = "";
+    public string StatusCode { get; init; } = "";
+    public Guid ContractId { get; init; }
+    public Guid? BrokerPersonId { get; init; }
+    public Guid? BrokerInstitutionId { get; init; }
+    public decimal GrossPremiumEur { get; init; }
+    public decimal RatePct { get; init; }
+    public decimal CommissionEur { get; init; }
+    public DateOnly? PaidDate { get; init; }
+    public string? Notes { get; init; }
+}
+
+public sealed class CommissionReportRow
+{
+    public DateOnly CommissionDate { get; init; }
+    public string CommissionTypeCode { get; init; } = "";
+    public string StatusCode { get; init; } = "";
+    public string? ContractNumber { get; init; }
+    public string? Tak { get; init; }
+    public string? Productcode { get; init; }
+    public string? BrokerNaam { get; init; }
+    public string? BrokerKantoor { get; init; }
+    public decimal GrossPremiumEur { get; init; }
+    public decimal RatePct { get; init; }
+    public decimal CommissionEur { get; init; }
+    public DateOnly? PaidDate { get; init; }
+}
+
+public sealed class PortfolioRow
+{
+    public string Tak { get; init; } = "";
+    public string Status { get; init; } = "";
+    public int ContractCount { get; init; }
+    public decimal TotaalPremieEur { get; init; }
+    public int TotaalSchaden { get; init; }
+    public decimal TotaalGereserveerdEur { get; init; }
+    public decimal TotaalBetaaldEur { get; init; }
+    public decimal? LossRatio { get; init; }
+}
+
+public sealed class ImportBatchRow
+{
+    public int RowNumber { get; init; }
+    public string? ContractNumber { get; init; }
+    public string? ContractDomainCode { get; init; }
+    public string? StartDate { get; init; }
+    public string ValidationStatus { get; init; } = "";
+    public string? ValidationErrors { get; init; }
+}
+
+public sealed class AuditLogRow
+{
+    public long AuditLogId { get; init; }
+    public string SchemaName { get; init; } = "";
+    public string TableName { get; init; } = "";
+    public string PrimaryKeyValue { get; init; } = "";
+    public string ActionType { get; init; } = "";
+    public DateTime ChangedAtUtc { get; init; }
+    public string? ChangedByName { get; init; }
+    public Guid? ChangedByUserId { get; init; }
+    public string? SourceSystem { get; init; }
+}

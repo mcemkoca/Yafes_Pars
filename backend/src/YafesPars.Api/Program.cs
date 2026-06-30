@@ -232,6 +232,9 @@ try
     app.MapDocumentWriteEndpoints();
     app.MapCoverageWriteEndpoints();
     app.MapRiskWriteEndpoints();
+    app.MapCommissionEndpoints();
+    app.MapPortfolioEndpoints();
+    app.MapImportEndpoints();
 
     app.Run();
 }
