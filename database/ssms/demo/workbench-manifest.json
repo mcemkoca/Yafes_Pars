@@ -9,7 +9,7 @@
                      "defaultName":  "YafesPars_Dev",
                      "environment":  "DEV",
                      "schemaCount":  13,
-                     "tableCount":  119,
+                     "tableCount":  120,
                      "legacyReferenceTableCount":  89
                  },
     "tenant":  {
@@ -18,8 +18,8 @@
                    "environmentLabel":  "DEV"
                },
     "migrations":  {
-                       "count":  32,
-                       "latest":  "031__add_overdue_invoice_sp.sql",
+                       "count":  33,
+                       "latest":  "032__add_payment_transactions.sql",
                        "files":  [
                                      "000__create_database.sql",
                                      "001__create_schemas.sql",
@@ -52,12 +52,13 @@
                                      "028__add_commission_tables.sql",
                                      "029__add_portfolio_summary_view.sql",
                                      "030__add_import_staging.sql",
-                                     "031__add_overdue_invoice_sp.sql"
+                                     "031__add_overdue_invoice_sp.sql",
+                                     "032__add_payment_transactions.sql"
                                  ]
                    },
     "validations":  {
-                        "count":  21,
-                        "latest":  "021__validate_overdue_invoice_sp.sql",
+                        "count":  22,
+                        "latest":  "022__validate_payment_transactions.sql",
                         "files":  [
                                       "001__validate_core_infrastructure.sql",
                                       "002__validate_person_domain.sql",
@@ -79,7 +80,8 @@
                                       "018__validate_commission.sql",
                                       "019__validate_portfolio_summary.sql",
                                       "020__validate_import_staging.sql",
-                                      "021__validate_overdue_invoice_sp.sql"
+                                      "021__validate_overdue_invoice_sp.sql",
+                                      "022__validate_payment_transactions.sql"
                                   ]
                     },
     "ssmsScripts":  [
@@ -176,7 +178,7 @@
                         {
                             "fileName":  "18__sql_agent_job_setup.sql",
                             "path":  "database/ssms/18__sql_agent_job_setup.sql",
-                            "sizeBytes":  7413
+                            "sizeBytes":  7624
                         }
                     ],
     "shortcuts":  [
@@ -576,13 +578,14 @@
                         "lane":  "Finance",
                         "subheading":  "Invoices, payments, payment plans, commissions",
                         "entryPoint":  "09__graph_report_pack.sql",
-                        "tableCount":  5,
+                        "tableCount":  6,
                         "tables":  [
                                        "Commissions",
                                        "Invoices",
                                        "PaymentPlanItems",
                                        "PaymentPlans",
-                                       "Payments"
+                                       "Payments",
+                                       "PaymentTransaction"
                                    ]
                     },
                     {
