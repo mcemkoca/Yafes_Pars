@@ -172,13 +172,15 @@ public static class AuditEndpoints
         string?  OldValue,
         string?  NewValue);
 
-    private sealed record GdprDataRow(
-        string   DataCategory,
-        string   Label,
-        Guid?    EntityId,       // audit satırları için NULL (audit_log_id BIGINT)
-        string?  Detail1,
-        string?  Detail2,
-        string?  CreatedAt,
-        string?  UpdatedAt,
-        bool     IsAnonymised);
+    private sealed record GdprDataRow
+    {
+        public string  DataCategory { get; init; } = "";
+        public string  Label        { get; init; } = "";
+        public Guid?   EntityId     { get; init; }
+        public string? Detail1      { get; init; }
+        public string? Detail2      { get; init; }
+        public string? CreatedAt    { get; init; }
+        public string? UpdatedAt    { get; init; }
+        public bool    IsAnonymised { get; init; }
+    }
 }
