@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.OpenApi.Models;
+using Azure.Extensions.AspNetCore.Configuration.Secrets;
+using Azure.Identity;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -30,6 +32,15 @@ try
     DefaultTypeMap.MatchNamesWithUnderscores = true;
 
     builder.Configuration.AddEnvironmentVariables();
+
+    // Azure Key Vault: AZURE_KEY_VAULT_URI ortam değişkeni ile aktif olur.
+    // App Service'de managed identity üzerinden authenticate edilir (no credentials needed).
+    var kvUri = builder.Configuration["AZURE_KEY_VAULT_URI"];
+    if (!string.IsNullOrWhiteSpace(kvUri))
+    {
+        builder.Configuration.AddAzureKeyVault(new Uri(kvUri), new DefaultAzureCredential());
+        Log.Information("Azure Key Vault konfigürasyonu aktif: {Uri}", kvUri);
+    }
 
     builder.Host.UseSerilog((ctx, services, cfg) =>
     {
