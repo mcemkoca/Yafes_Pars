@@ -73,7 +73,24 @@ BEGIN
         RETURN;
     END;
 
-    DECLARE @complaint_id UNIQUEIDENTIFIER = NEWSEQUENTIALID();
+    -- contract_id verilmişse aynı tenant'a ait olmalı
+    IF @contract_id IS NOT NULL
+       AND NOT EXISTS (SELECT 1 FROM policy.Contract WHERE contract_id = @contract_id AND tenant_id = @tenant_id)
+    BEGIN
+        RAISERROR (N'Sözleşme bu tenant kapsamında bulunamadı.', 16, 1);
+        RETURN;
+    END;
+
+    -- claim_id verilmişse aynı tenant'a ait olmalı
+    IF @claim_id IS NOT NULL
+       AND NOT EXISTS (SELECT 1 FROM claim.Claim WHERE claim_id = @claim_id AND tenant_id = @tenant_id)
+    BEGIN
+        RAISERROR (N'Hasar kaydı bu tenant kapsamında bulunamadı.', 16, 1);
+        RETURN;
+    END;
+
+    -- NEWSEQUENTIALID() sadece tablo DEFAULT'unda kullanılabilir; NEWID() kullan
+    DECLARE @complaint_id UNIQUEIDENTIFIER = NEWID();
 
     INSERT INTO communication.Complaint
         (complaint_id, tenant_id, person_id, contract_id, claim_id,
@@ -106,12 +123,14 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    -- Bulunamazsa boş result set döndür (caller rows.FirstOrDefault() → null → 404)
     IF NOT EXISTS (
         SELECT 1 FROM communication.Complaint
         WHERE complaint_id = @complaint_id AND tenant_id = @tenant_id AND is_deleted = 0
     )
     BEGIN
-        RAISERROR (N'Şikayet bulunamadı.', 16, 1);
+        SELECT NULL AS ComplaintId, NULL AS StatusCode, NULL AS ResolvedDate,
+               NULL AS FsmaReportable, NULL AS UpdatedAtUtc WHERE 1 = 0;
         RETURN;
     END;
 
