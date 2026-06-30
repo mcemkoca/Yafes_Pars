@@ -159,10 +159,11 @@ BEGIN TRY
     UNION ALL
 
     -- Audit kayıtları (bu kişi için yapılan değişiklikler)
+    -- audit_log_id BIGINT'tir; UNIQUEIDENTIFIER'a cast edilemez, NVARCHAR üzerinden NEWID ile temsil edilir.
     SELECT TOP 50
         'audit'             AS data_category,
         'Auditlog'          AS label,
-        CAST(al.audit_log_id AS UNIQUEIDENTIFIER) AS entity_id,
+        CAST(HASHBYTES('MD5', CAST(al.audit_log_id AS NVARCHAR(36))) AS UNIQUEIDENTIFIER) AS entity_id,
         al.table_name       AS detail_1,
         al.action_type      AS detail_2,
         CAST(al.changed_at_utc AS NVARCHAR(30)) AS created_at,
