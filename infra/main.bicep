@@ -96,6 +96,8 @@ resource appService 'Microsoft.Web/sites@2023-01-01' = {
         { name: 'Authentication__Audience', value: jwtAudience }
         { name: 'Cors__AllowedOrigins__0', value: corsAllowedOrigins }
         { name: 'YAFES_SQL_CONNECTION_STRING', value: '@Microsoft.KeyVault(VaultName=${kvName};SecretName=sql-connection-string)' }
+        { name: 'SENDGRID_API_KEY', value: '@Microsoft.KeyVault(VaultName=${kvName};SecretName=sendgrid-api-key)' }
+        { name: 'AZURE_KEY_VAULT_URI', value: keyVault.properties.vaultUri }
         { name: 'WEBSITES_ENABLE_APP_SERVICE_STORAGE', value: 'false' }
       ]
     }
