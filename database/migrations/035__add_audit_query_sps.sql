@@ -105,14 +105,14 @@ SET XACT_ABORT ON;
 BEGIN TRY
     -- Temel kişi bilgileri — tenant_id burada kontrol edilir.
     SELECT
-        'person'            AS data_category,
-        'Persoonsgegevens'  AS label,
-        p.person_id         AS entity_id,
-        p.dossier           AS detail_1,
-        p.person_kind       AS detail_2,
-        CAST(p.created_at_utc AS NVARCHAR(30)) AS created_at,
-        CAST(p.updated_at_utc AS NVARCHAR(30)) AS updated_at,
-        p.is_deleted        AS is_anonymised
+        'person'            AS DataCategory,
+        'Persoonsgegevens'  AS Label,
+        p.person_id         AS EntityId,
+        p.dossier           AS Detail1,
+        p.person_kind       AS Detail2,
+        CAST(p.created_at_utc AS NVARCHAR(30)) AS CreatedAt,
+        CAST(p.updated_at_utc AS NVARCHAR(30)) AS UpdatedAt,
+        p.is_deleted        AS IsAnonymised
     FROM person.Person p
     WHERE p.person_id = @person_id AND p.tenant_id = @tenant_id
 
@@ -120,14 +120,14 @@ BEGIN TRY
 
     -- E-mailadressen — person.Person join ile tenant izolasyonu sağlanır.
     SELECT
-        'person.email'      AS data_category,
-        'E-mailadres'       AS label,
-        e.email_id          AS entity_id,
-        e.email             AS detail_1,
-        CASE WHEN e.is_primary = 1 THEN 'primair' ELSE 'secundair' END AS detail_2,
-        CAST(e.created_at_utc AS NVARCHAR(30)) AS created_at,
-        CAST(e.updated_at_utc AS NVARCHAR(30)) AS updated_at,
-        e.is_deleted        AS is_anonymised
+        'person.email'      AS DataCategory,
+        'E-mailadres'       AS Label,
+        e.email_id          AS EntityId,
+        e.email             AS Detail1,
+        CASE WHEN e.is_primary = 1 THEN 'primair' ELSE 'secundair' END AS Detail2,
+        CAST(e.created_at_utc AS NVARCHAR(30)) AS CreatedAt,
+        CAST(e.updated_at_utc AS NVARCHAR(30)) AS UpdatedAt,
+        e.is_deleted        AS IsAnonymised
     FROM person.Email e
     INNER JOIN person.Person p
         ON p.person_id = e.person_id AND p.tenant_id = @tenant_id
@@ -137,14 +137,14 @@ BEGIN TRY
 
     -- Telefoonnummers — tenant izolasyonu.
     SELECT
-        'person.phone'      AS data_category,
-        'Telefoonnummer'    AS label,
-        ph.phone_id         AS entity_id,
-        ph.phone_number     AS detail_1,
-        ph.phone_type_code  AS detail_2,
-        CAST(ph.created_at_utc AS NVARCHAR(30)) AS created_at,
-        CAST(ph.updated_at_utc AS NVARCHAR(30)) AS updated_at,
-        ph.is_deleted       AS is_anonymised
+        'person.phone'      AS DataCategory,
+        'Telefoonnummer'    AS Label,
+        ph.phone_id         AS EntityId,
+        ph.phone_number     AS Detail1,
+        ph.phone_type_code  AS Detail2,
+        CAST(ph.created_at_utc AS NVARCHAR(30)) AS CreatedAt,
+        CAST(ph.updated_at_utc AS NVARCHAR(30)) AS UpdatedAt,
+        ph.is_deleted       AS IsAnonymised
     FROM person.Phone ph
     INNER JOIN person.Person p
         ON p.person_id = ph.person_id AND p.tenant_id = @tenant_id
@@ -154,14 +154,14 @@ BEGIN TRY
 
     -- Adressen — tenant izolasyonu.
     SELECT
-        'person.address'    AS data_category,
-        'Adres'             AS label,
-        a.address_id        AS entity_id,
-        CONCAT(a.street, ' ', a.house_number, ', ', a.postal_code, ' ', a.city) AS detail_1,
-        a.country_code      AS detail_2,
-        CAST(a.created_at_utc AS NVARCHAR(30)) AS created_at,
-        CAST(a.updated_at_utc AS NVARCHAR(30)) AS updated_at,
-        a.is_deleted        AS is_anonymised
+        'person.address'    AS DataCategory,
+        'Adres'             AS Label,
+        a.address_id        AS EntityId,
+        CONCAT(a.street, ' ', a.house_number, ', ', a.postal_code, ' ', a.city) AS Detail1,
+        a.country_code      AS Detail2,
+        CAST(a.created_at_utc AS NVARCHAR(30)) AS CreatedAt,
+        CAST(a.updated_at_utc AS NVARCHAR(30)) AS UpdatedAt,
+        a.is_deleted        AS IsAnonymised
     FROM person.Address a
     INNER JOIN person.Person p
         ON p.person_id = a.person_id AND p.tenant_id = @tenant_id
@@ -169,22 +169,22 @@ BEGIN TRY
 
     UNION ALL
 
-    -- Audit kayıtları — audit_log_id BIGINT olduğu için entity_id NULL döner.
+    -- Audit kayıtları — audit_log_id BIGINT olduğu için EntityId NULL döner.
     -- C# tarafında GdprDataRow.EntityId nullable (Guid?) olarak tanımlanmıştır.
     SELECT TOP 50
-        'audit'             AS data_category,
-        'Auditlog'          AS label,
-        NULL                AS entity_id,
-        CONCAT(al.schema_name, '.', al.table_name) AS detail_1,
-        al.action_type      AS detail_2,
-        CAST(al.changed_at_utc AS NVARCHAR(30)) AS created_at,
-        CAST(al.changed_at_utc AS NVARCHAR(30)) AS updated_at,
-        0                   AS is_anonymised
+        'audit'             AS DataCategory,
+        'Auditlog'          AS Label,
+        NULL                AS EntityId,
+        CONCAT(al.schema_name, '.', al.table_name) AS Detail1,
+        al.action_type      AS Detail2,
+        CAST(al.changed_at_utc AS NVARCHAR(30)) AS CreatedAt,
+        CAST(al.changed_at_utc AS NVARCHAR(30)) AS UpdatedAt,
+        0                   AS IsAnonymised
     FROM audit.AuditLog al
     WHERE al.tenant_id = @tenant_id
       AND al.primary_key_value = CAST(@person_id AS NVARCHAR(200))
 
-    ORDER BY data_category, created_at DESC;
+    ORDER BY DataCategory, CreatedAt DESC;
 END TRY
 BEGIN CATCH
     THROW;
