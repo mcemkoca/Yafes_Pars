@@ -22,8 +22,11 @@ public static class PaymentEndpoints
         auth.MapPost("", CreatePaymentAsync)
             .RequireRateLimiting("write");
 
-        // Mollie webhook: geen JWT-auth (Mollie-server stuurt dit), maar alleen POST toegestaan.
-        api.MapPost("/webhook", HandleWebhookAsync);
+        // Mollie webhook: geen JWT-auth (Mollie-server stuurt dit).
+        // Mollie stuurt application/x-www-form-urlencoded met 'id' parameter.
+        api.MapPost("/webhook", HandleWebhookAsync)
+            .Accepts<IFormCollection>("application/x-www-form-urlencoded")
+            .DisableAntiforgery();
 
         return app;
     }
@@ -157,26 +160,26 @@ public static class PaymentEndpoints
             });
     }
 
-    private sealed record WebhookBody(string Id);
-
     private static async Task<IResult> HandleWebhookAsync(
-        WebhookBody body,
+        IFormCollection form,
         IWriteRepository write,
         IMolliePaymentService mollie,
         CancellationToken cancellationToken)
     {
-        // Webhook body bevat alleen 'id'. Status ophalen bij Mollie.
-        // Tenant-id is onbekend in webhook — we doen een globale update op mollie_payment_id.
-        // SP zoekt op mollie_payment_id; tenant_id guard wordt geskipt via GUID.Empty noodoplossing:
-        // in productie zou een shared-secret header de webhook authenticeren.
+        // Mollie stuurt application/x-www-form-urlencoded met één veld: id=tr_xxxx.
+        var mollieId = form["id"].FirstOrDefault();
+        if (string.IsNullOrWhiteSpace(mollieId))
+            return Results.BadRequest();
+
+        // Status ophalen bij Mollie; geef 5xx terug zodat Mollie blijft herproberen.
         string mollieStatus;
         try
         {
-            mollieStatus = await mollie.GetPaymentStatusAsync(body.Id, cancellationToken);
+            mollieStatus = await mollie.GetPaymentStatusAsync(mollieId, cancellationToken);
         }
         catch
         {
-            return Results.Ok(); // Mollie herprobeert — geen 5xx teruggeven.
+            return Results.StatusCode(503); // Mollie herprobeert bij non-2xx.
         }
 
         var statusCode = mollieStatus switch
@@ -188,7 +191,7 @@ public static class PaymentEndpoints
             _           => "PENDING",
         };
 
-        // Webhook is tenant-agnostisch: gebruik een systeemaanroep zonder tenant-check.
+        // Update betalingsstatus + factuur (tenant-agnostisch op mollie_payment_id).
         try
         {
             await write.ExecuteAsync(
@@ -204,16 +207,16 @@ public static class PaymentEndpoints
                     UPDATE finance.Invoices
                     SET StatusCode = 'PAID', UpdatedAt = SYSUTCDATETIME()
                     FROM finance.Invoices i
-                    INNER JOIN finance.PaymentTransaction pt ON pt.invoice_id = i.invoice_id
+                    INNER JOIN finance.PaymentTransaction pt ON pt.invoice_id = i.InvoiceId
                     WHERE pt.mollie_payment_id = @mollieId AND pt.is_deleted = 0;
                 END
                 """,
-                new { mollieId = body.Id, statusCode },
+                new { mollieId, statusCode },
                 cancellationToken);
         }
         catch
         {
-            // Stille fout — Mollie verwacht 200 OK.
+            return Results.StatusCode(500); // Mollie herprobeert.
         }
 
         return Results.Ok();

@@ -18,18 +18,18 @@ COMMIT TRANSACTION;
 GO
 
 -- Betalingstransactietabel: één rij per Mollie-betaling.
--- Kolon convention: snake_case voor eigen kolommen, PascalCase FK doelen volgen bronschema.
+-- FK verwijst naar finance.Invoices(InvoiceId) — PascalCase conform bronschema.
 IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE schema_id = SCHEMA_ID(N'finance') AND name = N'PaymentTransaction')
 BEGIN
     CREATE TABLE finance.PaymentTransaction (
         transaction_id      UNIQUEIDENTIFIER    NOT NULL DEFAULT NEWSEQUENTIALID(),
         tenant_id           UNIQUEIDENTIFIER    NOT NULL,
         invoice_id          UNIQUEIDENTIFIER    NOT NULL,
-        mollie_payment_id   NVARCHAR(50)        NULL,       -- tr_xxxx van Mollie
-        mollie_checkout_url NVARCHAR(500)       NULL,       -- betaal-URL voor klant
+        mollie_payment_id   NVARCHAR(50)        NULL,
+        mollie_checkout_url NVARCHAR(500)       NULL,
         amount_eur          DECIMAL(18,4)       NOT NULL,
         status_code         NVARCHAR(30)        NOT NULL    CONSTRAINT DF_PT_status   DEFAULT N'PENDING',
-        payment_method      NVARCHAR(30)        NULL,       -- ideal, bancontact, creditcard …
+        payment_method      NVARCHAR(30)        NULL,
         description         NVARCHAR(255)       NULL,
         return_url          NVARCHAR(500)       NULL,
         webhook_url         NVARCHAR(500)       NULL,
@@ -44,19 +44,23 @@ BEGIN
         CONSTRAINT CK_PT_amount           CHECK (amount_eur > 0)
     );
 
-    CREATE INDEX IX_PT_tenant_invoice
-        ON finance.PaymentTransaction (tenant_id, invoice_id)
-        WHERE is_deleted = 0;
+    -- T-SQL: geen IF NOT EXISTS voor CREATE INDEX — gebruik sys.indexes check.
+    IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'finance.PaymentTransaction') AND name = N'IX_PT_tenant_invoice')
+        CREATE INDEX IX_PT_tenant_invoice
+            ON finance.PaymentTransaction (tenant_id, invoice_id)
+            WHERE is_deleted = 0;
 
-    CREATE UNIQUE INDEX IX_PT_mollie_id
-        ON finance.PaymentTransaction (mollie_payment_id)
-        WHERE mollie_payment_id IS NOT NULL AND is_deleted = 0;
+    IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'finance.PaymentTransaction') AND name = N'IX_PT_mollie_id')
+        CREATE UNIQUE INDEX IX_PT_mollie_id
+            ON finance.PaymentTransaction (mollie_payment_id)
+            WHERE mollie_payment_id IS NOT NULL AND is_deleted = 0;
 
-    PRINT 'finance.PaymentTransaction tabel aangemaakt.';
+    PRINT 'finance.PaymentTransaction aangemaakt.';
 END
 GO
 
--- SP: maak een betalingstransactierecord aan (vóór Mollie-API-aanroep).
+-- SP: maak betalingstransactie aan, gebruik OUTPUT voor gegenereerde GUID.
+-- NEWSEQUENTIALID() mag alleen in DEFAULT-constraints, niet in variabelen.
 CREATE OR ALTER PROCEDURE finance.SP_CreatePaymentTransaction
     @tenant_id      UNIQUEIDENTIFIER,
     @invoice_id     UNIQUEIDENTIFIER,
@@ -68,26 +72,27 @@ AS
 SET NOCOUNT ON;
 SET XACT_ABORT ON;
 BEGIN TRY
-    -- Controleer of de factuur bij de tenant hoort (finance.Invoices gebruikt PascalCase).
     IF NOT EXISTS (
         SELECT 1 FROM finance.Invoices
         WHERE InvoiceId = @invoice_id AND TenantId = @tenant_id
     )
         THROW 52010, 'Factuur niet gevonden voor deze tenant.', 1;
 
-    DECLARE @id UNIQUEIDENTIFIER = NEWSEQUENTIALID();
+    DECLARE @output TABLE (transaction_id UNIQUEIDENTIFIER);
 
     INSERT INTO finance.PaymentTransaction
-        (transaction_id, tenant_id, invoice_id, amount_eur, description, return_url, webhook_url)
+        (tenant_id, invoice_id, amount_eur, description, return_url, webhook_url)
+    OUTPUT inserted.transaction_id INTO @output
     VALUES
-        (@id, @tenant_id, @invoice_id, @amount_eur, @description, @return_url, @webhook_url);
+        (@tenant_id, @invoice_id, @amount_eur, @description, @return_url, @webhook_url);
 
     SELECT
-        @id                 AS TransactionId,
+        o.transaction_id    AS TransactionId,
         @invoice_id         AS InvoiceId,
         @amount_eur         AS AmountEur,
         N'PENDING'          AS StatusCode,
-        SYSUTCDATETIME()    AS CreatedAtUtc;
+        SYSUTCDATETIME()    AS CreatedAtUtc
+    FROM @output o;
 END TRY
 BEGIN CATCH
     THROW;
@@ -129,7 +134,6 @@ BEGIN TRY
     IF @@ROWCOUNT = 0
         THROW 52013, 'Betalingstransactie niet gevonden.', 1;
 
-    -- Markeer factuur als PAID bij succesvolle betaling.
     IF @status_code = N'PAID'
     BEGIN
         UPDATE finance.Invoices
