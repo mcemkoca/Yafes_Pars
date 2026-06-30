@@ -8,8 +8,8 @@
     "database":  {
                      "defaultName":  "YafesPars_Dev",
                      "environment":  "DEV",
-                     "schemaCount":  13,
-                     "tableCount":  120,
+                     "schemaCount":  14,
+                     "tableCount":  121,
                      "legacyReferenceTableCount":  89
                  },
     "tenant":  {
@@ -18,8 +18,8 @@
                    "environmentLabel":  "DEV"
                },
     "migrations":  {
-                       "count":  33,
-                       "latest":  "032__add_payment_transactions.sql",
+                       "count":  35,
+                       "latest":  "034__add_fsma_export_sp.sql",
                        "files":  [
                                      "000__create_database.sql",
                                      "001__create_schemas.sql",
@@ -53,12 +53,14 @@
                                      "029__add_portfolio_summary_view.sql",
                                      "030__add_import_staging.sql",
                                      "031__add_overdue_invoice_sp.sql",
-                                     "032__add_payment_transactions.sql"
+                                     "032__add_payment_transactions.sql",
+                                     "033__add_email_log.sql",
+                                     "034__add_fsma_export_sp.sql"
                                  ]
                    },
     "validations":  {
-                        "count":  22,
-                        "latest":  "022__validate_payment_transactions.sql",
+                        "count":  24,
+                        "latest":  "024__validate_fsma_export.sql",
                         "files":  [
                                       "001__validate_core_infrastructure.sql",
                                       "002__validate_person_domain.sql",
@@ -81,7 +83,9 @@
                                       "019__validate_portfolio_summary.sql",
                                       "020__validate_import_staging.sql",
                                       "021__validate_overdue_invoice_sp.sql",
-                                      "022__validate_payment_transactions.sql"
+                                      "022__validate_payment_transactions.sql",
+                                      "023__validate_email_log.sql",
+                                      "024__validate_fsma_export.sql"
                                   ]
                     },
     "ssmsScripts":  [
@@ -598,6 +602,18 @@
                         "tableCount":  1,
                         "tables":  [
                                        "PolicyImport"
+                                   ]
+                    },
+                    {
+                        "order":  140,
+                        "schema":  "communication",
+                        "title":  "Communication",
+                        "lane":  "Operations",
+                        "subheading":  "Transactionele e-maillog, compliance-trail voor alle berichten",
+                        "entryPoint":  "06__query_library_shortcuts.sql",
+                        "tableCount":  1,
+                        "tables":  [
+                                       "EmailLog"
                                    ]
                     }
                 ],
