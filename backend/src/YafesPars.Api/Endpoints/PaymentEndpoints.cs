@@ -83,9 +83,11 @@ public static class PaymentEndpoints
         // Haal factuurbedrag op.
         var invoices = await read.QueryAsync<InvoiceRow>(
             """
-            SELECT TOP 1 TotalAmountEur, StatusCode
+            SELECT TOP 1
+                Amount     AS TotalAmountEur,
+                StatusCode
             FROM finance.Invoices
-            WHERE invoice_id = @invoiceId AND tenant_id = @tenantId AND is_deleted = 0
+            WHERE InvoiceId = @invoiceId AND TenantId = @tenantId
             """,
             new { invoiceId = body.InvoiceId, tenantId },
             cancellationToken);

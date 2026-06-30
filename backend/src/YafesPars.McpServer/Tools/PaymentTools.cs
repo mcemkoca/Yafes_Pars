@@ -42,12 +42,11 @@ public sealed class PaymentTools
         var rows = await _read.QueryAsync<InvoiceAmountRow>(
             """
             SELECT TOP 1
-                TotalAmountEur,
+                Amount      AS TotalAmountEur,
                 StatusCode
             FROM finance.Invoices
-            WHERE invoice_id = @invoiceId
-              AND tenant_id  = @tenantId
-              AND is_deleted = 0
+            WHERE InvoiceId = @invoiceId
+              AND TenantId  = @tenantId
             """,
             new { invoiceId, tenantId = _ctx.TenantId },
             cancellationToken);
