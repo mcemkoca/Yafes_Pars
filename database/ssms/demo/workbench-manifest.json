@@ -18,8 +18,8 @@
         "environmentLabel": "DEV"
     },
     "migrations": {
-        "count": 39,
-        "latest": "038__add_production_readiness_sp.sql",
+        "count": 42,
+        "latest": "041__add_premium_calculator.sql",
         "files": [
             "000__create_database.sql",
             "001__create_schemas.sql",
@@ -59,12 +59,15 @@
             "035__add_audit_query_sps.sql",
             "036__add_operational_dashboard_sps.sql",
             "037__add_tenant_management_sps.sql",
-            "038__add_production_readiness_sp.sql"
+            "038__add_production_readiness_sp.sql",
+            "039__add_complaint_management.sql",
+            "040__add_renewal_pipeline.sql",
+            "041__add_premium_calculator.sql"
         ]
     },
     "validations": {
-        "count": 28,
-        "latest": "028__validate_production_readiness.sql",
+        "count": 31,
+        "latest": "031__validate_premium_calculator.sql",
         "files": [
             "001__validate_core_infrastructure.sql",
             "002__validate_person_domain.sql",
@@ -93,7 +96,10 @@
             "025__validate_audit_sps.sql",
             "026__validate_operational_dashboard.sql",
             "027__validate_tenant_management_sps.sql",
-            "028__validate_production_readiness.sql"
+            "028__validate_production_readiness.sql",
+            "029__validate_complaint_management.sql",
+            "030__validate_renewal_pipeline.sql",
+            "031__validate_premium_calculator.sql"
         ]
     },
     "ssmsScripts": [
