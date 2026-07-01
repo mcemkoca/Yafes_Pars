@@ -9,7 +9,7 @@
         "defaultName": "YafesPars_Dev",
         "environment": "DEV",
         "schemaCount": 14,
-        "tableCount": 121,
+        "tableCount": 123,
         "legacyReferenceTableCount": 89
     },
     "tenant": {
@@ -18,8 +18,8 @@
         "environmentLabel": "DEV"
     },
     "migrations": {
-        "count": 39,
-        "latest": "038__add_production_readiness_sp.sql",
+        "count": 41,
+        "latest": "040__add_renewal_pipeline.sql",
         "files": [
             "000__create_database.sql",
             "001__create_schemas.sql",
@@ -59,12 +59,14 @@
             "035__add_audit_query_sps.sql",
             "036__add_operational_dashboard_sps.sql",
             "037__add_tenant_management_sps.sql",
-            "038__add_production_readiness_sp.sql"
+            "038__add_production_readiness_sp.sql",
+            "039__add_complaint_management.sql",
+            "040__add_renewal_pipeline.sql"
         ]
     },
     "validations": {
-        "count": 28,
-        "latest": "028__validate_production_readiness.sql",
+        "count": 30,
+        "latest": "030__validate_renewal_pipeline.sql",
         "files": [
             "001__validate_core_infrastructure.sql",
             "002__validate_person_domain.sql",
@@ -93,7 +95,9 @@
             "025__validate_audit_sps.sql",
             "026__validate_operational_dashboard.sql",
             "027__validate_tenant_management_sps.sql",
-            "028__validate_production_readiness.sql"
+            "028__validate_production_readiness.sql",
+            "029__validate_complaint_management.sql",
+            "030__validate_renewal_pipeline.sql"
         ]
     },
     "ssmsScripts": [
@@ -480,7 +484,7 @@
             "lane": "Insurance Core",
             "subheading": "Contracts, versions, parties, objects, status, renewal flow",
             "entryPoint": "03__create_renewal_tasks.sql",
-            "tableCount": 17,
+            "tableCount": 18,
             "tables": [
                 "CollectionMethod",
                 "Contract",
@@ -497,6 +501,7 @@
                 "ContractVersionStatus",
                 "DurationType",
                 "Periodicity",
+                "RenewalQueue",
                 "TakeoverDirection",
                 "TakeoverSourceType"
             ]
@@ -617,10 +622,11 @@
             "schema": "communication",
             "title": "Communication",
             "lane": "Operations",
-            "subheading": "Transactionele e-maillog, compliance-trail voor alle berichten",
+            "subheading": "FSMA klachtenregister, e-maillog, compliance-trail",
             "entryPoint": "06__query_library_shortcuts.sql",
-            "tableCount": 1,
+            "tableCount": 2,
             "tables": [
+                "Complaint",
                 "EmailLog"
             ]
         }
