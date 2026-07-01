@@ -9,7 +9,7 @@
         "defaultName": "YafesPars_Dev",
         "environment": "DEV",
         "schemaCount": 14,
-        "tableCount": 121,
+        "tableCount": 123,
         "legacyReferenceTableCount": 89
     },
     "tenant": {
@@ -484,7 +484,7 @@
             "lane": "Insurance Core",
             "subheading": "Contracts, versions, parties, objects, status, renewal flow",
             "entryPoint": "03__create_renewal_tasks.sql",
-            "tableCount": 17,
+            "tableCount": 18,
             "tables": [
                 "CollectionMethod",
                 "Contract",
@@ -501,6 +501,7 @@
                 "ContractVersionStatus",
                 "DurationType",
                 "Periodicity",
+                "RenewalQueue",
                 "TakeoverDirection",
                 "TakeoverSourceType"
             ]
@@ -621,10 +622,11 @@
             "schema": "communication",
             "title": "Communication",
             "lane": "Operations",
-            "subheading": "Transactionele e-maillog, compliance-trail voor alle berichten",
+            "subheading": "FSMA klachtenregister, e-maillog, compliance-trail",
             "entryPoint": "06__query_library_shortcuts.sql",
-            "tableCount": 1,
+            "tableCount": 2,
             "tables": [
+                "Complaint",
                 "EmailLog"
             ]
         }
