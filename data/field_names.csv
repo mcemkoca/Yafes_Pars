@@ -1,0 +1,10 @@
+fn_id,naam,type,niveau,verwijderbaar,showAsLabel,sort_order
+10424,"Laatste balansjaar",1,1,1,0,99
+10427,"Winst/Verlies van het boekjaar (9904)",1,1,1,0,99
+10429,"Belastingen op het resultaat (67/77)",1,1,1,0,99
+10432,"Afschrijvingen en waardeverminderingen (630)",1,1,1,0,99
+10905,Schadestatistiek,0,1,1,0,99
+15016,Ongewenst,2,1,1,1,99
+15018,Zelfstandige,2,1,1,1,99
+15021,"Pars Outbound Call",6,1,1,0,99
+15948,"Opening faillissement",2,1,1,1,99

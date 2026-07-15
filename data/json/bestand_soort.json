@@ -1,0 +1,17 @@
+[
+{"soort_id":"1","naam":"Algemene Documenten","name_ftpfolder":"Documents","betrokken":"1","contract":"1","schade":"1","risico":"1","hidden":"0"},
+{"soort_id":"3","naam":"Opzegbrieven / Plaatsingsmandaat","name_ftpfolder":"Termination Letters or Placement Mandate","betrokken":"0","contract":"1","schade":"0","risico":"0","hidden":"0"},
+{"soort_id":"5","naam":"Inkomende Brieven","name_ftpfolder":"incoming letters","betrokken":"1","contract":"1","schade":"1","risico":"0","hidden":"0"},
+{"soort_id":"6","naam":"Persoonsidentificatie","name_ftpfolder":"person Identification","betrokken":"1","contract":"0","schade":"0","risico":"0","hidden":"0"},
+{"soort_id":"8","naam":"Contracten en bijvoegsel","name_ftpfolder":"contracts and attachements","betrokken":"0","contract":"1","schade":"0","risico":"0","hidden":"0"},
+{"soort_id":"10","naam":"Aangiftes","name_ftpfolder":"declarations","betrokken":"0","contract":"0","schade":"1","risico":"0","hidden":"0"},
+{"soort_id":"11","naam":"Foto's","name_ftpfolder":"pictures","betrokken":"0","contract":"0","schade":"1","risico":"1","hidden":"0"},
+{"soort_id":"12","naam":"Derden","name_ftpfolder":"third party","betrokken":"0","contract":"0","schade":"1","risico":"0","hidden":"0"},
+{"soort_id":"13","naam":"MIFID Documenten","name_ftpfolder":"mifid_documenten","betrokken":"1","contract":"1","schade":"0","risico":"0","hidden":"0"},
+{"soort_id":"14","naam":"Uitgaande brieven","name_ftpfolder":"uitgaande_brieven","betrokken":"1","contract":"1","schade":"1","risico":"0","hidden":"0"},
+{"soort_id":"20","naam":"Bankdocumenten","name_ftpfolder":"bankdocumenten","betrokken":"1","contract":"0","schade":"0","risico":"0","hidden":"0"},
+{"soort_id":"35","naam":"Verzekeringskaart (bv. Groene)","name_ftpfolder":"verzekeringskaart","betrokken":"0","contract":"1","schade":"0","risico":"0","hidden":"0"},
+{"soort_id":"47","naam":"Offertes","name_ftpfolder":"","betrokken":"1","contract":"1","schade":"0","risico":"0","hidden":"0"},
+{"soort_id":"57","naam":"Financiële documenten","name_ftpfolder":"fin_documents","betrokken":"0","contract":"1","schade":"1","risico":"0","hidden":"0"},
+{"soort_id":"60","naam":"Bestekken","name_ftpfolder":"bestekken","betrokken":"0","contract":"0","schade":"1","risico":"0","hidden":"0"}
+]

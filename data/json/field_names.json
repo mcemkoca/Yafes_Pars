@@ -1,0 +1,11 @@
+[
+{"fn_id":"10424","naam":"Laatste balansjaar","type":"1","niveau":"1","verwijderbaar":"1","showAsLabel":"0","sort_order":"99"},
+{"fn_id":"10427","naam":"Winst/Verlies van het boekjaar (9904)","type":"1","niveau":"1","verwijderbaar":"1","showAsLabel":"0","sort_order":"99"},
+{"fn_id":"10429","naam":"Belastingen op het resultaat (67/77)","type":"1","niveau":"1","verwijderbaar":"1","showAsLabel":"0","sort_order":"99"},
+{"fn_id":"10432","naam":"Afschrijvingen en waardeverminderingen (630)","type":"1","niveau":"1","verwijderbaar":"1","showAsLabel":"0","sort_order":"99"},
+{"fn_id":"10905","naam":"Schadestatistiek","type":"0","niveau":"1","verwijderbaar":"1","showAsLabel":"0","sort_order":"99"},
+{"fn_id":"15016","naam":"Ongewenst","type":"2","niveau":"1","verwijderbaar":"1","showAsLabel":"1","sort_order":"99"},
+{"fn_id":"15018","naam":"Zelfstandige","type":"2","niveau":"1","verwijderbaar":"1","showAsLabel":"1","sort_order":"99"},
+{"fn_id":"15021","naam":"Pars Outbound Call","type":"6","niveau":"1","verwijderbaar":"1","showAsLabel":"0","sort_order":"99"},
+{"fn_id":"15948","naam":"Opening faillissement","type":"2","niveau":"1","verwijderbaar":"1","showAsLabel":"1","sort_order":"99"}
+]
