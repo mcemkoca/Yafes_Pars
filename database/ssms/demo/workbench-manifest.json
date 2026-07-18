@@ -9,7 +9,7 @@
         "defaultName": "YafesPars_Dev",
         "environment": "DEV",
         "schemaCount": 15,
-        "tableCount": 135,
+        "tableCount": 137,
         "legacyReferenceTableCount": 89
     },
     "tenant": {
@@ -18,8 +18,8 @@
         "environmentLabel": "DEV"
     },
     "migrations": {
-        "count": 43,
-        "latest": "042__create_assurance_domain.sql",
+        "count": 44,
+        "latest": "044__add_claim_settlement.sql",
         "files": [
             "000__create_database.sql",
             "001__create_schemas.sql",
@@ -63,12 +63,13 @@
             "039__add_complaint_management.sql",
             "040__add_renewal_pipeline.sql",
             "041__add_premium_calculator.sql",
-            "042__create_assurance_domain.sql"
+            "042__create_assurance_domain.sql",
+            "044__add_claim_settlement.sql"
         ]
     },
     "validations": {
-        "count": 31,
-        "latest": "031__validate_premium_calculator.sql",
+        "count": 32,
+        "latest": "032__validate_claim_settlement.sql",
         "files": [
             "001__validate_core_infrastructure.sql",
             "002__validate_person_domain.sql",
@@ -100,7 +101,8 @@
             "028__validate_production_readiness.sql",
             "029__validate_complaint_management.sql",
             "030__validate_renewal_pipeline.sql",
-            "031__validate_premium_calculator.sql"
+            "031__validate_premium_calculator.sql",
+            "032__validate_claim_settlement.sql"
         ]
     },
     "ssmsScripts": [
@@ -533,7 +535,7 @@
             "lane": "Operations",
             "subheading": "Claims, parties, objects, circumstances, payment method",
             "entryPoint": "06__query_library_shortcuts.sql",
-            "tableCount": 8,
+            "tableCount": 10,
             "tables": [
                 "Claim",
                 "ClaimCircumstance",
@@ -542,6 +544,8 @@
                 "ClaimParty",
                 "ClaimPartyRole",
                 "ClaimPaymentMethod",
+                "ClaimReserveLog",
+                "ClaimSettlement",
                 "ClaimStatus"
             ]
         },

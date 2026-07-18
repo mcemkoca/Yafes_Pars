@@ -280,6 +280,7 @@ try
     app.MapRenewalEndpoints();
     app.MapPremiumEndpoints();
     app.MapAssuranceEndpoints();
+    app.MapClaimSettlementEndpoints();
 
     app.Run();
 }
