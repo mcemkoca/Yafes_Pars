@@ -9,7 +9,7 @@
         "defaultName": "YafesPars_Dev",
         "environment": "DEV",
         "schemaCount": 15,
-        "tableCount": 137,
+        "tableCount": 140,
         "legacyReferenceTableCount": 89
     },
     "tenant": {
@@ -18,7 +18,7 @@
         "environmentLabel": "DEV"
     },
     "migrations": {
-        "count": 44,
+        "count": 45,
         "latest": "044__add_claim_settlement.sql",
         "files": [
             "000__create_database.sql",
@@ -64,6 +64,7 @@
             "040__add_renewal_pipeline.sql",
             "041__add_premium_calculator.sql",
             "042__create_assurance_domain.sql",
+            "043__create_import_staging.sql",
             "044__add_claim_settlement.sql"
         ]
     },
@@ -200,6 +201,26 @@
             "fileName": "18__sql_agent_job_setup.sql",
             "path": "database/ssms/18__sql_agent_job_setup.sql",
             "sizeBytes": 7624
+        },
+        {
+            "fileName": "20__assurance_dashboard.sql",
+            "path": "database/ssms/20__assurance_dashboard.sql",
+            "sizeBytes": 1500
+        },
+        {
+            "fileName": "21__sql_risk_review_board.sql",
+            "path": "database/ssms/21__sql_risk_review_board.sql",
+            "sizeBytes": 1625
+        },
+        {
+            "fileName": "22__compliance_control_matrix.sql",
+            "path": "database/ssms/22__compliance_control_matrix.sql",
+            "sizeBytes": 1153
+        },
+        {
+            "fileName": "23__permission_drift_report.sql",
+            "path": "database/ssms/23__permission_drift_report.sql",
+            "sizeBytes": 1061
         }
     ],
     "shortcuts": [
@@ -618,10 +639,13 @@
             "schema": "import",
             "title": "Import",
             "lane": "Operations",
-            "subheading": "Bulk policy import staging and validation",
+            "subheading": "Bulk policy import staging, legacy data migration � PolicyImport, LegacyPerson, LegacyContract, LegacyClaim",
             "entryPoint": "06__query_library_shortcuts.sql",
-            "tableCount": 1,
+            "tableCount": 4,
             "tables": [
+                "LegacyClaim",
+                "LegacyContract",
+                "LegacyPerson",
                 "PolicyImport"
             ]
         },

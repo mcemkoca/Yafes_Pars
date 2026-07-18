@@ -17,7 +17,7 @@ BEGIN
         tenant_id           UNIQUEIDENTIFIER NOT NULL,
         contract_id         UNIQUEIDENTIFIER NOT NULL,
         contract_end_date   DATE             NOT NULL,
-        days_until_expiry   AS DATEDIFF(DAY, CAST(GETUTCDATE() AS DATE), contract_end_date) PERSISTED,
+        days_until_expiry   AS DATEDIFF(DAY, CAST(GETUTCDATE() AS DATE), contract_end_date),
         status_code         NVARCHAR(30)     NOT NULL DEFAULT N'PENDING',
         notice_sent_at      DATETIME2        NULL,
         notice_count        INT              NOT NULL DEFAULT 0,
@@ -83,7 +83,7 @@ BEGIN
     INNER JOIN policy.Contract c    ON c.contract_id = rq.contract_id
     LEFT JOIN policy.ContractParty cp
         ON cp.contract_id = rq.contract_id
-       AND cp.party_role_code = N'POLICY_HOLDER'
+       AND cp.contract_party_role_code = N'POLICY_HOLDER'
     LEFT JOIN person.Person p       ON p.person_id = cp.person_id AND p.is_deleted = 0
     LEFT JOIN person.NaturalPerson np ON np.person_id = p.person_id AND np.is_deleted = 0
     LEFT JOIN person.LegalPerson   lp ON lp.person_id = p.person_id AND lp.is_deleted = 0
