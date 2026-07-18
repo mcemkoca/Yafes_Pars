@@ -55,17 +55,19 @@ public sealed class FinanceLedgerTests
         Assert.NotNull(result);
         Assert.DoesNotContain("\"error\"", result);
 
-        // Verify Dapper mapping succeeds: journalId must be a non-empty GUID.
+        // Verify Dapper mapping succeeds: JournalId must be a non-empty GUID.
+        // System.Text.Json default serialization emits PascalCase for C# records,
+        // so assert PascalCase property names here.
         // If snake_case aliases were missing, all GUID fields would silently map to Guid.Empty.
         using var doc = System.Text.Json.JsonDocument.Parse(result);
         var root = doc.RootElement;
         Assert.True(root.TryGetProperty("entries", out var entries), "Result must have 'entries' array");
         Assert.True(entries.GetArrayLength() == 2, "SP_PostLedgerEntry must return debit + credit lines");
         var first = entries[0];
-        Assert.True(first.TryGetProperty("journalId", out var jid), "Entry must have journalId");
+        Assert.True(first.TryGetProperty("JournalId", out var jid), "Entry must have JournalId (PascalCase)");
         Assert.NotEqual(Guid.Empty, jid.GetGuid());
-        Assert.True(first.TryGetProperty("debitEur", out var deb) || first.TryGetProperty("creditEur", out _),
-            "Entry must have debitEur or creditEur");
+        Assert.True(first.TryGetProperty("DebitEur", out _) || first.TryGetProperty("CreditEur", out _),
+            "Entry must have DebitEur or CreditEur");
     }
 
     [SkippableFact]
@@ -81,8 +83,9 @@ public sealed class FinanceLedgerTests
         Assert.True(root.TryGetProperty("accounts", out var accounts), "Result must have 'accounts' array");
         Assert.True(accounts.GetArrayLength() > 0, "Chart of accounts must have at least one entry");
         var first = accounts[0];
-        Assert.True(first.TryGetProperty("accountCode", out var code), "Balance row must have accountCode");
-        Assert.False(string.IsNullOrEmpty(code.GetString()), "accountCode must not be empty");
+        // PascalCase: System.Text.Json default serializes C# record properties as-is
+        Assert.True(first.TryGetProperty("AccountCode", out var code), "Balance row must have AccountCode (PascalCase)");
+        Assert.False(string.IsNullOrEmpty(code.GetString()), "AccountCode must not be empty");
     }
 
     [SkippableFact]
