@@ -74,6 +74,7 @@ FROM (VALUES
     (90, N'Report', N'Graph/report pack', N'database/ssms/09__graph_report_pack.sql', N'READ_ONLY', N'Grid-friendly trend, bar, and export-ready report datasets.'),
     (100, N'Control', N'Daily operator checklist', N'database/ssms/10__daily_operator_checklist.sql', N'READ_ONLY', N'Morning and end-of-day checklist result sets.'),
     (110, N'Control', N'Monitoring and job readiness', N'database/ssms/15__monitoring_and_job_readiness.sql', N'READ_ONLY', N'DEV health, backlog, backup, and SQL Agent readiness grids.'),
+    (115, N'Finance', N'Finance ledger cockpit', N'database/ssms/19__finance_ledger_cockpit.sql', N'READ_ONLY', N'Chart of accounts, trial balance, P&L summary, claim cost, and reserve evolution.'),
     (120, N'Control', N'Delivery gap register', N'database/ssms/16__delivery_gap_register.sql', N'READ_ONLY', N'Commit review closure, open delivery gaps, and next SSMS actions.'),
     (130, N'Control', N'Remaining work cockpit', N'database/ssms/17__remaining_work_cockpit.sql', N'READ_ONLY', N'Owner decisions, evidence handoff, 019+ intake, edge bridge ranking, and SQL Agent promotion.')
 ) AS s(shortcut_order, shortcut_group, action_name, ssms_file, safety_mode, info_tip)
