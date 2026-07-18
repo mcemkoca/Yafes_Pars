@@ -170,9 +170,10 @@ public sealed class FinanceLedgerTools
     private sealed record LedgerEntryRow(
         Guid     EntryId,
         Guid     JournalId,
-        DateOnly PostingDate,
+        DateTime PostingDate,
         string   AccountCode,
         string   AccountNameNl,
+        string   AccountType,
         decimal  DebitEur,
         decimal  CreditEur,
         string   SourceType);
@@ -193,6 +194,6 @@ public sealed class FinanceLedgerTools
         decimal  ReservedEur,
         decimal  NetCostEur,
         int      PostingCount,
-        DateOnly FirstPosting,
-        DateOnly LastPosting);
+        DateTime FirstPosting,
+        DateTime LastPosting);
 }
