@@ -1,0 +1,30 @@
+﻿[
+  {
+    "framework": "GDPR",
+    "controlCode": "GDPR-ART32-AUDIT",
+    "title": "Auditability of processing",
+    "severity": "HIGH",
+    "description": "Personal-data processing activities must be traceable through audit logs."
+  },
+  {
+    "framework": "GDPR",
+    "controlCode": "GDPR-ART32-ENCRYPTION",
+    "title": "Encryption at rest",
+    "severity": "HIGH",
+    "description": "Database encryption should be enabled or explicitly documented."
+  },
+  {
+    "framework": "CIS",
+    "controlCode": "CIS-MSSQL-AUDIT",
+    "title": "SQL Server audit controls",
+    "severity": "HIGH",
+    "description": "Audit controls should be active and monitored."
+  },
+  {
+    "framework": "ISO27001",
+    "controlCode": "ISO-A.8.2",
+    "title": "Privileged access rights",
+    "severity": "HIGH",
+    "description": "Privileged access must be granted, reviewed and revoked under control."
+  }
+]
