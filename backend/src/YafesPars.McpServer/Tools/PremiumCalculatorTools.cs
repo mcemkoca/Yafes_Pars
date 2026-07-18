@@ -118,7 +118,7 @@ public sealed class PremiumCalculatorTools
         if (!string.IsNullOrWhiteSpace(effectiveFrom) && DateOnly.TryParse(effectiveFrom, out var d))
             effFrom = d;
 
-        var rows = await _read.QueryAsync<TariffRow>(
+        var rows = await _read.QueryAsync<TariffUpsertRow>(
             "finance.SP_UpsertTariffRate",
             new
             {
@@ -134,11 +134,11 @@ public sealed class PremiumCalculatorTools
                 effective_from       = effFrom?.ToDateTime(TimeOnly.MinValue)
             }, ct);
 
-        var row = rows.FirstOrDefault();
-        if (row is null)
+        var upserted = rows.FirstOrDefault();
+        if (upserted is null)
             return JsonSerializer.Serialize(new { error = "Tarife kaydedilemedi." });
 
-        return JsonSerializer.Serialize(new { success = true, tariff = row });
+        return JsonSerializer.Serialize(new { success = true, tariff = upserted });
     }
 
     // -------------------------------------------------------------------------
@@ -162,6 +162,7 @@ public sealed class PremiumCalculatorTools
         public DateOnly CalculatedAt         { get; init; }
     }
 
+    // SP_GetTariffRates full result (12 columns)
     private sealed record TariffRow(
         Guid     TariffRateId,
         string   CoverageDomainCode,
@@ -169,6 +170,20 @@ public sealed class PremiumCalculatorTools
         decimal  BaseRatePct,
         decimal  MinPremiumEur,
         decimal? MaxPremiumEur,
-        DateOnly EffectiveFrom,
+        decimal  AgeFactorYoung,
+        decimal  AgeFactorSenior,
+        decimal  NoClaimDiscount,
+        DateTime EffectiveFrom,
+        DateTime? EffectiveTo,
+        bool     IsActive);
+
+    // SP_UpsertTariffRate slim result (7 columns)
+    private sealed record TariffUpsertRow(
+        Guid     TariffRateId,
+        string   CoverageDomainCode,
+        string   CoverageTypeCode,
+        decimal  BaseRatePct,
+        decimal  MinPremiumEur,
+        DateTime EffectiveFrom,
         bool     IsActive);
 }
