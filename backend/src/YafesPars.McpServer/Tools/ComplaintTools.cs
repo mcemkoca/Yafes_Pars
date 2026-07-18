@@ -181,13 +181,13 @@ public sealed class ComplaintTools
     private sealed record ComplaintResult(
         Guid     ComplaintId,
         string   StatusCode,
-        DateOnly ReceivedDate,
+        DateTime ReceivedDate,
         bool     FsmaReportable);
 
     private sealed record ComplaintStatusResult(
         Guid      ComplaintId,
         string    StatusCode,
-        DateOnly? ResolvedDate,
+        DateTime? ResolvedDate,
         bool      FsmaReportable);
 
     private sealed record DashboardRow
@@ -207,24 +207,26 @@ public sealed class ComplaintTools
         string    PersonName,
         Guid?     ContractId,
         Guid?     ClaimId,
-        DateOnly  ReceivedDate,
+        DateTime  ReceivedDate,
         string    ChannelCode,
         string    Subject,
         string    StatusCode,
         string    PriorityCode,
         bool      FsmaReportable,
-        DateOnly? ResolvedDate,
+        DateTime? ResolvedDate,
         int       DaysOpen);
 
-    private sealed record FsmaRow(
-        Guid      ComplaintId,
-        DateOnly  ReceivedDate,
-        string    Channel,
-        string    Subject,
-        string    Status,
-        string    Priority,
-        DateOnly? ResolvedDate,
-        int       DaysToResolve,
-        bool      ExceededDeadline,
-        string    ClientName);
+    private sealed record FsmaRow
+    {
+        public Guid      ComplaintId      { get; init; }
+        public DateTime  ReceivedDate     { get; init; }
+        public string    Channel          { get; init; } = string.Empty;
+        public string    Subject          { get; init; } = string.Empty;
+        public string    Status           { get; init; } = string.Empty;
+        public string    Priority         { get; init; } = string.Empty;
+        public DateTime? ResolvedDate     { get; init; }
+        public int       DaysToResolve    { get; init; }
+        public bool      ExceededDeadline { get; init; }
+        public string    ClientName       { get; init; } = string.Empty;
+    }
 }
