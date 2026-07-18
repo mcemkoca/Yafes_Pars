@@ -1,5 +1,7 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
-using YafesPars.Infrastructure;
+using YafesPars.Application.Abstractions;
+using YafesPars.Api.Security;
 
 namespace YafesPars.Api.Endpoints;
 
@@ -37,11 +39,14 @@ public static class ClaimSettlementEndpoints
     private static async Task<IResult> GetSettlementsAsync(
         Guid claimId,
         IReadRepository read,
-        OperatorContext ctx)
+        ClaimsPrincipal user)
     {
+        if (!TenantClaims.TryGetTenantId(user, out var tenantId))
+            return Results.Unauthorized();
+
         var rows = await read.QueryAsync<dynamic>(
             "claim.SP_GetClaimSettlementSummary",
-            new { tenant_id = ctx.TenantId, claim_id = claimId });
+            new { tenant_id = tenantId, claim_id = claimId });
 
         return Results.Ok(rows);
     }
@@ -50,8 +55,11 @@ public static class ClaimSettlementEndpoints
         Guid claimId,
         [FromBody] CreateSettlementRequest req,
         IWriteRepository write,
-        OperatorContext ctx)
+        ClaimsPrincipal user)
     {
+        if (!TenantClaims.TryGetTenantId(user, out var tenantId))
+            return Results.Unauthorized();
+
         if (req.OfferAmountEur <= 0)
             return Results.BadRequest(new { error = "offer_amount_eur must be positive" });
 
@@ -59,7 +67,7 @@ public static class ClaimSettlementEndpoints
             "claim.SP_CreateSettlement",
             new
             {
-                tenant_id        = ctx.TenantId,
+                tenant_id        = tenantId,
                 claim_id         = claimId,
                 offer_amount_eur = req.OfferAmountEur,
                 iban             = req.Iban,
@@ -75,13 +83,16 @@ public static class ClaimSettlementEndpoints
         Guid settlementId,
         [FromBody] ApproveSettlementRequest req,
         IWriteRepository write,
-        OperatorContext ctx)
+        ClaimsPrincipal user)
     {
+        if (!TenantClaims.TryGetTenantId(user, out var tenantId))
+            return Results.Unauthorized();
+
         var result = await write.ExecuteScalarAsync<dynamic>(
             "claim.SP_ApproveSettlement",
             new
             {
-                tenant_id         = ctx.TenantId,
+                tenant_id         = tenantId,
                 settlement_id     = settlementId,
                 agreed_amount_eur = req.AgreedAmountEur,
                 payment_reference = req.PaymentReference
@@ -93,12 +104,15 @@ public static class ClaimSettlementEndpoints
     private static async Task<IResult> GetReserveLogAsync(
         Guid claimId,
         IReadRepository read,
-        OperatorContext ctx,
+        ClaimsPrincipal user,
         [FromQuery] int limit = 50)
     {
+        if (!TenantClaims.TryGetTenantId(user, out var tenantId))
+            return Results.Unauthorized();
+
         var rows = await read.QueryAsync<dynamic>(
             "claim.SP_GetReserveLog",
-            new { tenant_id = ctx.TenantId, claim_id = claimId, limit });
+            new { tenant_id = tenantId, claim_id = claimId, limit });
 
         return Results.Ok(rows);
     }
@@ -107,8 +121,11 @@ public static class ClaimSettlementEndpoints
         Guid claimId,
         [FromBody] UpdateReserveRequest req,
         IWriteRepository write,
-        OperatorContext ctx)
+        ClaimsPrincipal user)
     {
+        if (!TenantClaims.TryGetTenantId(user, out var tenantId))
+            return Results.Unauthorized();
+
         if (req.NewReserve < 0)
             return Results.BadRequest(new { error = "new_reserve cannot be negative" });
 
@@ -116,7 +133,7 @@ public static class ClaimSettlementEndpoints
             "claim.SP_UpdateClaimReserve",
             new
             {
-                tenant_id   = ctx.TenantId,
+                tenant_id   = tenantId,
                 claim_id    = claimId,
                 new_reserve = req.NewReserve,
                 reason_code = req.ReasonCode ?? "MANUAL",
