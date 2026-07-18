@@ -1,0 +1,9 @@
+id,listId,label,valueNl,valueFr,valueEn
+3,4,student,Student,Etudiant,Student
+4,4,whiteCollarWorker,Bediende,Employé,"White-collar worker"
+5,4,blueCollarWorker,Arbeider,Ouvrier,"Blue-collar worker"
+6,4,selfEmployed,Zelfstandige,Indépendant,Self-employed
+7,4,unemployed,Werkloos,"Sans profession",Unemployed
+8,4,retired,Gepensioneerd,Pensionné,Retired
+9,4,civilServant,Ambtenaar,"Fonctionnaire d'Etat","Civil servant"
+10,4,rentier,Rentenier,Rentier,Rentier

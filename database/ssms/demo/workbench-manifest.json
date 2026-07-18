@@ -8,8 +8,8 @@
     "database": {
         "defaultName": "YafesPars_Dev",
         "environment": "DEV",
-        "schemaCount": 14,
-        "tableCount": 121,
+        "schemaCount": 15,
+        "tableCount": 140,
         "legacyReferenceTableCount": 89
     },
     "tenant": {
@@ -18,8 +18,8 @@
         "environmentLabel": "DEV"
     },
     "migrations": {
-        "count": 39,
-        "latest": "038__add_production_readiness_sp.sql",
+        "count": 45,
+        "latest": "044__add_claim_settlement.sql",
         "files": [
             "000__create_database.sql",
             "001__create_schemas.sql",
@@ -59,12 +59,18 @@
             "035__add_audit_query_sps.sql",
             "036__add_operational_dashboard_sps.sql",
             "037__add_tenant_management_sps.sql",
-            "038__add_production_readiness_sp.sql"
+            "038__add_production_readiness_sp.sql",
+            "039__add_complaint_management.sql",
+            "040__add_renewal_pipeline.sql",
+            "041__add_premium_calculator.sql",
+            "042__create_assurance_domain.sql",
+            "043__create_import_staging.sql",
+            "044__add_claim_settlement.sql"
         ]
     },
     "validations": {
-        "count": 28,
-        "latest": "028__validate_production_readiness.sql",
+        "count": 32,
+        "latest": "032__validate_claim_settlement.sql",
         "files": [
             "001__validate_core_infrastructure.sql",
             "002__validate_person_domain.sql",
@@ -93,7 +99,11 @@
             "025__validate_audit_sps.sql",
             "026__validate_operational_dashboard.sql",
             "027__validate_tenant_management_sps.sql",
-            "028__validate_production_readiness.sql"
+            "028__validate_production_readiness.sql",
+            "029__validate_complaint_management.sql",
+            "030__validate_renewal_pipeline.sql",
+            "031__validate_premium_calculator.sql",
+            "032__validate_claim_settlement.sql"
         ]
     },
     "ssmsScripts": [
@@ -191,6 +201,26 @@
             "fileName": "18__sql_agent_job_setup.sql",
             "path": "database/ssms/18__sql_agent_job_setup.sql",
             "sizeBytes": 7624
+        },
+        {
+            "fileName": "20__assurance_dashboard.sql",
+            "path": "database/ssms/20__assurance_dashboard.sql",
+            "sizeBytes": 1500
+        },
+        {
+            "fileName": "21__sql_risk_review_board.sql",
+            "path": "database/ssms/21__sql_risk_review_board.sql",
+            "sizeBytes": 1625
+        },
+        {
+            "fileName": "22__compliance_control_matrix.sql",
+            "path": "database/ssms/22__compliance_control_matrix.sql",
+            "sizeBytes": 1153
+        },
+        {
+            "fileName": "23__permission_drift_report.sql",
+            "path": "database/ssms/23__permission_drift_report.sql",
+            "sizeBytes": 1061
         }
     ],
     "shortcuts": [
@@ -480,7 +510,7 @@
             "lane": "Insurance Core",
             "subheading": "Contracts, versions, parties, objects, status, renewal flow",
             "entryPoint": "03__create_renewal_tasks.sql",
-            "tableCount": 17,
+            "tableCount": 18,
             "tables": [
                 "CollectionMethod",
                 "Contract",
@@ -497,6 +527,7 @@
                 "ContractVersionStatus",
                 "DurationType",
                 "Periodicity",
+                "RenewalQueue",
                 "TakeoverDirection",
                 "TakeoverSourceType"
             ]
@@ -525,7 +556,7 @@
             "lane": "Operations",
             "subheading": "Claims, parties, objects, circumstances, payment method",
             "entryPoint": "06__query_library_shortcuts.sql",
-            "tableCount": 8,
+            "tableCount": 10,
             "tables": [
                 "Claim",
                 "ClaimCircumstance",
@@ -534,6 +565,8 @@
                 "ClaimParty",
                 "ClaimPartyRole",
                 "ClaimPaymentMethod",
+                "ClaimReserveLog",
+                "ClaimSettlement",
                 "ClaimStatus"
             ]
         },
@@ -590,14 +623,15 @@
             "lane": "Finance",
             "subheading": "Invoices, payments, payment plans, commissions",
             "entryPoint": "09__graph_report_pack.sql",
-            "tableCount": 6,
+            "tableCount": 7,
             "tables": [
                 "Commissions",
                 "Invoices",
                 "PaymentPlanItems",
                 "PaymentPlans",
+                "PaymentTransaction",
                 "Payments",
-                "PaymentTransaction"
+                "TariffRate"
             ]
         },
         {
@@ -605,10 +639,13 @@
             "schema": "import",
             "title": "Import",
             "lane": "Operations",
-            "subheading": "Bulk policy import staging and validation",
+            "subheading": "Bulk policy import staging, legacy data migration � PolicyImport, LegacyPerson, LegacyContract, LegacyClaim",
             "entryPoint": "06__query_library_shortcuts.sql",
-            "tableCount": 1,
+            "tableCount": 4,
             "tables": [
+                "LegacyClaim",
+                "LegacyContract",
+                "LegacyPerson",
                 "PolicyImport"
             ]
         },
@@ -617,16 +654,40 @@
             "schema": "communication",
             "title": "Communication",
             "lane": "Operations",
-            "subheading": "Transactionele e-maillog, compliance-trail voor alle berichten",
+            "subheading": "Transactionele e-maillog, FSMA klachtenregister, compliance-trail",
             "entryPoint": "06__query_library_shortcuts.sql",
-            "tableCount": 1,
+            "tableCount": 2,
             "tables": [
+                "Complaint",
                 "EmailLog"
+            ]
+        },
+        {
+            "order": 150,
+            "schema": "assurance",
+            "title": "Assurance",
+            "lane": "Control",
+            "subheading": "SQL risk review, compliance scans, sensitive columns, permission drift, masking policies",
+            "entryPoint": "04__admin_security_audit_queries.sql",
+            "tableCount": 11,
+            "tables": [
+                "ApprovalWorkflow",
+                "AssuranceReport",
+                "ComplianceControl",
+                "ComplianceFinding",
+                "ComplianceScanRun",
+                "MaskingPolicy",
+                "PermissionDriftFinding",
+                "RollbackPlan",
+                "SensitiveColumnFinding",
+                "SqlReviewRequest",
+                "SqlRiskFinding"
             ]
         }
     ],
     "backend": {
         "apiRoutes": [
+            "/api/assurance",
             "/api/audit-log",
             "/api/claims",
             "/api/coverage",
@@ -634,6 +695,7 @@
             "/api/institutions",
             "/api/persons",
             "/api/policies",
+            "/api/renewals",
             "/api/risks",
             "/api/settings/lookups",
             "/api/tasks",

@@ -1,0 +1,10 @@
+[
+{"id":"3","listId":"4","label":"student","valueNl":"Student","valueFr":"Etudiant","valueEn":"Student"},
+{"id":"4","listId":"4","label":"whiteCollarWorker","valueNl":"Bediende","valueFr":"Employé","valueEn":"White-collar worker"},
+{"id":"5","listId":"4","label":"blueCollarWorker","valueNl":"Arbeider","valueFr":"Ouvrier","valueEn":"Blue-collar worker"},
+{"id":"6","listId":"4","label":"selfEmployed","valueNl":"Zelfstandige","valueFr":"Indépendant","valueEn":"Self-employed"},
+{"id":"7","listId":"4","label":"unemployed","valueNl":"Werkloos","valueFr":"Sans profession","valueEn":"Unemployed"},
+{"id":"8","listId":"4","label":"retired","valueNl":"Gepensioneerd","valueFr":"Pensionné","valueEn":"Retired"},
+{"id":"9","listId":"4","label":"civilServant","valueNl":"Ambtenaar","valueFr":"Fonctionnaire d'Etat","valueEn":"Civil servant"},
+{"id":"10","listId":"4","label":"rentier","valueNl":"Rentenier","valueFr":"Rentier","valueEn":"Rentier"}
+]

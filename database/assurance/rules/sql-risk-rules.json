@@ -1,0 +1,25 @@
+[
+  {
+    "ruleCode": "PROD_ROLLBACK_REQUIRED",
+    "severity": "HIGH",
+    "category": "CHANGE_GOVERNANCE",
+    "environment": "PROD",
+    "requires": ["rollbackSql"],
+    "productionAction": "APPROVAL_REQUIRED",
+    "message": "Production changes require a rollback plan."
+  },
+  {
+    "ruleCode": "SCHEMA_CHANGE_REVIEW",
+    "severity": "MEDIUM",
+    "category": "SCHEMA_CHANGE",
+    "productionAction": "APPROVAL_REQUIRED",
+    "message": "Schema-level changes should be reviewed before rollout."
+  },
+  {
+    "ruleCode": "AUDIT_INTEGRITY_REVIEW",
+    "severity": "HIGH",
+    "category": "AUDIT_INTEGRITY",
+    "productionAction": "APPROVAL_REQUIRED",
+    "message": "Changes that affect audit integrity require explicit approval."
+  }
+]

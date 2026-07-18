@@ -1,0 +1,9 @@
+[
+  { "pattern": "email", "category": "CONTACT", "confidence": 95, "defaultMasking": "EMAIL_PARTIAL" },
+  { "pattern": "phone", "category": "CONTACT", "confidence": 85, "defaultMasking": "PHONE_PARTIAL" },
+  { "pattern": "mobile", "category": "CONTACT", "confidence": 85, "defaultMasking": "PHONE_PARTIAL" },
+  { "pattern": "iban", "category": "FINANCIAL", "confidence": 95, "defaultMasking": "IBAN_PARTIAL" },
+  { "pattern": "national", "category": "IDENTITY", "confidence": 95, "defaultMasking": "HASH" },
+  { "pattern": "birth", "category": "IDENTITY", "confidence": 80, "defaultMasking": "REDACT" },
+  { "pattern": "address", "category": "ADDRESS", "confidence": 80, "defaultMasking": "REDACT" }
+]

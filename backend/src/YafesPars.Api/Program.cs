@@ -276,6 +276,11 @@ try
     app.MapAuditEndpoints();
     app.MapMonitoringEndpoints();
     app.MapTenantManagementEndpoints();
+    app.MapComplaintEndpoints();
+    app.MapRenewalEndpoints();
+    app.MapPremiumEndpoints();
+    app.MapAssuranceEndpoints();
+    app.MapClaimSettlementEndpoints();
 
     app.Run();
 }
