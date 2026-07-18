@@ -83,7 +83,7 @@ BEGIN
     INNER JOIN policy.Contract c    ON c.contract_id = rq.contract_id
     LEFT JOIN policy.ContractParty cp
         ON cp.contract_id = rq.contract_id
-       AND cp.party_role_code = N'POLICY_HOLDER'
+       AND cp.contract_party_role_code = N'POLICY_HOLDER'
     LEFT JOIN person.Person p       ON p.person_id = cp.person_id AND p.is_deleted = 0
     LEFT JOIN person.NaturalPerson np ON np.person_id = p.person_id AND np.is_deleted = 0
     LEFT JOIN person.LegalPerson   lp ON lp.person_id = p.person_id AND lp.is_deleted = 0
