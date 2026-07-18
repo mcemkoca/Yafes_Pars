@@ -156,11 +156,11 @@ def load_claims(conn):
                    VALUES (?,?,?,?,?,?,?)""",
                 int(sid),
                 int(schadecontract[sid]) if schadecontract.get(sid) else None,
-                safe_date(alg.get("datum") or row.get("datum")),
-                safe_str(row.get("omstandigheden")),
-                1 if row.get("aansprakelijkheid") == "1" else 0,
-                safe_decimal(row.get("materiele_schade")),
-                safe_decimal(row.get("lichamelijke_schade")),
+                safe_date(row.get("datum") or alg.get("datum")),
+                safe_str(alg.get("omstandigheden")),
+                1 if alg.get("aansprakelijkheid") == "1" else 0,
+                safe_decimal(alg.get("materiele_schade")),
+                safe_decimal(alg.get("lichamelijke_schade")),
             )
             inserted += 1
     conn.commit()

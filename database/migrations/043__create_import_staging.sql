@@ -90,7 +90,7 @@ IF NOT EXISTS (SELECT 1 FROM sys.tables
 GO
 
 -- -----------------------------------------------------------------------------
--- 5. SP_ImportLegacyPersons — staging → core.Person
+-- 5. SP_ImportLegacyPersons — staging → person.Person + person.NaturalPerson
 -- -----------------------------------------------------------------------------
 CREATE OR ALTER PROCEDURE import.SP_ImportLegacyPersons
     @tenant_id      UNIQUEIDENTIFIER,
@@ -122,15 +122,20 @@ BEGIN
 
             IF @dry_run = 0
             BEGIN
-                INSERT INTO core.Person (person_id, tenant_id, last_name, first_name,
-                    gender_code, date_of_birth, national_id, language_code)
-                VALUES (@new_id, @tenant_id,
+                INSERT INTO person.Person (person_id, tenant_id, person_kind, language_code, nationality)
+                VALUES (@new_id, @tenant_id, N'NATURAL',
+                    ISNULL(NULLIF(@lang, N''), N'NL'),
+                    NULLIF(LTRIM(RTRIM(@nat)), N''));
+
+                INSERT INTO person.NaturalPerson (person_id, last_name, first_name,
+                    gender, birth_date, national_number, id_card_number)
+                VALUES (@new_id,
                     NULLIF(LTRIM(RTRIM(@ln)), N''),
                     NULLIF(LTRIM(RTRIM(@fn)), N''),
                     CASE WHEN @gnd IN (N'M', N'F') THEN @gnd ELSE NULL END,
                     @dob,
                     NULLIF(@nid, N''),
-                    ISNULL(NULLIF(@lang, N''), N'NL'));
+                    NULLIF(@icard, N''));
 
                 UPDATE import.LegacyPerson
                 SET yafes_person_id = @new_id, import_status = N'DONE'
