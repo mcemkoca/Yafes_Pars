@@ -66,8 +66,8 @@
         ]
     },
     "validations": {
-        "count": 30,
-        "latest": "030__validate_renewal_pipeline.sql",
+        "count": 31,
+        "latest": "031__validate_premium_calculator.sql",
         "files": [
             "001__validate_core_infrastructure.sql",
             "002__validate_person_domain.sql",
@@ -98,7 +98,8 @@
             "027__validate_tenant_management_sps.sql",
             "028__validate_production_readiness.sql",
             "029__validate_complaint_management.sql",
-            "030__validate_renewal_pipeline.sql"
+            "030__validate_renewal_pipeline.sql",
+            "031__validate_premium_calculator.sql"
         ]
     },
     "ssmsScripts": [
