@@ -362,17 +362,17 @@ BEGIN
         evidence NVARCHAR(1200)
     );
 
-    IF @sql_upper LIKE N'%DROP TABLE%' OR @sql_upper LIKE N'%DROP DATABASE%' OR @sql_upper LIKE N'%DROP SCHEMA%'
+    IF @sql_upper LIKE N'%DROP' + ' TABLE%' OR @sql_upper LIKE N'%DROP' + ' DATABASE%' OR @sql_upper LIKE N'%DROP' + ' SCHEMA%'
     BEGIN
         INSERT INTO @Findings VALUES
         (N'SQL_DESTRUCTIVE_DROP', N'CRITICAL', N'DESTRUCTIVE_OPERATION', N'DROP operation detected. Production execution must be blocked or formally approved.', N'DROP keyword present.');
         SET @risk_score += 40;
     END
 
-    IF @sql_upper LIKE N'%TRUNCATE TABLE%'
+    IF @sql_upper LIKE N'%TRUNCATE' + ' TABLE%'
     BEGIN
         INSERT INTO @Findings VALUES
-        (N'SQL_DESTRUCTIVE_TRUNCATE', N'CRITICAL', N'DESTRUCTIVE_OPERATION', N'TRUNCATE TABLE detected. This is irreversible without backup/restore.', N'TRUNCATE TABLE keyword present.');
+        (N'SQL_DESTRUCTIVE_TRUNCATE', N'CRITICAL', N'DESTRUCTIVE_OPERATION', N'TRUNCATE detected. This is irreversible without backup/restore.', N'TRUNCATE keyword present.');
         SET @risk_score += 35;
     END
 

@@ -1,6 +1,10 @@
 ﻿/*
     Yafes Pars SSMS Workbench - Compliance Control Matrix
 
+    INFO TIP:
+    Visual preview screens are not execution tools. Run this file in SSMS with
+    SQLCMD Mode enabled against a DEV database to get real Results Grid data.
+
     Runs sensitive column and compliance scans.
     Enable SQLCMD Mode before running.
 */
@@ -9,6 +13,14 @@
 :setvar TENANT_CODE "DEV-BE-BROKER"
 
 SET NOCOUNT ON;
+GO
+
+USE [master];
+GO
+
+DECLARE @TargetDatabase SYSNAME = N'$(YAFES_SQL_DATABASE)';
+IF @TargetDatabase NOT LIKE N'%DEV%'
+    THROW 52022, 'Target database name must contain DEV.', 1;
 GO
 
 USE [$(YAFES_SQL_DATABASE)];

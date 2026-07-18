@@ -1,6 +1,10 @@
 ﻿/*
     Yafes Pars SSMS Workbench - Permission Drift Report
 
+    INFO TIP:
+    Visual preview screens are not execution tools. Run this file in SSMS with
+    SQLCMD Mode enabled against a DEV database to get real Results Grid data.
+
     Detects authorization inconsistencies.
     Enable SQLCMD Mode before running.
 */
@@ -9,6 +13,14 @@
 :setvar TENANT_CODE "DEV-BE-BROKER"
 
 SET NOCOUNT ON;
+GO
+
+USE [master];
+GO
+
+DECLARE @TargetDatabase SYSNAME = N'$(YAFES_SQL_DATABASE)';
+IF @TargetDatabase NOT LIKE N'%DEV%'
+    THROW 52023, 'Target database name must contain DEV.', 1;
 GO
 
 USE [$(YAFES_SQL_DATABASE)];
