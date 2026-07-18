@@ -18,8 +18,8 @@
         "environmentLabel": "DEV"
     },
     "migrations": {
-        "count": 47,
-        "latest": "046__add_commission_integrity.sql",
+        "count": 48,
+        "latest": "047__register_missing_migrations.sql",
         "files": [
             "000__create_database.sql",
             "001__create_schemas.sql",
@@ -67,7 +67,8 @@
             "043__create_import_staging.sql",
             "044__add_claim_settlement.sql",
             "045__add_finance_ledger.sql",
-            "046__add_commission_integrity.sql"
+            "046__add_commission_integrity.sql",
+            "047__register_missing_migrations.sql"
         ]
     },
     "validations": {

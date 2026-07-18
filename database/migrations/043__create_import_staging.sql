@@ -1,5 +1,5 @@
 -- =============================================================================
--- Migration 042: Legacy data import staging
+-- Migration 043: Legacy data import staging
 -- Kaynak: Eski Belçika sigorta sistemi (data/ klasöründeki CSV dosyaları)
 -- Amaç: CSV verilerini temizleyip Yafes Pars şemasına aktarmak için
 --        staging tabloları ve import stored procedure'ları.
@@ -200,5 +200,5 @@ BEGIN
 END;
 GO
 
-PRINT 'Migration 042 complete: import schema + LegacyPerson/Contract/Claim staging tables + SPs.';
+PRINT 'Migration 043 complete: import schema + LegacyPerson/Contract/Claim staging tables + SPs.';
 GO
