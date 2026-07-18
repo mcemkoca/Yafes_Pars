@@ -28,7 +28,7 @@ public sealed class ClaimSettlementTests
 
         var rows = await Settlement.GetReserveLog(Guid.NewGuid(), limit: 10);
         Assert.NotNull(rows);
-        Assert.Empty(rows);
+        Assert.Equal("[]", rows);
     }
 
     [SkippableFact]
