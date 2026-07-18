@@ -3,8 +3,11 @@
 -- Adds assurance schema, SQL review records, compliance findings,
 -- sensitive column inventory, masking policy and permission drift records.
 -- =============================================================================
-:setvar YAFES_SQL_DATABASE "YafesPars"
-USE [$(YAFES_SQL_DATABASE)];
+SET NOCOUNT ON;
+SET XACT_ABORT ON;
+GO
+
+USE [YafesPars];
 GO
 
 PRINT 'Running migration: 021__create_assurance_domain.sql';
