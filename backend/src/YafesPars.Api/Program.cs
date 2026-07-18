@@ -279,6 +279,7 @@ try
     app.MapComplaintEndpoints();
     app.MapRenewalEndpoints();
     app.MapPremiumEndpoints();
+    app.MapAssuranceEndpoints();
 
     app.Run();
 }

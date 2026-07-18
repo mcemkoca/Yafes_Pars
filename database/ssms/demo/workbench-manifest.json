@@ -8,8 +8,8 @@
     "database": {
         "defaultName": "YafesPars_Dev",
         "environment": "DEV",
-        "schemaCount": 14,
-        "tableCount": 124,
+        "schemaCount": 15,
+        "tableCount": 135,
         "legacyReferenceTableCount": 89
     },
     "tenant": {
@@ -18,8 +18,8 @@
         "environmentLabel": "DEV"
     },
     "migrations": {
-        "count": 42,
-        "latest": "041__add_premium_calculator.sql",
+        "count": 43,
+        "latest": "042__create_assurance_domain.sql",
         "files": [
             "000__create_database.sql",
             "001__create_schemas.sql",
@@ -62,7 +62,8 @@
             "038__add_production_readiness_sp.sql",
             "039__add_complaint_management.sql",
             "040__add_renewal_pipeline.sql",
-            "041__add_premium_calculator.sql"
+            "041__add_premium_calculator.sql",
+            "042__create_assurance_domain.sql"
         ]
     },
     "validations": {
@@ -632,10 +633,33 @@
                 "Complaint",
                 "EmailLog"
             ]
+        },
+        {
+            "order": 150,
+            "schema": "assurance",
+            "title": "Assurance",
+            "lane": "Control",
+            "subheading": "SQL risk review, compliance scans, sensitive columns, permission drift, masking policies",
+            "entryPoint": "04__admin_security_audit_queries.sql",
+            "tableCount": 11,
+            "tables": [
+                "ApprovalWorkflow",
+                "AssuranceReport",
+                "ComplianceControl",
+                "ComplianceFinding",
+                "ComplianceScanRun",
+                "MaskingPolicy",
+                "PermissionDriftFinding",
+                "RollbackPlan",
+                "SensitiveColumnFinding",
+                "SqlReviewRequest",
+                "SqlRiskFinding"
+            ]
         }
     ],
     "backend": {
         "apiRoutes": [
+            "/api/assurance",
             "/api/audit-log",
             "/api/claims",
             "/api/coverage",
