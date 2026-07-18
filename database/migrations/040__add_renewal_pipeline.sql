@@ -17,7 +17,7 @@ BEGIN
         tenant_id           UNIQUEIDENTIFIER NOT NULL,
         contract_id         UNIQUEIDENTIFIER NOT NULL,
         contract_end_date   DATE             NOT NULL,
-        days_until_expiry   AS DATEDIFF(DAY, CAST(GETUTCDATE() AS DATE), contract_end_date) PERSISTED,
+        days_until_expiry   AS DATEDIFF(DAY, CAST(GETUTCDATE() AS DATE), contract_end_date),
         status_code         NVARCHAR(30)     NOT NULL DEFAULT N'PENDING',
         notice_sent_at      DATETIME2        NULL,
         notice_count        INT              NOT NULL DEFAULT 0,

@@ -199,6 +199,26 @@
             "fileName": "18__sql_agent_job_setup.sql",
             "path": "database/ssms/18__sql_agent_job_setup.sql",
             "sizeBytes": 7624
+        },
+        {
+            "fileName": "20__assurance_dashboard.sql",
+            "path": "database/ssms/20__assurance_dashboard.sql",
+            "sizeBytes": 1500
+        },
+        {
+            "fileName": "21__sql_risk_review_board.sql",
+            "path": "database/ssms/21__sql_risk_review_board.sql",
+            "sizeBytes": 1625
+        },
+        {
+            "fileName": "22__compliance_control_matrix.sql",
+            "path": "database/ssms/22__compliance_control_matrix.sql",
+            "sizeBytes": 1153
+        },
+        {
+            "fileName": "23__permission_drift_report.sql",
+            "path": "database/ssms/23__permission_drift_report.sql",
+            "sizeBytes": 1061
         }
     ],
     "shortcuts": [
@@ -615,7 +635,7 @@
             "schema": "import",
             "title": "Import",
             "lane": "Operations",
-            "subheading": "Bulk policy import staging, legacy data migration — PolicyImport, LegacyPerson, LegacyContract, LegacyClaim",
+            "subheading": "Bulk policy import staging, legacy data migration ï¿½ PolicyImport, LegacyPerson, LegacyContract, LegacyClaim",
             "entryPoint": "06__query_library_shortcuts.sql",
             "tableCount": 4,
             "tables": [
