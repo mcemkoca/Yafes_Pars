@@ -1,0 +1,20 @@
+relatie_type_id,naam
+1,ouder/kind
+2,broer/zus
+3,echtgenoot/echtgenote
+4,partner(samenwonend)
+5,"partner(niet samenwonend)"
+6,zaakvoerder
+7,grootouder/kleinkind
+8,werknemer/werkgever
+9,aanverwante
+11,boekhouder
+16,aandeelhouder
+20,voogd
+31,syndicus
+36,mede-eigenaar
+41,"oom/tante - neef/nicht"
+51,schoonmoeder/schoonvader-schoonzoon/schoondochter
+54,schoonzus/schoonbroer
+60,firma
+69,ex-partner

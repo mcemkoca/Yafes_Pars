@@ -1,0 +1,13 @@
+id,login,firstname,lastname,email,taal,kleur,group_id,active,server_id,pw_attempts,reset_pw_sent,pin_attempts,last_login,login_count,restrict_to_ip,last_read_support_date,hasAcceptedTerms,isTestAccount
+17478,info@tuzdelen.com,"Mehmet Akif",Tuzdelen,info@tuzdelen.com,NL,,0,1,,0,,0,"2026-05-26 19:08:19",4429,,"2026-01-15 16:52:59",0,0
+17591,emine@tuzdelen.com,Emine,Tuzdelen,emine@tuzdelen.com,NL,,0,1,,0,,0,"2026-05-26 09:06:10",1148,,"2020-01-22 13:43:11",0,0
+17679,cihat@tuzdelen.com,Cihat,Karakus,cihat@tuzdelen.com,NL,,0,1,,0,20200207094246,0,"2026-05-26 08:38:54",1834,,"2024-08-27 09:52:35",0,0
+18961,melda@tuzdelen.com,Melda,Cinar,melda@tuzdelen.com,NL,,0,1,,0,,0,"2026-05-22 09:32:18",1327,,"2022-09-23 14:47:51",0,0
+19899,sema@tuzdelen.com,Sema,Acer,info@tuzdelen.com,NL,,0,0,,0,,0,"2024-06-27 15:23:59",43,,"2024-04-16 13:34:19",0,0
+19987,ozan@tuzdelen.com,Ozan,Türkmen,,NL,,0,0,,0,,0,"2025-03-26 11:56:43",44,,"2024-09-06 15:29:54",0,0
+20007,Ebru@tuzdelen.com,Ebru,Asan,cihat@tuzdelen.com,NL,,0,0,,0,,0,"2024-12-20 09:06:17",39,,"2024-10-09 13:15:20",0,0
+20135,emrah@tuzdelen.com,Emrah,Karakizli,,NL,,0,1,,0,,0,"2026-05-26 10:29:34",384,,"2025-03-07 12:25:58",0,0
+20137,medard@tuzdelen.com,Medard," Samulski",,NL,,0,0,,0,,0,"2025-03-21 12:55:42",15,,"2025-03-07 12:26:55",0,0
+20141,amin@tuzdelen.com," Amin",Boulakhrif,,NL,,0,0,,0,,0,"2025-03-21 09:07:50",14,,"2025-03-07 12:27:49",0,0
+20157,ayse@tuzdelen.com,Ayse,Karakus,info@tuzdelen.com,NL,,0,0,,0,,0,"2025-12-19 13:08:39",150,,"2025-03-26 11:35:01",0,0
+20257,stage@pars.be,Stagiair,Stagiair,akif@pars.be,NL,,0,1,,0,,0,"2026-05-22 09:30:04",84,,"2026-01-15 17:16:00",0,0

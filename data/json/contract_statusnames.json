@@ -1,0 +1,11 @@
+[
+{"status_id":"1","name":"Lopend"},
+{"status_id":"2","name":"Geschorst"},
+{"status_id":"3","name":"Opgezegd"},
+{"status_id":"4","name":"Vernietigd"},
+{"status_id":"5","name":"Gemandateerd"},
+{"status_id":"6","name":"In wijziging / Opmaak"},
+{"status_id":"7","name":"Niet actief"},
+{"status_id":"8","name":"Gearchiveerd"},
+{"status_id":"9","name":"Buiten portefeuille"}
+]

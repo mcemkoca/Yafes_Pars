@@ -1,0 +1,21 @@
+[
+{"relatie_type_id":"1","naam":"ouder/kind"},
+{"relatie_type_id":"2","naam":"broer/zus"},
+{"relatie_type_id":"3","naam":"echtgenoot/echtgenote"},
+{"relatie_type_id":"4","naam":"partner(samenwonend)"},
+{"relatie_type_id":"5","naam":"partner(niet samenwonend)"},
+{"relatie_type_id":"6","naam":"zaakvoerder"},
+{"relatie_type_id":"7","naam":"grootouder/kleinkind"},
+{"relatie_type_id":"8","naam":"werknemer/werkgever"},
+{"relatie_type_id":"9","naam":"aanverwante"},
+{"relatie_type_id":"11","naam":"boekhouder"},
+{"relatie_type_id":"16","naam":"aandeelhouder"},
+{"relatie_type_id":"20","naam":"voogd"},
+{"relatie_type_id":"31","naam":"syndicus"},
+{"relatie_type_id":"36","naam":"mede-eigenaar"},
+{"relatie_type_id":"41","naam":"oom/tante - neef/nicht"},
+{"relatie_type_id":"51","naam":"schoonmoeder/schoonvader-schoonzoon/schoondochter"},
+{"relatie_type_id":"54","naam":"schoonzus/schoonbroer"},
+{"relatie_type_id":"60","naam":"firma"},
+{"relatie_type_id":"69","naam":"ex-partner"}
+]

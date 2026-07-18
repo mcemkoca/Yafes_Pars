@@ -1,0 +1,16 @@
+soort_id,naam,name_ftpfolder,betrokken,contract,schade,risico,hidden
+1,"Algemene Documenten",Documents,1,1,1,1,0
+3,"Opzegbrieven / Plaatsingsmandaat","Termination Letters or Placement Mandate",0,1,0,0,0
+5,"Inkomende Brieven","incoming letters",1,1,1,0,0
+6,Persoonsidentificatie,"person Identification",1,0,0,0,0
+8,"Contracten en bijvoegsel","contracts and attachements",0,1,0,0,0
+10,Aangiftes,declarations,0,0,1,0,0
+11,Foto's,pictures,0,0,1,1,0
+12,Derden,"third party",0,0,1,0,0
+13,"MIFID Documenten",mifid_documenten,1,1,0,0,0
+14,"Uitgaande brieven",uitgaande_brieven,1,1,1,0,0
+20,Bankdocumenten,bankdocumenten,1,0,0,0,0
+35,"Verzekeringskaart (bv. Groene)",verzekeringskaart,0,1,0,0,0
+47,Offertes,,1,1,0,0,0
+57,"Financiële documenten",fin_documents,0,1,1,0,0
+60,Bestekken,bestekken,0,0,1,0,0
