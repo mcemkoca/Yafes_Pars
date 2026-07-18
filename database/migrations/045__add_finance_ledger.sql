@@ -119,6 +119,8 @@ BEGIN TRANSACTION;
                 ON finance.LedgerEntry (account_code, posting_date);
             CREATE INDEX IX_LedgerEntry_Journal
                 ON finance.LedgerEntry (journal_id);
+            CREATE INDEX IX_LedgerEntry_Reversal
+                ON finance.LedgerEntry (reversed_by_entry_id) WHERE reversed_by_entry_id IS NOT NULL;
 
             PRINT 'finance.LedgerEntry created.';
         END

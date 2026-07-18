@@ -68,5 +68,12 @@ IF NOT EXISTS (
 )
     THROW 53312, 'IX_LedgerEntry_Account_Date index missing.', 1;
 
+IF NOT EXISTS (
+    SELECT 1 FROM sys.indexes
+    WHERE name = N'IX_LedgerEntry_Reversal'
+      AND object_id = OBJECT_ID(N'finance.LedgerEntry')
+)
+    THROW 53313, 'IX_LedgerEntry_Reversal index missing.', 1;
+
 PRINT 'Validation 033 passed: finance.LedgerAccount + LedgerEntry tables, seed, SPs, constraints, indexes OK.';
 GO
