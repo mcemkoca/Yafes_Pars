@@ -1,3 +1,5 @@
+using System.Text.Json;
+using Microsoft.Data.SqlClient;
 using Xunit;
 using YafesPars.McpServer.Tools;
 
@@ -37,5 +39,104 @@ public sealed class CommissionTests
         Skip.IfNot(_fx.Available, _fx.SkipReason);
         var res = await Commissions.GetCommissionReport(limit: 50);
         Assert.DoesNotContain("Databasefout", res);
+    }
+
+    // Verifies migration 046: FK_Commissions_Contract, FK_Commissions_BrokerPerson,
+    // FK_Commissions_BrokerInstitution, FK_LedgerEntry_Commission constraints exist.
+    [SkippableFact]
+    public async Task CommissionFkConstraints_ExistInSchema()
+    {
+        Skip.IfNot(_fx.Available, _fx.SkipReason);
+
+        var fks = await _fx.Read.QueryAsync<string>(
+            """
+            SELECT name FROM sys.foreign_keys
+            WHERE name IN (
+                N'FK_Commissions_Contract',
+                N'FK_Commissions_BrokerPerson',
+                N'FK_Commissions_BrokerInstitution',
+                N'FK_LedgerEntry_Commission'
+            )
+            ORDER BY name
+            """,
+            null,
+            default);
+
+        Assert.Equal(4, fks.Count);
+    }
+
+    // Verifies migration 046: composite (tenant_id, commission_date) index exists.
+    [SkippableFact]
+    public async Task CommissionTenantDateIndex_Exists()
+    {
+        Skip.IfNot(_fx.Available, _fx.SkipReason);
+
+        var rows = await _fx.Read.QueryAsync<string>(
+            """
+            SELECT name FROM sys.indexes
+            WHERE name = N'IX_Commissions_Tenant_Date'
+              AND object_id = OBJECT_ID(N'finance.Commissions')
+            """,
+            null,
+            default);
+
+        Assert.Single(rows);
+    }
+
+    // Verifies SP_FsmaExport CANCELLED filter: a CANCELLED commission must not
+    // appear in the export result set.
+    // Uses a far-future date window (year 9997) that cannot contain pre-existing
+    // data, so the assertion is not affected by today's DEV seed commissions.
+    [SkippableFact]
+    public async Task FsmaExport_ExcludesCancelledCommissions()
+    {
+        Skip.IfNot(_fx.Available, _fx.SkipReason);
+
+        // Get a real contract to satisfy the FK constraint.
+        var contractRows = await _fx.Read.QueryAsync<Guid>(
+            "SELECT TOP 1 contract_id FROM policy.Contract WHERE tenant_id = @tenantId AND is_deleted = 0",
+            new { tenantId = _fx.Operator.TenantId },
+            default);
+
+        if (contractRows.Count == 0)
+            return; // No contract in DEV — skip behavioural check.
+
+        var contractId = contractRows[0];
+        const string isolatedDate = "9997-06-15"; // far-future, no real data exists
+
+        // Insert a CANCELLED commission in the isolated date window.
+        await _fx.Write.ExecuteAsync(
+            """
+            INSERT INTO finance.Commissions
+                (tenant_id, contract_id, commission_type_code, commission_date,
+                 gross_premium_eur, rate_pct, commission_eur, status_code)
+            VALUES
+                (@tenantId, @contractId, N'PRODUCTIE', @isolatedDate,
+                 1000, 0.10, 100, N'CANCELLED')
+            """,
+            new { tenantId = _fx.Operator.TenantId, contractId, isolatedDate },
+            default);
+
+        // Export the isolated date range — only our CANCELLED row falls here.
+        var rows = await _fx.Read.QueryAsync<dynamic>(
+            """
+            EXEC reporting.SP_FsmaExport
+                @tenant_id    = @tenantId,
+                @period_start = @isolatedDate,
+                @period_end   = @isolatedDate
+            """,
+            new { tenantId = _fx.Operator.TenantId, isolatedDate },
+            default);
+
+        // commission_summary section must be empty: only row was CANCELLED.
+        int commissionSummaryRows = 0;
+        foreach (var row in rows)
+        {
+            var section = (string?)row.Section;
+            if (section == "commission_summary")
+                commissionSummaryRows++;
+        }
+
+        Assert.Equal(0, commissionSummaryRows);
     }
 }
