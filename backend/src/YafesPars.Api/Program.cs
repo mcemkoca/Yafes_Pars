@@ -38,7 +38,7 @@ try
     var kvUri = builder.Configuration["AZURE_KEY_VAULT_URI"];
     if (!string.IsNullOrWhiteSpace(kvUri))
     {
-        builder.Configuration.AddAzureKeyVault(new Uri(kvUri), new DefaultAzureCredential());
+        builder.Configuration.AddAzureKeyVault(new Uri(kvUri), new Azure.Identity.DefaultAzureCredential());
         Log.Information("Azure Key Vault konfigürasyonu aktif: {Uri}", kvUri);
     }
 
@@ -133,7 +133,6 @@ try
             .AddAspNetCoreInstrumentation(opts => opts.RecordException = true)
             .AddSqlClientInstrumentation(opts =>
             {
-                opts.SetDbStatementForText = false; // geen SQL-tekst in traces (privacy)
                 opts.RecordException = true;
             }));
 
