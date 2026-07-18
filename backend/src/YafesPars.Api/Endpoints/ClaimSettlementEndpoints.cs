@@ -92,10 +92,12 @@ public static class ClaimSettlementEndpoints
             "claim.SP_ApproveSettlement",
             new
             {
-                tenant_id         = tenantId,
-                settlement_id     = settlementId,
-                agreed_amount_eur = req.AgreedAmountEur,
-                payment_reference = req.PaymentReference
+                tenant_id            = tenantId,
+                settlement_id        = settlementId,
+                claim_id             = claimId,
+                agreed_amount_eur    = req.AgreedAmountEur,
+                payment_reference    = req.PaymentReference,
+                payment_method_code  = req.PaymentMethodCode
             });
 
         return Results.Ok(result);
@@ -149,8 +151,9 @@ public static class ClaimSettlementEndpoints
         string? Notes = null);
 
     private sealed record ApproveSettlementRequest(
-        decimal? AgreedAmountEur  = null,
-        string?  PaymentReference = null);
+        decimal? AgreedAmountEur    = null,
+        string?  PaymentReference   = null,
+        string?  PaymentMethodCode  = null);
 
     private sealed record UpdateReserveRequest(
         decimal NewReserve,

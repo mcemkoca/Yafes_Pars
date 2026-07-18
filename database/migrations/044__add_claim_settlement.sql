@@ -187,32 +187,41 @@ GO
 -- 5. SP_ApproveSettlement — schikking goedkeuren en uitbetalen
 -- -----------------------------------------------------------------------------
 CREATE OR ALTER PROCEDURE claim.SP_ApproveSettlement
-    @tenant_id          UNIQUEIDENTIFIER,
-    @settlement_id      UNIQUEIDENTIFIER,
-    @agreed_amount_eur  DECIMAL(18,2)   = NULL,
-    @payment_reference  NVARCHAR(50)    = NULL,
-    @approved_by        UNIQUEIDENTIFIER = NULL
+    @tenant_id            UNIQUEIDENTIFIER,
+    @settlement_id        UNIQUEIDENTIFIER,
+    @claim_id             UNIQUEIDENTIFIER = NULL,
+    @agreed_amount_eur    DECIMAL(18,2)    = NULL,
+    @payment_reference    NVARCHAR(50)     = NULL,
+    @payment_method_code  NVARCHAR(40)     = N'BANK_TRANSFER',
+    @approved_by          UNIQUEIDENTIFIER = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    DECLARE @claim_id           UNIQUEIDENTIFIER;
+    DECLARE @resolved_claim_id  UNIQUEIDENTIFIER;
     DECLARE @offer_amount       DECIMAL(18,2);
     DECLARE @settlement_status  NVARCHAR(40);
     DECLARE @current_reserve    DECIMAL(18,2);
     DECLARE @final_amount       DECIMAL(18,2);
 
     SELECT
-        @claim_id          = s.claim_id,
+        @resolved_claim_id = s.claim_id,
         @offer_amount      = s.offer_amount_eur,
         @settlement_status = s.settlement_status_code
     FROM claim.ClaimSettlement s
     WHERE s.settlement_id = @settlement_id
       AND s.tenant_id     = @tenant_id;
 
-    IF @claim_id IS NULL
+    IF @resolved_claim_id IS NULL
     BEGIN
         SELECT 'SETTLEMENT_NOT_FOUND' AS error_code;
+        RETURN;
+    END;
+
+    -- Verify settlement belongs to the expected claim when caller provides one
+    IF @claim_id IS NOT NULL AND @resolved_claim_id <> @claim_id
+    BEGIN
+        SELECT 'CLAIM_MISMATCH' AS error_code;
         RETURN;
     END;
 
@@ -232,7 +241,7 @@ BEGIN
     -- Huidige reserve ophalen
     SELECT @current_reserve = c.reserved_amount
     FROM claim.Claim c
-    WHERE c.claim_id = @claim_id AND c.tenant_id = @tenant_id;
+    WHERE c.claim_id = @resolved_claim_id AND c.tenant_id = @tenant_id;
 
     BEGIN TRANSACTION;
 
@@ -247,7 +256,7 @@ BEGIN
         updated_at_utc         = SYSUTCDATETIME()
     WHERE settlement_id = @settlement_id;
 
-    -- Claim bijwerken
+    -- Claim bijwerken (payment_method_code vereist door CK_Claim_payment_method)
     UPDATE claim.Claim
     SET paid_amount         = ISNULL(paid_amount, 0) + @final_amount,
         reserved_amount     = CASE
@@ -257,9 +266,10 @@ BEGIN
                               END,
         claim_status_code   = N'CLOSED',
         closed_date         = CAST(SYSUTCDATETIME() AS DATE),
+        payment_method_code = COALESCE(payment_method_code, @payment_method_code),
         updated_at_utc      = SYSUTCDATETIME(),
         updated_by_user_id  = @approved_by
-    WHERE claim_id  = @claim_id
+    WHERE claim_id  = @resolved_claim_id
       AND tenant_id = @tenant_id;
 
     -- Reserve log
@@ -268,23 +278,23 @@ BEGIN
         reason_code, notes, changed_by_user_id
     )
     VALUES (
-        @claim_id, @tenant_id,
+        @resolved_claim_id, @tenant_id,
         @current_reserve,
         CASE WHEN ISNULL(@current_reserve, 0) <= @final_amount THEN 0
              ELSE @current_reserve - @final_amount END,
         -@final_amount,
         N'SETTLEMENT',
-        N'Schikking goedgekeurd: ' + @settlement_id,
+        CONCAT(N'Schikking goedgekeurd: ', CAST(@settlement_id AS NVARCHAR(36))),
         @approved_by
     );
 
     COMMIT TRANSACTION;
 
     SELECT
-        @settlement_id  AS settlement_id,
-        @claim_id       AS claim_id,
-        @final_amount   AS paid_amount,
-        'PAID'          AS settlement_status_code;
+        @settlement_id      AS settlement_id,
+        @resolved_claim_id  AS claim_id,
+        @final_amount       AS paid_amount,
+        'PAID'              AS settlement_status_code;
 END;
 GO
 
