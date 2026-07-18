@@ -342,7 +342,7 @@ BEGIN
       AND (@from_date IS NULL OR le.posting_date >= @from_date)
       AND (@to_date   IS NULL OR le.posting_date <= @to_date)
     GROUP BY le.claim_id
-    ORDER BY net_cost_eur DESC;
+    ORDER BY SUM(le.debit_eur) DESC;
 END;
 GO
 
