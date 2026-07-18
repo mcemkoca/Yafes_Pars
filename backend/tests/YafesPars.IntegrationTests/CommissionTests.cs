@@ -85,6 +85,8 @@ public sealed class CommissionTests
 
     // Verifies SP_FsmaExport CANCELLED filter: a CANCELLED commission must not
     // appear in the export result set.
+    // Uses a far-future date window (year 9997) that cannot contain pre-existing
+    // data, so the assertion is not affected by today's DEV seed commissions.
     [SkippableFact]
     public async Task FsmaExport_ExcludesCancelledCommissions()
     {
@@ -100,41 +102,41 @@ public sealed class CommissionTests
             return; // No contract in DEV — skip behavioural check.
 
         var contractId = contractRows[0];
+        const string isolatedDate = "9997-06-15"; // far-future, no real data exists
 
-        // Insert a CANCELLED commission directly (SP only creates PENDING).
+        // Insert a CANCELLED commission in the isolated date window.
         await _fx.Write.ExecuteAsync(
             """
             INSERT INTO finance.Commissions
                 (tenant_id, contract_id, commission_type_code, commission_date,
                  gross_premium_eur, rate_pct, commission_eur, status_code)
             VALUES
-                (@tenantId, @contractId, N'PRODUCTIE', CONVERT(DATE, SYSUTCDATETIME()),
+                (@tenantId, @contractId, N'PRODUCTIE', @isolatedDate,
                  1000, 0.10, 100, N'CANCELLED')
             """,
-            new { tenantId = _fx.Operator.TenantId, contractId },
+            new { tenantId = _fx.Operator.TenantId, contractId, isolatedDate },
             default);
 
-        // Export today's range.
-        var today = DateTime.UtcNow.ToString("yyyy-MM-dd");
+        // Export the isolated date range — only our CANCELLED row falls here.
         var rows = await _fx.Read.QueryAsync<dynamic>(
             """
             EXEC reporting.SP_FsmaExport
                 @tenant_id    = @tenantId,
-                @period_start = @today,
-                @period_end   = @today
+                @period_start = @isolatedDate,
+                @period_end   = @isolatedDate
             """,
-            new { tenantId = _fx.Operator.TenantId, today },
+            new { tenantId = _fx.Operator.TenantId, isolatedDate },
             default);
 
-        // commission_summary section must have 0 rows (cancelled was excluded).
-        int cancelledInExport = 0;
+        // commission_summary section must be empty: only row was CANCELLED.
+        int commissionSummaryRows = 0;
         foreach (var row in rows)
         {
             var section = (string?)row.Section;
             if (section == "commission_summary")
-                cancelledInExport++;
+                commissionSummaryRows++;
         }
 
-        Assert.Equal(0, cancelledInExport);
+        Assert.Equal(0, commissionSummaryRows);
     }
 }

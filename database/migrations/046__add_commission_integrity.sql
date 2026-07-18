@@ -10,7 +10,13 @@
 USE [YafesPars];
 GO
 
+-- XACT_ABORT: any DDL error auto-rolls back the transaction so the
+-- SchemaMigration SUCCESS marker is never written on partial failure.
+SET XACT_ABORT ON;
+GO
+
 BEGIN TRANSACTION;
+BEGIN TRY
 
     IF NOT EXISTS (SELECT 1 FROM core.SchemaMigration WHERE migration_name = N'046__add_commission_integrity')
     BEGIN
@@ -96,7 +102,13 @@ BEGIN TRANSACTION;
         PRINT 'Migration 046: FK constraints + indexes added to finance.Commissions and finance.LedgerEntry.';
     END
 
-COMMIT TRANSACTION;
+    COMMIT TRANSACTION;
+
+END TRY
+BEGIN CATCH
+    IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
+    THROW;
+END CATCH;
 GO
 
 -- =============================================================================
