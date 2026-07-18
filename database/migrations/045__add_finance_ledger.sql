@@ -216,16 +216,18 @@ BEGIN
     END CATCH;
 
     -- Return the journal so caller can verify
+    -- PascalCase aliases required: Dapper positional record maps by column name (case-insensitive,
+    -- no underscore stripping), so snake_case columns would silently map to wrong constructor params.
     SELECT
-        le.entry_id,
-        le.journal_id,
-        le.posting_date,
-        le.account_code,
-        la.account_name_nl,
-        la.account_type,
-        le.debit_eur,
-        le.credit_eur,
-        le.source_type
+        le.entry_id       AS EntryId,
+        le.journal_id     AS JournalId,
+        le.posting_date   AS PostingDate,
+        le.account_code   AS AccountCode,
+        la.account_name_nl AS AccountNameNl,
+        la.account_type   AS AccountType,
+        le.debit_eur      AS DebitEur,
+        le.credit_eur     AS CreditEur,
+        le.source_type    AS SourceType
     FROM finance.LedgerEntry le
     JOIN finance.LedgerAccount la ON la.account_code = le.account_code
     WHERE le.journal_id = @journal_id
@@ -247,17 +249,17 @@ BEGIN
     SET NOCOUNT ON;
 
     SELECT
-        la.account_code,
-        la.account_name_nl,
-        la.account_type,
-        la.normal_balance,
-        ISNULL(SUM(le.debit_eur),  0)  AS total_debit_eur,
-        ISNULL(SUM(le.credit_eur), 0)  AS total_credit_eur,
+        la.account_code                AS AccountCode,
+        la.account_name_nl             AS AccountNameNl,
+        la.account_type                AS AccountType,
+        la.normal_balance              AS NormalBalance,
+        ISNULL(SUM(le.debit_eur),  0)  AS TotalDebitEur,
+        ISNULL(SUM(le.credit_eur), 0)  AS TotalCreditEur,
         CASE la.normal_balance
             WHEN N'D' THEN ISNULL(SUM(le.debit_eur),  0) - ISNULL(SUM(le.credit_eur), 0)
             ELSE           ISNULL(SUM(le.credit_eur), 0) - ISNULL(SUM(le.debit_eur),  0)
-        END                            AS balance_eur,
-        COUNT(le.entry_id)             AS entry_count
+        END                            AS BalanceEur,
+        COUNT(le.entry_id)             AS EntryCount
     FROM finance.LedgerAccount la
     LEFT JOIN finance.LedgerEntry le
         ON  le.account_code = la.account_code
@@ -287,15 +289,15 @@ BEGIN
     SET NOCOUNT ON;
 
     SELECT TOP (@limit)
-        le.entry_id,
-        le.journal_id,
-        le.posting_date,
-        le.account_code,
-        la.account_name_nl,
-        la.account_type,
-        le.debit_eur,
-        le.credit_eur,
-        le.source_type
+        le.entry_id       AS EntryId,
+        le.journal_id     AS JournalId,
+        le.posting_date   AS PostingDate,
+        le.account_code   AS AccountCode,
+        la.account_name_nl AS AccountNameNl,
+        la.account_type   AS AccountType,
+        le.debit_eur      AS DebitEur,
+        le.credit_eur     AS CreditEur,
+        le.source_type    AS SourceType
     FROM finance.LedgerEntry le
     JOIN finance.LedgerAccount la ON la.account_code = le.account_code
     WHERE le.tenant_id   = @tenant_id
@@ -317,24 +319,30 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    -- Only EXPENSE-side (debit) lines represent real outflow per journal.
+    -- Both debit and credit lines share the same claim_id, so SUM(debit-credit)
+    -- cancels to zero for every balanced posting. Summing debit_eur restricted
+    -- to EXPENSE accounts avoids the cancellation and correctly measures outflow.
     SELECT
-        le.claim_id,
-        SUM(CASE WHEN le.source_type = N'CLAIM'   THEN le.debit_eur ELSE 0 END) AS paid_eur,
-        SUM(CASE WHEN le.source_type = N'RESERVE' THEN le.debit_eur ELSE 0 END) AS reserved_eur,
-        SUM(le.debit_eur - le.credit_eur)                                        AS net_cost_eur,
-        COUNT(DISTINCT le.journal_id)                                            AS posting_count,
-        MIN(le.posting_date)                                                     AS first_posting,
-        MAX(le.posting_date)                                                     AS last_posting
+        le.claim_id                                                                   AS ClaimId,
+        SUM(CASE WHEN le.source_type = N'CLAIM'   THEN le.debit_eur ELSE 0 END)     AS PaidEur,
+        SUM(CASE WHEN le.source_type = N'RESERVE' THEN le.debit_eur ELSE 0 END)     AS ReservedEur,
+        SUM(le.debit_eur)                                                             AS NetCostEur,
+        COUNT(DISTINCT le.journal_id)                                                 AS PostingCount,
+        MIN(le.posting_date)                                                          AS FirstPosting,
+        MAX(le.posting_date)                                                          AS LastPosting
     FROM finance.LedgerEntry le
-    WHERE le.tenant_id  = @tenant_id
+    JOIN finance.LedgerAccount la ON la.account_code = le.account_code
+    WHERE le.tenant_id   = @tenant_id
       AND le.is_reversed = 0
       AND le.claim_id IS NOT NULL
-      AND (@claim_id  IS NULL OR le.claim_id    = @claim_id)
+      AND la.account_type = N'EXPENSE'
+      AND le.source_type IN (N'CLAIM', N'RESERVE', N'CORRECTION')
+      AND (@claim_id  IS NULL OR le.claim_id     = @claim_id)
       AND (@from_date IS NULL OR le.posting_date >= @from_date)
       AND (@to_date   IS NULL OR le.posting_date <= @to_date)
-      AND le.source_type IN (N'CLAIM', N'RESERVE', N'CORRECTION')
     GROUP BY le.claim_id
-    ORDER BY net_cost_eur DESC;
+    ORDER BY SUM(le.debit_eur) DESC;
 END;
 GO
 

@@ -76,7 +76,11 @@ public sealed class TenantManagementTools
             },
             cancellationToken);
 
-        return JsonSerializer.Serialize(rows.FirstOrDefault());
+        var provision = rows.FirstOrDefault();
+        if (provision is null)
+            return JsonSerializer.Serialize(new { error = "Provisioning SP gaf geen rij terug." });
+
+        return JsonSerializer.Serialize(provision);
     }
 
     [McpServerTool, Description(
@@ -131,7 +135,11 @@ public sealed class TenantManagementTools
             new { setting_key = settingKey.Trim(), setting_value = settingValue, description },
             cancellationToken);
 
-        return JsonSerializer.Serialize(rows.FirstOrDefault());
+        var setting = rows.FirstOrDefault();
+        if (setting is null)
+            return JsonSerializer.Serialize(new { error = "Upsert SP gaf geen rij terug." });
+
+        return JsonSerializer.Serialize(setting);
     }
 
     private sealed record TenantRow(

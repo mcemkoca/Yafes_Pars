@@ -30,13 +30,15 @@ BEGIN TRY
         THROW 54001, '@period_end mag niet voor @period_start liggen.', 1;
 
     -- Actieve polissen per tak (contract_domain_code) in de rapportageperiode.
+    -- PascalCase aliases required: Dapper positional records map by column name (case-insensitive,
+    -- no underscore stripping), so aantal_polissen would NOT match AantalPolissen.
     SELECT
-        'policy_summary'            AS section,
-        ISNULL(c.contract_domain_code, N'ONBEKEND') AS branche,
-        COUNT(*)                    AS aantal_polissen,
-        CAST(0 AS DECIMAL(18,4))    AS totaal_premie_eur,
-        CONVERT(NVARCHAR(10), @period_start, 120)   AS periode_van,
-        CONVERT(NVARCHAR(10), @period_end,   120)   AS periode_tot
+        'policy_summary'                                    AS Section,
+        ISNULL(c.contract_domain_code, N'ONBEKEND')        AS Branche,
+        COUNT(*)                                            AS AantalPolissen,
+        CAST(0 AS DECIMAL(18,4))                           AS TotaalPremieEur,
+        CONVERT(NVARCHAR(10), @period_start, 120)          AS PeriodeVan,
+        CONVERT(NVARCHAR(10), @period_end,   120)          AS PeriodeTot
     FROM policy.Contract c
     WHERE c.tenant_id = @tenant_id
       AND c.is_deleted = 0
@@ -48,12 +50,12 @@ BEGIN TRY
 
     -- Provisietotalen per maand (commission_eur = netto provisie).
     SELECT
-        'commission_summary'        AS section,
-        FORMAT(cm.commission_date, 'yyyy-MM')  AS branche,
-        COUNT(*)                    AS aantal_polissen,
-        SUM(CAST(cm.commission_eur AS DECIMAL(18,4))) AS totaal_premie_eur,
-        CONVERT(NVARCHAR(10), MIN(cm.commission_date), 120) AS periode_van,
-        CONVERT(NVARCHAR(10), MAX(cm.commission_date), 120) AS periode_tot
+        'commission_summary'                               AS Section,
+        FORMAT(cm.commission_date, 'yyyy-MM')             AS Branche,
+        COUNT(*)                                           AS AantalPolissen,
+        SUM(CAST(cm.commission_eur AS DECIMAL(18,4)))     AS TotaalPremieEur,
+        CONVERT(NVARCHAR(10), MIN(cm.commission_date), 120) AS PeriodeVan,
+        CONVERT(NVARCHAR(10), MAX(cm.commission_date), 120) AS PeriodeTot
     FROM finance.Commissions cm
     WHERE cm.tenant_id = @tenant_id
       AND cm.is_deleted = 0
@@ -65,19 +67,19 @@ BEGIN TRY
 
     -- Openstaande facturen (OVERDUE) in de periode.
     SELECT
-        'overdue_invoices'          AS section,
-        N'VERVALLEN'                AS branche,
-        COUNT(*)                    AS aantal_polissen,
-        SUM(CAST(i.Amount AS DECIMAL(18,4))) AS totaal_premie_eur,
-        CONVERT(NVARCHAR(10), MIN(i.DueDate), 120) AS periode_van,
-        CONVERT(NVARCHAR(10), MAX(i.DueDate), 120) AS periode_tot
+        'overdue_invoices'                                 AS Section,
+        N'VERVALLEN'                                       AS Branche,
+        COUNT(*)                                           AS AantalPolissen,
+        SUM(CAST(i.Amount AS DECIMAL(18,4)))              AS TotaalPremieEur,
+        CONVERT(NVARCHAR(10), MIN(i.DueDate), 120)        AS PeriodeVan,
+        CONVERT(NVARCHAR(10), MAX(i.DueDate), 120)        AS PeriodeTot
     FROM finance.Invoices i
     WHERE i.TenantId = @tenant_id
       AND i.StatusCode = N'OVERDUE'
       AND i.DueDate >= @period_start
       AND i.DueDate <= @period_end
 
-    ORDER BY section, branche;
+    ORDER BY Section, Branche;
 END TRY
 BEGIN CATCH
     THROW;

@@ -53,8 +53,39 @@ public sealed class FinanceLedgerTests
             description:   "Integration test claim payment");
 
         Assert.NotNull(result);
-        Assert.Contains("journalId", result);
         Assert.DoesNotContain("\"error\"", result);
+
+        // Verify Dapper mapping succeeds: JournalId must be a non-empty GUID.
+        // System.Text.Json default serialization emits PascalCase for C# records,
+        // so assert PascalCase property names here.
+        // If snake_case aliases were missing, all GUID fields would silently map to Guid.Empty.
+        using var doc = System.Text.Json.JsonDocument.Parse(result);
+        var root = doc.RootElement;
+        Assert.True(root.TryGetProperty("entries", out var entries), "Result must have 'entries' array");
+        Assert.True(entries.GetArrayLength() == 2, "SP_PostLedgerEntry must return debit + credit lines");
+        var first = entries[0];
+        Assert.True(first.TryGetProperty("JournalId", out var jid), "Entry must have JournalId (PascalCase)");
+        Assert.NotEqual(Guid.Empty, jid.GetGuid());
+        Assert.True(first.TryGetProperty("DebitEur", out _) || first.TryGetProperty("CreditEur", out _),
+            "Entry must have DebitEur or CreditEur");
+    }
+
+    [SkippableFact]
+    public async Task GetLedgerBalance_ReturnsNonEmptyAccounts()
+    {
+        Skip.IfNot(_fx.Available, _fx.SkipReason);
+
+        var result = await Ledger.GetLedgerBalance();
+        Assert.NotNull(result);
+
+        using var doc = System.Text.Json.JsonDocument.Parse(result);
+        var root = doc.RootElement;
+        Assert.True(root.TryGetProperty("accounts", out var accounts), "Result must have 'accounts' array");
+        Assert.True(accounts.GetArrayLength() > 0, "Chart of accounts must have at least one entry");
+        var first = accounts[0];
+        // PascalCase: System.Text.Json default serializes C# record properties as-is
+        Assert.True(first.TryGetProperty("AccountCode", out var code), "Balance row must have AccountCode (PascalCase)");
+        Assert.False(string.IsNullOrEmpty(code.GetString()), "AccountCode must not be empty");
     }
 
     [SkippableFact]

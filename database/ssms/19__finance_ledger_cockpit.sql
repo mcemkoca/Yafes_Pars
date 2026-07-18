@@ -195,11 +195,15 @@ PRINT '08 - Technische reserve evolutie (Reserve Evolution)';
 DECLARE @TenantId UNIQUEIDENTIFIER;
 SELECT @TenantId = tenant_id FROM core.Tenant WHERE tenant_code = N'$(TENANT_CODE)';
 
+-- Account 9000 is LIABILITY with normal_balance='C':
+--   credit to 9000 = reserve increase (toevoeging)
+--   debit  to 9000 = reserve release  (vrijval)
+-- Netto saldo = cumulative credit - cumulative debit (positive = growing reserve)
 SELECT
     FORMAT(posting_date, 'yyyy-MM') AS [Maand],
-    SUM(debit_eur)                  AS [Reserve Toevoeging EUR],
-    SUM(credit_eur)                 AS [Reserve Vrijval EUR],
-    SUM(credit_eur - debit_eur)     AS [Netto Reserve Saldo EUR]
+    SUM(credit_eur)                  AS [Reserve Toevoeging EUR],
+    SUM(debit_eur)                   AS [Reserve Vrijval EUR],
+    SUM(credit_eur - debit_eur)      AS [Netto Reserve Saldo EUR]
 FROM finance.LedgerEntry
 WHERE tenant_id    = @TenantId
   AND account_code  = N'9000'
