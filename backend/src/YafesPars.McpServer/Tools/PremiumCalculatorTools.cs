@@ -143,8 +143,7 @@ public sealed class PremiumCalculatorTools
 
     // -------------------------------------------------------------------------
     private sealed record PremiumRow(
-        Guid     CoverageId,
-        string   CoverageDomainCode,
+        Guid     CoverageItemId,
         string   CoverageTypeCode,
         decimal  InsuredValue,
         decimal? BaseRatePct,

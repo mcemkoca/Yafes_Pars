@@ -2,6 +2,8 @@
 -- Migration 041: Premium hesaplama motoru
 -- Belçika: her coverage domain için baz prim oranı + risk faktörleri.
 -- SP_CalculatePremium sözleşme üzerindeki coverage itemlarından prim hesaplar.
+-- Schema notu: ContractCoverageItem.coverage_limit = sigortalı değer (coverage_id yok)
+--              Contract.contract_domain_code = tarife domain eşleşmesi için kullanılır
 -- =============================================================================
 USE [YafesPars];
 GO
@@ -16,7 +18,7 @@ BEGIN
         tariff_rate_id      UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID(),
         tenant_id           UNIQUEIDENTIFIER NOT NULL,
         coverage_domain_code NVARCHAR(50)    NOT NULL,
-        coverage_type_code  NVARCHAR(50)     NOT NULL DEFAULT N'*',
+        coverage_type_code  NVARCHAR(80)     NOT NULL DEFAULT N'*',
         base_rate_pct       DECIMAL(8,4)     NOT NULL,
         min_premium_eur     DECIMAL(10,2)    NOT NULL DEFAULT 0,
         max_premium_eur     DECIMAL(10,2)    NULL,
@@ -44,12 +46,7 @@ ELSE
 GO
 
 -- -----------------------------------------------------------------------------
--- 2. Seed: standaard Belgische tarieven (per tenant, maar hier als referentie)
---    Werkelijke tarieven worden via SP_UpsertTariffRate per tenant ingesteld.
--- -----------------------------------------------------------------------------
-
--- -----------------------------------------------------------------------------
--- 3. SP_GetTariffRates — aktif tarifeler listesi
+-- 2. SP_GetTariffRates — aktif tarifeler listesi
 -- -----------------------------------------------------------------------------
 CREATE OR ALTER PROCEDURE finance.SP_GetTariffRates
     @tenant_id              UNIQUEIDENTIFIER,
@@ -81,12 +78,12 @@ END;
 GO
 
 -- -----------------------------------------------------------------------------
--- 4. SP_UpsertTariffRate — tarife ekle/güncelle
+-- 3. SP_UpsertTariffRate — tarife ekle/güncelle
 -- -----------------------------------------------------------------------------
 CREATE OR ALTER PROCEDURE finance.SP_UpsertTariffRate
     @tenant_id              UNIQUEIDENTIFIER,
     @coverage_domain_code   NVARCHAR(50),
-    @coverage_type_code     NVARCHAR(50)  = N'*',
+    @coverage_type_code     NVARCHAR(80)  = N'*',
     @base_rate_pct          DECIMAL(8,4),
     @min_premium_eur        DECIMAL(10,2) = 0,
     @max_premium_eur        DECIMAL(10,2) = NULL,
@@ -146,7 +143,10 @@ END;
 GO
 
 -- -----------------------------------------------------------------------------
--- 5. SP_CalculatePremium — sözleşme için prim hesapla
+-- 4. SP_CalculatePremium — sözleşme için prim hesapla
+-- Schema: ContractCoverageItem(coverage_item_id, coverage_type_code, coverage_limit)
+--         Contract(contract_domain_code) — tarife domain eşleşmesi için
+-- Wildcard: spesifik tarife varsa onu kullan, yoksa '*' fallback.
 -- -----------------------------------------------------------------------------
 CREATE OR ALTER PROCEDURE finance.SP_CalculatePremium
     @tenant_id      UNIQUEIDENTIFIER,
@@ -157,30 +157,32 @@ BEGIN
     SET NOCOUNT ON;
 
     DECLARE @ref_date DATE = ISNULL(@reference_date, CAST(GETUTCDATE() AS DATE));
+    DECLARE @domain_code NVARCHAR(40);
 
-    -- Sözleşme tenant kontrolü
-    IF NOT EXISTS (
-        SELECT 1 FROM policy.Contract
-        WHERE contract_id = @contract_id AND tenant_id = @tenant_id
-    )
+    -- Sözleşme tenant kontrolü + domain kodu al
+    SELECT @domain_code = contract_domain_code
+    FROM policy.Contract
+    WHERE contract_id = @contract_id AND tenant_id = @tenant_id;
+
+    IF @domain_code IS NULL
     BEGIN
-        SELECT NULL AS CoverageDomainCode, NULL AS CoverageTypeCode,
-               NULL AS InsuredValue, NULL AS BaseRatePct, NULL AS CalculatedPremium,
-               NULL AS FinalPremium WHERE 1 = 0;
+        SELECT NULL AS CoverageItemId, NULL AS CoverageTypeCode,
+               NULL AS InsuredValue,   NULL AS BaseRatePct,
+               NULL AS CalculatedPremium, NULL AS Status
+        WHERE 1 = 0;
         RETURN;
     END;
 
-    -- Coverage item bazlı prim hesaplama
-    -- InsuredValue: sigortalı değer (coverage_item.insured_value veya fallback 0)
-    -- Prim = MAX(min_premium, MIN(max_premium, insured_value * base_rate_pct / 100))
+    -- Coverage item bazlı prim hesaplama.
+    -- Tarife önceliği: spesifik coverage_type_code > wildcard '*'.
+    -- CROSS APPLY TOP 1 garantiler her item için en fazla 1 tarife satırı.
     SELECT
-        cci.coverage_id               AS CoverageId,
-        c2.coverage_domain_code       AS CoverageDomainCode,
-        c2.coverage_type_code         AS CoverageTypeCode,
-        ISNULL(cci.insured_value, 0)  AS InsuredValue,
-        tr.base_rate_pct              AS BaseRatePct,
-        tr.min_premium_eur            AS MinPremiumEur,
-        tr.max_premium_eur            AS MaxPremiumEur,
+        cci.coverage_item_id                    AS CoverageItemId,
+        cci.coverage_type_code                  AS CoverageTypeCode,
+        cci.coverage_limit                      AS InsuredValue,
+        tr.base_rate_pct                        AS BaseRatePct,
+        tr.min_premium_eur                      AS MinPremiumEur,
+        tr.max_premium_eur                      AS MaxPremiumEur,
         CASE
             WHEN tr.tariff_rate_id IS NULL THEN 0
             ELSE ROUND(
@@ -188,29 +190,33 @@ BEGIN
                         tr.min_premium_eur,
                         LEAST(
                             ISNULL(tr.max_premium_eur, 999999999),
-                            ISNULL(cci.insured_value, 0) * tr.base_rate_pct / 100.0
+                            cci.coverage_limit * tr.base_rate_pct / 100.0
                         )
                     )
                 , 2)
-        END                           AS CalculatedPremium,
-        CASE WHEN tr.tariff_rate_id IS NULL THEN 'NO_TARIFF' ELSE 'OK' END AS Status
+        END                                     AS CalculatedPremium,
+        CASE WHEN tr.tariff_rate_id IS NULL THEN N'NO_TARIFF' ELSE N'OK' END AS Status
     FROM coverage.ContractCoverageItem cci
-    INNER JOIN coverage.Coverage c2
-        ON c2.coverage_id = cci.coverage_id
-    LEFT JOIN finance.TariffRate tr
-        ON  tr.tenant_id            = @tenant_id
-        AND tr.coverage_domain_code = c2.coverage_domain_code
-        AND (tr.coverage_type_code  = c2.coverage_type_code OR tr.coverage_type_code = N'*')
-        AND tr.effective_from       <= @ref_date
-        AND (tr.effective_to IS NULL OR tr.effective_to >= @ref_date)
-        AND tr.is_active            = 1
+    OUTER APPLY (
+        SELECT TOP 1
+            tariff_rate_id, base_rate_pct, min_premium_eur, max_premium_eur
+        FROM finance.TariffRate
+        WHERE tenant_id            = @tenant_id
+          AND coverage_domain_code = @domain_code
+          AND (coverage_type_code  = cci.coverage_type_code OR coverage_type_code = N'*')
+          AND effective_from       <= @ref_date
+          AND (effective_to IS NULL OR effective_to >= @ref_date)
+          AND is_active            = 1
+        ORDER BY
+            CASE WHEN coverage_type_code = cci.coverage_type_code THEN 0 ELSE 1 END
+    ) tr
     WHERE cci.contract_id = @contract_id
-    ORDER BY c2.coverage_domain_code, c2.coverage_type_code;
+    ORDER BY cci.coverage_type_code;
 END;
 GO
 
 -- -----------------------------------------------------------------------------
--- 6. SP_GetPremiumSummary — sözleşme için toplam prim özeti
+-- 5. SP_GetPremiumSummary — sözleşme için toplam prim özeti
 -- -----------------------------------------------------------------------------
 CREATE OR ALTER PROCEDURE finance.SP_GetPremiumSummary
     @tenant_id      UNIQUEIDENTIFIER,
@@ -219,7 +225,21 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    DECLARE @ref_date DATE = CAST(GETUTCDATE() AS DATE);
+    DECLARE @ref_date    DATE         = CAST(GETUTCDATE() AS DATE);
+    DECLARE @domain_code NVARCHAR(40);
+
+    -- Tenant guard
+    SELECT @domain_code = contract_domain_code
+    FROM policy.Contract
+    WHERE contract_id = @contract_id AND tenant_id = @tenant_id;
+
+    IF @domain_code IS NULL
+    BEGIN
+        SELECT NULL AS ContractId, NULL AS CoverageCount, NULL AS MissingTariffCount,
+               NULL AS TotalAnnualPremiumEur, NULL AS MonthlyPremiumEur, NULL AS CalculatedAt
+        WHERE 1 = 0;
+        RETURN;
+    END;
 
     SELECT
         @contract_id                         AS ContractId,
@@ -229,24 +249,29 @@ BEGIN
             WHEN tr.tariff_rate_id IS NULL THEN 0
             ELSE ROUND(GREATEST(tr.min_premium_eur,
                          LEAST(ISNULL(tr.max_premium_eur, 999999999),
-                               ISNULL(cci.insured_value, 0) * tr.base_rate_pct / 100.0)), 2)
+                               cci.coverage_limit * tr.base_rate_pct / 100.0)), 2)
         END)                                 AS TotalAnnualPremiumEur,
         ROUND(SUM(CASE
             WHEN tr.tariff_rate_id IS NULL THEN 0
             ELSE ROUND(GREATEST(tr.min_premium_eur,
                          LEAST(ISNULL(tr.max_premium_eur, 999999999),
-                               ISNULL(cci.insured_value, 0) * tr.base_rate_pct / 100.0)), 2)
+                               cci.coverage_limit * tr.base_rate_pct / 100.0)), 2)
         END) / 12.0, 2)                      AS MonthlyPremiumEur,
         @ref_date                            AS CalculatedAt
     FROM coverage.ContractCoverageItem cci
-    INNER JOIN coverage.Coverage c2 ON c2.coverage_id = cci.coverage_id
-    LEFT JOIN finance.TariffRate tr
-        ON  tr.tenant_id            = @tenant_id
-        AND tr.coverage_domain_code = c2.coverage_domain_code
-        AND (tr.coverage_type_code  = c2.coverage_type_code OR tr.coverage_type_code = N'*')
-        AND tr.effective_from       <= @ref_date
-        AND (tr.effective_to IS NULL OR tr.effective_to >= @ref_date)
-        AND tr.is_active            = 1
+    OUTER APPLY (
+        SELECT TOP 1
+            tariff_rate_id, base_rate_pct, min_premium_eur, max_premium_eur
+        FROM finance.TariffRate
+        WHERE tenant_id            = @tenant_id
+          AND coverage_domain_code = @domain_code
+          AND (coverage_type_code  = cci.coverage_type_code OR coverage_type_code = N'*')
+          AND effective_from       <= @ref_date
+          AND (effective_to IS NULL OR effective_to >= @ref_date)
+          AND is_active            = 1
+        ORDER BY
+            CASE WHEN coverage_type_code = cci.coverage_type_code THEN 0 ELSE 1 END
+    ) tr
     WHERE cci.contract_id = @contract_id;
 END;
 GO
