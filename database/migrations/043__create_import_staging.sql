@@ -103,12 +103,11 @@ BEGIN
     DECLARE @imported INT = 0, @errors INT = 0;
 
     DECLARE cur CURSOR LOCAL FAST_FORWARD FOR
-        SELECT legacy_bet_id, last_name, first_name, gender_code,
+        SELECT TOP (@batch_size) legacy_bet_id, last_name, first_name, gender_code,
                date_of_birth, national_id, id_card_number, language_code, nationality
         FROM import.LegacyPerson
         WHERE import_status = N'PENDING'
-        ORDER BY legacy_bet_id
-        FETCH FIRST @batch_size ROWS ONLY;
+        ORDER BY legacy_bet_id;
 
     DECLARE @bid BIGINT, @ln NVARCHAR(200), @fn NVARCHAR(200), @gnd NCHAR(1),
             @dob DATE, @nid NVARCHAR(20), @icard NVARCHAR(30), @lang NCHAR(2), @nat NVARCHAR(100);
