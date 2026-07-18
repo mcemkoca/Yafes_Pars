@@ -9,7 +9,7 @@
         "defaultName": "YafesPars_Dev",
         "environment": "DEV",
         "schemaCount": 15,
-        "tableCount": 140,
+        "tableCount": 142,
         "legacyReferenceTableCount": 89
     },
     "tenant": {
@@ -18,8 +18,8 @@
         "environmentLabel": "DEV"
     },
     "migrations": {
-        "count": 45,
-        "latest": "044__add_claim_settlement.sql",
+        "count": 46,
+        "latest": "045__add_finance_ledger.sql",
         "files": [
             "000__create_database.sql",
             "001__create_schemas.sql",
@@ -65,12 +65,13 @@
             "041__add_premium_calculator.sql",
             "042__create_assurance_domain.sql",
             "043__create_import_staging.sql",
-            "044__add_claim_settlement.sql"
+            "044__add_claim_settlement.sql",
+            "045__add_finance_ledger.sql"
         ]
     },
     "validations": {
-        "count": 32,
-        "latest": "032__validate_claim_settlement.sql",
+        "count": 33,
+        "latest": "033__validate_finance_ledger.sql",
         "files": [
             "001__validate_core_infrastructure.sql",
             "002__validate_person_domain.sql",
@@ -103,7 +104,8 @@
             "029__validate_complaint_management.sql",
             "030__validate_renewal_pipeline.sql",
             "031__validate_premium_calculator.sql",
-            "032__validate_claim_settlement.sql"
+            "032__validate_claim_settlement.sql",
+            "033__validate_finance_ledger.sql"
         ]
     },
     "ssmsScripts": [
@@ -201,6 +203,11 @@
             "fileName": "18__sql_agent_job_setup.sql",
             "path": "database/ssms/18__sql_agent_job_setup.sql",
             "sizeBytes": 7624
+        },
+        {
+            "fileName": "19__finance_ledger_cockpit.sql",
+            "path": "database/ssms/19__finance_ledger_cockpit.sql",
+            "sizeBytes": 4800
         },
         {
             "fileName": "20__assurance_dashboard.sql",
@@ -358,6 +365,15 @@
             "fileName": "15__monitoring_and_job_readiness.sql",
             "safety": "READ_ONLY",
             "infoTip": "DEV health, backlog, backup, and SQL Agent readiness grids."
+        },
+        {
+            "order": 115,
+            "group": "Finance",
+            "action": "Finance ledger cockpit",
+            "ssmsFile": "database/ssms/19__finance_ledger_cockpit.sql",
+            "fileName": "19__finance_ledger_cockpit.sql",
+            "safety": "READ_ONLY",
+            "infoTip": "Chart of accounts, trial balance, P&L summary, claim cost, and reserve evolution."
         },
         {
             "order": 120,
@@ -621,12 +637,14 @@
             "schema": "finance",
             "title": "Finance",
             "lane": "Finance",
-            "subheading": "Invoices, payments, payment plans, commissions",
-            "entryPoint": "09__graph_report_pack.sql",
-            "tableCount": 7,
+            "subheading": "Invoices, payments, commissions, double-entry ledger",
+            "entryPoint": "19__finance_ledger_cockpit.sql",
+            "tableCount": 9,
             "tables": [
                 "Commissions",
                 "Invoices",
+                "LedgerAccount",
+                "LedgerEntry",
                 "PaymentPlanItems",
                 "PaymentPlans",
                 "PaymentTransaction",
