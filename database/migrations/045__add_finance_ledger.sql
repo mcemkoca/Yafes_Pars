@@ -222,6 +222,7 @@ BEGIN
         le.posting_date,
         le.account_code,
         la.account_name_nl,
+        la.account_type,
         le.debit_eur,
         le.credit_eur,
         le.source_type
@@ -289,18 +290,12 @@ BEGIN
         le.entry_id,
         le.journal_id,
         le.posting_date,
-        le.value_date,
         le.account_code,
         la.account_name_nl,
         la.account_type,
         le.debit_eur,
         le.credit_eur,
-        le.source_type,
-        le.description,
-        le.claim_id,
-        le.commission_id,
-        le.is_reversed,
-        le.created_at_utc
+        le.source_type
     FROM finance.LedgerEntry le
     JOIN finance.LedgerAccount la ON la.account_code = le.account_code
     WHERE le.tenant_id   = @tenant_id
