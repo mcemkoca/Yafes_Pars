@@ -11,7 +11,7 @@ public sealed class GdprErasureTests
     public GdprErasureTests(SqlServerFixture fx) => _fx = fx;
 
     private PersonWriteTools Persons => new(_fx.Write, _fx.Operator);
-    private ComplianceTools Compliance => new(_fx.Write, _fx.Operator);
+    private ComplianceTools Compliance => new(_fx.Read, _fx.Write, _fx.Operator);
 
     private static Guid ExtractGuid(string json, string prop)
     {
