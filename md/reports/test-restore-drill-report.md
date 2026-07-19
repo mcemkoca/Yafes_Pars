@@ -1,112 +1,112 @@
-# TEST Restore Drill Evidence Report
+# TEST Yedek Geri Yükleme Tatbikatı Kanıt Raporu
 
-**Environment:** TEST  
-**Status:** PENDING ENVIRONMENT EXECUTION  
-**Owner:** Deuterium12{MCK}  
+**Ortam:** TEST  
+**Durum:** ORTAM YÜRÜTMESI BEKLENİYOR  
+**Sorumlu:** Deuterium12{MCK}  
 **Plan:** `md/restore/test-restore-drill-plan.md`  
-**Template version:** 2026-07-19
+**Şablon sürümü:** 2026-07-19
 
 ---
 
-## Drill Summary
+## Tatbikat Özeti
 
-| Field | Value |
+| Alan | Değer |
 |---|---|
-| Environment | TEST |
-| Source backup instance | |
-| Restore target instance | |
-| Backup file selected | |
-| Backup timestamp | |
-| Backup file size | |
-| Drill start UTC | |
-| Drill end UTC | |
-| Elapsed time (minutes) | |
-| Target RTO | 60 minutes |
-| RTO met? | |
-| Executor | |
+| Ortam | TEST |
+| Kaynak yedek örneği | |
+| Geri yükleme hedef örneği | |
+| Seçilen yedek dosyası | |
+| Yedek zaman damgası | |
+| Yedek dosya boyutu | |
+| Tatbikat başlangıcı (UTC) | |
+| Tatbikat bitişi (UTC) | |
+| Geçen süre (dakika) | |
+| Hedef RTO | 60 dakika |
+| RTO karşılandı mı? | |
+| Yürüten | |
 
 ---
 
-## Step 1 — Backup Selection
+## Adım 1 — Yedek Seçimi
 
-| Field | Value |
+| Alan | Değer |
 |---|---|
-| Most recent full backup found | |
-| Backup file path | |
-| Backup taken at UTC | |
-| Verified with RESTORE VERIFYONLY | |
+| Bulunan en güncel tam yedek | |
+| Yedek dosya yolu | |
+| Yedekleme tarihi (UTC) | |
+| RESTORE VERIFYONLY ile doğrulandı | |
 
 ---
 
-## Step 2 — Restore
+## Adım 2 — Geri Yükleme
 
 ```sql
--- Command used:
+-- Kullanılan komut:
 RESTORE DATABASE [YafesPars_RestoreDrill]
-FROM DISK = N'<backup_path>'
-WITH MOVE 'YafesPars' TO N'<data_file_path>',
-     MOVE 'YafesPars_log' TO N'<log_file_path>',
+FROM DISK = N'<yedek_yolu>'
+WITH MOVE 'YafesPars' TO N'<veri_dosyası_yolu>',
+     MOVE 'YafesPars_log' TO N'<log_dosyası_yolu>',
      REPLACE, STATS = 10;
 ```
 
-| Field | Value |
+| Alan | Değer |
 |---|---|
-| RESTORE command result | |
-| Errors encountered | |
-| Duration (seconds) | |
+| RESTORE komutu sonucu | |
+| Karşılaşılan hatalar | |
+| Süre (saniye) | |
 
 ---
 
-## Step 3 — Validation (`database/tools/restore-drill-validation.sql`)
+## Adım 3 — Doğrulama (`database/tools/restore-drill-validation.sql`)
 
-Run against `YafesPars_RestoreDrill` database.
+`YafesPars_RestoreDrill` veritabanına karşı çalıştırın:
 
-| Check | Expected | Actual | Status |
+| Kontrol | Beklenen | Gerçekleşen | Durum |
 |---|---|---|---|
-| Migration count | ≥ 48 | | |
-| All migrations SUCCESS | Yes | | |
-| Table count | ≥ 140 | | |
-| Orphan FK violations | 0 | | |
-| Schema version | 1 | | |
+| Migrasyon sayısı | ≥ 48 | | |
+| Tüm migrasyonlar SUCCESS | Evet | | |
+| Tablo sayısı | ≥ 140 | | |
+| Yetim FK ihlali | 0 | | |
+| Şema sürümü | 1 | | |
 
 ---
 
-## Step 4 — SSMS Operator Smoke Test (optional)
+## Adım 4 — SSMS Operatör Duman Testi (isteğe bağlı)
 
-| Script | Status |
+| Script | Durum |
 |---|---|
 | `05__operator_dashboard_home.sql` | |
 | `14__admin_role_permission_matrix.sql` | |
 
 ---
 
-## Step 5 — Cleanup
+## Adım 5 — Temizlik
 
-| Action | Done |
+| İşlem | Tamamlandı |
 |---|---|
-| `YafesPars_RestoreDrill` database dropped | |
-| Backup file access confirmed revoked | |
-| No live copy of TEST data retained | |
+| `YafesPars_RestoreDrill` veritabanı silindi | |
+| Yedek dosyası erişimi iptal edildi | |
+| TEST verisinin canlı kopyası kalmadı | |
 
 ---
 
-## Pass Criteria
+## Geçme Kriterleri
 
-- [ ] Restore completed without errors within 60 minutes
-- [ ] Migration count ≥ 48, all SUCCESS
-- [ ] Table count ≥ 140
-- [ ] No orphan FK violations
-- [ ] Restore target dropped after evidence recorded
+- [ ] Geri yükleme 60 dakika içinde hatasız tamamlandı
+- [ ] Migrasyon sayısı ≥ 48, tamamı SUCCESS
+- [ ] Tablo sayısı ≥ 140
+- [ ] Yetim FK ihlali yok
+- [ ] Kanıt kaydedildikten sonra geri yükleme hedefi silindi
 
 ---
 
-## Sign-Off
+## İmza
 
-| Field | Value |
+| Alan | Değer |
 |---|---|
-| Drill result | PASS / FAIL |
-| Issues found | |
-| Corrective actions | |
-| Executor sign-off | |
-| Approver sign-off | |
-| Date | |
+| Tatbikat sonucu | GEÇTİ / KALDI |
+| Bulunan sorunlar | |
+| Düzeltici eylemler | |
+| Yürüten imzası | Deuterium12 <mcemkoca0@gmail.com> |
+| Onaylayan imzası | |
+| Tarih | |

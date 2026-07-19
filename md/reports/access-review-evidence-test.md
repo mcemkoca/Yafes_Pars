@@ -1,43 +1,43 @@
-# TEST Access Review Evidence
+# TEST Erişim İncelemesi Kanıtı
 
-**Environment:** TEST  
-**Status:** PENDING ENVIRONMENT EXECUTION  
-**Owner:** Deuterium12{MCK}  
-**Template version:** 2026-07-19
+**Ortam:** TEST  
+**Durum:** ORTAM YÜRÜTMESI BEKLENİYOR  
+**Sorumlu:** Deuterium12{MCK}  
+**Şablon sürümü:** 2026-07-19
 
-Fill in from `database/tools/access-review/` scripts run against the TEST instance.
+TEST örneğine karşı `database/tools/access-review/` scriptleri çalıştırılarak doldurulacaktır.
 
 ---
 
-## Summary
+## Özet
 
-| Field | Value |
+| Alan | Değer |
 |---|---|
-| Environment | TEST |
-| Database | |
-| Review date/time UTC | |
-| Reviewer | |
-| Approver | |
-| Commit SHA / release | |
-| Scripts used | `01__list_active_users.sql`, `02__role_permission_matrix.sql`, `03__segregation_of_duties_check.sql` |
+| Ortam | TEST |
+| Veritabanı | |
+| İnceleme tarihi/saati (UTC) | |
+| İnceleyen | |
+| Onaylayan | |
+| Commit SHA / sürüm | |
+| Kullanılan scriptler | `01__list_active_users.sql`, `02__role_permission_matrix.sql`, `03__segregation_of_duties_check.sql` |
 
 ---
 
-## Active Users (from 01__list_active_users.sql)
+## Aktif Kullanıcılar (`01__list_active_users.sql`)
 
-| user_id | email | role_count | last_login_at_utc | tenant | Status |
+| user_id | e-posta | rol_sayısı | son_giriş_utc | tenant | Durum |
 |---|---|---|---|---|---|
 | | | | | | |
 
-Total active users: ______  
-Users with no role: ______ (expected: 0)  
-Users inactive > 90 days: ______ (flag for removal)
+Toplam aktif kullanıcı: ______  
+Rolsüz kullanıcı: ______ (beklenen: 0)  
+90 günden uzun süredir pasif kullanıcı: ______ (kaldırma için işaretle)
 
 ---
 
-## Role Permission Matrix (from 02__role_permission_matrix.sql)
+## Rol-İzin Matrisi (`02__role_permission_matrix.sql`)
 
-| Role | Permission count | Admin perms | Status |
+| Rol | İzin sayısı | Admin izinleri | Durum |
 |---|---|---|---|
 | SYSTEM_ADMIN | | | |
 | BROKER_ADMIN | | | |
@@ -46,42 +46,42 @@ Users inactive > 90 days: ______ (flag for removal)
 
 ---
 
-## Segregation of Duties (from 03__segregation_of_duties_check.sql)
+## Görevler Ayrılığı (`03__segregation_of_duties_check.sql`)
 
-| Check | Result | Notes |
+| Kontrol | Sonuç | Notlar |
 |---|---|---|
-| Users with CLAIM_APPROVE + CLAIM_CLOSE | | (expected: 0 or approved exception) |
-| Users with PAYMENT_CREATE + PAYMENT_APPROVE | | (expected: 0 or approved exception) |
-| Users with ADMIN + CLAIM_HANDLE combined | | |
+| CLAIM_APPROVE + CLAIM_CLOSE aynı kullanıcı | | (beklenen: 0 veya onaylı istisna) |
+| PAYMENT_CREATE + PAYMENT_APPROVE aynı kullanıcı | | (beklenen: 0 veya onaylı istisna) |
+| ADMIN + CLAIM_HANDLE birlikte | | |
 
 ---
 
-## Role Review
+## Rol İncelemesi
 
-| Role | Expected owner | Approved use | Exception |
+| Rol | Beklenen sahip | Onaylı kullanım | İstisna |
 |---|---|---|---|
-| `SYSTEM_ADMIN` | Platform owner | Emergency/platform administration only | |
-| `BROKER_ADMIN` | Tenant admin | Broker office administration | |
-| `BROKER_USER` | Daily operator | Read-focused daily broker work | |
-| `CLAIM_HANDLER` | Claims team | Claim handling and document work | |
+| `SYSTEM_ADMIN` | Platform sahibi | Yalnızca acil/platform yönetimi | |
+| `BROKER_ADMIN` | Tenant yöneticisi | Broker ofisi yönetimi | |
+| `BROKER_USER` | Günlük operatör | Günlük broker işlemleri | |
+| `CLAIM_HANDLER` | Hasar ekibi | Hasar işleme ve belge çalışması | |
 
 ---
 
-## User Assignment Review
+## Kullanıcı Atama İncelemesi
 
-| User | Role(s) | Status | Decision | Notes |
+| Kullanıcı | Rol(ler) | Durum | Karar | Notlar |
 |---|---|---|---|---|
-| | | | Keep / Remove / Change | |
+| | | | Tut / Kaldır / Değiştir | |
 
 ---
 
-## Sign-Off
+## İmza
 
-| Field | Value |
+| Alan | Değer |
 |---|---|
-| Access accepted | |
-| Exceptions accepted | |
-| Follow-up tasks | |
-| Reviewer sign-off | |
-| Approver sign-off | |
-| Date | |
+| Erişim kabul edildi | |
+| İstisnalar kabul edildi | |
+| Takip görevleri | |
+| İnceleyen imzası | Deuterium12 <mcemkoca0@gmail.com> |
+| Onaylayan imzası | |
+| Tarih | |

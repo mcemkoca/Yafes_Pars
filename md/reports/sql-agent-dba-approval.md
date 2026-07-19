@@ -1,102 +1,102 @@
-# SQL Agent Job Setup — DBA Approval Package
+# SQL Agent İş Kurulumu — DBA Onay Paketi
 
 **Script:** `database/ssms/18__sql_agent_job_setup.sql`  
-**Status:** PENDING DBA SIGN-OFF  
-**Owner:** Deuterium12{MCK}
+**Durum:** DBA İMZASI BEKLENİYOR  
+**Sorumlu:** Deuterium12{MCK}
 
 ---
 
-## Summary
+## Özet
 
-Three SQL Server Agent jobs for automated daily/weekly operations. Script is
-idempotent — skips any job that already exists. DEV guard aborts with RAISERROR
-if `YAFES_SQL_DATABASE` does not contain DEV, TEST, or ACC.
-
----
-
-## Jobs Requested
-
-### Job 1 — YafesPars_DailyMarkOverdueInvoices
-
-| Field | Value |
-|---|---|
-| Schedule | Daily 06:00 (server local time) |
-| SP Called | `finance.SP_MarkOverdueInvoices @dry_run = 0` |
-| Database | `$(YAFES_SQL_DATABASE)` (SQLCMD variable) |
-| Subsystem | TSQL |
-| On Success | Quit with success |
-| On Fail | Quit with failure |
-| Tenant scope | All tenants in database |
-| Side effects | Sets PENDING invoices with past due date to OVERDUE |
-| Reversible? | No — status change is logged in audit trail |
-
-### Job 2 — YafesPars_DailyRenewalTasks
-
-| Field | Value |
-|---|---|
-| Schedule | Daily 07:00 (server local time) |
-| SP Called | `tasking.SP_CreateRenewalTasks @tenant_id = <resolved>, @days_ahead = 60, @dry_run = 0` |
-| Database | `$(YAFES_SQL_DATABASE)` (SQLCMD variable) |
-| Subsystem | TSQL |
-| On Success | Quit with success |
-| On Fail | Quit with failure |
-| Tenant scope | Single tenant resolved from `$(TENANT_CODE)` at job creation time |
-| Side effects | Creates renewal tasks for contracts expiring within 60 days (idempotent per contract) |
-| Reversible? | Tasks can be closed/cancelled manually |
-
-### Job 3 — YafesPars_WeeklyFsmaPortfolioCheck
-
-| Field | Value |
-|---|---|
-| Schedule | Every Monday 08:00 (server local time) |
-| SP Called | Inline SELECT (active policies, expired policies, pending commissions) |
-| Database | `$(YAFES_SQL_DATABASE)` (SQLCMD variable) |
-| Subsystem | TSQL |
-| On Success | Quit with success |
-| On Fail | Quit with failure |
-| Tenant scope | All tenants in database |
-| Side effects | READ-ONLY — results visible in SQL Agent job history only |
-| Reversible? | N/A — read-only |
+Günlük / haftalık otomatik işlemler için üç SQL Server Agent işi.
+Script idempotent — zaten var olan işi atlar. `YAFES_SQL_DATABASE` değişkeni
+DEV, TEST veya ACC içermiyorsa RAISERROR level 16 ile işlemi durdurur.
 
 ---
 
-## Security Review
+## İstenen İşler
 
-| Check | Result |
+### İş 1 — YafesPars_DailyMarkOverdueInvoices
+
+| Alan | Değer |
 |---|---|
-| DEV/TEST/ACC guard | ✅ RAISERROR level 16 + RETURN if DB name does not contain DEV, TEST, or ACC |
-| Hard-coded database names | ✅ None — Job 2 uses `sp_executesql` with SQLCMD variable |
-| Owner login | Configurable via `:setvar JOB_OWNER "sa"` — must be changed to a dedicated service account for PROD |
-| Idempotent | ✅ IF NOT EXISTS check per job |
-| Requires permissions | `sysadmin` or `SQLAgentOperatorRole` on msdb |
-| Reads production data | Job 3 reads policy/commission counts — no PII extracted |
-| Writes production data | Job 1 updates invoice status; Job 2 creates tasks |
+| Zamanlama | Her gün 06:00 (sunucu yerel saati) |
+| Çağrılan SP | `finance.SP_MarkOverdueInvoices @dry_run = 0` |
+| Veritabanı | `$(YAFES_SQL_DATABASE)` (SQLCMD değişkeni) |
+| Alt sistem | TSQL |
+| Başarı durumu | Başarıyla çık |
+| Hata durumu | Hatayla çık |
+| Tenant kapsamı | Veritabanındaki tüm tenant'lar |
+| Yan etkiler | Vadesi geçmiş PENDING faturaları OVERDUE yapar |
+| Geri alınabilir mi? | Hayır — durum değişikliği denetim izine kaydedilir |
+
+### İş 2 — YafesPars_DailyRenewalTasks
+
+| Alan | Değer |
+|---|---|
+| Zamanlama | Her gün 07:00 (sunucu yerel saati) |
+| Çağrılan SP | `tasking.SP_CreateRenewalTasks @tenant_id = <çözümlendi>, @days_ahead = 60, @dry_run = 0` |
+| Veritabanı | `$(YAFES_SQL_DATABASE)` (SQLCMD değişkeni) |
+| Alt sistem | TSQL |
+| Başarı durumu | Başarıyla çık |
+| Hata durumu | Hatayla çık |
+| Tenant kapsamı | İş oluşturma anında `$(TENANT_CODE)` ile çözümlenen tek tenant |
+| Yan etkiler | 60 gün içinde sona erecek sözleşmeler için yenileme görevi oluşturur (sözleşme başına idempotent) |
+| Geri alınabilir mi? | Görevler manuel olarak kapatılabilir / iptal edilebilir |
+
+### İş 3 — YafesPars_WeeklyFsmaPortfolioCheck
+
+| Alan | Değer |
+|---|---|
+| Zamanlama | Her Pazartesi 08:00 (sunucu yerel saati) |
+| Çağrılan SP | Satır içi SELECT (aktif poliçeler, süresi dolmuş poliçeler, bekleyen komisyonlar) |
+| Veritabanı | `$(YAFES_SQL_DATABASE)` (SQLCMD değişkeni) |
+| Alt sistem | TSQL |
+| Başarı durumu | Başarıyla çık |
+| Hata durumu | Hatayla çık |
+| Tenant kapsamı | Veritabanındaki tüm tenant'lar |
+| Yan etkiler | SALT OKUNUR — sonuçlar yalnızca SQL Agent iş geçmişinde görünür |
+| Geri alınabilir mi? | Geçerli değil — salt okunur |
 
 ---
 
-## Pre-Execution Checklist
+## Güvenlik İncelemesi
 
-- [ ] SQLServerAgent service is running on target instance
-- [ ] `YAFES_SQL_DATABASE` set to correct database name (must contain DEV or TEST)
-- [ ] `TENANT_CODE` set to correct tenant code for Job 2
-- [ ] `JOB_OWNER` changed from `sa` to approved service account login
-- [ ] Script reviewed on `database/ssms/18__sql_agent_job_setup.sql` — current SHA: ______
-- [ ] Test run with DRY_RUN equivalent (EXECUTE_ACTION not applicable; run on DEV first)
-- [ ] DEV jobs verified before promoting to TEST
+| Kontrol | Sonuç |
+|---|---|
+| DEV/TEST/ACC koruması | ✅ DB adı DEV, TEST veya ACC içermiyorsa RAISERROR level 16 + RETURN |
+| Sabit kodlanmış DB adı | ✅ Yok — İş 2, SQLCMD değişkeniyle `sp_executesql` kullanır |
+| Sahip girişi | `:setvar JOB_OWNER "sa"` ile yapılandırılabilir — PROD için özel servis hesabıyla değiştirilmeli |
+| İdempotent | ✅ İş başına IF NOT EXISTS kontrolü |
+| Gereken izinler | msdb üzerinde `sysadmin` veya `SQLAgentOperatorRole` |
+| Üretim verisi okuma | İş 3 poliçe/komisyon sayılarını okur — KKB/PII çıkarımı yapılmaz |
+| Üretim verisi yazma | İş 1 fatura durumunu günceller; İş 2 görev oluşturur |
 
 ---
 
-## DBA Sign-Off
+## Çalıştırma Öncesi Kontrol Listesi
 
-| Field | Value |
+- [ ] Hedef örnekte SQLServerAgent servisi çalışıyor
+- [ ] `YAFES_SQL_DATABASE` doğru DB adına ayarlı (DEV veya TEST içermeli)
+- [ ] `TENANT_CODE` İş 2 için doğru tenant koduna ayarlı
+- [ ] `JOB_OWNER` değeri `sa`'dan onaylı servis hesabına değiştirildi
+- [ ] `database/ssms/18__sql_agent_job_setup.sql` incelendi — mevcut SHA: ______
+- [ ] Önce DEV'de çalıştırılarak doğrulandı
+- [ ] DEV işleri doğrulandıktan sonra TEST'e alındı
+
+---
+
+## DBA İmza
+
+| Alan | Değer |
 |---|---|
-| DBA name | |
-| Review date UTC | |
-| Environment | |
-| Database | |
-| Jobs approved | YafesPars_DailyMarkOverdueInvoices / YafesPars_DailyRenewalTasks / YafesPars_WeeklyFsmaPortfolioCheck |
-| JOB_OWNER login confirmed | |
-| Notes | |
-| DBA signature | |
-| Approved by | |
-| Approval date | |
+| DBA adı | |
+| İnceleme tarihi (UTC) | |
+| Ortam | |
+| Veritabanı | |
+| Onaylanan işler | YafesPars_DailyMarkOverdueInvoices / YafesPars_DailyRenewalTasks / YafesPars_WeeklyFsmaPortfolioCheck |
+| JOB_OWNER girişi onaylandı | |
+| Notlar | |
+| DBA imzası | |
+| Onaylayan | Deuterium12 <mcemkoca0@gmail.com> |
+| Onay tarihi | |
