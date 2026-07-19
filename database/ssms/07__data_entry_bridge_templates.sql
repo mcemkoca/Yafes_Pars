@@ -158,6 +158,43 @@
 :setvar COMPLETE_ROW_COUNT "0"
 :setvar COMPLETE_ERROR_MESSAGE ""
 
+-- CREATE_REAL_ESTATE_OBJECT values
+:setvar PROPERTY_ADDRESS "Leopoldstraat 1, 1000 Brussel"
+:setvar PROPERTY_TYPE_CODE "HOUSE"
+:setvar PROPERTY_CONSTRUCTION_AREA ""
+:setvar PROPERTY_CONSTRUCTION_YEAR ""
+:setvar PROPERTY_INSURED_VALUE ""
+:setvar PROPERTY_CURRENCY_CODE "EUR"
+
+-- ADD_COVERAGE_ITEM values
+:setvar COVERAGE_CONTRACT_ID ""
+:setvar COVERAGE_TYPE_CODE "FIRE_BUILDING"
+:setvar COVERAGE_LIMIT "250000.00"
+:setvar COVERAGE_DEDUCTIBLE "500.00"
+:setvar COVERAGE_CURRENCY_CODE "EUR"
+
+-- ATTACH_DOCUMENT values
+:setvar DOC_DOCUMENT_TYPE_CODE "POLICY_DOCUMENT"
+:setvar DOC_FILE_NAME "policy.pdf"
+:setvar DOC_MIME_TYPE "application/pdf"
+:setvar DOC_FILE_SIZE_BYTES "0"
+:setvar DOC_STORAGE_URI ""
+:setvar DOC_OWNER_ENTITY_TYPE "POLICY"
+:setvar DOC_OWNER_ENTITY_ID ""
+
+-- RECORD_PAYMENT values
+:setvar PAYMENT_INVOICE_ID ""
+:setvar PAYMENT_DATE "2026-07-01"
+:setvar PAYMENT_AMOUNT "500.00"
+:setvar PAYMENT_METHOD_CODE "BANK_TRANSFER"
+
+-- CREATE_PAYMENT_PLAN values
+:setvar PLAN_CONTRACT_ID ""
+:setvar PLAN_INSTALLMENT_COUNT "4"
+:setvar PLAN_FIRST_DUE_DATE "2026-08-01"
+:setvar PLAN_TOTAL_AMOUNT "2000.00"
+:setvar PLAN_CURRENCY_CODE "EUR"
+
 SET NOCOUNT ON;
 GO
 
@@ -217,7 +254,12 @@ IF @ActionName NOT IN (
     N'UPDATE_CLAIM_RESERVE',
     N'CREATE_LEGAL_PERSON',
     N'REGISTER_EXPORT_JOB',
-    N'COMPLETE_EXPORT_JOB'
+    N'COMPLETE_EXPORT_JOB',
+    N'CREATE_REAL_ESTATE_OBJECT',
+    N'ADD_COVERAGE_ITEM',
+    N'ATTACH_DOCUMENT',
+    N'RECORD_PAYMENT',
+    N'CREATE_PAYMENT_PLAN'
 )
     THROW 52302, 'Unknown ACTION_NAME.', 1;
 
@@ -244,7 +286,12 @@ FROM (VALUES
     (N'CREATE_TASK',          N'tasking.SP_CreateTask',            N'PREVIEW_FIRST', N'Creates a tenant-owned follow-up task with optional related entity validation.'),
     (N'CREATE_VEHICLE_OBJECT',N'risk.SP_CreateVehicleObject',      N'PREVIEW_FIRST', N'Creates a tenant-owned vehicle risk object before policy linking.'),
     (N'REGISTER_EXPORT_JOB',  N'import.SP_CreateExportJob',        N'PREVIEW_FIRST', N'Registers a new bulk export job (FSMA, PORTFOLIO, CLAIMS, LEDGER, CUSTOM).'),
-    (N'UPDATE_CLAIM_RESERVE', N'claim.SP_UpdateClaimReserve',      N'PREVIEW_FIRST', N'Updates the reserved amount for a tenant-owned claim with reason logging.')
+    (N'UPDATE_CLAIM_RESERVE',        N'claim.SP_UpdateClaimReserve',        N'PREVIEW_FIRST', N'Updates the reserved amount for a tenant-owned claim with reason logging.'),
+    (N'CREATE_REAL_ESTATE_OBJECT',   N'risk.sp_CreateProperty',             N'PREVIEW_FIRST', N'Creates a real estate risk object (house, apartment) before policy linking.'),
+    (N'ADD_COVERAGE_ITEM',           N'coverage.sp_AddCoverageItem',        N'PREVIEW_FIRST', N'Adds a coverage line item to a tenant-owned policy contract.'),
+    (N'ATTACH_DOCUMENT',             N'document.sp_CreateDocument',         N'PREVIEW_FIRST', N'Registers a document metadata record and links it to a policy, claim, or person.'),
+    (N'RECORD_PAYMENT',              N'finance.sp_RecordPayment',           N'PREVIEW_FIRST', N'Records a payment against an invoice; auto-marks invoice PAID when fully settled.'),
+    (N'CREATE_PAYMENT_PLAN',         N'finance.sp_CreatePaymentPlan',       N'PREVIEW_FIRST', N'Creates an installment payment plan with auto-generated instalment schedule.')
 ) AS a(action_name, procedure_name, default_mode, info_tip)
 ORDER BY action_name;
 
@@ -1070,5 +1117,292 @@ BEGIN
         @CompleteJobId AS job_id,
         @CompleteStatusCode AS final_status,
         N'Export job updated. Use GetExportJobStatus to verify final state.' AS info_tip;
+END;
+
+-- =============================================================================
+-- CREATE_REAL_ESTATE_OBJECT
+-- Creates a real estate (fire/property) risk object in risk.InsurableRealEstate.
+-- Result: insurable_object_id — use as INSURABLE_OBJECT_ID for ADD_POLICY_OBJECT.
+-- =============================================================================
+IF @ActionName = N'CREATE_REAL_ESTATE_OBJECT'
+BEGIN
+    DECLARE @PropAddress NVARCHAR(500) = NULLIF(N'$(PROPERTY_ADDRESS)', N'');
+    DECLARE @PropTypeCode NVARCHAR(80) = COALESCE(NULLIF(N'$(PROPERTY_TYPE_CODE)', N''), N'HOUSE');
+    DECLARE @PropArea DECIMAL(10,2) = TRY_CONVERT(DECIMAL(10,2), NULLIF(N'$(PROPERTY_CONSTRUCTION_AREA)', N''));
+    DECLARE @PropYear INT = TRY_CONVERT(INT, NULLIF(N'$(PROPERTY_CONSTRUCTION_YEAR)', N''));
+    DECLARE @PropInsuredValue DECIMAL(18,2) = TRY_CONVERT(DECIMAL(18,2), NULLIF(N'$(PROPERTY_INSURED_VALUE)', N''));
+    DECLARE @PropCurrencyCode NCHAR(3) = COALESCE(NULLIF(N'$(PROPERTY_CURRENCY_CODE)', N''), N'EUR');
+
+    PRINT '02 - CREATE_REAL_ESTATE_OBJECT preview';
+    SELECT
+        @TenantId AS tenant_id,
+        @PropAddress AS property_address,
+        @PropTypeCode AS property_type_code,
+        @PropArea AS construction_area,
+        @PropYear AS construction_year,
+        @PropInsuredValue AS insured_value,
+        @PropCurrencyCode AS currency_code,
+        N'INFO TIP: PropertyTypeCodes: HOUSE, APARTMENT, OFFICE, WAREHOUSE, COMMERCIAL. insured_value is informational; set tariff via UpsertTariffRate.' AS info_tip;
+
+    PRINT '03 - Input validation';
+    SELECT
+        CASE WHEN @PropAddress IS NOT NULL THEN N'OK' ELSE N'WARN: property_address is empty' END AS address_status,
+        CASE WHEN @PropTypeCode IN (N'HOUSE', N'APARTMENT', N'OFFICE', N'WAREHOUSE', N'COMMERCIAL') THEN N'OK' ELSE N'WARN: unexpected property_type_code' END AS type_status,
+        N'INFO TIP: Proceed with EXECUTE_ACTION = 1 when inputs are correct.' AS info_tip;
+
+    IF @ExecuteAction = 0
+        RETURN;
+
+    DECLARE @PropObjectId UNIQUEIDENTIFIER;
+
+    EXEC risk.sp_CreateProperty
+        @tenant_id           = @TenantId,
+        @property_address    = @PropAddress,
+        @property_type_code  = @PropTypeCode,
+        @construction_area   = @PropArea,
+        @construction_year   = @PropYear,
+        @insured_value       = @PropInsuredValue,
+        @currency_code       = @PropCurrencyCode,
+        @created_by_user_id  = @CreatedByUserId,
+        @insurable_object_id = @PropObjectId OUTPUT;
+
+    SELECT
+        @PropObjectId AS insurable_object_id,
+        @PropTypeCode AS property_type_code,
+        @PropAddress AS property_address,
+        N'Real estate object created. Copy insurable_object_id into INSURABLE_OBJECT_ID for ADD_POLICY_OBJECT.' AS info_tip;
+END;
+
+-- =============================================================================
+-- ADD_COVERAGE_ITEM
+-- Adds a coverage line item to a policy contract.
+-- =============================================================================
+IF @ActionName = N'ADD_COVERAGE_ITEM'
+BEGIN
+    DECLARE @CovContractId UNIQUEIDENTIFIER = TRY_CONVERT(UNIQUEIDENTIFIER, NULLIF(N'$(COVERAGE_CONTRACT_ID)', N''));
+    DECLARE @CovTypeCode NVARCHAR(80) = UPPER(NULLIF(N'$(COVERAGE_TYPE_CODE)', N''));
+    DECLARE @CovLimit DECIMAL(18,2) = TRY_CONVERT(DECIMAL(18,2), NULLIF(N'$(COVERAGE_LIMIT)', N''));
+    DECLARE @CovDeductible DECIMAL(18,2) = TRY_CONVERT(DECIMAL(18,2), NULLIF(N'$(COVERAGE_DEDUCTIBLE)', N''));
+    DECLARE @CovCurrencyCode NCHAR(3) = COALESCE(NULLIF(N'$(COVERAGE_CURRENCY_CODE)', N''), N'EUR');
+
+    PRINT '02 - ADD_COVERAGE_ITEM preview';
+    SELECT
+        @CovContractId AS contract_id,
+        @CovTypeCode AS coverage_type_code,
+        @CovLimit AS coverage_limit,
+        @CovDeductible AS deductible,
+        @CovCurrencyCode AS currency_code,
+        N'INFO TIP: coverage_limit > 0 required. deductible is optional.' AS info_tip;
+
+    PRINT '03 - Coverage type and contract validation';
+    SELECT
+        CASE WHEN @CovContractId IS NULL THEN N'MISSING' WHEN EXISTS (SELECT 1 FROM policy.Contract WHERE contract_id = @CovContractId AND tenant_id = @TenantId) THEN N'OK' ELSE N'NOT_FOUND' END AS contract_status,
+        CASE WHEN @CovTypeCode IS NULL THEN N'MISSING' WHEN EXISTS (SELECT 1 FROM coverage.CoverageType WHERE coverage_type_code = @CovTypeCode AND is_active = 1) THEN N'OK' ELSE N'UNKNOWN_TYPE' END AS coverage_type_status,
+        CASE WHEN ISNULL(@CovLimit, 0) > 0 THEN N'OK' ELSE N'INVALID: must be > 0' END AS limit_status,
+        N'INFO TIP: All statuses must be OK before EXECUTE_ACTION = 1.' AS info_tip;
+
+    IF @ExecuteAction = 0
+        RETURN;
+
+    DECLARE @CovItemId UNIQUEIDENTIFIER;
+
+    EXEC coverage.sp_AddCoverageItem
+        @tenant_id          = @TenantId,
+        @contract_id        = @CovContractId,
+        @coverage_type_code = @CovTypeCode,
+        @coverage_limit     = @CovLimit,
+        @deductible         = @CovDeductible,
+        @currency_code      = @CovCurrencyCode,
+        @coverage_item_id   = @CovItemId OUTPUT;
+
+    SELECT
+        @CovItemId AS coverage_item_id,
+        @CovContractId AS contract_id,
+        @CovTypeCode AS coverage_type_code,
+        @CovLimit AS coverage_limit,
+        @CovCurrencyCode AS currency_code,
+        N'Coverage item added. Use CalculatePremium MCP tool or SP_CalculatePremium to recalculate premium.' AS info_tip;
+END;
+
+-- =============================================================================
+-- ATTACH_DOCUMENT
+-- Registers a document and links it to a policy, claim, person, or risk object.
+-- owner_entity_type: POLICY | CLAIM | PERSON | INSTITUTION | RISK_OBJECT
+-- =============================================================================
+IF @ActionName = N'ATTACH_DOCUMENT'
+BEGIN
+    DECLARE @DocTypeCode NVARCHAR(80) = NULLIF(N'$(DOC_DOCUMENT_TYPE_CODE)', N'');
+    DECLARE @DocFileName NVARCHAR(260) = NULLIF(N'$(DOC_FILE_NAME)', N'');
+    DECLARE @DocMimeType NVARCHAR(120) = COALESCE(NULLIF(N'$(DOC_MIME_TYPE)', N''), N'application/pdf');
+    DECLARE @DocSizeBytes BIGINT = TRY_CONVERT(BIGINT, NULLIF(N'$(DOC_FILE_SIZE_BYTES)', N''));
+    DECLARE @DocStorageUri NVARCHAR(500) = NULLIF(N'$(DOC_STORAGE_URI)', N'');
+    DECLARE @DocOwnerType NVARCHAR(60) = UPPER(COALESCE(NULLIF(N'$(DOC_OWNER_ENTITY_TYPE)', N''), N'POLICY'));
+    DECLARE @DocOwnerEntityId UNIQUEIDENTIFIER = TRY_CONVERT(UNIQUEIDENTIFIER, NULLIF(N'$(DOC_OWNER_ENTITY_ID)', N''));
+
+    PRINT '02 - ATTACH_DOCUMENT preview';
+    SELECT
+        @DocFileName AS file_name,
+        @DocTypeCode AS document_type_code,
+        @DocMimeType AS mime_type,
+        @DocOwnerType AS owner_entity_type,
+        @DocOwnerEntityId AS owner_entity_id,
+        @DocStorageUri AS storage_uri,
+        N'INFO TIP: owner_entity_type: POLICY, CLAIM, PERSON, INSTITUTION, RISK_OBJECT. storage_uri can be empty (placeholder assigned).' AS info_tip;
+
+    PRINT '03 - Input validation';
+    SELECT
+        CASE WHEN @DocFileName IS NOT NULL THEN N'OK' ELSE N'MISSING' END AS file_name_status,
+        CASE WHEN @DocTypeCode IS NOT NULL THEN N'OK' ELSE N'MISSING' END AS document_type_status,
+        CASE WHEN @DocOwnerType IN (N'PERSON', N'INSTITUTION', N'POLICY', N'CLAIM', N'RISK_OBJECT') THEN N'OK' ELSE N'INVALID_TYPE' END AS owner_type_status,
+        CASE WHEN @DocOwnerEntityId IS NOT NULL THEN N'OK' ELSE N'MISSING' END AS owner_entity_id_status,
+        N'INFO TIP: All statuses must be OK before EXECUTE_ACTION = 1.' AS info_tip;
+
+    IF @ExecuteAction = 0
+        RETURN;
+
+    DECLARE @DocId UNIQUEIDENTIFIER;
+
+    EXEC document.sp_CreateDocument
+        @tenant_id           = @TenantId,
+        @document_type_code  = @DocTypeCode,
+        @file_name           = @DocFileName,
+        @mime_type           = @DocMimeType,
+        @file_size_bytes     = @DocSizeBytes,
+        @storage_uri         = @DocStorageUri,
+        @uploaded_by_user_id = @CreatedByUserId,
+        @owner_entity_type   = @DocOwnerType,
+        @owner_entity_id     = @DocOwnerEntityId,
+        @document_id         = @DocId OUTPUT;
+
+    SELECT
+        @DocId AS document_id,
+        @DocFileName AS file_name,
+        @DocTypeCode AS document_type_code,
+        @DocOwnerType AS owner_entity_type,
+        @DocOwnerEntityId AS owner_entity_id,
+        N'Document registered. Update storage_uri later via direct update when the file has been uploaded to Azure Blob.' AS info_tip;
+END;
+
+-- =============================================================================
+-- RECORD_PAYMENT
+-- Records a payment against a finance.Invoice.
+-- Auto-marks the invoice PAID when total payments >= invoice amount.
+-- =============================================================================
+IF @ActionName = N'RECORD_PAYMENT'
+BEGIN
+    DECLARE @PayInvoiceId UNIQUEIDENTIFIER = TRY_CONVERT(UNIQUEIDENTIFIER, NULLIF(N'$(PAYMENT_INVOICE_ID)', N''));
+    DECLARE @PayDate DATE = TRY_CONVERT(DATE, NULLIF(N'$(PAYMENT_DATE)', N''));
+    DECLARE @PayAmount DECIMAL(18,2) = TRY_CONVERT(DECIMAL(18,2), NULLIF(N'$(PAYMENT_AMOUNT)', N''));
+    DECLARE @PayMethodCode NVARCHAR(32) = COALESCE(NULLIF(N'$(PAYMENT_METHOD_CODE)', N''), N'BANK_TRANSFER');
+
+    PRINT '02 - RECORD_PAYMENT preview';
+    SELECT
+        @PayInvoiceId AS invoice_id,
+        @PayDate AS payment_date,
+        @PayAmount AS amount,
+        @PayMethodCode AS payment_method_code,
+        N'INFO TIP: PaymentMethodCodes: BANK_TRANSFER, DIRECT_DEBIT, CASH, CARD. Invoice auto-marked PAID when sum of payments >= invoice total.' AS info_tip;
+
+    PRINT '03 - Invoice and amount validation';
+    SELECT
+        CASE WHEN @PayInvoiceId IS NULL THEN N'MISSING'
+             WHEN EXISTS (SELECT 1 FROM finance.Invoices WHERE InvoiceId = @PayInvoiceId AND TenantId = @TenantId) THEN N'OK'
+             ELSE N'NOT_FOUND' END AS invoice_status,
+        CASE WHEN ISNULL(@PayAmount, 0) > 0 THEN N'OK' ELSE N'INVALID: must be > 0' END AS amount_status,
+        CASE WHEN @PayDate IS NOT NULL THEN N'OK' ELSE N'MISSING' END AS payment_date_status,
+        CASE WHEN @PayMethodCode IN (N'BANK_TRANSFER', N'DIRECT_DEBIT', N'CASH', N'CARD') THEN N'OK' ELSE N'UNKNOWN_METHOD' END AS method_status,
+        N'INFO TIP: All statuses must be OK before EXECUTE_ACTION = 1.' AS info_tip;
+
+    IF @ExecuteAction = 0
+        RETURN;
+
+    DECLARE @PayId UNIQUEIDENTIFIER;
+
+    EXEC finance.sp_RecordPayment
+        @tenant_id          = @TenantId,
+        @invoice_id         = @PayInvoiceId,
+        @payment_date       = @PayDate,
+        @amount             = @PayAmount,
+        @payment_method_code= @PayMethodCode,
+        @payment_id         = @PayId OUTPUT;
+
+    DECLARE @InvoiceBalance TABLE (StatusCode NVARCHAR(20), Amount DECIMAL(18,2), PaidTotal DECIMAL(18,2));
+    INSERT INTO @InvoiceBalance
+    SELECT
+        i.StatusCode,
+        i.Amount,
+        ISNULL(SUM(p.Amount), 0)
+    FROM finance.Invoices i
+    LEFT JOIN finance.Payments p ON p.InvoiceId = i.InvoiceId
+    WHERE i.InvoiceId = @PayInvoiceId
+    GROUP BY i.StatusCode, i.Amount;
+
+    SELECT
+        @PayId AS payment_id,
+        @PayInvoiceId AS invoice_id,
+        @PayAmount AS recorded_amount,
+        b.StatusCode AS invoice_status,
+        b.Amount AS invoice_total,
+        b.PaidTotal AS total_paid,
+        b.Amount - b.PaidTotal AS remaining_balance,
+        N'Payment recorded.' AS info_tip
+    FROM @InvoiceBalance b;
+END;
+
+-- =============================================================================
+-- CREATE_PAYMENT_PLAN
+-- Creates an installment payment plan with auto-generated schedule.
+-- =============================================================================
+IF @ActionName = N'CREATE_PAYMENT_PLAN'
+BEGIN
+    DECLARE @PlanContractId UNIQUEIDENTIFIER = TRY_CONVERT(UNIQUEIDENTIFIER, NULLIF(N'$(PLAN_CONTRACT_ID)', N''));
+    DECLARE @PlanInstallmentCount SMALLINT = TRY_CONVERT(SMALLINT, NULLIF(N'$(PLAN_INSTALLMENT_COUNT)', N''));
+    DECLARE @PlanFirstDueDate DATE = TRY_CONVERT(DATE, NULLIF(N'$(PLAN_FIRST_DUE_DATE)', N''));
+    DECLARE @PlanTotalAmount DECIMAL(18,2) = TRY_CONVERT(DECIMAL(18,2), NULLIF(N'$(PLAN_TOTAL_AMOUNT)', N''));
+    DECLARE @PlanCurrencyCode NCHAR(3) = COALESCE(NULLIF(N'$(PLAN_CURRENCY_CODE)', N''), N'EUR');
+
+    PRINT '02 - CREATE_PAYMENT_PLAN preview';
+    SELECT
+        @PlanContractId AS contract_id,
+        @PlanInstallmentCount AS installment_count,
+        @PlanFirstDueDate AS first_due_date,
+        @PlanTotalAmount AS total_amount,
+        @PlanCurrencyCode AS currency_code,
+        ROUND(ISNULL(@PlanTotalAmount, 0) / ISNULL(NULLIF(@PlanInstallmentCount, 0), 1), 2) AS installment_amount_preview,
+        N'INFO TIP: Installments are auto-scheduled monthly from first_due_date. installment_count >= 1 required.' AS info_tip;
+
+    PRINT '03 - Contract and amount validation';
+    SELECT
+        CASE WHEN @PlanContractId IS NULL THEN N'MISSING'
+             WHEN EXISTS (SELECT 1 FROM policy.Contract WHERE contract_id = @PlanContractId AND tenant_id = @TenantId) THEN N'OK'
+             ELSE N'NOT_FOUND' END AS contract_status,
+        CASE WHEN ISNULL(@PlanInstallmentCount, 0) >= 1 THEN N'OK' ELSE N'INVALID: must be >= 1' END AS installment_count_status,
+        CASE WHEN @PlanFirstDueDate IS NOT NULL THEN N'OK' ELSE N'MISSING' END AS first_due_date_status,
+        CASE WHEN ISNULL(@PlanTotalAmount, 0) > 0 THEN N'OK' ELSE N'INVALID: must be > 0' END AS total_amount_status,
+        N'INFO TIP: All statuses must be OK before EXECUTE_ACTION = 1.' AS info_tip;
+
+    IF @ExecuteAction = 0
+        RETURN;
+
+    DECLARE @PlanId UNIQUEIDENTIFIER;
+
+    EXEC finance.sp_CreatePaymentPlan
+        @tenant_id          = @TenantId,
+        @contract_id        = @PlanContractId,
+        @installment_count  = @PlanInstallmentCount,
+        @first_due_date     = @PlanFirstDueDate,
+        @total_amount       = @PlanTotalAmount,
+        @currency_code      = @PlanCurrencyCode,
+        @plan_id            = @PlanId OUTPUT;
+
+    SELECT
+        @PlanId AS payment_plan_id,
+        @PlanContractId AS contract_id,
+        @PlanInstallmentCount AS installment_count,
+        @PlanTotalAmount AS total_amount,
+        @PlanCurrencyCode AS currency_code,
+        ROUND(@PlanTotalAmount / @PlanInstallmentCount, 2) AS installment_amount,
+        @PlanFirstDueDate AS first_due_date,
+        N'Payment plan created with instalment schedule. Review via finance.PaymentPlanItems.' AS info_tip;
 END;
 GO
