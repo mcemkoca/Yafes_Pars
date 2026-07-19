@@ -9,7 +9,7 @@
         "defaultName": "YafesPars_Dev",
         "environment": "DEV",
         "schemaCount": 15,
-        "tableCount": 142,
+        "tableCount": 144,
         "legacyReferenceTableCount": 89
     },
     "tenant": {
@@ -662,14 +662,16 @@
             "schema": "import",
             "title": "Import",
             "lane": "Operations",
-            "subheading": "Bulk policy import staging, legacy data migration � PolicyImport, LegacyPerson, LegacyContract, LegacyClaim",
+            "subheading": "Bulk policy import staging, legacy data migration, export job lifecycle — PolicyImport, LegacyPerson, LegacyContract, LegacyClaim, ExportJob, ExportJobFile",
             "entryPoint": "06__query_library_shortcuts.sql",
-            "tableCount": 4,
+            "tableCount": 6,
             "tables": [
                 "LegacyClaim",
                 "LegacyContract",
                 "LegacyPerson",
-                "PolicyImport"
+                "PolicyImport",
+                "ExportJob",
+                "ExportJobFile"
             ]
         },
         {
