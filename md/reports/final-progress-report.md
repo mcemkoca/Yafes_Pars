@@ -1,6 +1,13 @@
 # Final Progress Report
 
-Branch: `feature/complete-db-validation-backend-frontend-foundation`
+> **ARCHIVE — 2026-07-19**
+> This report describes work completed on the now-deleted branch
+> `feature/complete-db-validation-backend-frontend-foundation`.
+> It is preserved as a historical record only.
+> Current system state is authoritative; do not use these build results
+> to draw conclusions about the present codebase.
+
+Branch: `feature/complete-db-validation-backend-frontend-foundation` *(deleted — merged into main)*
 
 ## Completed Database Work
 
