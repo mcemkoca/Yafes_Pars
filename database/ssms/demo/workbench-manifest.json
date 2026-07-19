@@ -18,8 +18,8 @@
         "environmentLabel": "DEV"
     },
     "migrations": {
-        "count": 48,
-        "latest": "047__register_missing_migrations.sql",
+        "count": 49,
+        "latest": "048__add_export_job_lifecycle.sql",
         "files": [
             "000__create_database.sql",
             "001__create_schemas.sql",
@@ -68,12 +68,13 @@
             "044__add_claim_settlement.sql",
             "045__add_finance_ledger.sql",
             "046__add_commission_integrity.sql",
-            "047__register_missing_migrations.sql"
+            "047__register_missing_migrations.sql",
+            "048__add_export_job_lifecycle.sql"
         ]
     },
     "validations": {
-        "count": 34,
-        "latest": "034__validate_commission_integrity.sql",
+        "count": 35,
+        "latest": "035__validate_export_job_lifecycle.sql",
         "files": [
             "001__validate_core_infrastructure.sql",
             "002__validate_person_domain.sql",
@@ -108,7 +109,8 @@
             "031__validate_premium_calculator.sql",
             "032__validate_claim_settlement.sql",
             "033__validate_finance_ledger.sql",
-            "034__validate_commission_integrity.sql"
+            "034__validate_commission_integrity.sql",
+            "035__validate_export_job_lifecycle.sql"
         ]
     },
     "ssmsScripts": [
