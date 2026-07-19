@@ -205,50 +205,95 @@ public sealed class ComplianceTools
     }
 
     // -------------------------------------------------------------------------
+    // SP_CreateSqlReviewRequest:
+    //   sql_review_request_id, tenant_id, environment_code, target_database,
+    //   script_name, risk_score, risk_level, status_code, created_at_utc
+    // SP_GetSqlReviewRequests:
+    //   sql_review_request_id, environment_code, target_database, script_name,
+    //   risk_score, risk_level, status_code, submitted_by_user_id,
+    //   created_at_utc, approved_at_utc, executed_at_utc
+    // Shared subset (positional ctor Dapper fills left-to-right):
     private sealed record SqlReviewRow(
-        Guid   SqlReviewRequestId,
-        string EnvironmentCode,
-        string TargetDatabase,
-        string ScriptName,
-        string Status,
-        int?   RiskScore,
+        Guid      SqlReviewRequestId,
+        string    EnvironmentCode,
+        string    TargetDatabase,
+        string    ScriptName,
+        int?      RiskScore,
+        string?   RiskLevel,
+        string    StatusCode,
+        DateTime  CreatedAtUtc);
+
+    // SP_GetSqlRiskFindings:
+    //   sql_risk_finding_id, sql_review_request_id, rule_code, severity_code,
+    //   category_code, finding_message, evidence, line_number, created_at_utc
+    private sealed record SqlRiskFindingRow(
+        Guid     SqlRiskFindingId,
+        Guid     SqlReviewRequestId,
+        string   RuleCode,
+        string   SeverityCode,
+        string   CategoryCode,
+        string   FindingMessage,
+        string?  Evidence,
+        int?     LineNumber,
         DateTime CreatedAtUtc);
 
-    private sealed record SqlRiskFindingRow(
-        Guid   FindingId,
-        Guid   SqlReviewRequestId,
-        string RiskCategory,
-        string RiskLevel,
-        string Description,
-        string? AffectedObject);
-
+    // SP_RunSensitiveColumnScan:
+    //   sensitive_column_finding_id, schema_name, table_name, column_name,
+    //   detected_pattern, data_category_code, confidence_score,
+    //   masking_recommended, is_acknowledged, created_at_utc
     private sealed record SensitiveColumnRow(
-        string SchemaName,
-        string TableName,
-        string ColumnName,
-        string PiiCategory,
-        bool   IsEncrypted);
+        Guid     SensitiveColumnFindingId,
+        string   SchemaName,
+        string   TableName,
+        string   ColumnName,
+        string   DetectedPattern,
+        string   DataCategoryCode,
+        decimal  ConfidenceScore,
+        bool     MaskingRecommended,
+        bool     IsAcknowledged,
+        DateTime CreatedAtUtc);
 
+    // SP_RunComplianceScan:
+    //   compliance_scan_run_id, tenant_id, scan_scope_code, status_code,
+    //   started_at_utc, completed_at_utc, summary_json
     private sealed record ComplianceScanRow(
-        Guid     ScanRunId,
-        DateTime ScannedAtUtc,
-        int      TotalChecks,
-        int      PassedChecks,
-        int      FailedChecks,
-        string?  SummaryJson);
+        Guid      ComplianceScanRunId,
+        Guid      TenantId,
+        string    ScanScopeCode,
+        string    StatusCode,
+        DateTime  StartedAtUtc,
+        DateTime? CompletedAtUtc,
+        string?   SummaryJson);
 
+    // SP_GetComplianceFindings:
+    //   compliance_finding_id, compliance_scan_run_id, framework_code,
+    //   control_code, finding_status_code, severity_code, finding_title,
+    //   finding_detail, remediation_hint, created_at_utc
     private sealed record ComplianceFindingRow(
-        Guid   FindingId,
-        string Framework,
-        string ControlCode,
-        string ControlDescription,
-        string Status,
-        string? Recommendation);
+        Guid     ComplianceFindingId,
+        Guid     ComplianceScanRunId,
+        string   FrameworkCode,
+        string   ControlCode,
+        string   FindingStatusCode,
+        string   SeverityCode,
+        string   FindingTitle,
+        string?  FindingDetail,
+        string?  RemediationHint,
+        DateTime CreatedAtUtc);
 
+    // SP_RunPermissionDriftScan / SP_GetPermissionDriftFindings:
+    //   permission_drift_finding_id, finding_type_code, severity_code,
+    //   principal_name, role_code, finding_detail, remediation_hint,
+    //   is_resolved, created_at_utc, resolved_at_utc
     private sealed record PermissionDriftRow(
-        Guid   UserId,
-        string Email,
-        bool   IsActive,
-        int    RoleCount,
-        DateTime? LastLoginAtUtc);
+        Guid      PermissionDriftFindingId,
+        string    FindingTypeCode,
+        string    SeverityCode,
+        string?   PrincipalName,
+        string?   RoleCode,
+        string?   FindingDetail,
+        string?   RemediationHint,
+        bool      IsResolved,
+        DateTime  CreatedAtUtc,
+        DateTime? ResolvedAtUtc);
 }

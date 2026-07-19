@@ -166,10 +166,10 @@ public sealed class TenantManagementTools
 
     [McpServerTool, Description(
         "Demo-data verwijderen vóór productie-go-live. / Canlıya geçmeden önce demo verisini temizle.\n" +
-        "ONOMKEERBAAR. Vereist confirmToken = 'PURGE-DEMO-DATA'. " +
+        "ONOMKEERBAAR. Vereist confirmToken = 'PURGE-DEMO-DATA-CONFIRM'. " +
         "Werkt alleen als core.SystemSetting 'demo_data_seeded' = '1' én environment ≠ PROD.")]
     public async Task<string> PurgeDemoData(
-        [Description("Bevestigingstoken: typ exact 'PURGE-DEMO-DATA'")] string confirmToken,
+        [Description("Bevestigingstoken: typ exact 'PURGE-DEMO-DATA-CONFIRM'")] string confirmToken,
         CancellationToken ct = default)
     {
         var rows = await _read.QueryAsync<PurgeResultRow>(
@@ -181,7 +181,8 @@ public sealed class TenantManagementTools
 
     private sealed record IsolationRow(Guid TenantId, int RowCount);
 
-    private sealed record PurgeResultRow(int DeletedRows, string Message);
+    // SP_PurgeDemoData returns: Result (NVARCHAR), RowsPurged (INT)
+    private sealed record PurgeResultRow(string Result, int RowsPurged);
 
     private sealed record TenantRow(
         Guid     TenantId,

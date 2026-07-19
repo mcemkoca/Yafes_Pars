@@ -180,18 +180,24 @@ public sealed class FinanceLedgerTools
             ct);
 
         var row = rows.FirstOrDefault();
+        // SP returns WouldMark (dry_run=1) or Marked (dry_run=0), plus Mode and RunDate
+        int count = dryRun ? (row?.WouldMark ?? 0) : (row?.Marked ?? 0);
         return JsonSerializer.Serialize(new
         {
             dryRun,
-            affected = row?.Affected ?? 0,
+            mode     = row?.Mode,
+            runDate  = row?.RunDate,
+            affected = count,
             message  = dryRun
-                ? $"{row?.Affected ?? 0} facturen zouden OVERDUE worden (dryRun, geen schrijven)."
-                : $"{row?.Affected ?? 0} facturen bijgewerkt naar OVERDUE."
+                ? $"{count} facturen zouden OVERDUE worden (dryRun, geen schrijven)."
+                : $"{count} facturen bijgewerkt naar OVERDUE."
         });
     }
 
     // -------------------------------------------------------------------------
-    private sealed record OverdueResultRow(int Affected);
+    // SP_MarkOverdueInvoices dry_run=1: WouldMark, Mode, RunDate
+    // SP_MarkOverdueInvoices dry_run=0: Marked,    Mode, RunDate
+    private sealed record OverdueResultRow(int? WouldMark, int? Marked, string? Mode, DateOnly? RunDate);
 
     private sealed record LedgerEntryRow(
         Guid     EntryId,
