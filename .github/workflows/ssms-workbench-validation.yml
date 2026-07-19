@@ -212,7 +212,7 @@ jobs:
             ['database.schemaCount', manifest.database.schemaCount, schemaNames.size],
             ['migrations.count', manifest.migrations.count, migrationFiles.length],
             ['validations.count', manifest.validations.count, validationFiles.length],
-            ['ssmsScripts.count', manifest.ssmsScripts.length, ssmsScripts.length]
+            ['ssmsScripts.count', manifest.ssmsScripts.count, ssmsScripts.length]
           ];
 
           for (const [label, actual, expected] of checks) {
