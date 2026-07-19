@@ -1,12 +1,10 @@
 -- =============================================================================
 -- Access Review Tool 02: Role–Permission Matrix
--- Read-only. Shows which roles have which permissions.
+-- Read-only. Schema: core.Role, core.Permission (PK=permission_code),
+-- core.RolePermission (role_id, permission_code), core.UserRole (user_id, role_id).
 -- Evidence: export to CSV and attach to access-review report.
 -- =============================================================================
 SET NOCOUNT ON;
-GO
-
-USE [YafesPars];
 GO
 
 PRINT 'Access Review: 01 - Role list';
@@ -14,9 +12,9 @@ PRINT 'Access Review: 01 - Role list';
 SELECT
     r.role_code,
     r.role_name,
-    r.is_active,
-    r.created_at_utc
-FROM core.AppRole r
+    r.is_system_role,
+    r.is_active
+FROM core.Role r
 ORDER BY r.role_code;
 GO
 
@@ -38,11 +36,10 @@ SELECT
     r.role_name,
     p.module_code,
     p.permission_code,
-    p.permission_name,
-    rp.granted_at_utc
+    p.permission_name
 FROM core.RolePermission rp
-INNER JOIN core.AppRole   r ON r.role_id      = rp.role_id
-INNER JOIN core.Permission p ON p.permission_id = rp.permission_id
+INNER JOIN core.Role       r ON r.role_id        = rp.role_id
+INNER JOIN core.Permission p ON p.permission_code = rp.permission_code
 ORDER BY r.role_code, p.module_code, p.permission_code;
 GO
 
@@ -52,12 +49,11 @@ SELECT
     t.tenant_code,
     u.email,
     r.role_code,
-    r.role_name,
-    ur.assigned_at_utc
+    r.role_name
 FROM core.UserRole ur
-INNER JOIN core.AppUser   u ON u.user_id   = ur.user_id
-INNER JOIN core.AppRole   r ON r.role_id   = ur.role_id
-INNER JOIN core.Tenant    t ON t.tenant_id = u.tenant_id
+INNER JOIN core.AppUser u ON u.user_id   = ur.user_id
+INNER JOIN core.Role    r ON r.role_id   = ur.role_id
+INNER JOIN core.Tenant  t ON t.tenant_id = u.tenant_id
 ORDER BY t.tenant_code, u.email, r.role_code;
 GO
 

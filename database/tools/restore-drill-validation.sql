@@ -5,18 +5,30 @@
 -- Validates structural integrity: table counts, migration state, SP presence,
 -- and basic row-count sanity checks.
 --
+-- IMPORTANT: Do NOT switch the database context here. The caller must already
+-- be connected to the restored copy (e.g. YafesPars_RestoreDrill).
+-- Using `USE [YafesPars]` would re-target the source DB if it is present on
+-- the same server, defeating the drill.
+-- See md/restore/test-restore-drill-plan.md for connection instructions.
+--
 -- !! NEVER run against the primary DEV/TEST/PROD instance !!
--- This script is for the restored copy only.
 -- =============================================================================
 SET NOCOUNT ON;
-GO
-
-USE [YafesPars];
 GO
 
 PRINT 'Restore Drill Validation — ' + CONVERT(NVARCHAR, SYSUTCDATETIME(), 126);
 PRINT 'Server: ' + @@SERVERNAME;
 PRINT 'Database: ' + DB_NAME();
+GO
+
+-- Safety: confirm we are NOT on the source database name
+IF DB_NAME() NOT LIKE N'%RestoreDrill%' AND DB_NAME() NOT LIKE N'%Restore%' AND DB_NAME() NOT LIKE N'%Drill%'
+BEGIN
+    PRINT 'WARNING: Database name does not contain RestoreDrill/Restore/Drill.';
+    PRINT 'Connect explicitly to the restored copy before running this script.';
+    PRINT 'Aborting to avoid validating the wrong database.';
+    THROW 55200, 'Run this script while connected to the restored database, not the source.', 1;
+END;
 GO
 
 -- -------------------------------------------------------------------------
@@ -48,8 +60,8 @@ GO
 PRINT '02 - Core table presence';
 
 SELECT
-    t.name                                        AS table_name,
     s.name                                        AS schema_name,
+    t.name                                        AS table_name,
     p.rows                                        AS row_count
 FROM sys.tables t
 INNER JOIN sys.schemas s ON s.schema_id = t.schema_id
@@ -85,18 +97,15 @@ ORDER BY SCHEMA_NAME(o.schema_id), o.name;
 GO
 
 -- -------------------------------------------------------------------------
--- 04. Tenant and user sanity
+-- 04. Tenant and user sanity (core.Role — not core.AppRole)
 -- -------------------------------------------------------------------------
 PRINT '04 - Tenant and user row counts';
 
-SELECT
-    'core.Tenant'  AS table_name, COUNT(*) AS row_count FROM core.Tenant
+SELECT 'core.Tenant'  AS table_name, COUNT(*) AS row_count FROM core.Tenant
 UNION ALL
-SELECT
-    'core.AppUser' AS table_name, COUNT(*) AS row_count FROM core.AppUser
+SELECT 'core.AppUser' AS table_name, COUNT(*) AS row_count FROM core.AppUser
 UNION ALL
-SELECT
-    'core.AppRole' AS table_name, COUNT(*) AS row_count FROM core.AppRole;
+SELECT 'core.Role'    AS table_name, COUNT(*) AS row_count FROM core.Role;
 GO
 
 -- -------------------------------------------------------------------------

@@ -814,6 +814,8 @@ BEGIN
     IF @ExecuteAction = 0
         RETURN;
 
+    -- SP returns a result set on success or an error_code row on rejection.
+    -- Capture and display it so the operator can see the outcome immediately.
     EXEC claim.SP_CreateSettlement
         @tenant_id        = @TenantId,
         @claim_id         = @SettlementClaimId,
@@ -822,8 +824,8 @@ BEGIN
         @notes            = @SettlementNotes,
         @created_by       = @CreatedByUserId,
         @dry_run          = 0;
-
-    SELECT N'Settlement offer created. Copy settlement_id into APPROVE_SETTLEMENT when ready.' AS info_tip;
+    -- SP output: settlement_id + status on success, error_code on rejection.
+    -- Review the result grid above before proceeding.
 END;
 
 -- =============================================================================
@@ -884,7 +886,7 @@ IF @ActionName = N'UPDATE_CLAIM_RESERVE'
 BEGIN
     DECLARE @ReserveClaimId UNIQUEIDENTIFIER = TRY_CONVERT(UNIQUEIDENTIFIER, NULLIF(N'$(RESERVE_CLAIM_ID)', N''));
     DECLARE @NewReserve DECIMAL(18,2) = TRY_CONVERT(DECIMAL(18,2), N'$(RESERVE_NEW_AMOUNT)');
-    DECLARE @ReserveReasonCode NVARCHAR(40) = NULLIF(N'$(RESERVE_REASON_CODE)', N'MANUAL');
+    DECLARE @ReserveReasonCode NVARCHAR(40) = COALESCE(NULLIF(N'$(RESERVE_REASON_CODE)', N''), N'MANUAL');
     DECLARE @ReserveNotes NVARCHAR(500) = NULLIF(N'$(RESERVE_NOTES)', N'');
 
     PRINT '02 - UPDATE_CLAIM_RESERVE preview';
@@ -1010,10 +1012,11 @@ BEGIN
 
     INSERT INTO @ExportJobRows
     EXEC import.SP_CreateExportJob
-        @tenant_id        = @TenantId,
-        @export_type_code = @ExportTypeCode,
-        @period_start     = @ExportPeriodStart,
-        @period_end       = @ExportPeriodEnd;
+        @tenant_id              = @TenantId,
+        @export_type_code       = @ExportTypeCode,
+        @period_start           = @ExportPeriodStart,
+        @period_end             = @ExportPeriodEnd,
+        @requested_by_user_id   = @CreatedByUserId;
 
     SELECT
         JobId AS created_job_id,
