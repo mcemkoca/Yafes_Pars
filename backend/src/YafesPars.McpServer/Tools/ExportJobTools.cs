@@ -169,13 +169,18 @@ public sealed class ExportJobTools
     {
         try
         {
+            // Normalize blank strings to null: SP treats NULL as "no filter",
+            // but an empty string would match nothing (j.export_type_code = '').
+            var typeFilter   = string.IsNullOrWhiteSpace(exportTypeCode) ? null : exportTypeCode.Trim().ToUpperInvariant();
+            var statusFilter = string.IsNullOrWhiteSpace(statusCode)     ? null : statusCode.Trim().ToUpperInvariant();
+
             var rows = await _read.QueryAsync<ExportJobQueueRow>(
                 "import.SP_GetExportJobQueue",
                 new
                 {
                     tenant_id        = _ctx.TenantId,
-                    export_type_code = exportTypeCode,
-                    status_code      = statusCode,
+                    export_type_code = typeFilter,
+                    status_code      = statusFilter,
                     limit
                 },
                 ct);
