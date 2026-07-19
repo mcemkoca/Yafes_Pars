@@ -142,6 +142,48 @@ public sealed class TenantManagementTools
         return JsonSerializer.Serialize(setting);
     }
 
+    [McpServerTool, Description(
+        "Tenant-isolatie controleren voor een tabel. / Bir tablo için tenant izolasyonunu kontrol et.\n" +
+        "Telt rijen per tenant_id en detecteert cross-tenant lekkage in de opgegeven tabel.\n" +
+        "Gebruik voor assurance-controles; schrijft niets.")]
+    public async Task<string> CheckTenantIsolation(
+        [Description("Schemanaam (bijv. 'coverage')")] string schemaName,
+        [Description("Tabelnaam (bijv. 'ContractCoverageItem')")] string tableName,
+        CancellationToken ct = default)
+    {
+        var rows = await _read.QueryAsync<IsolationRow>(
+            "core.SP_TenantIsolationCheck",
+            new { schema_name = schemaName, table_name = tableName }, ct);
+
+        return JsonSerializer.Serialize(new
+        {
+            schemaName,
+            tableName,
+            tenantCount = rows.Count,
+            breakdown   = rows
+        }, JsonOpts.Default);
+    }
+
+    [McpServerTool, Description(
+        "Demo-data verwijderen vóór productie-go-live. / Canlıya geçmeden önce demo verisini temizle.\n" +
+        "ONOMKEERBAAR. Vereist confirmToken = 'PURGE-DEMO-DATA-CONFIRM'. " +
+        "Werkt alleen als core.SystemSetting 'demo_data_seeded' = '1' én environment ≠ PROD.")]
+    public async Task<string> PurgeDemoData(
+        [Description("Bevestigingstoken: typ exact 'PURGE-DEMO-DATA-CONFIRM'")] string confirmToken,
+        CancellationToken ct = default)
+    {
+        var rows = await _read.QueryAsync<PurgeResultRow>(
+            "core.SP_PurgeDemoData",
+            new { confirm_token = confirmToken }, ct);
+
+        return JsonSerializer.Serialize(new { success = true, result = rows.FirstOrDefault() }, JsonOpts.Default);
+    }
+
+    private sealed record IsolationRow(Guid TenantId, int RowCount);
+
+    // SP_PurgeDemoData returns: Result (NVARCHAR), RowsPurged (INT)
+    private sealed record PurgeResultRow(string Result, int RowsPurged);
+
     private sealed record TenantRow(
         Guid     TenantId,
         string   TenantCode,
