@@ -73,7 +73,7 @@ public sealed class ExportJobTests
 
         var completeDoc = JsonDocument.Parse(completeRes).RootElement;
         Assert.Equal("SUCCESS", completeDoc.GetProperty("StatusCode").GetString());
-        Assert.Equal(42, completeDoc.GetProperty("RowCount").GetInt32());
+        Assert.Equal(42, completeDoc.GetProperty("RecordCount").GetInt32());
     }
 
     [SkippableFact]

@@ -200,7 +200,7 @@ BEGIN TRY
         j.job_id            AS JobId,
         j.export_type_code  AS ExportTypeCode,
         j.status_code       AS StatusCode,
-        j.row_count         AS RowCount,
+        j.row_count         AS RecordCount,
         j.started_at_utc    AS StartedAtUtc,
         j.completed_at_utc  AS CompletedAtUtc,
         j.error_message     AS ErrorMessage
@@ -237,7 +237,7 @@ BEGIN TRY
         j.status_code           AS StatusCode,
         j.period_start          AS PeriodStart,
         j.period_end            AS PeriodEnd,
-        j.row_count             AS RowCount,
+        j.row_count             AS RecordCount,
         j.started_at_utc        AS StartedAtUtc,
         j.completed_at_utc      AS CompletedAtUtc,
         j.error_message         AS ErrorMessage,
@@ -251,7 +251,7 @@ BEGIN TRY
         f.file_name         AS FileName,
         f.file_format_code  AS FileFormatCode,
         f.byte_size         AS ByteSize,
-        f.row_count         AS RowCount,
+        f.row_count         AS RecordCount,
         f.storage_path      AS StoragePath,
         f.created_at_utc    AS CreatedAtUtc
     FROM import.ExportJobFile f
@@ -285,7 +285,7 @@ BEGIN TRY
         j.status_code           AS StatusCode,
         j.period_start          AS PeriodStart,
         j.period_end            AS PeriodEnd,
-        j.row_count             AS RowCount,
+        j.row_count             AS RecordCount,
         j.started_at_utc        AS StartedAtUtc,
         j.completed_at_utc      AS CompletedAtUtc,
         j.created_at_utc        AS CreatedAtUtc

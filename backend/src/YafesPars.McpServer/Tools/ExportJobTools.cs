@@ -202,7 +202,7 @@ public sealed class ExportJobTools
         Guid      JobId,
         string    ExportTypeCode,
         string    StatusCode,
-        int?      RowCount,
+        int?      RecordCount,
         DateTime? StartedAtUtc,
         DateTime? CompletedAtUtc,
         string?   ErrorMessage);
@@ -213,7 +213,7 @@ public sealed class ExportJobTools
         string    StatusCode,
         DateOnly? PeriodStart,
         DateOnly? PeriodEnd,
-        int?      RowCount,
+        int?      RecordCount,
         DateTime? StartedAtUtc,
         DateTime? CompletedAtUtc,
         string?   ErrorMessage,
@@ -224,7 +224,7 @@ public sealed class ExportJobTools
         string    FileName,
         string    FileFormatCode,
         long?     ByteSize,
-        int?      RowCount,
+        int?      RecordCount,
         string?   StoragePath,
         DateTime  CreatedAtUtc);
 
@@ -234,7 +234,7 @@ public sealed class ExportJobTools
         string    StatusCode,
         DateOnly? PeriodStart,
         DateOnly? PeriodEnd,
-        int?      RowCount,
+        int?      RecordCount,
         DateTime? StartedAtUtc,
         DateTime? CompletedAtUtc,
         DateTime  CreatedAtUtc);
