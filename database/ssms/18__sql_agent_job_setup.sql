@@ -26,11 +26,12 @@ GO
 USE [msdb];
 GO
 
--- Safety: alleen uitvoeren op DEV of indien expliciet toegestaan
+-- Safety: alleen uitvoeren op DEV/TEST/ACC
 DECLARE @db SYSNAME = N'$(YAFES_SQL_DATABASE)';
 IF @db NOT LIKE N'%DEV%' AND @db NOT LIKE N'%TEST%' AND @db NOT LIKE N'%ACC%'
 BEGIN
-    PRINT 'WARN: Target database name must contain DEV/TEST/ACC. Verify target before running.';
+    RAISERROR('ABORT: Target database name must contain DEV, TEST, or ACC. Current value: %s. Set YAFES_SQL_DATABASE correctly before running.', 16, 1, @db) WITH LOG;
+    RETURN;
 END
 GO
 
@@ -85,11 +86,9 @@ BEGIN
     DECLARE @job_id2 UNIQUEIDENTIFIER;
     DECLARE @tenant_id UNIQUEIDENTIFIER;
 
-    -- Haal de tenant-id op via tenant_code
-    SELECT @tenant_id = tenant_id
-    FROM YafesPars_Dev.core.Tenant
-    WHERE tenant_code = N'$(TENANT_CODE)'
-      AND is_active = 1;
+    -- Haal de tenant-id op via tenant_code (gebruik SQLCMD-variabele voor database naam)
+    DECLARE @sql_tenant NVARCHAR(500) = N'SELECT @tid = tenant_id FROM [' + N'$(YAFES_SQL_DATABASE)' + N'].core.Tenant WHERE tenant_code = N''$(TENANT_CODE)'' AND is_active = 1;';
+    EXEC sp_executesql @sql_tenant, N'@tid UNIQUEIDENTIFIER OUTPUT', @tid = @tenant_id OUTPUT;
 
     IF @tenant_id IS NULL
     BEGIN

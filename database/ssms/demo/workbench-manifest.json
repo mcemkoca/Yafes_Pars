@@ -113,7 +113,9 @@
             "035__validate_export_job_lifecycle.sql"
         ]
     },
-    "ssmsScripts": [
+    "ssmsScripts": {
+        "count": 24,
+        "items": [
         {
             "fileName": "00__open_first_safety_check.sql",
             "path": "database/ssms/00__open_first_safety_check.sql",
@@ -234,7 +236,8 @@
             "path": "database/ssms/23__permission_drift_report.sql",
             "sizeBytes": 1061
         }
-    ],
+        ]
+    },
     "shortcuts": [
         {
             "order": 10,

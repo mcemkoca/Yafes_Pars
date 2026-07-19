@@ -391,7 +391,7 @@ function Test-SsmsWorkbenchManifest {
         [pscustomobject]@{ Label = "database.schemaCount"; Actual = [int]$manifest.database.schemaCount; Expected = $schemaNames.Count },
         [pscustomobject]@{ Label = "migrations.count"; Actual = [int]$manifest.migrations.count; Expected = $migrationFiles.Count },
         [pscustomobject]@{ Label = "validations.count"; Actual = [int]$manifest.validations.count; Expected = $validationFiles.Count },
-        [pscustomobject]@{ Label = "ssmsScripts.count"; Actual = @($manifest.ssmsScripts).Count; Expected = $ssmsScripts.Count }
+        [pscustomobject]@{ Label = "ssmsScripts.count"; Actual = [int]$manifest.ssmsScripts.count; Expected = $ssmsScripts.Count }
     )
 
     foreach ($check in $checks) {

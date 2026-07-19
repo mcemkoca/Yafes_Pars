@@ -153,13 +153,16 @@ $manifest = [ordered]@{
         latest = $validationFiles[-1].Name
         files = @($validationFiles | ForEach-Object { $_.Name })
     }
-    ssmsScripts = @($ssmsScripts | ForEach-Object {
-        [ordered]@{
-            fileName = $_.Name
-            path = Get-RelativePath $_.FullName
-            sizeBytes = $_.Length
-        }
-    })
+    ssmsScripts = [ordered]@{
+        count = $ssmsScripts.Count
+        items = @($ssmsScripts | ForEach-Object {
+            [ordered]@{
+                fileName = $_.Name
+                path = Get-RelativePath $_.FullName
+                sizeBytes = $_.Length
+            }
+        })
+    }
     shortcuts = @($shortcuts)
     schemas = @($schemas)
     backend = [ordered]@{
