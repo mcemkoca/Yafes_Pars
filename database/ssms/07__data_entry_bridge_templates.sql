@@ -118,6 +118,46 @@
 :setvar TASK_REMINDER_AT_UTC "2026-06-15T09:00:00"
 :setvar TASK_REMINDER_CHANNEL_CODE "IN_APP"
 
+-- CREATE_SETTLEMENT values
+:setvar SETTLEMENT_CLAIM_ID ""
+:setvar SETTLEMENT_OFFER_AMOUNT "1000.00"
+:setvar SETTLEMENT_IBAN ""
+:setvar SETTLEMENT_NOTES "Settlement offer created via SSMS bridge."
+
+-- APPROVE_SETTLEMENT values
+:setvar APPROVE_SETTLEMENT_ID ""
+:setvar APPROVE_SETTLEMENT_CLAIM_ID ""
+:setvar APPROVE_AGREED_AMOUNT ""
+:setvar APPROVE_PAYMENT_REFERENCE ""
+:setvar APPROVE_PAYMENT_METHOD_CODE "BANK_TRANSFER"
+
+-- UPDATE_CLAIM_RESERVE values
+:setvar RESERVE_CLAIM_ID ""
+:setvar RESERVE_NEW_AMOUNT "5000.00"
+:setvar RESERVE_REASON_CODE "MANUAL"
+:setvar RESERVE_NOTES "Reserve updated via SSMS bridge."
+
+-- CREATE_LEGAL_PERSON values
+:setvar LEGAL_DOSSIER "DOS-ORG-001"
+:setvar LEGAL_LANGUAGE "nl"
+:setvar LEGAL_NAME "New Legal Entity NV"
+:setvar LEGAL_FORM "NV"
+:setvar LEGAL_VAT_NUMBER ""
+:setvar LEGAL_KBO_NUMBER ""
+:setvar LEGAL_NATIONALITY "Belgian"
+:setvar LEGAL_INCORPORATION_DATE "2020-01-01"
+
+-- REGISTER_EXPORT_JOB values
+:setvar EXPORT_TYPE_CODE "FSMA"
+:setvar EXPORT_PERIOD_START "2026-01-01"
+:setvar EXPORT_PERIOD_END "2026-06-30"
+
+-- COMPLETE_EXPORT_JOB values
+:setvar COMPLETE_JOB_ID ""
+:setvar COMPLETE_STATUS_CODE "SUCCESS"
+:setvar COMPLETE_ROW_COUNT "0"
+:setvar COMPLETE_ERROR_MESSAGE ""
+
 SET NOCOUNT ON;
 GO
 
@@ -171,7 +211,13 @@ IF @ActionName NOT IN (
     N'CLOSE_CLAIM',
     N'CREATE_TASK',
     N'ADD_TASK_COMMENT',
-    N'ADD_TASK_REMINDER'
+    N'ADD_TASK_REMINDER',
+    N'CREATE_SETTLEMENT',
+    N'APPROVE_SETTLEMENT',
+    N'UPDATE_CLAIM_RESERVE',
+    N'CREATE_LEGAL_PERSON',
+    N'REGISTER_EXPORT_JOB',
+    N'COMPLETE_EXPORT_JOB'
 )
     THROW 52302, 'Unknown ACTION_NAME.', 1;
 
@@ -182,17 +228,23 @@ SELECT
     default_mode,
     info_tip
 FROM (VALUES
-    (N'CREATE_NATURAL_PERSON', N'person.SP_CreateNaturalPerson', N'PREVIEW_FIRST', N'Creates the customer root and natural-person detail row.'),
-    (N'CREATE_POLICY', N'policy.SP_CreateContract', N'PREVIEW_FIRST', N'Creates the policy contract shell after lookup checks.'),
-    (N'CREATE_POLICY_VERSION', N'policy.SP_CreateContractVersion', N'PREVIEW_FIRST', N'Adds a version to an existing tenant-owned policy.'),
-    (N'ADD_POLICY_PARTY', N'policy.SP_AddContractParty', N'PREVIEW_FIRST', N'Links a tenant-owned person to a tenant-owned policy.'),
-    (N'ADD_POLICY_OBJECT', N'policy.SP_AddContractObject', N'PREVIEW_FIRST', N'Links a tenant-owned risk object to a tenant-owned policy.'),
-    (N'CREATE_VEHICLE_OBJECT', N'risk.SP_CreateVehicleObject', N'PREVIEW_FIRST', N'Creates a tenant-owned vehicle risk object before policy linking.'),
-    (N'CREATE_CLAIM', N'claim.SP_CreateClaim', N'PREVIEW_FIRST', N'Creates an open claim and resolves handler email to handler person_id.'),
-    (N'CLOSE_CLAIM', N'claim.SP_CloseClaim', N'PREVIEW_FIRST', N'Closes a tenant-owned claim with amount and payment checks.'),
-    (N'CREATE_TASK', N'tasking.SP_CreateTask', N'PREVIEW_FIRST', N'Creates a tenant-owned follow-up task with optional related entity validation.'),
-    (N'ADD_TASK_COMMENT', N'tasking.SP_AddTaskComment', N'PREVIEW_FIRST', N'Adds an operator comment to a tenant-owned task.'),
-    (N'ADD_TASK_REMINDER', N'tasking.SP_AddTaskReminder', N'PREVIEW_FIRST', N'Adds a future reminder to a tenant-owned open task.')
+    (N'ADD_POLICY_OBJECT',    N'policy.SP_AddContractObject',      N'PREVIEW_FIRST', N'Links a tenant-owned risk object to a tenant-owned policy.'),
+    (N'ADD_POLICY_PARTY',     N'policy.SP_AddContractParty',       N'PREVIEW_FIRST', N'Links a tenant-owned person to a tenant-owned policy.'),
+    (N'ADD_TASK_COMMENT',     N'tasking.SP_AddTaskComment',        N'PREVIEW_FIRST', N'Adds an operator comment to a tenant-owned task.'),
+    (N'ADD_TASK_REMINDER',    N'tasking.SP_AddTaskReminder',       N'PREVIEW_FIRST', N'Adds a future reminder to a tenant-owned open task.'),
+    (N'APPROVE_SETTLEMENT',   N'claim.SP_ApproveSettlement',       N'PREVIEW_FIRST', N'Approves a DRAFT settlement offer; transitions claim to PENDING_PAYMENT.'),
+    (N'CLOSE_CLAIM',          N'claim.SP_CloseClaim',              N'PREVIEW_FIRST', N'Closes a tenant-owned claim with amount and payment checks.'),
+    (N'COMPLETE_EXPORT_JOB',  N'import.SP_CompleteExportJob',      N'PREVIEW_FIRST', N'Marks an export job SUCCESS, FAILED, or CANCELLED with row count.'),
+    (N'CREATE_CLAIM',         N'claim.SP_CreateClaim',             N'PREVIEW_FIRST', N'Creates an open claim and resolves handler email to handler person_id.'),
+    (N'CREATE_LEGAL_PERSON',  N'person.SP_CreateLegalPerson',      N'PREVIEW_FIRST', N'Creates a legal entity (company/org) customer root record.'),
+    (N'CREATE_NATURAL_PERSON',N'person.SP_CreateNaturalPerson',    N'PREVIEW_FIRST', N'Creates the customer root and natural-person detail row.'),
+    (N'CREATE_POLICY',        N'policy.SP_CreateContract',         N'PREVIEW_FIRST', N'Creates the policy contract shell after lookup checks.'),
+    (N'CREATE_POLICY_VERSION',N'policy.SP_CreateContractVersion',  N'PREVIEW_FIRST', N'Adds a version to an existing tenant-owned policy.'),
+    (N'CREATE_SETTLEMENT',    N'claim.SP_CreateSettlement',        N'PREVIEW_FIRST', N'Creates a settlement offer (DRAFT) for a tenant-owned claim.'),
+    (N'CREATE_TASK',          N'tasking.SP_CreateTask',            N'PREVIEW_FIRST', N'Creates a tenant-owned follow-up task with optional related entity validation.'),
+    (N'CREATE_VEHICLE_OBJECT',N'risk.SP_CreateVehicleObject',      N'PREVIEW_FIRST', N'Creates a tenant-owned vehicle risk object before policy linking.'),
+    (N'REGISTER_EXPORT_JOB',  N'import.SP_CreateExportJob',        N'PREVIEW_FIRST', N'Registers a new bulk export job (FSMA, PORTFOLIO, CLAIMS, LEDGER, CUSTOM).'),
+    (N'UPDATE_CLAIM_RESERVE', N'claim.SP_UpdateClaimReserve',      N'PREVIEW_FIRST', N'Updates the reserved amount for a tenant-owned claim with reason logging.')
 ) AS a(action_name, procedure_name, default_mode, info_tip)
 ORDER BY action_name;
 
@@ -728,5 +780,295 @@ BEGIN
     SELECT
         @CreatedTaskReminderId AS created_task_reminder_id,
         N'Added task reminder.' AS info_tip;
+END;
+
+-- =============================================================================
+-- CREATE_SETTLEMENT
+-- Creates a settlement offer (DRAFT) for an open tenant-owned claim.
+-- =============================================================================
+IF @ActionName = N'CREATE_SETTLEMENT'
+BEGIN
+    DECLARE @SettlementClaimId UNIQUEIDENTIFIER = TRY_CONVERT(UNIQUEIDENTIFIER, NULLIF(N'$(SETTLEMENT_CLAIM_ID)', N''));
+    DECLARE @OfferAmount DECIMAL(18,2) = TRY_CONVERT(DECIMAL(18,2), N'$(SETTLEMENT_OFFER_AMOUNT)');
+    DECLARE @SettlementIban NVARCHAR(34) = NULLIF(N'$(SETTLEMENT_IBAN)', N'');
+    DECLARE @SettlementNotes NVARCHAR(500) = NULLIF(N'$(SETTLEMENT_NOTES)', N'');
+
+    PRINT '02 - CREATE_SETTLEMENT preview';
+    SELECT
+        @TenantId AS tenant_id,
+        @SettlementClaimId AS claim_id,
+        @OfferAmount AS offer_amount_eur,
+        @SettlementIban AS iban,
+        @SettlementNotes AS notes,
+        @CreatedByUserId AS created_by_user_id,
+        N'INFO TIP: claim must be OPEN or UNDER_INVESTIGATION. Offer amount must be > 0.' AS info_tip;
+
+    PRINT '03 - Claim ownership validation';
+    SELECT
+        CASE WHEN @SettlementClaimId IS NULL THEN N'MISSING_ID'
+             WHEN EXISTS (SELECT 1 FROM claim.Claim WHERE claim_id = @SettlementClaimId AND tenant_id = @TenantId AND is_deleted = 0) THEN N'OK'
+             ELSE N'MISSING' END AS claim_status,
+        CASE WHEN @OfferAmount > 0 THEN N'OK' ELSE N'INVALID' END AS offer_amount_status,
+        N'INFO TIP: Both statuses must be OK before EXECUTE_ACTION = 1.' AS info_tip;
+
+    IF @ExecuteAction = 0
+        RETURN;
+
+    -- SP returns a result set on success or an error_code row on rejection.
+    -- Capture and display it so the operator can see the outcome immediately.
+    EXEC claim.SP_CreateSettlement
+        @tenant_id        = @TenantId,
+        @claim_id         = @SettlementClaimId,
+        @offer_amount_eur = @OfferAmount,
+        @iban             = @SettlementIban,
+        @notes            = @SettlementNotes,
+        @created_by       = @CreatedByUserId,
+        @dry_run          = 0;
+    -- SP output: settlement_id + status on success, error_code on rejection.
+    -- Review the result grid above before proceeding.
+END;
+
+-- =============================================================================
+-- APPROVE_SETTLEMENT
+-- Approves a settlement offer and transitions claim to PENDING_PAYMENT.
+-- =============================================================================
+IF @ActionName = N'APPROVE_SETTLEMENT'
+BEGIN
+    DECLARE @ApproveSettlementId UNIQUEIDENTIFIER = TRY_CONVERT(UNIQUEIDENTIFIER, NULLIF(N'$(APPROVE_SETTLEMENT_ID)', N''));
+    DECLARE @ApproveSettlementClaimId UNIQUEIDENTIFIER = TRY_CONVERT(UNIQUEIDENTIFIER, NULLIF(N'$(APPROVE_SETTLEMENT_CLAIM_ID)', N''));
+    DECLARE @AgreedAmount DECIMAL(18,2) = TRY_CONVERT(DECIMAL(18,2), NULLIF(N'$(APPROVE_AGREED_AMOUNT)', N''));
+    DECLARE @PaymentReference NVARCHAR(50) = NULLIF(N'$(APPROVE_PAYMENT_REFERENCE)', N'');
+    DECLARE @ApprovePaymentMethodCode NVARCHAR(40) = NULLIF(N'$(APPROVE_PAYMENT_METHOD_CODE)', N'');
+
+    PRINT '02 - APPROVE_SETTLEMENT preview';
+    SELECT
+        @TenantId AS tenant_id,
+        @ApproveSettlementId AS settlement_id,
+        @ApproveSettlementClaimId AS claim_id,
+        @AgreedAmount AS agreed_amount_eur,
+        @PaymentReference AS payment_reference,
+        @ApprovePaymentMethodCode AS payment_method_code,
+        @CreatedByUserId AS approved_by_user_id,
+        N'INFO TIP: Settlement must be in DRAFT status. Use BANK_TRANSFER, CASH, or CHECK.' AS info_tip;
+
+    PRINT '03 - Settlement ownership validation';
+    SELECT
+        CASE WHEN @ApproveSettlementId IS NULL THEN N'MISSING_ID'
+             WHEN EXISTS (
+                SELECT 1 FROM claim.ClaimSettlement cs
+                INNER JOIN claim.Claim c ON c.claim_id = cs.claim_id
+                WHERE cs.settlement_id = @ApproveSettlementId
+                  AND c.tenant_id = @TenantId
+                  AND c.is_deleted = 0
+             ) THEN N'OK' ELSE N'MISSING' END AS settlement_status,
+        N'INFO TIP: settlement_status must be OK before EXECUTE_ACTION = 1.' AS info_tip;
+
+    IF @ExecuteAction = 0
+        RETURN;
+
+    EXEC claim.SP_ApproveSettlement
+        @tenant_id           = @TenantId,
+        @settlement_id       = @ApproveSettlementId,
+        @claim_id            = @ApproveSettlementClaimId,
+        @agreed_amount_eur   = @AgreedAmount,
+        @payment_reference   = @PaymentReference,
+        @payment_method_code = @ApprovePaymentMethodCode,
+        @approved_by         = @CreatedByUserId;
+
+    SELECT N'Settlement approved. Claim status transitions to PENDING_PAYMENT.' AS info_tip;
+END;
+
+-- =============================================================================
+-- UPDATE_CLAIM_RESERVE
+-- Updates the reserve amount for a tenant-owned claim.
+-- =============================================================================
+IF @ActionName = N'UPDATE_CLAIM_RESERVE'
+BEGIN
+    DECLARE @ReserveClaimId UNIQUEIDENTIFIER = TRY_CONVERT(UNIQUEIDENTIFIER, NULLIF(N'$(RESERVE_CLAIM_ID)', N''));
+    DECLARE @NewReserve DECIMAL(18,2) = TRY_CONVERT(DECIMAL(18,2), N'$(RESERVE_NEW_AMOUNT)');
+    DECLARE @ReserveReasonCode NVARCHAR(40) = COALESCE(NULLIF(N'$(RESERVE_REASON_CODE)', N''), N'MANUAL');
+    DECLARE @ReserveNotes NVARCHAR(500) = NULLIF(N'$(RESERVE_NOTES)', N'');
+
+    PRINT '02 - UPDATE_CLAIM_RESERVE preview';
+    SELECT
+        @TenantId AS tenant_id,
+        @ReserveClaimId AS claim_id,
+        @NewReserve AS new_reserve_eur,
+        @ReserveReasonCode AS reason_code,
+        @ReserveNotes AS notes,
+        @CreatedByUserId AS changed_by_user_id,
+        N'INFO TIP: New reserve replaces old reserve. Reason codes: MANUAL, REASSESSMENT, EXPERT_VALUATION, COURT_ORDER.' AS info_tip;
+
+    PRINT '03 - Claim ownership validation';
+    SELECT
+        CASE WHEN @ReserveClaimId IS NULL THEN N'MISSING_ID'
+             WHEN EXISTS (SELECT 1 FROM claim.Claim WHERE claim_id = @ReserveClaimId AND tenant_id = @TenantId AND is_deleted = 0) THEN N'OK'
+             ELSE N'MISSING' END AS claim_status,
+        CASE WHEN @NewReserve >= 0 THEN N'OK' ELSE N'INVALID' END AS reserve_amount_status,
+        N'INFO TIP: Both statuses must be OK before EXECUTE_ACTION = 1.' AS info_tip;
+
+    IF @ExecuteAction = 0
+        RETURN;
+
+    EXEC claim.SP_UpdateClaimReserve
+        @tenant_id   = @TenantId,
+        @claim_id    = @ReserveClaimId,
+        @new_reserve = @NewReserve,
+        @reason_code = @ReserveReasonCode,
+        @notes       = @ReserveNotes,
+        @changed_by  = @CreatedByUserId;
+
+    SELECT
+        @ReserveClaimId AS claim_id,
+        @NewReserve AS new_reserve_eur,
+        N'Reserve updated. Check audit log for change history.' AS info_tip;
+END;
+
+-- =============================================================================
+-- CREATE_LEGAL_PERSON
+-- Creates a legal entity (company/organisation) customer root record.
+-- =============================================================================
+IF @ActionName = N'CREATE_LEGAL_PERSON'
+BEGIN
+    DECLARE @LegalDossier NVARCHAR(50) = NULLIF(N'$(LEGAL_DOSSIER)', N'');
+    DECLARE @LegalLanguage NVARCHAR(10) = NULLIF(N'$(LEGAL_LANGUAGE)', N'');
+    DECLARE @LegalName NVARCHAR(200) = NULLIF(N'$(LEGAL_NAME)', N'');
+    DECLARE @LegalForm NVARCHAR(120) = NULLIF(N'$(LEGAL_FORM)', N'');
+    DECLARE @LegalVatNumber NVARCHAR(30) = NULLIF(N'$(LEGAL_VAT_NUMBER)', N'');
+    DECLARE @LegalKboNumber NVARCHAR(12) = NULLIF(N'$(LEGAL_KBO_NUMBER)', N'');
+    DECLARE @LegalNationality NVARCHAR(80) = NULLIF(N'$(LEGAL_NATIONALITY)', N'');
+    DECLARE @LegalIncorporationDate DATE = TRY_CONVERT(DATE, NULLIF(N'$(LEGAL_INCORPORATION_DATE)', N''));
+
+    PRINT '02 - CREATE_LEGAL_PERSON preview';
+    SELECT
+        @TenantId AS tenant_id,
+        @LegalDossier AS dossier,
+        @LegalLanguage AS language_code,
+        @LegalName AS legal_name,
+        @LegalForm AS legal_form,
+        @LegalVatNumber AS vat_number,
+        @LegalKboNumber AS kbo_number,
+        @LegalNationality AS nationality,
+        @LegalIncorporationDate AS incorporation_date,
+        N'INFO TIP: legal_form examples: NV, BV, VZW, BVBA, SA, SPRL, ASBL.' AS info_tip;
+
+    IF @ExecuteAction = 0
+        RETURN;
+
+    DECLARE @CreatedLegalPersonId UNIQUEIDENTIFIER;
+
+    EXEC person.SP_CreateLegalPerson
+        @tenant_id          = @TenantId,
+        @dossier            = @LegalDossier,
+        @language_code      = @LegalLanguage,
+        @legal_name         = @LegalName,
+        @legal_form         = @LegalForm,
+        @vat_number         = @LegalVatNumber,
+        @kbo_number         = @LegalKboNumber,
+        @nationality        = @LegalNationality,
+        @incorporation_date = @LegalIncorporationDate,
+        @created_by_user_id = @CreatedByUserId,
+        @created_person_id  = @CreatedLegalPersonId OUTPUT;
+
+    SELECT
+        @CreatedLegalPersonId AS created_person_id,
+        N'Created legal person. Copy this ID into ADD_POLICY_PARTY as person_id.' AS info_tip;
+END;
+
+-- =============================================================================
+-- REGISTER_EXPORT_JOB
+-- Registers a new bulk export job (FSMA, PORTFOLIO, CLAIMS, LEDGER, CUSTOM).
+-- =============================================================================
+IF @ActionName = N'REGISTER_EXPORT_JOB'
+BEGIN
+    DECLARE @ExportTypeCode NVARCHAR(40) = UPPER(NULLIF(N'$(EXPORT_TYPE_CODE)', N''));
+    DECLARE @ExportPeriodStart DATE = TRY_CONVERT(DATE, NULLIF(N'$(EXPORT_PERIOD_START)', N''));
+    DECLARE @ExportPeriodEnd DATE = TRY_CONVERT(DATE, NULLIF(N'$(EXPORT_PERIOD_END)', N''));
+
+    PRINT '02 - REGISTER_EXPORT_JOB preview';
+    SELECT
+        @TenantId AS tenant_id,
+        @ExportTypeCode AS export_type_code,
+        @ExportPeriodStart AS period_start,
+        @ExportPeriodEnd AS period_end,
+        N'INFO TIP: ExportTypeCodes: FSMA, PORTFOLIO, CLAIMS, LEDGER, CUSTOM. Job starts as PENDING.' AS info_tip;
+
+    PRINT '03 - Export type validation';
+    SELECT
+        CASE WHEN @ExportTypeCode IN (N'FSMA', N'PORTFOLIO', N'CLAIMS', N'LEDGER', N'CUSTOM') THEN N'OK' ELSE N'INVALID' END AS export_type_status,
+        CASE WHEN @ExportPeriodEnd IS NULL OR @ExportPeriodStart IS NULL OR @ExportPeriodEnd >= @ExportPeriodStart THEN N'OK' ELSE N'INVALID_PERIOD' END AS period_status,
+        N'INFO TIP: Both statuses must be OK before EXECUTE_ACTION = 1.' AS info_tip;
+
+    IF @ExecuteAction = 0
+        RETURN;
+
+    DECLARE @ExportJobRows TABLE (
+        JobId          UNIQUEIDENTIFIER,
+        TenantId       UNIQUEIDENTIFIER,
+        ExportTypeCode NVARCHAR(40),
+        StatusCode     NVARCHAR(20),
+        CreatedAtUtc   DATETIME2(0)
+    );
+
+    INSERT INTO @ExportJobRows
+    EXEC import.SP_CreateExportJob
+        @tenant_id              = @TenantId,
+        @export_type_code       = @ExportTypeCode,
+        @period_start           = @ExportPeriodStart,
+        @period_end             = @ExportPeriodEnd,
+        @requested_by_user_id   = @CreatedByUserId;
+
+    SELECT
+        JobId AS created_job_id,
+        ExportTypeCode AS export_type_code,
+        StatusCode AS status_code,
+        CreatedAtUtc AS created_at_utc,
+        N'Export job registered. Copy job_id into COMPLETE_EXPORT_JOB after the export runs.' AS info_tip
+    FROM @ExportJobRows;
+END;
+
+-- =============================================================================
+-- COMPLETE_EXPORT_JOB
+-- Marks an export job as SUCCESS, FAILED, or CANCELLED with row count.
+-- =============================================================================
+IF @ActionName = N'COMPLETE_EXPORT_JOB'
+BEGIN
+    DECLARE @CompleteJobId UNIQUEIDENTIFIER = TRY_CONVERT(UNIQUEIDENTIFIER, NULLIF(N'$(COMPLETE_JOB_ID)', N''));
+    DECLARE @CompleteStatusCode NVARCHAR(20) = UPPER(NULLIF(N'$(COMPLETE_STATUS_CODE)', N''));
+    DECLARE @CompleteRowCount INT = TRY_CONVERT(INT, NULLIF(N'$(COMPLETE_ROW_COUNT)', N''));
+    DECLARE @CompleteErrorMessage NVARCHAR(1000) = NULLIF(N'$(COMPLETE_ERROR_MESSAGE)', N'');
+
+    PRINT '02 - COMPLETE_EXPORT_JOB preview';
+    SELECT
+        @TenantId AS tenant_id,
+        @CompleteJobId AS job_id,
+        @CompleteStatusCode AS status_code,
+        @CompleteRowCount AS row_count,
+        @CompleteErrorMessage AS error_message,
+        N'INFO TIP: StatusCodes: SUCCESS, FAILED, CANCELLED. error_message required for FAILED.' AS info_tip;
+
+    PRINT '03 - Export job ownership validation';
+    SELECT
+        CASE WHEN @CompleteJobId IS NULL THEN N'MISSING_ID'
+             WHEN EXISTS (SELECT 1 FROM import.ExportJob WHERE job_id = @CompleteJobId AND tenant_id = @TenantId) THEN N'OK'
+             ELSE N'MISSING' END AS job_status,
+        CASE WHEN @CompleteStatusCode IN (N'SUCCESS', N'FAILED', N'CANCELLED') THEN N'OK' ELSE N'INVALID' END AS status_code_status,
+        CASE WHEN @CompleteStatusCode <> N'FAILED' OR @CompleteErrorMessage IS NOT NULL THEN N'OK' ELSE N'ERROR_MESSAGE_REQUIRED' END AS error_message_status,
+        N'INFO TIP: All statuses must be OK before EXECUTE_ACTION = 1.' AS info_tip;
+
+    IF @ExecuteAction = 0
+        RETURN;
+
+    EXEC import.SP_CompleteExportJob
+        @job_id        = @CompleteJobId,
+        @tenant_id     = @TenantId,
+        @status_code   = @CompleteStatusCode,
+        @row_count     = @CompleteRowCount,
+        @error_message = @CompleteErrorMessage;
+
+    SELECT
+        @CompleteJobId AS job_id,
+        @CompleteStatusCode AS final_status,
+        N'Export job updated. Use GetExportJobStatus to verify final state.' AS info_tip;
 END;
 GO
