@@ -109,8 +109,8 @@ Yalıtılmış örnekteki `YafesPars_ProdRestoreDrill` veritabanına karşı ça
 | Tatbikat sonucu | GEÇTİ / KALDI |
 | Bulunan sorunlar | |
 | Düzeltici eylemler | |
-| Birinci imzacı adı | Deuterium12 |
-| Birinci imzacı imzası | Deuterium12 <mcemkoca0@gmail.com> |
+| Birinci imzacı adı | |
+| Birinci imzacı imzası | |
 | İkinci imzacı adı | |
 | İkinci imzacı imzası | |
 | Tarih | |
