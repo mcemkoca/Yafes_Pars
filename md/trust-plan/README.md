@@ -1,18 +1,18 @@
-# Legacy Trust Plan Notes
+# Eski Güven Planı Notları
 
-This folder keeps only sanitized comparison notes from the old imported package.
-The old web-first plans, VM/VHDX notes, server readmes, duplicated task plans,
-package archives, `.env` files, and generated assets are not part of the active
-product anymore.
+Bu klasör, yalnızca eski içe aktarılan paketten arındırılmış karşılaştırma notlarını
+saklar. Eski web-öncelikli planlar, VM/VHDX notları, sunucu readme'leri, kopyalanan
+görev planları, paket arşivleri, `.env` dosyaları ve oluşturulan varlıklar artık
+aktif ürünün parçası değildir.
 
-Use these notes only for comparison, table-count history, and UX lessons. The
-production source of truth is:
+Bu notları yalnızca karşılaştırma, tablo sayısı geçmişi ve UX dersleri için
+kullanın. Gerçeğin üretim kaynağı şunlardır:
 
-- SQL scripts under `database/`
-- SSMS workbench scripts under `database/ssms/`
-- Human-readable project plan in `md/mustafaplan.md`
-- Customer-facing overview in root `README.md`
-- Table reconciliation in `md/database/table-reconciliation-89-vs-108.md`
+- `database/` altındaki SQL script'leri
+- `database/ssms/` altındaki SSMS çalışma tezgahı script'leri
+- `md/mustafaplan.md`'deki insan tarafından okunabilir proje planı
+- `README.md` kökündeki müşteriye yönelik genel bakış
+- `md/database/table-reconciliation-89-vs-108.md`'deki tablo mutabakatı
 
-Do not copy old credentials, docker defaults, CORS examples, or web-first
-architecture from these notes into the active product.
+Bu notlardan eski kimlik bilgilerini, docker varsayılanlarını, CORS örneklerini
+veya web-öncelikli mimariye ait içerikleri aktif ürüne kopyalamayın.

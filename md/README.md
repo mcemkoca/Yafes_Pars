@@ -1,35 +1,35 @@
-# Documentation Hub
+# Belgeleme Merkezi
 
-This folder keeps the human-readable Yafes Pars documentation in one clean
-place. The root `README.md`, `SECURITY.md`, `AGENTS.md`, and GitHub templates
-stay in their conventional locations because GitHub and tooling read them there.
+Bu klasör, Yafes Pars için insan tarafından okunabilir belgeleri tek ve düzenli
+bir yerde tutar. Kök `README.md`, `SECURITY.md`, `AGENTS.md` ve GitHub şablonları
+GitHub ve araçlar tarafından okunduğu için alışılmış konumlarında kalmaya devam eder.
 
-## Quick Map
+## Hızlı Harita
 
-| Path | Purpose |
+| Yol | Amaç |
 | --- | --- |
-| `md/mustafaplan.md` | Living plan, expert review, risks, and next update backlog. |
-| `md/product-ownership.md` | Product ownership, release authority, and attribution rules. |
-| `md/database/` | SQL Server architecture, deployment, migration, security, ERD, and readiness docs. |
-| `md/ssms/` | SSMS operator workbench docs, tutorials, templates, and dashboard plan. |
-| `md/backend/` | Optional .NET backend foundation notes. |
-| `md/reports/` | Progress and delivery reports. |
-| `md/trust-plan/` | Sanitized legacy comparison notes only. Do not treat as production source. |
+| `md/mustafaplan.md` | Canlı plan, uzman değerlendirmesi, riskler ve sonraki güncelleme biriktirme listesi. |
+| `md/product-ownership.md` | Ürün sahipliği, yayın yetkisi ve atıf kuralları. |
+| `md/database/` | SQL Server mimarisi, dağıtım, migration, güvenlik, ERD ve hazırlık belgeleri. |
+| `md/ssms/` | SSMS operatör çalışma tezgahı belgeleri, öğreticiler, şablonlar ve dashboard planı. |
+| `md/backend/` | İsteğe bağlı .NET backend temel notları. |
+| `md/reports/` | İlerleme ve teslimat raporları. |
+| `md/trust-plan/` | Yalnızca temizlenmiş eski karşılaştırma notları. Üretim kaynağı olarak kullanmayın. |
 
-## Documentation Style
+## Belgeleme Stili
 
-Write docs for a real operator, not for a file archive.
+Belgeleri gerçek bir operatör için yazın, dosya arşivi için değil.
 
-- Start with who should use the document and when.
-- Keep the first screen useful: purpose, safety note, and next action.
-- Prefer short sections, plain language, and concrete paths.
-- Put commands in copy-friendly blocks.
-- Mark risky actions with an explicit safety mode.
-- Keep old reference material clearly labelled as legacy.
+- Belgeyi kimin ve ne zaman kullanması gerektiğiyle başlayın.
+- İlk ekranı işlevsel tutun: amaç, güvenlik notu ve sonraki adım.
+- Kısa bölümleri, sade dili ve somut yolları tercih edin.
+- Komutları kopyalamaya hazır bloklara koyun.
+- Riskli işlemleri açık bir güvenlik moduyla işaretleyin.
+- Eski referans materyali açıkça eski olarak etiketleyin.
 
-## Turkish Note
+## Türkçe Notu
 
-Bu klasor projenin okunabilir dokuman merkezidir. Karsilikli calisma planlari,
-SSMS is akislari, veri tabani notlari ve sonraki adimlar burada tutulur.
-Kokte kalan `README.md` hem Ingilizce hem Turkce musteri vitrini olarak
+Bu klasör projenin okunabilir doküman merkezidir. Karşılıklı çalışma planları,
+SSMS iş akışları, veri tabanı notları ve sonraki adımlar burada tutulur.
+Kökte kalan `README.md` hem İngilizce hem Türkçe müşteri vitrini olarak
 korunur.

@@ -1,40 +1,40 @@
-# Quick Start
+# Hızlı Başlangıç
 
-## Goal
+## Hedef
 
-Start SSMS work with minimum risk and a known DEV context.
+SSMS çalışmasını minimum riskle ve bilinen DEV bağlamında başlatın.
 
-## Steps
+## Adımlar
 
-1. Open SQL Server Management Studio.
-2. Connect to the DEV SQL Server instance.
-3. Open `database/ssms/00__open_first_safety_check.sql`.
-4. Enable `Query > SQLCMD Mode`.
-5. Set `YAFES_SQL_DATABASE` to the DEV database name.
-6. Execute the script.
-7. Confirm the Results Grid shows the expected server, machine, and database.
-8. Open `database/ssms/05__operator_dashboard_home.sql`.
+1. SQL Server Management Studio'yu açın.
+2. DEV SQL Server örneğine bağlanın.
+3. `database/ssms/00__open_first_safety_check.sql` dosyasını açın.
+4. `Query > SQLCMD Mode` etkinleştirin.
+5. `YAFES_SQL_DATABASE`'i DEV veri tabanı adına ayarlayın.
+6. Script'i çalıştırın.
+7. Results Grid'in beklenen sunucu, makine ve veri tabanını gösterdiğini doğrulayın.
+8. `database/ssms/05__operator_dashboard_home.sql` dosyasını açın.
 
-## Info Tips
+## Bilgi İpuçları
 
-- Stop if the database name does not contain `DEV`.
-- Stop if the server or machine name looks like production.
-- Keep the dashboard open as the first SSMS tab.
-- Use query library results to copy IDs into bridge templates.
+- Veri tabanı adı `DEV` içermiyorsa durun.
+- Sunucu veya makine adı üretim gibi görünüyorsa durun.
+- Dashboard'u ilk SSMS sekmesi olarak açık tutun.
+- ID'leri bridge şablonlarına kopyalamak için sorgu kütüphanesi sonuçlarını kullanın.
 
-## Daily Startup
+## Günlük Başlangıç
 
-Run these scripts in order:
+Bu script'leri sırayla çalıştırın:
 
 1. `05__operator_dashboard_home.sql`
 2. `10__daily_operator_checklist.sql`
 3. `02__operations_dashboard.sql`
 
-When learning the model or planning table/template changes, run these before
-data entry:
+Modeli öğrenirken veya tablo/şablon değişikliklerini planlarken, veri girişinden
+önce şunları çalıştırın:
 
 1. `11__schema_working_logic_map.sql`
 2. `13__visual_workflow_board.sql`
 3. `12__table_catalog_and_relationships.sql`
 
-Resolve any `ACTION` rows before data entry.
+Veri girişinden önce tüm `AKSIYON` satırlarını çözüme kavuşturun.

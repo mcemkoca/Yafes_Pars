@@ -1,37 +1,38 @@
-# Database tools
+# Veri Tabanı Araçları
 
-This folder contains guarded helpers for running the Yafes Pars SQL Server DEV database workflow.
+Bu klasör, Yafes Pars SQL Server DEV veri tabanı iş akışını çalıştırmak için
+korumalı yardımcılar içerir.
 
-## Static quality gate
+## Statik kalite kapısı
 
-Run the static quality gate before heavier SQL Server execution:
+Daha ağır SQL Server yürütmesinden önce statik kalite kapısını çalıştırın:
 
 ```powershell
 .\database\tools\test-sql-quality-gate.ps1
 ```
 
-In CI, use `-NoReportFile` to avoid writing local execution artifacts:
+CI'da yerel yürütme eserlerini yazmaktan kaçınmak için `-NoReportFile` kullanın:
 
 ```powershell
 .\database\tools\test-sql-quality-gate.ps1 -NoReportFile
 ```
 
-Use `-StrictStyle` when you want style advisories such as `SET XACT_ABORT ON`
-to become blocking failures.
+`SET XACT_ABORT ON` gibi stil önerilerinin engelleyici hatalara dönüşmesini
+istediğinizde `-StrictStyle` kullanın.
 
-The gate checks:
+Kapı şunları kontrol eder:
 
-- protected migration order `000` through `018`
-- protected validation order `001` through `017`
-- unsupported non-SQL Server syntax
-- destructive SQL patterns outside rollback scripts
-- forbidden `Object` table naming
-- SSMS operator conventions for info tips, SQLCMD guards, and tenant context
-- required production readiness documentation
+- `000`'dan `018`'e korumalı migration sırası
+- `001`'den `017`'ye korumalı doğrulama sırası
+- Desteklenmeyen SQL Server dışı sözdizimi
+- Rollback script'leri dışında yıkıcı SQL kalıpları
+- Yasaklı `Object` tablo adlandırması
+- Bilgi ipuçları, SQLCMD koruyucuları ve tenant bağlamı için SSMS operatör kuralları
+- Gerekli üretim hazırlık belgeleri
 
-## Required variables
+## Gerekli değişkenler
 
-Set these environment variables before running the migration runner:
+Migration çalıştırıcısını çalıştırmadan önce şu ortam değişkenlerini ayarlayın:
 
 ```powershell
 $env:YAFES_SQL_SERVER="YOUR_DEV_SQL_SERVER"
@@ -42,82 +43,92 @@ $env:YAFES_SQL_PASSWORD="YOUR_SQL_PASSWORD"
 .\database\tools\run-dev-migrations.ps1
 ```
 
-Optional:
+İsteğe bağlı:
 
-- `YAFES_SQL_BACKUP_DIR`: SQL Server-visible backup directory. Defaults to the run log folder.
-- `YAFES_SQL_SECRET_FILE`: path to a local, uncommitted `KEY=VALUE` file containing the required variables.
+- `YAFES_SQL_BACKUP_DIR`: SQL Server tarafından görülebilen yedek dizini. Varsayılan olarak
+  çalıştırma günlüğü klasörüdür.
+- `YAFES_SQL_SECRET_FILE`: gerekli değişkenleri içeren, commit edilmemiş yerel bir
+  `KEY=VALUE` dosyasının yolu.
 
-Never commit real secrets, passwords, tokens, or connection strings.
+Gerçek secret'ları, parolaları, token'ları veya bağlantı dizelerini asla commit etmeyin.
 
-## Safety checks
+## Güvenlik kontrolleri
 
-`run-dev-migrations.ps1` stops before DB changes when:
+`run-dev-migrations.ps1`, şu durumlarda DB değişikliklerinden önce durur:
 
-- `YAFES_SQL_DATABASE` does not contain `DEV`.
-- `YAFES_SQL_SERVER`, verified server name, or machine name suggests production.
-- Any required connection variable is missing.
-- Any migration or validation file in the expected sequence is missing.
-- Unsafe migration operations are detected.
-- The target database cannot be verified.
-- The pre-migration backup cannot be created.
-- Any migration or validation script fails.
+- `YAFES_SQL_DATABASE` `DEV` içermiyor.
+- `YAFES_SQL_SERVER`, doğrulanmış sunucu adı veya makine adı üretimi akla getiriyor.
+- Gerekli bağlantı değişkenlerinden herhangi biri eksik.
+- Beklenen dizideki herhangi bir migration veya doğrulama dosyası eksik.
+- Güvensiz migration işlemleri tespit edildi.
+- Hedef veri tabanı doğrulanamıyor.
+- Migration öncesi yedek oluşturulamıyor.
+- Herhangi bir migration veya doğrulama script'i başarısız oluyor.
 
-The runner executes migrations `000` through `018` in strict numeric order, then validations `001` through `017`.
+Çalıştırıcı, migration'ları `000`'dan `018`'e kesin sayısal sırayla, ardından
+doğrulamaları `001`'den `017`'ye çalıştırır.
 
-## Backup behavior
+## Yedek davranışı
 
-Before migrations run, the target DEV database must already exist so the runner can create a pre-migration backup.
+Migration'lar çalışmadan önce, çalıştırıcının migration öncesi yedek oluşturabilmesi
+için hedef DEV veri tabanı zaten mevcut olmalıdır.
 
-Backup filename format:
+Yedek dosyası adı biçimi:
 
 ```text
 YafesPars_Dev_PreMigration_YYYYMMDD_HHMMSS.bak
 ```
 
-If SQL Server cannot write the backup path or the SQL account lacks backup permission, the runner stops and does not execute migrations.
+SQL Server yedek yolunu yazamıyorsa veya SQL hesabında yedek izni yoksa, çalıştırıcı
+durur ve migration'ları yürütmez.
 
-## Logs
+## Günlükler
 
-Every run creates:
+Her çalıştırma şunu oluşturur:
 
 ```text
 database/execution-logs/YYYYMMDD_HHMMSS/
 ```
 
-The folder contains prepared scripts, one log per migration, one log per validation, backup logs, and `final-report.md`.
+Klasör hazırlanmış script'leri, migration başına bir günlük, doğrulama başına bir
+günlük, yedek günlükleri ve `final-report.md` içerir.
 
-The runner prepares temporary copies of the SQL files with the configured DEV database name. Original migration and validation files are not modified.
+Çalıştırıcı, SQL dosyalarının yapılandırılmış DEV veri tabanı adıyla geçici kopyalarını
+hazırlar. Özgün migration ve doğrulama dosyaları değiştirilmez.
 
-## CI validation
+## CI doğrulaması
 
-GitHub Actions uses `.github/workflows/sql-server-validation.yml` and
-`run-ci-sql-validation.ps1` to start a SQL Server Developer container, create
-`YafesPars_DEV`, run migrations `000` through `018`, run validations `001`
-through `017`, and upload execution logs.
+GitHub Actions, bir SQL Server Developer container'ı başlatmak, `YafesPars_DEV`
+oluşturmak, `000`'dan `018`'e migration'ları çalıştırmak, `001`'den `017`'ye
+doğrulamaları çalıştırmak ve yürütme günlüklerini yüklemek için
+`.github/workflows/sql-server-validation.yml` ve `run-ci-sql-validation.ps1` kullanır.
 
-The workflow generates a masked, short-lived SQL Server container password for
-each run. No static SQL Server password is stored in the repository.
+İş akışı, her çalıştırma için maskelenmiş, kısa ömürlü bir SQL Server container
+parolası oluşturur. Depoda statik SQL Server parolası saklanmaz.
 
-`.github/workflows/database-quality-gate.yml` runs the static gate without a SQL
-Server container so documentation, SSMS, template, and migration structure
-problems are caught quickly.
+`.github/workflows/database-quality-gate.yml`, belgeleme, SSMS, şablon ve migration
+yapı sorunlarının hızla yakalanması için SQL Server container'ı olmadan statik kapıyı
+çalıştırır.
 
-## SSMS fallback
+## SSMS geri dönüşü
 
-If `sqlcmd` is not installed, the runner creates:
+`sqlcmd` kurulu değilse çalıştırıcı şunu oluşturur:
 
 ```text
 database/execution-logs/YYYYMMDD_HHMMSS/ssms-dev-migrations.sql
 ```
 
-Open that file in SSMS, enable `Query > SQLCMD Mode`, set the SQLCMD variables at the top, and run it only against a verified DEV target.
+Bu dosyayı SSMS'de açın, `Query > SQLCMD Mode` etkinleştirin, üstteki SQLCMD
+değişkenlerini ayarlayın ve yalnızca doğrulanmış bir DEV hedefine karşı çalıştırın.
 
-You can generate only the manual SSMS script with:
+Yalnızca manuel SSMS script'ini şununla oluşturabilirsiniz:
 
 ```powershell
 .\database\tools\run-dev-migrations.ps1 -GenerateSsmsScriptOnly
 ```
 
-## Rollback notes
+## Rollback notları
 
-Rollback is not automatic. Use scripts under `database/rollback/` only after reviewing their guard variables and confirming the target is DEV.
+Rollback otomatik değildir. `database/rollback/` altındaki script'leri yalnızca
+koruyucu değişkenleri inceledikten ve hedefin DEV olduğunu doğruladıktan sonra
+kullanın.

@@ -1,31 +1,31 @@
-# Monitoring And Jobs
+# İzleme ve İşler
 
-Use this workflow when an operator, admin, or DBA wants a quick SSMS view of
-database readiness, backlog pressure, backup visibility, and SQL Agent handoff
-items.
+Bir operatör, admin veya DBA'nın veri tabanı hazırlığı, biriktirme baskısı,
+yedek görünürlüğü ve SQL Agent devir öğelerinin hızlı bir SSMS görünümünü
+istediğinde bu iş akışını kullanın.
 
-## Open The Script
+## Script'i Açma
 
-1. Open `database/ssms/15__monitoring_and_job_readiness.sql` in SSMS.
-2. Enable `Query > SQLCMD Mode`.
-3. Confirm `YAFES_SQL_DATABASE` contains `DEV`.
-4. Confirm `TENANT_CODE` is the expected tenant.
-5. Run the script.
+1. SSMS'de `database/ssms/15__monitoring_and_job_readiness.sql` dosyasını açın.
+2. `Query > SQLCMD Mode` etkinleştirin.
+3. `YAFES_SQL_DATABASE`'in `DEV` içerdiğini doğrulayın.
+4. `TENANT_CODE`'un beklenen tenant olduğunu doğrulayın.
+5. Script'i çalıştırın.
 
-## Read The Result Sets
+## Sonuç Kümelerini Okuma
 
-1. Start with `01 - Monitoring context`.
-2. Check `02 - Database readiness signals` for migration count, recovery model,
-   updateability, and Query Store state.
-3. Review `03 - Tenant operations monitoring` for open tasks, overdue tasks,
-   open claims, renewal candidates, and recent audit volume.
-4. Use `04 - SQL Agent job blueprint` as the DBA handoff list.
-5. Check `05 - SQL Agent observed Yafes jobs` to see whether approved jobs
-   already exist.
-6. Review `07 - Backup recency signal` before release or restore planning.
+1. `01 - İzleme bağlamı` ile başlayın.
+2. Migration sayısı, kurtarma modeli, güncellenebilirlik ve Query Store durumu
+   için `02 - Veri tabanı hazırlık sinyalleri`'ni kontrol edin.
+3. Açık görevler, gecikmiş görevler, açık hasarlar, yenileme adayları ve son
+   denetim hacmi için `03 - Tenant operasyon izlemesi`'ni inceleyin.
+4. DBA devir listesi olarak `04 - SQL Agent iş şeması`'nı kullanın.
+5. Onaylanmış işlerin zaten mevcut olup olmadığını görmek için
+   `05 - SQL Agent gözlemlenen Yafes işleri`'ni kontrol edin.
+6. Sürüm veya geri yükleme planlamasından önce `07 - Yedek güncellik sinyali`'ni inceleyin.
 
-## Operator Rule
+## Operatör Kuralı
 
-This script is read-only. It does not create SQL Agent jobs and does not change
-data. If a signal shows `ACTION` or `REVIEW`, open the linked SSMS script or
-send the result set to the named owner.
+Bu script salt okunurdur. SQL Agent işleri oluşturmaz ve veri değiştirmez.
+Bir sinyal `AKSIYON` veya `GÖZDEN GEÇİR` gösteriyorsa bağlantılı SSMS script'ini
+açın veya sonuç kümesini adı geçen sahibine gönderin.

@@ -1,179 +1,173 @@
-# Final Progress Report
+# Son İlerleme Raporu
 
-> **ARCHIVE — 2026-07-19**
-> This report describes work completed on the now-deleted branch
-> `feature/complete-db-validation-backend-frontend-foundation`.
-> It is preserved as a historical record only.
-> Current system state is authoritative; do not use these build results
-> to draw conclusions about the present codebase.
+> **ARŞİV — 2026-07-19**
+> Bu rapor, şu anda silinmiş olan
+> `feature/complete-db-validation-backend-frontend-foundation` dalında
+> tamamlanan çalışmaları açıklar.
+> Yalnızca geçmiş kayıt olarak korunmaktadır.
+> Mevcut sistem durumu yetkilidir; bu derleme sonuçlarını
+> mevcut kod tabanı hakkında sonuç çıkarmak için kullanmayın.
 
-Branch: `feature/complete-db-validation-backend-frontend-foundation` *(deleted — merged into main)*
+Dal: `feature/complete-db-validation-backend-frontend-foundation` *(silindi — main'e birleştirildi)*
 
-## Completed Database Work
+## Tamamlanan Veri Tabanı Çalışması
 
-- Completed guarded DEV migration workflow hardening.
-- Added SQL Server CI validation workflow and CI wrapper script.
-- Completed coverage seed data for domains, coverages, packages, and package items.
-- Completed missing advanced risk lookup seed data.
-- Added `tasking.SP_CreateRenewalTasks`.
-- Hardened validation scripts for person, institution, risk, policy, coverage,
-  claim, document, tasking, audit, cross-domain constraints, stored procedures,
-  and seed data.
-- Updated optional DEV sample data for active policy party/object/version consistency.
-- Updated SSMS fallback script generation.
-- Hardened stored procedure bridge tenant ownership checks for policy party,
-  policy object, claim handler, creator user, and claim close updater paths.
+- Korumalı DEV migration iş akışı güçlendirmesi tamamlandı.
+- SQL Server CI doğrulama iş akışı ve CI sarmalayıcı script eklendi.
+- Domain'ler, teminatlar, paketler ve paket kalemleri için teminat seed verisi tamamlandı.
+- Eksik gelişmiş risk arama seed verisi tamamlandı.
+- `tasking.SP_CreateRenewalTasks` eklendi.
+- Kişi, kuruluş, risk, poliçe, teminat, hasar, belge, tasking, denetim, domain'ler arası
+  kısıtlamalar, stored procedure'ler ve seed verisi için doğrulama script'leri güçlendirildi.
+- Aktif poliçe tarafı/nesnesi/versiyonu tutarlılığı için isteğe bağlı DEV örnek verisi
+  güncellendi.
+- SSMS geri dönüş script üretimi güncellendi.
+- Policy tarafı, policy nesnesi, hasar işleyicisi, oluşturucu kullanıcı ve hasar kapama
+  güncelleyici yolları için stored procedure bridge tenant sahipliği kontrolleri güçlendirildi.
 
-## Validation Result
+## Doğrulama Sonucu
 
-- Static SQL Server compatibility checks: PASSED.
-- Destructive migration pattern scan: PASSED.
-- PowerShell runner parse checks: PASSED.
-- Real SQL Server DEV execution: PASSED in SQL Server 2022 container.
-- SSMS bridge, guardrail, and monitoring scripts: PASSED in SQL Server 2022
-  container.
-- DEV restore drill: PASSED.
-- DEV access review evidence: PASSED.
+- Statik SQL Server uyumluluk kontrolleri: BAŞARILI.
+- Yıkıcı migration kalıbı taraması: BAŞARILI.
+- PowerShell çalıştırıcı ayrıştırma kontrolleri: BAŞARILI.
+- Gerçek SQL Server DEV yürütmesi: SQL Server 2022 container'ında BAŞARILI.
+- SSMS bridge, bariyer ve izleme script'leri: SQL Server 2022 container'ında BAŞARILI.
+- DEV geri yükleme tatbikatı: BAŞARILI.
+- DEV erişim inceleme kanıtı: BAŞARILI.
 
-Evidence reports:
+Kanıt raporları:
 
 - `md/reports/dev-validation-evidence-2026-06-04.md`
 - `md/reports/restore-drill-evidence-dev-2026-06-04.md`
 - `md/reports/access-review-evidence-dev-2026-06-04.md`
 
-## Seed Completion Summary
+## Seed Tamamlama Özeti
 
-- Coverage domains: AUTO, FIRE, FAMILY, LIABILITY, LEGAL_PROTECTION, HEALTH,
+- Teminat domain'leri: AUTO, FIRE, FAMILY, LIABILITY, LEGAL_PROTECTION, HEALTH,
   LIFE, LOAN, BUSINESS, TRAVEL.
-- Coverage examples: BA_AUTO, OMNIUM, MINI_OMNIUM, DRIVER_PROTECTION,
+- Teminat örnekleri: BA_AUTO, OMNIUM, MINI_OMNIUM, DRIVER_PROTECTION,
   LEGAL_PROTECTION_AUTO, FIRE_BUILDING, FIRE_CONTENTS, THEFT, GLASS_BREAKAGE,
   WATER_DAMAGE, FAMILY_LIABILITY, LEGAL_PROTECTION_PRIVATE, HOSPITALIZATION,
   LIFE_COVER, OUTSTANDING_BALANCE, BUSINESS_LIABILITY, TRAVEL_ASSISTANCE.
-- Coverage packages: AUTO_BASIC, AUTO_FULL, HOME_BASIC, HOME_FULL,
+- Teminat paketleri: AUTO_BASIC, AUTO_FULL, HOME_BASIC, HOME_FULL,
   FAMILY_BASIC, BUSINESS_BASIC.
-- Risk lookup coverage expanded for vehicle, real estate, insured roles,
-  residence/destination/adjacency/occupancy/construction/roof/burglary,
-  insured person, worker/employee, age, thing, material, activity, and activity
-  risk levels.
+- Araç, gayrimenkul, sigortalı roller, konut/hedef/bitişiklik/doluluk/yapı/çatı/
+  hırsızlık koruması, sigortalı kişi, işçi/çalışan, yaş, nesne, malzeme, faaliyet
+  ve faaliyet risk seviyeleri için risk arama teminatı genişletildi.
 
-## Stored Procedures Added
+## Eklenen Stored Procedure'ler
 
 - `tasking.SP_CreateRenewalTasks`
-- Existing policy and claim bridge procedures were hardened with tenant-owned
-  person/object/handler/user checks.
+- Mevcut policy ve claim bridge procedure'leri, tenant'a ait kişi/nesne/işleyici/
+  kullanıcı kontrolleriyle güçlendirildi.
 
-Behavior:
+Davranış:
 
-- Tenant-aware.
-- Supports `@dry_run`.
-- Prevents duplicate open renewal tasks for the same contract.
-- Validates assigned and creator users belong to the tenant.
-- Uses transaction safety, `SET XACT_ABORT ON`, TRY/CATCH, and `THROW`.
+- Tenant farkında.
+- `@dry_run` destekliyor.
+- Aynı sözleşme için yinelenen açık yenileme görevlerini önlüyor.
+- Atanan ve oluşturucu kullanıcıların tenant'a ait olduğunu doğruluyor.
+- İşlem güvenliği, `SET XACT_ABORT ON`, TRY/CATCH ve `THROW` kullanıyor.
 
-## ERD And Data Dictionary
+## ERD ve Veri Sözlüğü
 
-- Updated `md/database/erd-notes.md`.
-- Added `md/database/erd-mermaid.md`.
-- Expanded `md/database/data-dictionary.md` with column-level detail for the
-  main operational tables and security classifications.
+- `md/database/erd-notes.md` güncellendi.
+- `md/database/erd-mermaid.md` eklendi.
+- `md/database/data-dictionary.md`, ana operasyonel tablolar ve güvenlik
+  sınıflandırmaları için sütun düzeyi ayrıntıyla genişletildi.
 
-## SSMS Workbench Status
+## SSMS Çalışma Tezgahı Durumu
 
-- Added SSMS-first operational workbench under `database/ssms/`.
-- Added `00__open_first_safety_check.sql` for DEV target and server safety
-  checks before any operational work.
-- Added `01__run_all_dev_migrations_sqlcmd.sql` as the SSMS SQLCMD-mode
-  migration launcher.
-- Added `02__operations_dashboard.sql` for tenant-aware Results Grid
-  dashboards across customers, institutions, risks, policies, claims,
-  documents, tasks, coverage, and lookup health.
-- Added `03__create_renewal_tasks.sql` for controlled execution of
-  `tasking.SP_CreateRenewalTasks`.
-- Added `04__admin_security_audit_queries.sql` for RBAC, audit, and data
-  integrity checks.
-- Added `14__admin_role_permission_matrix.sql` for role coverage, permission
-  matrix, tenant user assignments, least-privilege checks, and admin handoff.
-- Extended `07__data_entry_bridge_templates.sql` with `CREATE_VEHICLE_OBJECT`,
-  `ADD_POLICY_OBJECT`, and `CLOSE_CLAIM` preview-first actions.
-- Extended task bridge coverage with `CREATE_TASK`, `ADD_TASK_COMMENT`, and
-  `ADD_TASK_REMINDER` preview-first actions backed by stored procedures.
-- Added `15__monitoring_and_job_readiness.sql` for DEV database health,
-  backlog, backup visibility, SQL Agent observed jobs, and DBA handoff grids.
-- Added `16__delivery_gap_register.sql` for commit review closure, unfinished
-  delivery gaps, owner blockers, and next SSMS actions.
-- Added `17__remaining_work_cockpit.sql` for owner evidence handoff, 019+
-  decision intake, next bridge ranking, SQL Agent promotion, and release gates.
-- Primary interface target is SSMS Query Editor and SQL Server engine behavior,
-  not a web site.
+- `database/ssms/` altında SSMS öncelikli operasyonel çalışma tezgahı eklendi.
+- DEV hedef ve sunucu güvenlik kontrolü için `00__open_first_safety_check.sql` eklendi.
+- SSMS SQLCMD modu migration başlatıcısı olarak `01__run_all_dev_migrations_sqlcmd.sql`
+  eklendi.
+- Müşteriler, kurumlar, riskler, poliçeler, hasarlar, belgeler, görevler, teminat
+  ve arama sağlığı için tenant farkında Results Grid dashboard'ları için
+  `02__operations_dashboard.sql` eklendi.
+- `tasking.SP_CreateRenewalTasks`'ın kontrollü yürütmesi için
+  `03__create_renewal_tasks.sql` eklendi.
+- RBAC, denetim ve veri bütünlük kontrolleri için
+  `04__admin_security_audit_queries.sql` eklendi.
+- Rol kapsamı, izin matrisi, tenant kullanıcı atamaları, en az ayrıcalık kontrolleri
+  ve admin deviri için `14__admin_role_permission_matrix.sql` eklendi.
+- `CREATE_VEHICLE_OBJECT`, `ADD_POLICY_OBJECT` ve `CLOSE_CLAIM` önizleme öncelikli
+  aksiyonlarıyla `07__data_entry_bridge_templates.sql` genişletildi.
+- DEV veri tabanı sağlığı, biriktirme, yedek görünürlüğü, SQL Agent gözlemlenen
+  işleri ve DBA devir ızgaraları için `15__monitoring_and_job_readiness.sql` eklendi.
+- Commit inceleme kapanması, bitmemiş teslimat boşlukları, sahip engelleyicileri ve
+  sonraki SSMS aksiyonları için `16__delivery_gap_register.sql` eklendi.
+- Sahip kanıtı deviri, 019+ karar alımı, sonraki bridge sıralaması, SQL Agent terfisi
+  ve sürüm kapıları için `17__remaining_work_cockpit.sql` eklendi.
+- Birincil arayüz hedefi bir web sitesi değil SSMS Query Editor ve SQL Server motor
+  davranışıdır.
 
-## CI Pipeline Status
+## CI Pipeline Durumu
 
-- Added `.github/workflows/sql-server-validation.yml`.
-- Added `.github/workflows/backend-build.yml`.
-- Removed the frontend workflow because the requested target is SSMS-first.
-- GitHub Actions now validates backend build, SQL Server validation, database
-  quality gate, and SSMS workbench validation.
-- SQL Server validation now executes the checked-in SSMS operator scripts after
-  the guarded migration and validation sequence.
-- The guarded runner automatically includes contiguous `019+` scripts instead
-  of relying on a permanently fixed file list.
+- `.github/workflows/sql-server-validation.yml` eklendi.
+- `.github/workflows/backend-build.yml` eklendi.
+- İstenen hedef SSMS öncelikli olduğundan frontend iş akışı kaldırıldı.
+- GitHub Actions artık backend derlemesini, SQL Server doğrulamasını, veri tabanı
+  kalite kapısını ve SSMS çalışma tezgahı doğrulamasını doğrulıyor.
+- SQL Server doğrulaması artık korumalı migration ve doğrulama dizisinden sonra
+  kontrol altındaki SSMS operatör script'lerini yürütüyor.
+- Korumalı çalıştırıcı, kalıcı olarak sabit bir dosya listesine güvenmek yerine
+  bitişik `019+` script'leri otomatik olarak içeriyor.
 
-## Backend/API Status
+## Backend/API Durumu
 
-- Added optional .NET 8 Clean Architecture foundation under `backend/`.
-- Added API, Application, Domain, Infrastructure, and Tests projects.
-- Added Swagger/OpenAPI setup.
-- Added JWT-ready authentication wiring.
-- Bound tenant-scoped domain reads to the authenticated JWT `tenant_id` claim.
-- Required JWT authority and audience outside Development.
-- Restricted Swagger to Development and protected the DB connectivity health
-  endpoint with authorization.
-- Added read/search endpoints for tenants, persons, institutions, risks,
-  policies, claims, documents, tasks, coverage, and lookup health.
-- Backend build is confirmed in CI.
-- Seven backend authorization and tenant-claim tests pass locally.
+- `backend/` altında isteğe bağlı .NET 8 Temiz Mimari temeli eklendi.
+- API, Application, Domain, Infrastructure ve Tests projeleri eklendi.
+- Swagger/OpenAPI kurulumu eklendi.
+- JWT'ye hazır kimlik doğrulama bağlantısı eklendi.
+- Tenant kapsamlı domain okumaları, kimliği doğrulanmış JWT `tenant_id` claim'ine
+  bağlandı.
+- Development dışında JWT otoritesi ve kitlesi zorunlu kılındı.
+- Swagger Development ile kısıtlandı ve DB bağlantı sağlığı uç noktası
+  yetkilendirmeyle korundu.
+- Tenant'lar, kişiler, kurumlar, riskler, poliçeler, hasarlar, belgeler, görevler,
+  teminat ve arama sağlığı için okuma/arama uç noktaları eklendi.
+- Backend derlemesi CI'da onaylandı.
+- Yedi backend yetkilendirme ve tenant claim testi yerel olarak geçiyor.
 
-## Product Ownership
+## Ürün Sahipliği
 
-- Product owner, maintainer, technical direction, and release attribution:
-  `Deuterium12{MCK}`.
-- Public repository documents and contribution templates use the same ownership
-  label.
-- GitHub account handles are retained only where the platform requires a valid
-  account for permissions and review routing.
+- Ürün sahibi, bakımcı, teknik yön ve sürüm atfı: `Deuterium12{MCK}`.
+- Kamuya açık depo belgeleri ve katkı şablonları aynı sahiplik etiketini kullanır.
+- GitHub hesap tanıtıcıları yalnızca platformun izinler ve inceleme yönlendirme için
+  geçerli bir hesap gerektirdiği yerlerde saklanır.
 
-## Frontend/Web Status
+## Frontend/Web Durumu
 
-- Removed the Next.js web admin panel after direction was clarified.
-- Removed `.github/workflows/frontend-build.yml`.
-- No web UI is part of the intended operator surface now.
+- Yön netleştirildikten sonra Next.js web admin paneli kaldırıldı.
+- `.github/workflows/frontend-build.yml` kaldırıldı.
+- Şu anda amaçlanan operatör yüzeyinin bir parçası olarak web UI yok.
 
-## Remaining Risks
+## Kalan Riskler
 
-- Exposed coordination tokens must be revoked/rotated.
-- TEST/PROD execution evidence must be collected on approved infrastructure.
-- TEST/PROD access-review evidence must be collected with named operators and
-  sign-off.
-- TEST/PROD restore drill evidence must be collected before go-live.
-- SQL Agent jobs still require approved DEV/TEST owners and schedules.
-- Future `019+` migrations need owner approval before finance, import/export,
-  entity notes, or product-template tables are added.
-- Open P0-P3 delivery gaps should be reviewed from
-  `16__delivery_gap_register.sql` after each PR/commit review.
-- Remaining owner actions should be assigned from
-  `17__remaining_work_cockpit.sql` before schema or job creation.
+- İfşa edilmiş koordinasyon token'ları iptal edilmeli/döndürülmelidir.
+- TEST/PROD yürütme kanıtı onaylı altyapıda toplanmalıdır.
+- TEST/PROD erişim inceleme kanıtı, adlandırılmış operatörler ve imzayla
+  toplanmalıdır.
+- TEST/PROD geri yükleme tatbikatı kanıtı canlıya geçişten önce toplanmalıdır.
+- SQL Agent işleri hâlâ onaylı DEV/TEST sahiplerini ve zamanlamaları gerektiriyor.
+- Gelecekteki `019+` migration'lar, finans, içe/dışa aktarma sahneleme, varlık
+  notları veya ürün şablonu tabloları eklemeden önce sahip onayı gerektirir.
+- Açık P0-P3 teslimat boşlukları her PR/commit incelemesinden sonra
+  `16__delivery_gap_register.sql`'den incelenmelidir.
+- Kalan sahip aksiyonları, schema veya iş oluşturmadan önce
+  `17__remaining_work_cockpit.sql`'den atanmalıdır.
 
-## Next Recommended Work
+## Sonraki Önerilen Çalışma
 
-1. Revoke/rotate any exposed GitHub token.
-2. Run `16__delivery_gap_register.sql` after commit/PR review and keep open
-   gap rows current.
-3. Run `17__remaining_work_cockpit.sql` to assign evidence, 019+ decision,
-   bridge ranking, and DBA handoff actions.
-4. Collect TEST/PROD execution evidence with the approved SQL Server target.
-5. Collect TEST/PROD access-review evidence using the approved environment
-   procedure.
-6. Run TEST/PROD restore drill and record evidence.
-7. Prioritize `019+` design candidates only after owner approval.
-8. Convert monitoring/job-readiness grids into approved SQL Agent jobs after
-   DEV/TEST infrastructure owners confirm schedules.
+1. İfşa edilmiş GitHub token'ını iptal edin/döndürün.
+2. Commit/PR incelemesinden sonra `16__delivery_gap_register.sql` çalıştırın ve
+   açık boşluk satırlarını güncel tutun.
+3. Kanıt, 019+ kararı, bridge sıralaması ve DBA devir aksiyonlarını atamak için
+   `17__remaining_work_cockpit.sql` çalıştırın.
+4. Onaylı SQL Server hedefiyle TEST/PROD yürütme kanıtı toplayın.
+5. Onaylı ortam prosedürünü kullanarak TEST/PROD erişim inceleme kanıtı toplayın.
+6. TEST/PROD geri yükleme tatbikatı çalıştırın ve kanıt kaydedin.
+7. `019+` tasarım adaylarını yalnızca sahip onayından sonra önceliklendirin.
+8. DEV/TEST altyapı sahipleri zamanlamaları onayladıktan sonra izleme/iş hazırlık
+   ızgaralarını onaylı SQL Agent işlerine dönüştürün.

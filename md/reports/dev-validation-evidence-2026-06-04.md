@@ -1,43 +1,43 @@
-# DEV Validation Evidence - 2026-06-04
+# DEV Doğrulama Kanıtı — 2026-06-04
 
-## Summary
+## Özet
 
-| Field | Value |
+| Alan | Değer |
 | --- | --- |
-| Environment | Local ephemeral SQL Server DEV container |
-| Source database | `YafesPars_DEV` |
-| Evidence date | 2026-06-04 |
-| Commit line | PR #1 feature branch |
-| Tenant code | `DEV-BE-BROKER` |
-| Tenant display name | Yafes Broker Operations |
-| Result | PASS |
+| Ortam | Yerel geçici SQL Server DEV container'ı |
+| Kaynak veri tabanı | `YafesPars_DEV` |
+| Kanıt tarihi | 2026-06-04 |
+| Commit hattı | PR #1 feature dalı |
+| Tenant kodu | `DEV-BE-BROKER` |
+| Tenant görünen adı | Yafes Broker Operations |
+| Sonuç | BAŞARILI |
 
-## Evidence
+## Kanıt
 
-| Check | Result |
+| Kontrol | Sonuç |
 | --- | --- |
-| Static quality gate | PASS |
-| Migration scripts `000..018` | PASS, 19 scripts |
-| Validation scripts `001..017` on source DEV database | PASS, 17 scripts |
-| SSMS dashboard contract | PASS |
-| Admin role matrix contract | PASS |
-| SQL Server validation workflow | PASS in GitHub Actions |
-| SSMS workbench validation workflow | PASS in GitHub Actions |
+| Statik kalite kapısı | BAŞARILI |
+| Migration script'leri `000..018` | BAŞARILI, 19 script |
+| Kaynak DEV veri tabanında doğrulama script'leri `001..017` | BAŞARILI, 17 script |
+| SSMS dashboard sözleşmesi | BAŞARILI |
+| Admin rol matrisi sözleşmesi | BAŞARILI |
+| SQL Server doğrulama iş akışı | GitHub Actions'ta BAŞARILI |
+| SSMS çalışma tezgahı doğrulama iş akışı | GitHub Actions'ta BAŞARILI |
 
-## Restored Database Signals
+## Geri Yüklenen Veri Tabanı Sinyalleri
 
-| Signal | Value |
+| Sinyal | Değer |
 | --- | --- |
-| Domain table count | 108 |
-| Active role count | 4 |
-| Active permission count | 18 |
-| Active DEV sample user count | 3 |
+| Domain tablo sayısı | 108 |
+| Aktif rol sayısı | 4 |
+| Aktif izin sayısı | 18 |
+| Aktif DEV örnek kullanıcı sayısı | 3 |
 
-## Notes
+## Notlar
 
-- No secret, password, backup file, or execution log artifact was committed.
-- The database source remains migrations `000..018`; future schema work starts
-  at `019+`.
-- The local browser preview remains non-persistent. Real data work stays in
-  SSMS with SQLCMD Mode enabled against DEV/TEST/PROD change-controlled
-  environments.
+- Secret, parola, yedek dosyası veya yürütme günlüğü eseri commit edilmedi.
+- Veri tabanı kaynağı migration `000..018` olmaya devam ediyor; gelecekteki schema
+  çalışmaları `019+` ile başlıyor.
+- Yerel tarayıcı önizlemesi kalıcı değil. Gerçek veri çalışması, DEV/TEST/PROD
+  değişiklik kontrollü ortamlarına karşı SQLCMD Mode etkinleştirilmiş SSMS'de
+  kalmaktadır.

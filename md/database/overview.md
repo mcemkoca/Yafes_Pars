@@ -1,39 +1,39 @@
-# Database
+# Veri Tabanı
 
-This folder contains the SQL Server and SSMS-first database project for Yafes
-Pars.
+Bu klasör, Yafes Pars için SQL Server ve SSMS öncelikli veri tabanı projesini içerir.
 
-## Folders
+## Klasörler
 
-- `legacy/`: original SQL files retained for comparison and traceability.
-- `migrations/`: ordered forward migrations.
-- `rollback/`: rollback scripts kept outside the forward path.
-- `validation/`: SSMS scripts that verify expected database objects and rules.
-- `md/database/`: human-readable database architecture and operating documentation.
-- `templates/`: reusable T-SQL templates.
+- `legacy/`: karşılaştırma ve izlenebilirlik için saklanan özgün SQL dosyaları.
+- `migrations/`: sıralı ileri migration'lar.
+- `rollback/`: ileri yolun dışında tutulan rollback script'leri.
+- `validation/`: beklenen veri tabanı nesnelerini ve kuralları doğrulayan SSMS script'leri.
+- `md/database/`: insan tarafından okunabilir veri tabanı mimarisi ve operasyon belgeleri.
+- `templates/`: yeniden kullanılabilir T-SQL şablonları.
 
-## Working Rule
+## Çalışma Kuralı
 
-Every major database change should include:
+Her büyük veri tabanı değişikliği şunları içermelidir:
 
-1. A migration script.
-2. A validation script.
-3. Documentation updates.
-4. A focused commit.
+1. Bir migration script'i.
+2. Bir doğrulama script'i.
+3. Belgeleme güncellemeleri.
+4. Odaklı bir commit.
 
-Production lookup seed data and optional demo data must remain separate.
+Üretim arama seed verisi ve isteğe bağlı demo verisi ayrı kalmalıdır.
 
-## Build Status
+## Derleme Durumu
 
-The database folder now contains ordered migrations from `000` through `018`,
-validation scripts for each major phase, guarded rollback scripts, and reusable
-SQL templates. Human-readable database documentation lives in `md/database/`.
+Veri tabanı klasörü artık `000`'dan `018`'e sıralı migration'lar, her büyük aşama
+için doğrulama script'leri, korumalı rollback script'leri ve yeniden kullanılabilir
+SQL şablonlarını içermektedir. İnsan tarafından okunabilir veri tabanı belgeleri
+`md/database/` altındadır.
 
-## Evidence Documents
+## Kanıt Belgeleri
 
-- `table-reconciliation-89-vs-108.md`: explains why the current model has 108
-  tables while the old legacy reference had 89.
-- `access-review-evidence-template.md`: records role, permission, user, and
-  least-privilege review evidence.
-- `restore-drill-evidence-template.md`: records backup restore proof, timing,
-  and validation results.
+- `table-reconciliation-89-vs-108.md`: mevcut modelin neden 89 eski referansa
+  karşı 108 tablo içerdiğini açıklar.
+- `access-review-evidence-template.md`: rol, izin, kullanıcı ve en az ayrıcalık
+  inceleme kanıtını kaydeder.
+- `restore-drill-evidence-template.md`: yedek geri yükleme kanıtını, zamanlamayı
+  ve doğrulama sonuçlarını kaydeder.

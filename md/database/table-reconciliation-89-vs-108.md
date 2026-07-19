@@ -1,91 +1,90 @@
-# Table Reconciliation: Legacy 89 vs Current 108
+# Tablo Mutabakatı: Eski 89 ile Mevcut 108
 
-Use this document before removing, merging, or adding tables. The current
-migration source is the production design authority.
+Tablo kaldırmadan, birleştirmeden veya eklemeden önce bu belgeyi kullanın. Mevcut
+migration kaynağı, üretim tasarım otoritesidir.
 
-Short rule: legacy 89 is comparison history; current 108 is the active model.
+Kısa kural: eski 89 karşılaştırma tarihidir; mevcut 108 aktif modeldir.
 
-## Source Of Truth
+## Gerçeğin Kaynağı
 
-| Source | Count | Status |
+| Kaynak | Sayı | Durum |
 | --- | ---: | --- |
-| `database/legacy/schema.sql` | 89 | Legacy comparison source only. |
-| `database/migrations/000..018` | 108 | Active SQL Server source of truth. |
+| `database/legacy/schema.sql` | 89 | Yalnızca eski karşılaştırma kaynağı. |
+| `database/migrations/000..018` | 108 | Aktif SQL Server gerçek kaynağı. |
 
-Decision: do not reduce the active model to 89 tables. The 108-table model is
-intentional because it adds tenant/RBAC/audit foundations, document/tasking
-operations, clearer coverage structures, and safer risk/object naming.
+Karar: aktif modeli 89 tabloya indirmeyin. 108 tablo modeli kasıtlıdır; tenant/RBAC/denetim
+temellerini, belge/tasking operasyonlarını, daha net teminat yapılarını ve daha güvenli
+risk/nesne adlandırmasını eklemektedir.
 
-## Current Schema Counts
+## Mevcut Schema Sayıları
 
-| Schema | Tables | Role |
+| Schema | Tablo | Rol |
 | --- | ---: | --- |
-| `core` | 7 | Tenant, users, roles, permissions, migration ledger. |
-| `ref` | 6 | Shared lookup standards. |
-| `person` | 16 | Natural/legal identity, contact data, relations. |
-| `institution` | 6 | Insurers, banks, brokers, identifiers, addresses. |
-| `risk` | 33 | Insurable objects and subtype detail. |
-| `policy` | 17 | Contracts, versions, parties, objects, takeovers. |
-| `coverage` | 4 | Coverage catalog, domains, packages. |
-| `claim` | 8 | Claim root, parties, objects, circumstances. |
-| `document` | 4 | Documents, links, versions, storage metadata. |
-| `tasking` | 5 | Tasks, comments, reminders, priority/status. |
-| `audit` | 2 | Audit log and entity change details. |
+| `core` | 7 | Tenant, kullanıcılar, roller, izinler, migration defteri. |
+| `ref` | 6 | Paylaşılan arama standartları. |
+| `person` | 16 | Gerçek/tüzel kimlik, iletişim verisi, ilişkiler. |
+| `institution` | 6 | Sigortacılar, bankalar, brokerlar, tanımlayıcılar, adresler. |
+| `risk` | 33 | Sigortalanabilir nesneler ve alt tür ayrıntıları. |
+| `policy` | 17 | Sözleşmeler, versiyonlar, taraflar, nesneler, devirler. |
+| `coverage` | 4 | Teminat kataloğu, domain'ler, paketler. |
+| `claim` | 8 | Hasar kökü, taraflar, nesneler, koşullar. |
+| `document` | 4 | Belgeler, bağlantılar, versiyonlar, depolama meta verisi. |
+| `tasking` | 5 | Görevler, yorumlar, hatırlatıcılar, öncelik/durum. |
+| `audit` | 2 | Denetim günlüğü ve varlık değişim ayrıntıları. |
 
-## Rename And Split Decisions
+## Yeniden Adlandırma ve Bölme Kararları
 
-| Legacy table or idea | Current table or decision | Decision |
+| Eski tablo veya fikir | Mevcut tablo veya karar | Karar |
 | --- | --- | --- |
-| `Object` | `risk.InsurableObject` | Renamed to avoid unsafe generic table naming. |
-| `ObjectType` | `risk.InsurableObjectType` | Renamed for clarity. |
-| `ObjectVehicle` | `risk.InsurableVehicle` | Kept with safer naming. |
-| `ObjectRealEstate` | `risk.InsurableRealEstate` | Kept with safer naming. |
-| `ObjectRealEstate_BurglaryProtection` | `risk.InsurableRealEstateBurglaryProtection` | Kept and normalized naming. |
-| `ObjectLoan` | `risk.InsurableLoan` | Kept with safer naming. |
-| `ObjectPerson` | `risk.InsurablePerson` | Kept with safer naming. |
-| `ObjectThing` | `risk.InsurableThing` | Kept with safer naming. |
-| `ObjectActivity` | `risk.InsurableActivity` | Kept with safer naming. |
-| `ObjectPersonSubtype` | `risk.InsurablePersonSubtype` | Kept with safer naming. |
-| `ObjectThingSubtype` | `risk.InsurableThingSubtype` | Kept with safer naming. |
-| `ObjectActivitySubtype` | `risk.InsurableActivitySubtype` | Kept with safer naming. |
-| `Person_PersonType` | `person.PersonPersonType` | Kept with SQL Server-friendly naming. |
-| `PersonRelation_Person` | `person.PersonRelationPerson` | Kept with SQL Server-friendly naming. |
-| `EconomicActivity_Nacebel` | `person.EconomicActivityNacebel` | Kept with SQL Server-friendly naming. |
-| `Contract_Object` | `policy.ContractObject` | Kept with SQL Server-friendly naming. |
-| `Contract_Party` | `policy.ContractParty` | Kept with SQL Server-friendly naming. |
-| `ContractVersion_Object` | `policy.ContractVersionObject` | Kept with SQL Server-friendly naming. |
-| `Claim_Circumstance` | `claim.ClaimCircumstance` | Kept with SQL Server-friendly naming. |
-| `Claim_Object` | `claim.ClaimObject` | Kept with SQL Server-friendly naming. |
-| `Claim_Party` | `claim.ClaimParty` | Kept with SQL Server-friendly naming. |
-| `lookup_coverage` | `coverage.Coverage` | Reworked into the coverage schema. |
-| `coverage_domain` | `coverage.CoverageDomain` | Reworked into the coverage schema. |
-| `NatureType` | Not carried forward as a table | Needs owner confirmation before any future migration. |
+| `Object` | `risk.InsurableObject` | Güvensiz genel tablo adlandırmasından kaçınmak için yeniden adlandırıldı. |
+| `ObjectType` | `risk.InsurableObjectType` | Netlik için yeniden adlandırıldı. |
+| `ObjectVehicle` | `risk.InsurableVehicle` | Daha güvenli adlandırmayla korundu. |
+| `ObjectRealEstate` | `risk.InsurableRealEstate` | Daha güvenli adlandırmayla korundu. |
+| `ObjectRealEstate_BurglaryProtection` | `risk.InsurableRealEstateBurglaryProtection` | Korundu ve adlandırma normalleştirildi. |
+| `ObjectLoan` | `risk.InsurableLoan` | Daha güvenli adlandırmayla korundu. |
+| `ObjectPerson` | `risk.InsurablePerson` | Daha güvenli adlandırmayla korundu. |
+| `ObjectThing` | `risk.InsurableThing` | Daha güvenli adlandırmayla korundu. |
+| `ObjectActivity` | `risk.InsurableActivity` | Daha güvenli adlandırmayla korundu. |
+| `ObjectPersonSubtype` | `risk.InsurablePersonSubtype` | Daha güvenli adlandırmayla korundu. |
+| `ObjectThingSubtype` | `risk.InsurableThingSubtype` | Daha güvenli adlandırmayla korundu. |
+| `ObjectActivitySubtype` | `risk.InsurableActivitySubtype` | Daha güvenli adlandırmayla korundu. |
+| `Person_PersonType` | `person.PersonPersonType` | SQL Server dostu adlandırmayla korundu. |
+| `PersonRelation_Person` | `person.PersonRelationPerson` | SQL Server dostu adlandırmayla korundu. |
+| `EconomicActivity_Nacebel` | `person.EconomicActivityNacebel` | SQL Server dostu adlandırmayla korundu. |
+| `Contract_Object` | `policy.ContractObject` | SQL Server dostu adlandırmayla korundu. |
+| `Contract_Party` | `policy.ContractParty` | SQL Server dostu adlandırmayla korundu. |
+| `ContractVersion_Object` | `policy.ContractVersionObject` | SQL Server dostu adlandırmayla korundu. |
+| `Claim_Circumstance` | `claim.ClaimCircumstance` | SQL Server dostu adlandırmayla korundu. |
+| `Claim_Object` | `claim.ClaimObject` | SQL Server dostu adlandırmayla korundu. |
+| `Claim_Party` | `claim.ClaimParty` | SQL Server dostu adlandırmayla korundu. |
+| `lookup_coverage` | `coverage.Coverage` | Coverage schema'sına yeniden işlendi. |
+| `coverage_domain` | `coverage.CoverageDomain` | Coverage schema'sına yeniden işlendi. |
+| `NatureType` | Mevcut tablo olarak taşınmadı | Gelecekteki herhangi bir migration öncesinde sahip onayı gerektirir. |
 
-## Additions Beyond Legacy 89
+## Eski 89'un Ötesindeki Eklemeler
 
-| Area | Added tables | Reason |
+| Alan | Eklenen tablolar | Gerekçe |
 | --- | --- | --- |
-| Tenant and security | `core.Tenant`, `core.AppUser`, `core.Role`, `core.Permission`, `core.RolePermission`, `core.UserRole`, `core.SchemaMigration` | Required for multi-tenant operation, RBAC, and migration traceability. |
-| Documents | `document.DocumentType`, `document.Document`, `document.DocumentLink`, `document.DocumentVersion` | Required for policy, claim, person, institution, and risk document handling. |
-| Tasking | `tasking.TaskStatus`, `tasking.TaskPriority`, `tasking.Task`, `tasking.TaskComment`, `tasking.TaskReminder` | Required for daily operator workflow and renewal/claim follow-up. |
-| Audit | `audit.AuditLog`, `audit.EntityChangeSet` | Required for guarded edits and support/audit evidence. |
-| Coverage packages | `coverage.CoveragePackage`, `coverage.CoveragePackageItem` | Required for reusable insurance package structure. |
+| Tenant ve güvenlik | `core.Tenant`, `core.AppUser`, `core.Role`, `core.Permission`, `core.RolePermission`, `core.UserRole`, `core.SchemaMigration` | Çok kiracılı işlem, RBAC ve migration izlenebilirliği için zorunlu. |
+| Belgeler | `document.DocumentType`, `document.Document`, `document.DocumentLink`, `document.DocumentVersion` | Poliçe, hasar, kişi, kuruluş ve risk belge işleme için zorunlu. |
+| Tasking | `tasking.TaskStatus`, `tasking.TaskPriority`, `tasking.Task`, `tasking.TaskComment`, `tasking.TaskReminder` | Günlük operatör iş akışı ve yenileme/hasar takibi için zorunlu. |
+| Denetim | `audit.AuditLog`, `audit.EntityChangeSet` | Korumalı düzenlemeler ve destek/denetim kanıtı için zorunlu. |
+| Teminat paketleri | `coverage.CoveragePackage`, `coverage.CoveragePackageItem` | Yeniden kullanılabilir sigorta paketi yapısı için zorunlu. |
 
-## Working Rule
+## Çalışma Kuralı
 
-1. Keep the current 108-table migration line protected.
-2. Use `12__table_catalog_and_relationships.sql` before planning any table
-   change.
-3. Use `13__visual_workflow_board.sql` to review domain routes and readiness.
-4. Add new schema changes only as forward migration `019+`.
-5. Do not delete or merge tables only because the legacy package had fewer
-   tables.
+1. Mevcut 108 tablo migration hattını korumalı tutun.
+2. Herhangi bir tablo değişikliği planlamadan önce `12__table_catalog_and_relationships.sql`
+   kullanın.
+3. Domain rotalarını ve hazırlığı incelemek için `13__visual_workflow_board.sql` kullanın.
+4. Yeni schema değişikliklerini yalnızca ileri migration `019+` olarak ekleyin.
+5. Eski paket daha az tablo içerdiği için tabloları silmeyin veya birleştirmeyin.
 
-## Open Owner Decisions
+## Açık Sahip Kararları
 
-| Topic | Current position | Required owner decision |
+| Konu | Mevcut konum | Gerekli sahip kararı |
 | --- | --- | --- |
-| `NatureType` | Not implemented as a current table. | Confirm whether it belongs to policy, risk, or lookup scope. |
-| Finance/commission | Not implemented yet. | Approve accounting flow before `019+` design. |
-| Import/export staging | Not implemented yet. | Approve onboarding/import process before `019+` design. |
-| Product templates | Not implemented yet. | Confirm product/rating ownership before `019+` design. |
+| `NatureType` | Mevcut tablo olarak uygulanmadı. | Policy, risk veya arama kapsamına ait olup olmadığını onaylayın. |
+| Finans/komisyon | Henüz uygulanmadı. | `019+` tasarımından önce muhasebe akışını onaylayın. |
+| İçe/dışa aktarma sahneleme | Henüz uygulanmadı. | `019+` tasarımından önce ekleme/içe aktarma sürecini onaylayın. |
+| Ürün şablonları | Henüz uygulanmadı. | `019+` tasarımından önce ürün/derecelendirme sahipliğini onaylayın. |

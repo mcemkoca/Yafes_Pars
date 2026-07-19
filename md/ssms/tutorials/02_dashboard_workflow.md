@@ -1,35 +1,35 @@
-# Dashboard Workflow
+# Dashboard İş Akışı
 
-## Purpose
+## Amaç
 
-The dashboard is the SSMS home screen. It returns shortcut grids, health
-signals, and next actions without changing data.
+Dashboard, SSMS ana ekranıdır. Veri değiştirmeksizin kısayol ızgaraları, sağlık
+sinyalleri ve sonraki aksiyonlar döndürür.
 
-## Main Script
+## Ana Script
 
-Use:
+Kullanın:
 
 ```text
 database/ssms/05__operator_dashboard_home.sql
 ```
 
-## How To Read The Result Sets
+## Sonuç Kümelerini Okuma
 
-- `Operator shortcuts`: script catalog with safety mode and purpose.
-- `Current operating context`: server, database, tenant, and login.
-- `Health signals`: quick operational status.
-- `Recommended next actions`: suggested next SSMS tabs.
+- `Operatör kısayolları`: güvenlik modu ve amacıyla script kataloğu.
+- `Mevcut çalışma bağlamı`: sunucu, veri tabanı, tenant ve oturum açma bilgileri.
+- `Sağlık sinyalleri`: hızlı operasyonel durum.
+- `Önerilen sonraki aksiyonlar`: önerilen sonraki SSMS sekmeleri.
 
-## Shortcut Safety Modes
+## Kısayol Güvenlik Modları
 
-- `READ_ONLY`: safe to run without changing data.
-- `BACKUP_REQUIRED`: run only after backup path is configured.
-- `DRY_RUN_FIRST`: run preview before insert/update.
-- `REVIEW_BEFORE_COMMIT`: review preview grids before executing.
-- `ROLLBACK_DEFAULT`: changes are rolled back unless commit is explicitly enabled.
+- `READ_ONLY`: veri değiştirmeden güvenle çalıştırılabilir.
+- `BACKUP_REQUIRED`: yalnızca yedek yolu yapılandırıldıktan sonra çalıştırın.
+- `DRY_RUN_FIRST`: ekle/güncelle öncesinde önizleme çalıştırın.
+- `REVIEW_BEFORE_COMMIT`: yürütmeden önce önizleme ızgaralarını inceleyin.
+- `ROLLBACK_DEFAULT`: commit açıkça etkinleştirilmedikçe değişiklikler geri alınır.
 
-## Info Tips
+## Bilgi İpuçları
 
-- Treat the dashboard as a control panel, not as a data entry form.
-- Use the shortcut file names to open scripts in new SSMS tabs.
-- Keep `TENANT_CODE` consistent across all open tabs.
+- Dashboard'u veri giriş formu olarak değil, kontrol paneli olarak ele alın.
+- Yeni SSMS sekmelerinde script açmak için kısayol dosya adlarını kullanın.
+- `TENANT_CODE`'u tüm açık sekmelerde tutarlı tutun.

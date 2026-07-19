@@ -1,47 +1,47 @@
-# Security And Audit
+# Güvenlik ve Denetim
 
-## Purpose
+## Amaç
 
-Review RBAC, role permissions, tenant user assignments, least-privilege checks,
-audit triggers, audit logs, and open integrity issues.
+RBAC, rol izinleri, tenant kullanıcı atamaları, en az ayrıcalık kontrolleri,
+denetim trigger'ları, denetim günlükleri ve açık bütünlük sorunlarını inceleyin.
 
-## Main Script
+## Ana Script
 
-Use:
+Kullanın:
 
 ```text
 database/ssms/14__admin_role_permission_matrix.sql
 database/ssms/04__admin_security_audit_queries.sql
 ```
 
-## What To Review
+## İncelenecekler
 
-- Expected system role coverage
-- Role/permission matrix
-- Tenant user role assignments
-- Least-privilege checklist
-- Users and roles
-- Role permissions
-- Audit trigger inventory
-- Recent audit events
-- Active packages without coverage items
-- Active coverage without domains
-- Task assignees outside tenant
+- Beklenen sistem rol kapsamı
+- Rol/izin matrisi
+- Tenant kullanıcı rol atamaları
+- En az ayrıcalık kontrol listesi
+- Kullanıcılar ve roller
+- Rol izinleri
+- Denetim trigger envanteri
+- Son denetim olayları
+- Teminat kalemi olmayan aktif paketler
+- Domain'siz aktif teminatlar
+- Tenant dışındaki görev atananlar
 
-## Recommended Routine
+## Önerilen Rutin
 
-Run this script:
+Bu script'i şu durumlarda çalıştırın:
 
-- after migrations
-- after bulk data entry
-- before handoff
-- when a user/role problem is suspected
-- before assigning admin or broker roles
+- migration'lardan sonra
+- toplu veri girişinden sonra
+- devir öncesinde
+- bir kullanıcı/rol sorunu şüphelenildiğinde
+- admin veya broker roller atamadan önce
 
-## Info Tips
+## Bilgi İpuçları
 
-- Security review should be read-only.
-- Start with `14__admin_role_permission_matrix.sql` for human-friendly RBAC,
-  then run `04__admin_security_audit_queries.sql` for technical audit evidence.
-- Do not paste credentials into SSMS query tabs.
-- Use `SECURITY.md` for repository-level vulnerability handling.
+- Güvenlik incelemesi salt okunur olmalıdır.
+- İnsan dostu RBAC için önce `14__admin_role_permission_matrix.sql` çalıştırın,
+  ardından teknik denetim kanıtı için `04__admin_security_audit_queries.sql` çalıştırın.
+- SSMS sorgu sekmelerine kimlik bilgileri yapıştırmayın.
+- Depo düzeyindeki güvenlik açığı yönetimi için `SECURITY.md` kullanın.

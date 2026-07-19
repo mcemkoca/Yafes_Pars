@@ -1,37 +1,38 @@
-# ERD Notes
+# ERD Notları
 
-Existing legacy ERD images remain under `ERD/`. The SQL Server migration set now
-uses schema-qualified domain tables, so new ERD documentation is maintained in:
+Mevcut eski ERD görüntüleri `ERD/` altında kalmaya devam eder. SQL Server migration
+seti artık schema-nitelikli domain tabloları kullandığından, yeni ERD belgeleri
+şurada tutulmaktadır:
 
 - `md/database/erd-mermaid.md`
 
-## Domain Split
+## Domain Bölünmesi
 
-- `core`: tenants, users, roles, permissions.
-- `person`: natural/legal persons, contacts, relations, bank and license data.
-- `institution`: insurers, brokers, banks, identifiers, addresses.
-- `risk`: insurable object root plus vehicle, real estate, loan, person, thing,
-  and activity subtypes.
-- `policy`: contracts, versions, parties, objects, version objects, takeovers.
-- `coverage`: coverages, domain mappings, packages, package items.
-- `claim`: claims, claim parties, claim objects, claim circumstances.
-- `document`: metadata-only documents, links, versions.
-- `tasking`: tasks, comments, reminders.
-- `audit`: audit log and per-column change sets.
+- `core`: tenant'lar, kullanıcılar, roller, izinler.
+- `person`: gerçek/tüzel kişiler, kişiler, ilişkiler, banka ve ehliyet verisi.
+- `institution`: sigortacılar, brokerlar, bankalar, tanımlayıcılar, adresler.
+- `risk`: sigortalanabilir nesne kökü artı araç, gayrimenkul, kredi, kişi, nesne
+  ve faaliyet alt türleri.
+- `policy`: sözleşmeler, versiyonlar, taraflar, nesneler, versiyon nesneleri, devirler.
+- `coverage`: teminatlar, domain eşlemeleri, paketler, paket kalemleri.
+- `claim`: hasarlar, hasar tarafları, hasar nesneleri, hasar koşulları.
+- `document`: yalnızca meta veri belgeleri, bağlantılar, versiyonlar.
+- `tasking`: görevler, yorumlar, hatırlatıcılar.
+- `audit`: denetim günlüğü ve sütun başına değişim kümeleri.
 
-## Legacy Mapping Notes
+## Eski Eşleme Notları
 
-- Legacy `Object` is mapped to `risk.InsurableObject`.
-- Legacy `ObjectVehicle` is mapped to `risk.InsurableVehicle`.
-- Legacy `ObjectRealEstate` is mapped to `risk.InsurableRealEstate`.
-- Legacy `Contract_Object` is mapped to `policy.ContractObject`.
-- Legacy `ContractVersion_Object` is mapped to `policy.ContractVersionObject`.
-- Legacy `Claim_Object` is mapped to `claim.ClaimObject`.
-- Legacy `lookup_coverage` is mapped to `coverage.Coverage`.
-- Legacy `coverage_domain` is mapped to `coverage.CoverageDomain`.
+- Eski `Object`, `risk.InsurableObject`'e eşlendi.
+- Eski `ObjectVehicle`, `risk.InsurableVehicle`'a eşlendi.
+- Eski `ObjectRealEstate`, `risk.InsurableRealEstate`'e eşlendi.
+- Eski `Contract_Object`, `policy.ContractObject`'e eşlendi.
+- Eski `ContractVersion_Object`, `policy.ContractVersionObject`'e eşlendi.
+- Eski `Claim_Object`, `claim.ClaimObject`'e eşlendi.
+- Eski `lookup_coverage`, `coverage.Coverage`'a eşlendi.
+- Eski `coverage_domain`, `coverage.CoverageDomain`'e eşlendi.
 
-## Diagram Strategy
+## Diyagram Stratejisi
 
-The full model is too large for one practical diagram. Use one high-level
-cross-domain ERD for navigation, then domain-level diagrams in
-`erd-mermaid.md` for implementation detail.
+Tam model, tek pratik bir diyagram için çok büyük. Navigasyon için bir üst düzey
+domain'ler arası ERD, ardından uygulama ayrıntısı için `erd-mermaid.md`'deki
+domain düzeyi diyagramlar kullanın.

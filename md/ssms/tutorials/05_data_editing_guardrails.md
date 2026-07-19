@@ -1,36 +1,36 @@
-# Data Editing Guardrails
+# Veri Düzenleme Güvenceleri
 
-## Purpose
+## Amaç
 
-Update existing records with preview and rollback-by-default behavior.
+Mevcut kayıtları önizleme ve varsayılan rollback davranışıyla güncelleyin.
 
-## Main Script
+## Ana Script
 
-Use:
+Kullanın:
 
 ```text
 database/ssms/08__data_editing_guardrails.sql
 ```
 
-## Supported Actions
+## Desteklenen Aksiyonlar
 
 - `UPDATE_TASK_STATUS`
 - `CLOSE_CLAIM`
 - `SOFT_DELETE_DOCUMENT`
 
-## Safe Edit Flow
+## Güvenli Düzenleme Akışı
 
-1. Use `06__query_library_shortcuts.sql` to find the exact ID.
-2. Set `ACTION_NAME`.
-3. Set `COMMIT_CHANGES = 0`.
-4. Fill the ID and target values.
-5. Execute and inspect before/after result sets.
-6. Confirm the expected row count is exactly one.
-7. Set `COMMIT_CHANGES = 1`.
-8. Execute again only when the preview is correct.
+1. Tam ID'yi bulmak için `06__query_library_shortcuts.sql` kullanın.
+2. `ACTION_NAME`'i ayarlayın.
+3. `COMMIT_CHANGES = 0` ayarlayın.
+4. ID ve hedef değerleri doldurun.
+5. Çalıştırın ve öncesi/sonrası sonuç kümelerini inceleyin.
+6. Beklenen satır sayısının tam olarak bir olduğunu doğrulayın.
+7. `COMMIT_CHANGES = 1` ayarlayın.
+8. Yalnızca önizleme doğru olduğunda tekrar çalıştırın.
 
-## Info Tips
+## Bilgi İpuçları
 
-- If more than one row is affected, the script throws an error.
-- If the preview is unexpected, leave `COMMIT_CHANGES = 0`.
-- Use audit queries after significant edit sessions.
+- Birden fazla satır etkileniyorsa script hata verir.
+- Önizleme beklenmedik ise `COMMIT_CHANGES = 0` bırakın.
+- Önemli düzenleme oturumlarının ardından denetim sorgularını çalıştırın.

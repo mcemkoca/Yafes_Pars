@@ -1,45 +1,45 @@
-# Bridge Department Use-Case Matrix
+# Bridge Departman Kullanım Senaryosu Matrisi
 
-Maps operational department needs to bridge actions.
+Operasyonel departman ihtiyaçlarını bridge aksiyonlarıyla eşleştirir.
 
-## Claims Department
+## Hasar Departmanı
 
-| Use Case | Bridge Action | Status |
+| Kullanım Senaryosu | Bridge Aksiyonu | Durum |
 |----------|--------------|--------|
-| Open a new claim | CREATE_CLAIM | AVAILABLE |
-| Close a resolved claim | CLOSE_CLAIM | AVAILABLE |
-| Adjust reserve amount | UPDATE_CLAIM_RESERVE | AVAILABLE |
-| Create settlement offer | CREATE_SETTLEMENT | AVAILABLE |
-| Approve settlement | APPROVE_SETTLEMENT | AVAILABLE |
-| Reopen a closed claim | REOPEN_CLAIM | FUTURE |
-| Withdraw a settlement | WITHDRAW_SETTLEMENT | FUTURE |
+| Yeni hasar aç | CREATE_CLAIM | MEVCUT |
+| Çözülmüş hasarı kapat | CLOSE_CLAIM | MEVCUT |
+| Rezerv tutarını ayarla | UPDATE_CLAIM_RESERVE | MEVCUT |
+| Uzlaşma teklifi oluştur | CREATE_SETTLEMENT | MEVCUT |
+| Uzlaşmayı onayla | APPROVE_SETTLEMENT | MEVCUT |
+| Kapalı hasarı yeniden aç | REOPEN_CLAIM | GELECEK |
+| Uzlaşmayı geri çek | WITHDRAW_SETTLEMENT | GELECEK |
 
-## Policy / Underwriting Department
+## Poliçe / Sigortalama Departmanı
 
-| Use Case | Bridge Action | Status |
+| Kullanım Senaryosu | Bridge Aksiyonu | Durum |
 |----------|--------------|--------|
-| Register a new natural person | CREATE_NATURAL_PERSON | AVAILABLE |
-| Register a company/organisation | CREATE_LEGAL_PERSON | AVAILABLE |
-| Create a policy contract | CREATE_POLICY | AVAILABLE |
-| Add a policy version | CREATE_POLICY_VERSION | AVAILABLE |
-| Link policyholder to contract | ADD_POLICY_PARTY | AVAILABLE |
-| Register a vehicle | CREATE_VEHICLE_OBJECT | AVAILABLE |
-| Link vehicle to policy | ADD_POLICY_OBJECT | AVAILABLE |
-| Cancel an active contract | CANCEL_CONTRACT | FUTURE |
-| Update person contact details | UPDATE_NATURAL_PERSON | FUTURE |
+| Yeni gerçek kişi kaydet | CREATE_NATURAL_PERSON | MEVCUT |
+| Şirket/kuruluş kaydet | CREATE_LEGAL_PERSON | MEVCUT |
+| Poliçe sözleşmesi oluştur | CREATE_POLICY | MEVCUT |
+| Poliçe versiyonu ekle | CREATE_POLICY_VERSION | MEVCUT |
+| Poliçe sahibini sözleşmeye bağla | ADD_POLICY_PARTY | MEVCUT |
+| Araç kaydet | CREATE_VEHICLE_OBJECT | MEVCUT |
+| Aracı poliçeye bağla | ADD_POLICY_OBJECT | MEVCUT |
+| Aktif sözleşmeyi iptal et | CANCEL_CONTRACT | GELECEK |
+| Kişi iletişim bilgilerini güncelle | UPDATE_NATURAL_PERSON | GELECEK |
 
-## Operations / Tasking
+## Operasyonlar / Tasking
 
-| Use Case | Bridge Action | Status |
+| Kullanım Senaryosu | Bridge Aksiyonu | Durum |
 |----------|--------------|--------|
-| Create a follow-up task | CREATE_TASK | AVAILABLE |
-| Add comment to a task | ADD_TASK_COMMENT | AVAILABLE |
-| Add reminder to a task | ADD_TASK_REMINDER | AVAILABLE |
+| Takip görevi oluştur | CREATE_TASK | MEVCUT |
+| Göreve yorum ekle | ADD_TASK_COMMENT | MEVCUT |
+| Göreve hatırlatıcı ekle | ADD_TASK_REMINDER | MEVCUT |
 
-## Import / Export (DBA / Reporting)
+## İçe/Dışa Aktarma (DBA / Raporlama)
 
-| Use Case | Bridge Action | Status |
+| Kullanım Senaryosu | Bridge Aksiyonu | Durum |
 |----------|--------------|--------|
-| Register a bulk export run | REGISTER_EXPORT_JOB | AVAILABLE |
-| Mark export as complete | COMPLETE_EXPORT_JOB | AVAILABLE |
-| Attach file to export job | ADD_EXPORT_JOB_FILE | FUTURE |
+| Toplu dışa aktarma çalışması kaydet | REGISTER_EXPORT_JOB | MEVCUT |
+| Dışa aktarmayı tamamlandı olarak işaretle | COMPLETE_EXPORT_JOB | MEVCUT |
+| Dışa aktarma işine dosya ekle | ADD_EXPORT_JOB_FILE | GELECEK |

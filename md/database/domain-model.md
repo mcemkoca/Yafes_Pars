@@ -1,79 +1,78 @@
-# Domain Model
+# Domain Modeli
 
-The platform is organized around these insurance core domains:
+Platform şu sigorta temel domain'leri etrafında organize edilmiştir:
 
-- Person and customer management
-- Institution management
-- Insurable objects
-- Policies and contracts
-- Contract versions
-- Coverages
-- Claims
-- Documents
-- Tasks and reminders
-- Audit and compliance
+- Kişi ve müşteri yönetimi
+- Kuruluş yönetimi
+- Sigortalanabilir nesneler
+- Poliçeler ve sözleşmeler
+- Sözleşme versiyonları
+- Teminatlar
+- Hasarlar
+- Belgeler
+- Görevler ve hatırlatıcılar
+- Denetim ve uyumluluk
 
-Contract versioning is a core domain concept and must remain explicit.
+Sözleşme versiyonlama temel bir domain kavramıdır ve açık kalmalıdır.
 
-## Person Domain
+## Person Domain'i
 
-The person domain uses `person.Person` as the tenant-aware root. Natural and
-legal persons are split into `person.NaturalPerson` and `person.LegalPerson`.
-Contact data is represented by address, phone, email, social media, bank
-account, and driver license tables.
+Person domain'i, tenant farkında kök olarak `person.Person`'ı kullanır. Gerçek ve
+tüzel kişiler `person.NaturalPerson` ve `person.LegalPerson`'a bölünmüştür.
+İletişim verisi adres, telefon, e-posta, sosyal medya, banka hesabı ve sürücü
+belgesi tablolarıyla temsil edilir.
 
-Legacy join table names are normalized to PascalCase:
+Eski birleştirme tablosu adları PascalCase'e normalleştirildi:
 
-- `Person_PersonType` becomes `person.PersonPersonType`.
-- `PersonRelation_Person` becomes `person.PersonRelationPerson`.
+- `Person_PersonType`, `person.PersonPersonType` oldu.
+- `PersonRelation_Person`, `person.PersonRelationPerson` oldu.
 
-## Institution Domain
+## Institution Domain'i
 
-The institution domain uses `institution.Institution` as the tenant-aware root
-for insurers, banks, brokers, and partner companies. Identifiers and addresses
-are modeled as child tables with type and role lookup tables.
+Institution domain'i, sigortacılar, bankalar, brokerlar ve ortak şirketler için
+tenant farkında kök olarak `institution.Institution`'ı kullanır. Tanımlayıcılar ve
+adresler, tür ve rol arama tablolarıyla alt tablolar olarak modellenir.
 
-## Risk Domain
+## Risk Domain'i
 
-The legacy object domain is refactored to `risk.InsurableObject` and subtype
-tables. No table is named `Object`; subtypes use `InsurableVehicle`,
-`InsurableRealEstate`, `InsurableLoan`, `InsurablePerson`, `InsurableThing`, and
-`InsurableActivity`.
+Eski nesne domain'i `risk.InsurableObject` ve alt tür tablolarına yeniden
+düzenlendi. Hiçbir tablo `Object` olarak adlandırılmaz; alt türler `InsurableVehicle`,
+`InsurableRealEstate`, `InsurableLoan`, `InsurablePerson`, `InsurableThing` ve
+`InsurableActivity` kullanır.
 
-## Policy Domain
+## Policy Domain'i
 
-The policy domain uses `policy.Contract` as the tenant-aware root and
-`policy.ContractVersion` as the lifecycle history model. Parties link to
-`person.Person`; insured objects link to `risk.InsurableObject`.
+Policy domain'i, tenant farkında kök olarak `policy.Contract`'ı ve yaşam döngüsü
+geçmişi modeli olarak `policy.ContractVersion`'ı kullanır. Taraflar `person.Person`'a
+bağlanır; sigortalı nesneler `risk.InsurableObject`'e bağlanır.
 
-## Coverage Domain
+## Coverage Domain'i
 
-The coverage domain replaces legacy `lookup_coverage` and `coverage_domain`
-tables with schema-qualified `coverage.Coverage` and
-`coverage.CoverageDomain`. Coverage packages allow reusable bundles per policy
-domain.
+Coverage domain'i, eski `lookup_coverage` ve `coverage_domain` tablolarının
+yerini schema-nitelikli `coverage.Coverage` ve `coverage.CoverageDomain` ile alır.
+Teminat paketleri, poliçe domain'i başına yeniden kullanılabilir paketlere izin verir.
 
-## Claim Domain
+## Claim Domain'i
 
-The claim domain uses `claim.Claim` as the tenant-aware root. Claims link to
-`policy.Contract`, optional `coverage.Coverage`, claim parties, claim objects,
-and circumstance types.
+Claim domain'i, tenant farkında kök olarak `claim.Claim`'i kullanır. Hasarlar
+`policy.Contract`, isteğe bağlı `coverage.Coverage`, hasar tarafları, hasar nesneleri
+ve koşul türlerine bağlanır.
 
-## Document Domain
+## Document Domain'i
 
-Documents are represented as metadata records with storage provider and storage
-key fields. Binary file content is intentionally stored outside SQL Server.
-Documents can be versioned and linked to people, institutions, policies, claims,
-or risk objects.
+Belgeler, depolama sağlayıcısı ve depolama anahtarı alanlarına sahip meta veri
+kayıtları olarak temsil edilir. İkili dosya içeriği kasıtlı olarak SQL Server dışında
+depolanır. Belgeler versiyonlanabilir ve kişilere, kuruluşlara, poliçelere, hasarlara
+veya risk nesnelerine bağlanabilir.
 
-## Task Domain
+## Task Domain'i
 
-Tasks are tenant-aware operational records that can point to a person,
-institution, policy, claim, risk object, or document. Comments and reminders are
-modeled as child tables.
+Görevler, kişiye, kuruluşa, poliçeye, hasara, risk nesnesine veya belgeye işaret
+edebilen tenant farkında operasyonel kayıtlardır. Yorumlar ve hatırlatıcılar alt
+tablolar olarak modellenir.
 
-## Audit Domain
+## Audit Domain'i
 
-Audit logging is centralized in `audit.AuditLog`. The first migration version
-adds minimal insert/update/delete triggers for key root tables: person,
-institution, insurable object, contract, contract version, and claim.
+Denetim günlüğü `audit.AuditLog`'da merkezileştirilir. İlk migration versiyonu,
+temel kök tablolar için minimal insert/update/delete trigger'ları ekler: kişi,
+kuruluş, sigortalanabilir nesne, sözleşme, sözleşme versiyonu ve hasar.

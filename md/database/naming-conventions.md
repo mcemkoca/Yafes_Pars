@@ -1,34 +1,34 @@
-# Naming Conventions
+# Adlandırma Kuralları
 
-## Schemas
+## Schema'lar
 
-Use lowercase domain schema names such as `person`, `policy`, and `claim`.
+`person`, `policy` ve `claim` gibi küçük harfli domain schema adları kullanın.
 
-## Tables
+## Tablolar
 
-Use PascalCase singular table names:
+PascalCase tekil tablo adları kullanın:
 
 - `person.Person`
 - `risk.InsurableObject`
 - `policy.Contract`
 - `policy.ContractVersion`
 
-## Columns
+## Sütunlar
 
-Use snake_case column names:
+snake_case sütun adları kullanın:
 
 - `tenant_id`
 - `created_at_utc`
 - `contract_number`
 
-## Database Objects
+## Veri Tabanı Nesneleri
 
-- Primary keys: `PK_<Table>`
-- Foreign keys: `FK_<FromTable>_<ToTable>_<Purpose>`
-- Unique constraints: `UQ_<Table>_<ColumnOrBusinessKey>`
-- Check constraints: `CK_<Table>_<Rule>`
-- Indexes: `IX_<Table>_<ColumnList>`
-- Defaults: `DF_<Table>_<Column>`
-- Triggers: `TR_<Table>_<Action>`
-- Views: `VW_<Domain>_<Name>`
-- Stored procedures: `SP_<Domain>_<Action>`
+- Birincil anahtarlar: `PK_<Tablo>`
+- Yabancı anahtarlar: `FK_<KaynakTablo>_<HedefTablo>_<Amaç>`
+- Benzersiz kısıtlamalar: `UQ_<Tablo>_<SütunVeyaİşAnahtarı>`
+- Kontrol kısıtlamaları: `CK_<Tablo>_<Kural>`
+- İndeksler: `IX_<Tablo>_<SütunListesi>`
+- Varsayılanlar: `DF_<Tablo>_<Sütun>`
+- Trigger'lar: `TR_<Tablo>_<Aksiyon>`
+- View'lar: `VW_<Domain>_<Ad>`
+- Stored procedure'ler: `SP_<Domain>_<Aksiyon>`

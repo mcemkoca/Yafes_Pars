@@ -1,38 +1,38 @@
-# Access Review Evidence - DEV - 2026-06-04
+# Erişim İnceleme Kanıtı — DEV — 2026-06-04
 
-## Summary
+## Özet
 
-| Field | Value |
+| Alan | Değer |
 | --- | --- |
-| Environment | DEV local ephemeral SQL Server container |
-| Database reviewed | `YafesPars_RESTORE_DEV` |
-| Evidence date | 2026-06-04 |
-| Source script | `database/ssms/14__admin_role_permission_matrix.sql` |
-| Tenant code | `DEV-BE-BROKER` |
-| Tenant display name | Yafes Broker Operations |
-| Result | PASS |
+| Ortam | DEV yerel geçici SQL Server container'ı |
+| İncelenen veri tabanı | `YafesPars_RESTORE_DEV` |
+| Kanıt tarihi | 2026-06-04 |
+| Kaynak script | `database/ssms/14__admin_role_permission_matrix.sql` |
+| Tenant kodu | `DEV-BE-BROKER` |
+| Tenant görünen adı | Yafes Broker Operations |
+| Sonuç | BAŞARILI |
 
-## RBAC Signals
+## RBAC Sinyalleri
 
-| Signal | Value |
+| Sinyal | Değer |
 | --- | --- |
-| Expected system roles present | 4 |
-| Active permissions present | 18 |
-| Active DEV sample users present | 3 |
-| Admin matrix execution | PASS |
-| Least-privilege checklist execution | PASS |
+| Beklenen sistem rolleri mevcut | 4 |
+| Aktif izinler mevcut | 18 |
+| Aktif DEV örnek kullanıcıları mevcut | 3 |
+| Admin matrisi yürütmesi | BAŞARILI |
+| En az ayrıcalık kontrol listesi yürütmesi | BAŞARILI |
 
-## Role Review
+## Rol İncelemesi
 
-| Role | Expected use | DEV evidence |
+| Rol | Beklenen kullanım | DEV kanıtı |
 | --- | --- | --- |
-| `SYSTEM_ADMIN` | Platform/database administration only | Present; all active permissions covered. |
-| `BROKER_ADMIN` | Tenant administration | Present; operations admin user assigned. |
-| `BROKER_USER` | Daily broker operation | Present; broker operator user assigned. |
-| `CLAIM_HANDLER` | Claim handling | Present; claims specialist user assigned. |
+| `SYSTEM_ADMIN` | Yalnızca platform/veri tabanı yönetimi | Mevcut; tüm aktif izinler kapsanıyor. |
+| `BROKER_ADMIN` | Tenant yönetimi | Mevcut; operasyon admin kullanıcısı atandı. |
+| `BROKER_USER` | Günlük broker operasyonu | Mevcut; broker operatör kullanıcısı atandı. |
+| `CLAIM_HANDLER` | Hasar işleme | Mevcut; hasar uzmanı kullanıcısı atandı. |
 
-## Decision
+## Karar
 
-DEV access review evidence is acceptable for the current SSMS-first product
-baseline. TEST/PROD access review still requires environment-specific evidence
-with named operators, approved SQL logins or Windows groups, and formal sign-off.
+DEV erişim inceleme kanıtı, mevcut SSMS öncelikli ürün temeli için kabul edilebilir.
+TEST/PROD erişim incelemesi, adlandırılmış operatörler, onaylı SQL girişleri veya
+Windows grupları ve resmi imzayla ortama özgü kanıt gerektirmeye devam etmektedir.

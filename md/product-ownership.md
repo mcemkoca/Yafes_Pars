@@ -1,20 +1,20 @@
-# Product Ownership
+# Ürün Sahipliği
 
-Yafes Pars product ownership, technical direction, release attribution, and
-customer-facing delivery authority belong to `Deuterium12{MCK}`.
+Yafes Pars ürün sahipliği, teknik yön, sürüm atfı ve
+müşteriye yönelik teslimat yetkisi `Deuterium12{MCK}` tarafından üstlenilmiştir.
 
-## Repository Rules
+## Depo Kuralları
 
-- Public product and release material uses `Deuterium12{MCK}` attribution.
-- GitHub account handles remain only where GitHub requires a valid account for
-  review routing, permissions, or protected-branch enforcement.
-- Every release must pass the database, SSMS workbench, SQL Server runtime, and
-  backend validation gates defined in this repository.
-- Credentials, customer data, backups, and environment secrets never belong in
-  source control or public review text.
+- Kamuya açık ürün ve sürüm materyali `Deuterium12{MCK}` atfını kullanır.
+- GitHub hesap tanıtıcıları yalnızca GitHub'ın inceleme yönlendirme, izinler
+  veya korumalı dal uygulaması için geçerli bir hesap gerektirdiği yerlerde kalır.
+- Her sürüm, bu depoda tanımlanan veri tabanı, SSMS çalışma tezgahı, SQL Server
+  çalışma zamanı ve backend doğrulama kapılarını geçmelidir.
+- Kimlik bilgileri, müşteri verileri, yedekler ve ortam secret'ları asla kaynak
+  kontrolüne veya kamuya açık inceleme metinlerine ait değildir.
 
-## Release Authority
+## Yayın Yetkisi
 
-Technical completion does not by itself authorize production deployment.
-Production promotion requires recorded environment evidence, restore evidence,
-access review, and explicit release approval under `Deuterium12{MCK}` ownership.
+Teknik tamamlanma, tek başına üretim dağıtımını yetkilendirmez.
+Üretim terfisi, `Deuterium12{MCK}` sahipliği altında kayıtlı ortam kanıtı,
+geri yükleme kanıtı, erişim incelemesi ve açık yayın onayı gerektirir.

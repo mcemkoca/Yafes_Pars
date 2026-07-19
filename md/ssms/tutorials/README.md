@@ -1,25 +1,25 @@
-# Yafes Pars SSMS Tutorials
+# Yafes Pars SSMS Öğreticileri
 
-This folder is the operator manual for working safely inside SQL Server
-Management Studio.
+Bu klasör, SQL Server Management Studio içinde güvenli çalışmak için operatör
+kılavuzudur.
 
-## Tutorial Map
+## Öğretici Haritası
 
-1. `01_quick_start.md` - first-run setup and daily startup.
-2. `02_dashboard_workflow.md` - how to use the SSMS dashboard and shortcuts.
-3. `03_query_and_search.md` - searching customers, policies, claims, tasks, and lookups.
-4. `04_data_entry_bridge.md` - guided create actions through stored procedures.
-5. `05_data_editing_guardrails.md` - safe update patterns with rollback by default.
-6. `06_reports_and_graphs.md` - report grids, text bars, and export guidance.
-7. `07_security_audit.md` - RBAC, audit, and data quality checks.
-8. `08_troubleshooting.md` - common SSMS errors and fixes.
-9. `09_monitoring_and_jobs.md` - monitoring grids and SQL Agent handoff.
-10. `10_delivery_gap_register.md` - commit review closure and unfinished delivery items.
-11. `11_remaining_work_cockpit.md` - owner evidence, 019+ decisions, bridge ranking, and DBA handoff.
+1. `01_quick_start.md` - ilk çalıştırma kurulumu ve günlük başlangıç.
+2. `02_dashboard_workflow.md` - SSMS dashboard ve kısayolların kullanımı.
+3. `03_query_and_search.md` - müşteri, poliçe, hasar, görev ve arama sorgulama.
+4. `04_data_entry_bridge.md` - stored procedure'ler aracılığıyla kılavuzlu oluşturma aksiyonları.
+5. `05_data_editing_guardrails.md` - varsayılan rollback ile güvenli güncelleme kalıpları.
+6. `06_reports_and_graphs.md` - rapor ızgaraları, metin çubukları ve dışa aktarma kılavuzu.
+7. `07_security_audit.md` - RBAC, denetim ve veri kalitesi kontrolleri.
+8. `08_troubleshooting.md` - yaygın SSMS hataları ve çözümleri.
+9. `09_monitoring_and_jobs.md` - izleme ızgaraları ve SQL Agent deviri.
+10. `10_delivery_gap_register.md` - commit inceleme kapanması ve bitmemiş teslimat öğeleri.
+11. `11_remaining_work_cockpit.md` - sahip kanıtı, 019+ kararları, bridge sıralaması ve DBA deviri.
 
-## Operator Rule
+## Operatör Kuralı
 
-When in doubt, run the read-only scripts first:
+Şüphe duyduğunuzda önce salt okunur script'leri çalıştırın:
 
 1. `00__open_first_safety_check.sql`
 2. `05__operator_dashboard_home.sql`
@@ -32,4 +32,4 @@ When in doubt, run the read-only scripts first:
 9. `16__delivery_gap_register.sql`
 10. `17__remaining_work_cockpit.sql`
 
-Only then use data entry or editing scripts.
+Yalnızca bunların ardından veri girişi veya düzenleme script'lerini kullanın.

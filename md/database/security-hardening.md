@@ -1,100 +1,98 @@
-# Security Hardening
+# Güvenlik Güçlendirme
 
-This guide lists the minimum hardening controls for a professional SQL Server
-and SSMS-first Yafes Pars deployment.
+Bu kılavuz, profesyonel bir SQL Server ve SSMS öncelikli Yafes Pars dağıtımı için
+minimum güçlendirme kontrollerini listeler.
 
-## Secrets
+## Secret'lar
 
-- Do not commit passwords, tokens, connection strings, certificates, or backup
-  files.
-- Use environment variables, secret stores, or deployment tooling for secrets.
-- Rotate any credential that was pasted into chat, tickets, logs, or source.
-- Mask secrets in CI logs.
+- Parola, token, bağlantı dizesi, sertifika veya yedek dosyalarını commit etmeyin.
+- Secret'lar için ortam değişkenleri, secret depolar veya dağıtım araçları kullanın.
+- Sohbete, biletlere, günlüklere veya kaynağa yapıştırılan kimlik bilgilerini döndürün.
+- CI günlüklerinde secret'ları maskeleyin.
 
 ## Windows Server
 
-- Keep Windows Server patched.
-- Restrict local administrators.
-- Use named service accounts for SQL Server services.
-- Disable unused services.
-- Restrict RDP with network rules and just-in-time access where available.
-- Enable endpoint protection and event forwarding.
+- Windows Server'ı yamalı tutun.
+- Yerel yöneticileri kısıtlayın.
+- SQL Server servisleri için adlandırılmış hizmet hesapları kullanın.
+- Kullanılmayan servisleri devre dışı bırakın.
+- RDP'yi ağ kurallarıyla ve mevcut olduğunda tam zamanında erişimle kısıtlayın.
+- Uç nokta korumasını ve olay iletmeyi etkinleştirin.
 
-## SQL Server Instance
+## SQL Server Örneği
 
-- Apply approved SQL Server cumulative updates.
-- Disable or restrict `sa`.
-- Use least-privilege logins.
-- Remove unused sample databases.
-- Restrict linked servers and external access features unless approved.
-- Configure maximum server memory.
-- Review SQL Server Error Log after every deployment.
+- Onaylı SQL Server kümülatif güncellemelerini uygulayın.
+- `sa`'yı devre dışı bırakın veya kısıtlayın.
+- En az ayrıcalıklı girişler kullanın.
+- Kullanılmayan örnek veri tabanlarını kaldırın.
+- Onaylanmadıkça bağlı sunucuları ve harici erişim özelliklerini kısıtlayın.
+- Maksimum sunucu belleğini yapılandırın.
+- Her dağıtımdan sonra SQL Server Hata Günlüğünü inceleyin.
 
-## Database Access
+## Veri Tabanı Erişimi
 
-- Separate deployment, application, support, and read-only access.
-- Grant only required permissions.
-- Keep tenant-aware tables protected from broad ad hoc updates.
-- Use stored procedure bridges for guided create operations.
-- Use rollback-by-default scripts for manual data correction.
-- Stored procedure bridges must validate tenant ownership for every supplied
-  person, institution, policy, claim, object, and operator user ID.
+- Dağıtım, uygulama, destek ve salt okunur erişimi ayırın.
+- Yalnızca gerekli izinleri verin.
+- Tenant farkında tabloları geniş çaplı geçici güncellemelerden koruyun.
+- Kılavuzlu oluşturma işlemleri için stored procedure bridge'leri kullanın.
+- Manuel veri düzeltmesi için önce rollback script'leri kullanın.
+- Stored procedure bridge'ler, sağlanan her kişi, kuruluş, poliçe, hasar, nesne ve
+  operatör kullanıcı ID'si için tenant sahipliğini doğrulamalıdır.
 
-## API Surface
+## API Yüzeyi
 
-- Keep health and authentication discovery endpoints separate from domain data.
-- Require JWT/Bearer authorization on domain read endpoints before exposing any
-  tenant, person, policy, claim, document, task, coverage, or lookup data.
-- Treat missing authority or audience configuration as a deployment blocker
-  outside local DEV.
+- Sağlık ve kimlik doğrulama keşif uç noktalarını domain verilerinden ayrı tutun.
+- Tenant, kişi, poliçe, hasar, belge, görev, teminat veya arama verisi açığa
+  çıkarmadan önce domain okuma uç noktalarında JWT/Bearer yetkilendirmesi gerektirin.
+- Yerel DEV dışında eksik otorite veya kitle yapılandırmasını dağıtım engelleyici
+  olarak değerlendirin.
 
-## Tenant Isolation
+## Tenant İzolasyonu
 
-Business root tables must include `tenant_id`. Query templates and dashboard
-scripts must require tenant context for operator workflows. Cross-tenant joins
-must be explicit and reviewed.
+İş kök tabloları `tenant_id` içermelidir. Sorgu şablonları ve dashboard script'leri
+operatör iş akışları için tenant bağlamı gerektirmelidir. Tenant'lar arası birleşimler
+açık ve incelenmiş olmalıdır.
 
 ## RBAC
 
-The platform uses:
+Platform şunları kullanır:
 
 - `core.Role`
 - `core.Permission`
 - `core.RolePermission`
 - `core.UserRole`
 
-Production roles should be reviewed before go-live and after each release that
-changes permissions.
+Üretim rolleri, canlıya geçişten önce ve izinleri değiştiren her sürümden sonra
+incelenmelidir.
 
-Record review evidence with
-`md/database/access-review-evidence-template.md`. In DEV, use
-`database/ssms/14__admin_role_permission_matrix.sql` as the operator-friendly
-matrix before collecting formal TEST/PROD evidence through the approved
-environment procedure.
+İnceleme kanıtını `md/database/access-review-evidence-template.md` ile kaydedin.
+DEV'de, resmi TEST/PROD kanıtını onaylı ortam prosedürü aracılığıyla toplamadan önce
+operatör dostu matris olarak `database/ssms/14__admin_role_permission_matrix.sql`
+kullanın.
 
-## Monitoring
+## İzleme
 
-Use `database/ssms/15__monitoring_and_job_readiness.sql` as the SSMS read-only
-monitoring handoff. It reviews DEV health, backlog pressure, backup visibility,
-and observed Yafes SQL Agent jobs. TEST/PROD jobs must still be created only by
-an approved DBA with named owners, schedules, and alert paths.
+SSMS salt okunur izleme deviri olarak `database/ssms/15__monitoring_and_job_readiness.sql`
+kullanın. DEV sağlığını, biriktirme baskısını, yedek görünürlüğünü ve gözlemlenen
+Yafes SQL Agent işlerini inceler. TEST/PROD işleri yine de yalnızca adlandırılmış
+sahipler, zamanlamalar ve uyarı yollarına sahip onaylı bir DBA tarafından oluşturulmalıdır.
 
-## Audit
+## Denetim
 
-Audit triggers write key root table changes to `audit.AuditLog`. Production
-operations should also record:
+Denetim trigger'ları temel kök tablo değişikliklerini `audit.AuditLog`'a yazar.
+Üretim operasyonları ayrıca şunları kaydetmelidir:
 
-- release owner
-- execution timestamp
-- target environment
-- changed scripts
-- validation status
-- incident or rollback decision
+- sürüm sahibi
+- yürütme zaman damgası
+- hedef ortam
+- değiştirilen script'ler
+- doğrulama durumu
+- olay veya rollback kararı
 
-## CI And Repository Controls
+## CI ve Depo Kontrolleri
 
-- Use branch protection for production release branches.
-- Require pull request review for database changes.
-- Require SQL quality gate and SQL Server validation workflows.
-- Keep Dependabot enabled for GitHub Actions and NuGet.
-- Keep `SECURITY.md` current.
+- Üretim sürüm dalları için dal koruması kullanın.
+- Veri tabanı değişiklikleri için pull request incelemesi gerektirin.
+- SQL kalite kapısı ve SQL Server doğrulama iş akışlarını zorunlu kılın.
+- GitHub Actions ve NuGet için Dependabot'u etkin tutun.
+- `SECURITY.md` dosyasını güncel tutun.

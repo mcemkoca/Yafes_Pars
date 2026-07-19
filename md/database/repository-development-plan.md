@@ -1,17 +1,17 @@
-# Repository Development Plan
+# Depo Geliştirme Planı
 
-This plan captures the next professionalization steps for the SSMS-first,
-database-first Yafes Pars repository.
+Bu plan, SSMS öncelikli, veri tabanı öncelikli Yafes Pars deposu için sonraki
+profesyonelleştirme adımlarını kapsar.
 
-## A. Critical Findings
+## A. Kritik Bulgular
 
-- The product direction is SQL Server and SSMS-first, not web-first.
-- Migration order `000` through `018` must remain stable.
-- Production deployment needs Azure Windows Server, SQL Server, backup, restore,
-  security, and execution runbooks.
-- Static quality checks should run before heavier SQL Server validation.
+- Ürün yönü SQL Server ve SSMS öncelikli, web öncelikli değil.
+- Migration sırası `000`'dan `018`'e kararlı kalmalıdır.
+- Üretim dağıtımı Azure Windows Server, SQL Server, yedek, geri yükleme,
+  güvenlik ve yürütme runbook'larına ihtiyaç duyar.
+- Statik kalite kontrolleri daha ağır SQL Server doğrulamasından önce çalışmalıdır.
 
-## B. Current Structure That Must Not Break
+## B. Bozulmaması Gereken Mevcut Yapı
 
 - `database/legacy/`
 - `database/migrations/`
@@ -22,92 +22,92 @@ database-first Yafes Pars repository.
 - `database/ssms/`
 - `UML/`
 - `ERD/`
-- `md/trust-plan/` as sanitized comparison notes only
+- `md/trust-plan/` yalnızca temizlenmiş karşılaştırma notları olarak
 
-## C. Azure Windows Server Target Architecture
+## C. Azure Windows Server Hedef Mimarisi
 
-Run SQL Server on an Azure Windows Server VM with private network access, split
-data/log/tempdb/backup storage where possible, and SSMS as the operator surface.
-Use Azure monitoring and off-VM backup storage.
+SQL Server'ı özel ağ erişimiyle bir Azure Windows Server VM'inde çalıştırın, mümkün
+olduğunda veri/günlük/tempdb/yedek depolamayı ayırın ve operatör yüzeyi olarak SSMS
+kullanın. Azure izleme ve VM dışı yedek depolama kullanın.
 
-## D. SQL Server And SSMS Deployment Plan
+## D. SQL Server ve SSMS Dağıtım Planı
 
-Keep deployment script-based. Operators use SSMS Query Editor, Results Grid,
-Messages, and SQLCMD Mode. DEV can use the guarded PowerShell runner. TEST and
-PROD follow the SSMS deployment runbook and execution log.
+Dağıtımı script tabanlı tutun. Operatörler SSMS Query Editor, Results Grid, Messages
+ve SQLCMD Mode kullanır. DEV korumalı PowerShell çalıştırıcısını kullanabilir. TEST
+ve PROD, SSMS dağıtım runbook'unu ve yürütme günlüğünü izler.
 
-## E. Migration And Validation Plan
+## E. Migration ve Doğrulama Planı
 
-Preserve migrations `000` through `018`. New forward migrations start at `019`.
-Validation scripts remain ordered and must be run after migrations. Rollback
-scripts stay separate and manually approved.
+Migration'ları `000`'dan `018`'e koruyun. Yeni ileri migration'lar `019`'dan başlar.
+Doğrulama script'leri sıralı kalır ve migration'lardan sonra çalıştırılmalıdır.
+Rollback script'leri ayrı kalır ve manuel olarak onaylanır.
 
-## F. Security Hardening Plan
+## F. Güvenlik Güçlendirme Planı
 
-Use least privilege, private SQL access, restricted RDP, credential rotation,
-secret storage outside Git, RBAC review, tenant isolation review, and audit log
-review before production.
+Üretim öncesinde en az ayrıcalık, özel SQL erişimi, kısıtlı RDP, kimlik bilgisi
+rotasyonu, Git dışı secret saklama, RBAC incelemesi, tenant izolasyon incelemesi
+ve denetim günlüğü incelemesi kullanın.
 
-## G. Backup, Restore, And DR Plan
+## G. Yedek, Geri Yükleme ve DR Planı
 
-Define RPO/RTO with the business owner. Use full backups, optional differential
-backups, log backups for full recovery, mandatory pre-deployment backups, and
-regular restore drills.
+RPO/RTO'yu iş sahibiyle tanımlayın. Tam yedekler, isteğe bağlı fark yedekler, tam
+kurtarma için günlük yedekler, zorunlu dağıtım öncesi yedekler ve düzenli geri
+yükleme tatbikatları kullanın.
 
-## H. Monitoring And Maintenance Plan
+## H. İzleme ve Bakım Planı
 
-Monitor SQL Server availability, backup age, SQL Agent jobs, disk space, error
-logs, failed logins, and validation results. Review maintenance windows for
-index/statistics work after real data volume is known. Use
-`database/ssms/15__monitoring_and_job_readiness.sql` as the SSMS read-only
-handoff before approved SQL Agent jobs are created.
+SQL Server kullanılabilirliğini, yedek yaşını, SQL Agent işlerini, disk alanını,
+hata günlüklerini, başarısız girişleri ve doğrulama sonuçlarını izleyin. Gerçek
+veri hacmi bilindiğinde indeks/istatistik çalışması için bakım pencerelerini gözden
+geçirin. Onaylı SQL Agent işleri oluşturulmadan önce SSMS salt okunur deviri olarak
+`database/ssms/15__monitoring_and_job_readiness.sql` kullanın.
 
-## I. Repo File And Documentation Update List
+## I. Depo Dosyası ve Belgeleme Güncelleme Listesi
 
-- Add Azure Windows Server deployment guide.
-- Add SSMS deployment runbook.
-- Add SQL Server installation checklist.
-- Add backup and restore strategy.
-- Add security hardening guide.
-- Add migration execution log template.
-- Add access review evidence template.
-- Add restore drill evidence template.
-- Add table reconciliation record.
-- Add environment matrix.
-- Add production readiness checklist.
-- Add static SQL quality gate script and CI workflow.
-- Add SSMS monitoring and SQL Agent readiness result sets.
+- Azure Windows Server dağıtım kılavuzu ekleyin.
+- SSMS dağıtım runbook'u ekleyin.
+- SQL Server kurulum kontrol listesi ekleyin.
+- Yedek ve geri yükleme stratejisi ekleyin.
+- Güvenlik güçlendirme kılavuzu ekleyin.
+- Migration yürütme günlüğü şablonu ekleyin.
+- Erişim inceleme kanıt şablonu ekleyin.
+- Geri yükleme tatbikatı kanıt şablonu ekleyin.
+- Tablo mutabakat kaydı ekleyin.
+- Ortam matrisi ekleyin.
+- Üretim hazırlık kontrol listesi ekleyin.
+- Statik SQL kalite kapısı script'i ve CI iş akışı ekleyin.
+- SSMS izleme ve SQL Agent hazırlık sonuç kümeleri ekleyin.
 
-## J. New SQL Script Recommendations
+## J. Yeni SQL Script Önerileri
 
-- Add migration `019+` only for new database changes.
-- Add matching validation scripts for every new domain or shared behavior.
-- Add SSMS bridge scripts for new guided operator actions.
-- Add report pack scripts for new executive or operational dashboards.
-- Convert monitoring result sets into approved SQL Agent jobs after DEV/TEST
-  owners, schedules, and alert paths are confirmed.
+- Yalnızca yeni veri tabanı değişiklikleri için `019+` migration ekleyin.
+- Her yeni domain veya paylaşılan davranış için eşleşen doğrulama script'leri ekleyin.
+- Yeni kılavuzlu operatör aksiyonları için SSMS bridge script'leri ekleyin.
+- Yeni yönetici veya operasyonel dashboard'lar için rapor paketi script'leri ekleyin.
+- DEV/TEST sahipleri, zamanlamalar ve uyarı yolları onaylandıktan sonra izleme
+  sonuç kümelerini onaylı SQL Agent işlerine dönüştürün.
 
-## K. Production Readiness Checklist
+## K. Üretim Hazırlık Kontrol Listesi
 
-Use `md/database/production-readiness-checklist.md` as the single readiness
-gate. Every exception must have an owner, reason, and expiry date.
+`md/database/production-readiness-checklist.md` dosyasını tek hazırlık kapısı
+olarak kullanın. Her istisnada bir sahip, gerekçe ve son kullanma tarihi olmalıdır.
 
-## L. Risks And Mitigations
+## L. Riskler ve Azaltmalar
 
-| Risk | Mitigation |
+| Risk | Azaltma |
 | --- | --- |
-| Wrong environment execution | SSMS safety scripts, environment matrix, and runbook stop conditions. |
-| Missing backup | Pre-deployment backup requirement and execution log evidence. |
-| Unsafe SQL | Static quality gate and peer review. |
-| Cross-tenant data mistakes | Tenant-required templates and RBAC/audit review. |
-| Secret exposure | No-secrets policy and credential rotation. |
+| Yanlış ortam yürütmesi | SSMS güvenlik script'leri, ortam matrisi ve runbook durdurma koşulları. |
+| Eksik yedek | Dağıtım öncesi yedek zorunluluğu ve yürütme günlüğü kanıtı. |
+| Güvensiz SQL | Statik kalite kapısı ve uzman incelemesi. |
+| Tenant'lar arası veri hataları | Tenant zorunlu şablonlar ve RBAC/denetim incelemesi. |
+| Secret ifşası | Secret yasağı politikası ve kimlik bilgisi rotasyonu. |
 
-## M. Concrete Execution Order
+## M. Somut Yürütme Sırası
 
-1. Keep existing migration order unchanged.
-2. Run static SQL quality gate.
-3. Run SQL Server validation in DEV/CI.
-4. Rehearse SSMS deployment in TEST.
-5. Complete backup/restore drill.
-6. Complete production readiness checklist.
-7. Execute approved PROD release runbook.
+1. Mevcut migration sırasını değiştirmeden koruyun.
+2. Statik SQL kalite kapısını çalıştırın.
+3. DEV/CI'da SQL Server doğrulamasını çalıştırın.
+4. TEST'te SSMS dağıtımını prova edin.
+5. Yedek/geri yükleme tatbikatını tamamlayın.
+6. Üretim hazırlık kontrol listesini tamamlayın.
+7. Onaylı PROD sürüm runbook'unu yürütün.

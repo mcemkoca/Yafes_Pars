@@ -1,52 +1,52 @@
-# SQL Server Installation Checklist
+# SQL Server Kurulum Kontrol Listesi
 
-Use this checklist before running Yafes Pars migrations on a new SQL Server
-instance.
+Yeni bir SQL Server örneğinde Yafes Pars migration'larını çalıştırmadan önce bu
+kontrol listesini kullanın.
 
 ## Windows Server
 
-- [ ] Windows Server is patched.
-- [ ] Time zone and NTP synchronization are configured.
-- [ ] Local administrator access is restricted.
-- [ ] RDP access is restricted to approved sources.
-- [ ] Windows Defender or approved endpoint protection is enabled.
-- [ ] Data, log, tempdb, and backup folders are created.
-- [ ] Disk free space alerts are configured.
+- [ ] Windows Server yamalandı.
+- [ ] Saat dilimi ve NTP senkronizasyonu yapılandırıldı.
+- [ ] Yerel yönetici erişimi kısıtlandı.
+- [ ] RDP erişimi onaylı kaynaklarla kısıtlandı.
+- [ ] Windows Defender veya onaylı uç nokta koruması etkinleştirildi.
+- [ ] Veri, günlük, tempdb ve yedek klasörleri oluşturuldu.
+- [ ] Disk boş alan uyarıları yapılandırıldı.
 
-## SQL Server Setup
+## SQL Server Kurulumu
 
-- [ ] SQL Server edition matches the environment.
-- [ ] Latest approved SQL Server cumulative update is installed.
-- [ ] SQL Server service account is dedicated and non-interactive.
-- [ ] SQL Server Agent service account is dedicated where Agent is used.
-- [ ] Mixed mode is enabled only when SQL logins are required.
-- [ ] `sa` is disabled or protected by policy where possible.
-- [ ] TCP/IP is enabled only for required interfaces.
-- [ ] SQL Browser is disabled unless explicitly needed.
-- [ ] Maximum server memory is configured.
-- [ ] tempdb has appropriate file count, size, and growth settings.
-- [ ] Database default collation is documented.
+- [ ] SQL Server sürümü ortamla eşleşiyor.
+- [ ] En son onaylı SQL Server kümülatif güncellemesi yüklendi.
+- [ ] SQL Server hizmet hesabı adanmış ve etkileşimli olmayan.
+- [ ] Agent kullanıldığında SQL Server Agent hizmet hesabı adanmış.
+- [ ] Karma mod yalnızca SQL girişleri gerektiğinde etkin.
+- [ ] `sa` mümkün olduğunda politika gereği devre dışı veya korumalı.
+- [ ] TCP/IP yalnızca gerekli arayüzler için etkin.
+- [ ] SQL Browser açıkça gerekmedikçe devre dışı.
+- [ ] Maksimum sunucu belleği yapılandırıldı.
+- [ ] tempdb uygun dosya sayısı, boyutu ve büyüme ayarlarına sahip.
+- [ ] Veri tabanı varsayılan harmanlama belgelendi.
 
-## Required Tools
+## Gerekli Araçlar
 
-- [ ] SQL Server Management Studio is installed for operators.
-- [ ] `sqlcmd` is installed for automated DEV/CI validation where needed.
-- [ ] PowerShell can run repository tools.
-- [ ] Git client is available on engineering workstations.
+- [ ] SQL Server Management Studio operatörler için yüklendi.
+- [ ] `sqlcmd` gerektiğinde otomatik DEV/CI doğrulaması için yüklendi.
+- [ ] PowerShell, depo araçlarını çalıştırabilir.
+- [ ] Git istemcisi mühendislik iş istasyonlarında mevcut.
 
-## Database Preparation
+## Veri Tabanı Hazırlığı
 
-- [ ] Target database name matches the environment matrix.
-- [ ] Database owner is approved.
-- [ ] Data and log file locations are correct.
-- [ ] Recovery model matches backup strategy.
-- [ ] Backup location is writable by SQL Server.
-- [ ] Pre-migration backup has been tested.
+- [ ] Hedef veri tabanı adı ortam matrisiyle eşleşiyor.
+- [ ] Veri tabanı sahibi onaylandı.
+- [ ] Veri ve günlük dosyası konumları doğru.
+- [ ] Kurtarma modeli yedek stratejisiyle eşleşiyor.
+- [ ] Yedek konumu SQL Server tarafından yazılabilir.
+- [ ] Migration öncesi yedek test edildi.
 
-## Repository Preparation
+## Depo Hazırlığı
 
-- [ ] Release branch or tag is approved.
-- [ ] Static quality gate passes.
-- [ ] Migration order `000` through `018` is unchanged.
-- [ ] New migrations, if any, start at `019`.
-- [ ] Secrets are not present in repository files.
+- [ ] Sürüm dalı veya etiketi onaylandı.
+- [ ] Statik kalite kapısı geçiyor.
+- [ ] `000`'dan `018`'e migration sırası değişmedi.
+- [ ] Varsa yeni migration'lar `019`'dan başlıyor.
+- [ ] Depo dosyalarında secret yok.

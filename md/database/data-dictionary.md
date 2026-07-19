@@ -1,424 +1,424 @@
-# Data Dictionary
+# Veri Sözlüğü
 
-This dictionary documents the validated SQL Server schema. Classification values:
+Bu sözlük, doğrulanmış SQL Server schema'sını belgelemektedir. Sınıflandırma değerleri:
 `public`, `internal`, `confidential`, `personal_data`, `financial_data`,
 `security_sensitive`.
 
-Most lookup tables use the standard pattern: code primary key, Dutch/French/
-English/Turkish label columns when present, `is_active`, and `sort_order`.
-Domain-specific operational tables are documented below at column level.
+Çoğu arama tablosu standart kalıbı kullanır: kod birincil anahtar, mevcut olduğunda
+Hollandaca/Fransızca/İngilizce/Türkçe etiket sütunları, `is_active` ve `sort_order`.
+Domain'e özgü operasyonel tablolar aşağıda sütun düzeyinde belgelenmiştir.
 
 ## core.Tenant
 
-Purpose: tenant identity and default settings.
+Amaç: tenant kimliği ve varsayılan ayarlar.
 
-| Column | Type | Null | Default | Key | Notes | Meaning | Classification |
+| Sütun | Tür | Null | Varsayılan | Anahtar | Notlar | Anlam | Sınıflandırma |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| tenant_id | UNIQUEIDENTIFIER | No | NEWSEQUENTIALID() | PK | Referenced by tenant-aware roots | Tenant surrogate id | internal |
-| tenant_code | NVARCHAR(80) | No | none | UQ | UQ_Tenant_tenant_code | Stable tenant code | internal |
-| legal_name | NVARCHAR(200) | No | none |  | Legal display | Registered tenant name | confidential |
-| display_name | NVARCHAR(200) | No | none |  | UI display | Broker/tenant label | internal |
-| vat_number | NVARCHAR(30) | Yes | none |  | Business identifier | VAT number | confidential |
-| country_code | CHAR(2) | No | 'BE' |  | ISO country | Tenant country | internal |
-| default_language | CHAR(2) | No | 'nl' |  | FK-like language code | Default UI language | internal |
-| is_active | BIT | No | 1 |  | Active flag | Tenant availability | internal |
-| created_at_utc | DATETIME2(0) | No | SYSUTCDATETIME() |  | Audit timestamp | Creation time | internal |
-| updated_at_utc | DATETIME2(0) | No | SYSUTCDATETIME() |  | Audit timestamp | Last update time | internal |
+| tenant_id | UNIQUEIDENTIFIER | Hayır | NEWSEQUENTIALID() | PK | Tenant farkında kökler tarafından referans alınır | Tenant vekil id | internal |
+| tenant_code | NVARCHAR(80) | Hayır | yok | UQ | UQ_Tenant_tenant_code | Kararlı tenant kodu | internal |
+| legal_name | NVARCHAR(200) | Hayır | yok |  | Hukuki görüntü | Kayıtlı tenant adı | confidential |
+| display_name | NVARCHAR(200) | Hayır | yok |  | UI görüntüsü | Broker/tenant etiketi | internal |
+| vat_number | NVARCHAR(30) | Evet | yok |  | İş tanımlayıcı | KDV numarası | confidential |
+| country_code | CHAR(2) | Hayır | 'BE' |  | ISO ülke | Tenant ülkesi | internal |
+| default_language | CHAR(2) | Hayır | 'nl' |  | FK benzeri dil kodu | Varsayılan UI dili | internal |
+| is_active | BIT | Hayır | 1 |  | Aktif bayrağı | Tenant kullanılabilirliği | internal |
+| created_at_utc | DATETIME2(0) | Hayır | SYSUTCDATETIME() |  | Denetim zaman damgası | Oluşturma zamanı | internal |
+| updated_at_utc | DATETIME2(0) | Hayır | SYSUTCDATETIME() |  | Denetim zaman damgası | Son güncelleme zamanı | internal |
 
 ## core.AppUser
 
-Purpose: tenant-scoped application users.
+Amaç: tenant kapsamlı uygulama kullanıcıları.
 
-| Column | Type | Null | Default | Key | Notes | Meaning | Classification |
+| Sütun | Tür | Null | Varsayılan | Anahtar | Notlar | Anlam | Sınıflandırma |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| user_id | UNIQUEIDENTIFIER | No | NEWSEQUENTIALID() | PK |  | User id | internal |
-| tenant_id | UNIQUEIDENTIFIER | No | none | FK | FK_AppUser_Tenant, UQ tenant/email | Owning tenant | internal |
-| email | NVARCHAR(320) | No | none | UQ | Unique per tenant | Login/contact email | personal_data |
-| display_name | NVARCHAR(160) | No | none |  |  | UI name | personal_data |
-| person_id | UNIQUEIDENTIFIER | Yes | none | FK | FK_AppUser_Person | Linked person | personal_data |
-| auth_provider | NVARCHAR(40) | No | 'local' |  |  | Identity provider | security_sensitive |
-| external_subject_id | NVARCHAR(200) | Yes | none |  |  | External identity id | security_sensitive |
-| is_active | BIT | No | 1 |  |  | Login enabled | security_sensitive |
-| last_login_at_utc | DATETIME2(0) | Yes | none |  |  | Last login time | security_sensitive |
-| created_at_utc | DATETIME2(0) | No | SYSUTCDATETIME() |  |  | Creation time | internal |
-| updated_at_utc | DATETIME2(0) | No | SYSUTCDATETIME() |  |  | Last update time | internal |
+| user_id | UNIQUEIDENTIFIER | Hayır | NEWSEQUENTIALID() | PK |  | Kullanıcı id | internal |
+| tenant_id | UNIQUEIDENTIFIER | Hayır | yok | FK | FK_AppUser_Tenant, UQ tenant/email | Sahip tenant | internal |
+| email | NVARCHAR(320) | Hayır | yok | UQ | Tenant başına benzersiz | Giriş/iletişim e-postası | personal_data |
+| display_name | NVARCHAR(160) | Hayır | yok |  |  | UI adı | personal_data |
+| person_id | UNIQUEIDENTIFIER | Evet | yok | FK | FK_AppUser_Person | Bağlı kişi | personal_data |
+| auth_provider | NVARCHAR(40) | Hayır | 'local' |  |  | Kimlik sağlayıcısı | security_sensitive |
+| external_subject_id | NVARCHAR(200) | Evet | yok |  |  | Harici kimlik id | security_sensitive |
+| is_active | BIT | Hayır | 1 |  |  | Giriş etkin | security_sensitive |
+| last_login_at_utc | DATETIME2(0) | Evet | yok |  |  | Son giriş zamanı | security_sensitive |
+| created_at_utc | DATETIME2(0) | Hayır | SYSUTCDATETIME() |  |  | Oluşturma zamanı | internal |
+| updated_at_utc | DATETIME2(0) | Hayır | SYSUTCDATETIME() |  |  | Son güncelleme zamanı | internal |
 
 ## person.Person
 
-Purpose: tenant-aware root for natural and legal persons.
+Amaç: gerçek ve tüzel kişiler için tenant farkında kök.
 
-| Column | Type | Null | Default | Key | Notes | Meaning | Classification |
+| Sütun | Tür | Null | Varsayılan | Anahtar | Notlar | Anlam | Sınıflandırma |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| person_id | UNIQUEIDENTIFIER | No | NEWSEQUENTIALID() | PK |  | Person id | personal_data |
-| tenant_id | UNIQUEIDENTIFIER | No | none | FK | FK_Person_Tenant | Owning tenant | internal |
-| person_kind | NVARCHAR(10) | No | none | CK | NATURAL or LEGAL | Subtype discriminator | personal_data |
-| dossier | NVARCHAR(50) | Yes | none | UQ filtered | UQ_Person_tenant_dossier | Broker dossier number | confidential |
-| language_code | CHAR(2) | Yes | none | FK | FK_Person_Language | Preferred language | personal_data |
-| nationality | NVARCHAR(80) | Yes | none |  |  | Nationality | personal_data |
-| subagent_person_id | UNIQUEIDENTIFIER | Yes | none | FK | Self FK | Subagent person | confidential |
-| manager_person_id | UNIQUEIDENTIFIER | Yes | none | FK | Self FK | Manager person | confidential |
-| portfolio_person_id | UNIQUEIDENTIFIER | Yes | none | FK | Self FK | Portfolio owner | confidential |
-| created_at_utc | DATETIME2(0) | No | SYSUTCDATETIME() |  |  | Creation time | internal |
-| updated_at_utc | DATETIME2(0) | No | SYSUTCDATETIME() |  |  | Last update time | internal |
-| created_by_user_id | UNIQUEIDENTIFIER | Yes | none | FK | FK_Person_AppUser_CreatedBy | Creator user | security_sensitive |
-| updated_by_user_id | UNIQUEIDENTIFIER | Yes | none | FK | FK_Person_AppUser_UpdatedBy | Last updater | security_sensitive |
-| is_deleted | BIT | No | 0 |  | Soft delete | Deleted marker | internal |
+| person_id | UNIQUEIDENTIFIER | Hayır | NEWSEQUENTIALID() | PK |  | Kişi id | personal_data |
+| tenant_id | UNIQUEIDENTIFIER | Hayır | yok | FK | FK_Person_Tenant | Sahip tenant | internal |
+| person_kind | NVARCHAR(10) | Hayır | yok | CK | NATURAL veya LEGAL | Alt tür ayrımcısı | personal_data |
+| dossier | NVARCHAR(50) | Evet | yok | UQ filtreli | UQ_Person_tenant_dossier | Broker dosya numarası | confidential |
+| language_code | CHAR(2) | Evet | yok | FK | FK_Person_Language | Tercih edilen dil | personal_data |
+| nationality | NVARCHAR(80) | Evet | yok |  |  | Uyruk | personal_data |
+| subagent_person_id | UNIQUEIDENTIFIER | Evet | yok | FK | Öz FK | Alt acente kişisi | confidential |
+| manager_person_id | UNIQUEIDENTIFIER | Evet | yok | FK | Öz FK | Yönetici kişi | confidential |
+| portfolio_person_id | UNIQUEIDENTIFIER | Evet | yok | FK | Öz FK | Portföy sahibi | confidential |
+| created_at_utc | DATETIME2(0) | Hayır | SYSUTCDATETIME() |  |  | Oluşturma zamanı | internal |
+| updated_at_utc | DATETIME2(0) | Hayır | SYSUTCDATETIME() |  |  | Son güncelleme zamanı | internal |
+| created_by_user_id | UNIQUEIDENTIFIER | Evet | yok | FK | FK_Person_AppUser_CreatedBy | Oluşturan kullanıcı | security_sensitive |
+| updated_by_user_id | UNIQUEIDENTIFIER | Evet | yok | FK | FK_Person_AppUser_UpdatedBy | Son güncelleyen | security_sensitive |
+| is_deleted | BIT | Hayır | 0 |  | Geçici silme | Silinmiş işareti | internal |
 
 ## person.NaturalPerson
 
-Purpose: natural person subtype.
+Amaç: gerçek kişi alt türü.
 
-| Column | Type | Null | Default | Key | Notes | Meaning | Classification |
+| Sütun | Tür | Null | Varsayılan | Anahtar | Notlar | Anlam | Sınıflandırma |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| person_id | UNIQUEIDENTIFIER | No | none | PK/FK | FK_NaturalPerson_Person | Root person | personal_data |
-| first_name | NVARCHAR(100) | Yes | none |  |  | First name | personal_data |
-| last_name | NVARCHAR(100) | Yes | none |  | IX_NaturalPerson_name | Last name | personal_data |
-| birth_date | DATE | Yes | none |  | Lifespan check | Birth date | personal_data |
-| birth_place | NVARCHAR(120) | Yes | none |  |  | Birth place | personal_data |
-| death_date | DATE | Yes | none |  | death >= birth | Death date | personal_data |
-| gender | NVARCHAR(20) | Yes | none |  |  | Gender | personal_data |
-| marital_status | NVARCHAR(50) | Yes | none |  |  | Marital status | personal_data |
-| national_number | NVARCHAR(30) | Yes | none |  | Sensitive identifier | National id | personal_data |
-| passport_number | NVARCHAR(30) | Yes | none |  | Sensitive identifier | Passport id | personal_data |
-| id_card_number | NVARCHAR(30) | Yes | none |  | Sensitive identifier | ID card number | personal_data |
-| id_card_valid_from | DATE | Yes | none |  | Date range check | ID validity start | personal_data |
-| id_card_valid_to | DATE | Yes | none |  | Date range check | ID validity end | personal_data |
-| title_code | NVARCHAR(10) | Yes | none | FK | FK_NaturalPerson_Title | Person title | personal_data |
-| created_at_utc | DATETIME2(0) | No | SYSUTCDATETIME() |  |  | Creation time | internal |
-| updated_at_utc | DATETIME2(0) | No | SYSUTCDATETIME() |  |  | Last update time | internal |
-| created_by_user_id | UNIQUEIDENTIFIER | Yes | none | FK |  | Creator user | security_sensitive |
-| updated_by_user_id | UNIQUEIDENTIFIER | Yes | none | FK |  | Last updater | security_sensitive |
-| is_deleted | BIT | No | 0 |  | Soft delete | Deleted marker | internal |
+| person_id | UNIQUEIDENTIFIER | Hayır | yok | PK/FK | FK_NaturalPerson_Person | Kök kişi | personal_data |
+| first_name | NVARCHAR(100) | Evet | yok |  |  | Ad | personal_data |
+| last_name | NVARCHAR(100) | Evet | yok |  | IX_NaturalPerson_name | Soyadı | personal_data |
+| birth_date | DATE | Evet | yok |  | Yaşam süresi kontrolü | Doğum tarihi | personal_data |
+| birth_place | NVARCHAR(120) | Evet | yok |  |  | Doğum yeri | personal_data |
+| death_date | DATE | Evet | yok |  | ölüm >= doğum | Ölüm tarihi | personal_data |
+| gender | NVARCHAR(20) | Evet | yok |  |  | Cinsiyet | personal_data |
+| marital_status | NVARCHAR(50) | Evet | yok |  |  | Medeni durum | personal_data |
+| national_number | NVARCHAR(30) | Evet | yok |  | Hassas tanımlayıcı | Ulusal kimlik | personal_data |
+| passport_number | NVARCHAR(30) | Evet | yok |  | Hassas tanımlayıcı | Pasaport id | personal_data |
+| id_card_number | NVARCHAR(30) | Evet | yok |  | Hassas tanımlayıcı | Kimlik kart numarası | personal_data |
+| id_card_valid_from | DATE | Evet | yok |  | Tarih aralığı kontrolü | Kimlik geçerlilik başlangıcı | personal_data |
+| id_card_valid_to | DATE | Evet | yok |  | Tarih aralığı kontrolü | Kimlik geçerlilik sonu | personal_data |
+| title_code | NVARCHAR(10) | Evet | yok | FK | FK_NaturalPerson_Title | Kişi unvanı | personal_data |
+| created_at_utc | DATETIME2(0) | Hayır | SYSUTCDATETIME() |  |  | Oluşturma zamanı | internal |
+| updated_at_utc | DATETIME2(0) | Hayır | SYSUTCDATETIME() |  |  | Son güncelleme zamanı | internal |
+| created_by_user_id | UNIQUEIDENTIFIER | Evet | yok | FK |  | Oluşturan kullanıcı | security_sensitive |
+| updated_by_user_id | UNIQUEIDENTIFIER | Evet | yok | FK |  | Son güncelleyen | security_sensitive |
+| is_deleted | BIT | Hayır | 0 |  | Geçici silme | Silinmiş işareti | internal |
 
 ## person.LegalPerson
 
-Purpose: legal entity subtype modeled as a person.
+Amaç: kişi olarak modellenen tüzel varlık alt türü.
 
-| Column | Type | Null | Default | Key | Notes | Meaning | Classification |
+| Sütun | Tür | Null | Varsayılan | Anahtar | Notlar | Anlam | Sınıflandırma |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| person_id | UNIQUEIDENTIFIER | No | none | PK/FK | FK_LegalPerson_Person | Root person | confidential |
-| incorporation_date | DATE | Yes | none |  | closing >= incorporation | Incorporation date | confidential |
-| closing_date | DATE | Yes | none |  | closing >= incorporation | Closing date | confidential |
-| legal_form | NVARCHAR(120) | Yes | none |  |  | Legal form | confidential |
-| created_at_utc | DATETIME2(0) | No | SYSUTCDATETIME() |  |  | Creation time | internal |
-| updated_at_utc | DATETIME2(0) | No | SYSUTCDATETIME() |  |  | Last update time | internal |
-| created_by_user_id | UNIQUEIDENTIFIER | Yes | none | FK |  | Creator user | security_sensitive |
-| updated_by_user_id | UNIQUEIDENTIFIER | Yes | none | FK |  | Last updater | security_sensitive |
-| is_deleted | BIT | No | 0 |  | Soft delete | Deleted marker | internal |
+| person_id | UNIQUEIDENTIFIER | Hayır | yok | PK/FK | FK_LegalPerson_Person | Kök kişi | confidential |
+| incorporation_date | DATE | Evet | yok |  | kapanış >= kuruluş | Kuruluş tarihi | confidential |
+| closing_date | DATE | Evet | yok |  | kapanış >= kuruluş | Kapanış tarihi | confidential |
+| legal_form | NVARCHAR(120) | Evet | yok |  |  | Hukuki form | confidential |
+| created_at_utc | DATETIME2(0) | Hayır | SYSUTCDATETIME() |  |  | Oluşturma zamanı | internal |
+| updated_at_utc | DATETIME2(0) | Hayır | SYSUTCDATETIME() |  |  | Son güncelleme zamanı | internal |
+| created_by_user_id | UNIQUEIDENTIFIER | Evet | yok | FK |  | Oluşturan kullanıcı | security_sensitive |
+| updated_by_user_id | UNIQUEIDENTIFIER | Evet | yok | FK |  | Son güncelleyen | security_sensitive |
+| is_deleted | BIT | Hayır | 0 |  | Geçici silme | Silinmiş işareti | internal |
 
 ## institution.Institution
 
-Purpose: insurers, brokers, banks, leasing firms, and partners.
+Amaç: sigortacılar, brokerlar, bankalar, kiralama firmaları ve ortaklar.
 
-| Column | Type | Null | Default | Key | Notes | Meaning | Classification |
+| Sütun | Tür | Null | Varsayılan | Anahtar | Notlar | Anlam | Sınıflandırma |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| institution_id | UNIQUEIDENTIFIER | No | NEWSEQUENTIALID() | PK |  | Institution id | internal |
-| tenant_id | UNIQUEIDENTIFIER | No | none | FK/UQ | UQ_Institution_tenant_code | Owning tenant | internal |
-| institution_code | NVARCHAR(80) | No | none | UQ | Unique per tenant | Institution code | internal |
-| name | NVARCHAR(200) | No | none |  | IX_Institution_name | Common name | confidential |
-| legal_name | NVARCHAR(200) | Yes | none |  |  | Legal name | confidential |
-| vat_number | NVARCHAR(30) | Yes | none |  |  | VAT number | confidential |
-| country_code | CHAR(2) | No | 'BE' |  |  | Country | internal |
-| is_active | BIT | No | 1 |  |  | Active flag | internal |
-| created_at_utc | DATETIME2(0) | No | SYSUTCDATETIME() |  |  | Creation time | internal |
-| updated_at_utc | DATETIME2(0) | No | SYSUTCDATETIME() |  |  | Last update time | internal |
-| created_by_user_id | UNIQUEIDENTIFIER | Yes | none | FK |  | Creator user | security_sensitive |
-| updated_by_user_id | UNIQUEIDENTIFIER | Yes | none | FK |  | Last updater | security_sensitive |
-| is_deleted | BIT | No | 0 |  | Soft delete | Deleted marker | internal |
+| institution_id | UNIQUEIDENTIFIER | Hayır | NEWSEQUENTIALID() | PK |  | Kuruluş id | internal |
+| tenant_id | UNIQUEIDENTIFIER | Hayır | yok | FK/UQ | UQ_Institution_tenant_code | Sahip tenant | internal |
+| institution_code | NVARCHAR(80) | Hayır | yok | UQ | Tenant başına benzersiz | Kuruluş kodu | internal |
+| name | NVARCHAR(200) | Hayır | yok |  | IX_Institution_name | Yaygın ad | confidential |
+| legal_name | NVARCHAR(200) | Evet | yok |  |  | Hukuki ad | confidential |
+| vat_number | NVARCHAR(30) | Evet | yok |  |  | KDV numarası | confidential |
+| country_code | CHAR(2) | Hayır | 'BE' |  |  | Ülke | internal |
+| is_active | BIT | Hayır | 1 |  |  | Aktif bayrağı | internal |
+| created_at_utc | DATETIME2(0) | Hayır | SYSUTCDATETIME() |  |  | Oluşturma zamanı | internal |
+| updated_at_utc | DATETIME2(0) | Hayır | SYSUTCDATETIME() |  |  | Son güncelleme zamanı | internal |
+| created_by_user_id | UNIQUEIDENTIFIER | Evet | yok | FK |  | Oluşturan kullanıcı | security_sensitive |
+| updated_by_user_id | UNIQUEIDENTIFIER | Evet | yok | FK |  | Son güncelleyen | security_sensitive |
+| is_deleted | BIT | Hayır | 0 |  | Geçici silme | Silinmiş işareti | internal |
 
 ## risk.InsurableObject
 
-Purpose: tenant-aware root for all insurable risks.
+Amaç: tüm sigortalanabilir riskler için tenant farkında kök.
 
-| Column | Type | Null | Default | Key | Notes | Meaning | Classification |
+| Sütun | Tür | Null | Varsayılan | Anahtar | Notlar | Anlam | Sınıflandırma |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| insurable_object_id | UNIQUEIDENTIFIER | No | NEWSEQUENTIALID() | PK |  | Risk id | internal |
-| tenant_id | UNIQUEIDENTIFIER | No | none | FK | FK_InsurableObject_Tenant | Owning tenant | internal |
-| object_type_code | NVARCHAR(40) | No | none | FK | FK_InsurableObject_InsurableObjectType | Risk subtype | internal |
-| description | NVARCHAR(255) | No | none |  |  | Risk label | confidential |
-| status_code | NVARCHAR(30) | No | none |  | Validated values | Risk status | internal |
-| start_date | DATE | No | none |  | Date range check | Risk start | internal |
-| end_date | DATE | Yes | none |  | end >= start | Risk end | internal |
-| created_at_utc | DATETIME2(0) | No | SYSUTCDATETIME() |  |  | Creation time | internal |
-| updated_at_utc | DATETIME2(0) | No | SYSUTCDATETIME() |  |  | Last update time | internal |
-| created_by_user_id | UNIQUEIDENTIFIER | Yes | none | FK |  | Creator user | security_sensitive |
-| updated_by_user_id | UNIQUEIDENTIFIER | Yes | none | FK |  | Last updater | security_sensitive |
-| is_deleted | BIT | No | 0 |  | Soft delete | Deleted marker | internal |
+| insurable_object_id | UNIQUEIDENTIFIER | Hayır | NEWSEQUENTIALID() | PK |  | Risk id | internal |
+| tenant_id | UNIQUEIDENTIFIER | Hayır | yok | FK | FK_InsurableObject_Tenant | Sahip tenant | internal |
+| object_type_code | NVARCHAR(40) | Hayır | yok | FK | FK_InsurableObject_InsurableObjectType | Risk alt türü | internal |
+| description | NVARCHAR(255) | Hayır | yok |  |  | Risk etiketi | confidential |
+| status_code | NVARCHAR(30) | Hayır | yok |  | Doğrulanmış değerler | Risk durumu | internal |
+| start_date | DATE | Hayır | yok |  | Tarih aralığı kontrolü | Risk başlangıcı | internal |
+| end_date | DATE | Evet | yok |  | bitiş >= başlangıç | Risk bitişi | internal |
+| created_at_utc | DATETIME2(0) | Hayır | SYSUTCDATETIME() |  |  | Oluşturma zamanı | internal |
+| updated_at_utc | DATETIME2(0) | Hayır | SYSUTCDATETIME() |  |  | Son güncelleme zamanı | internal |
+| created_by_user_id | UNIQUEIDENTIFIER | Evet | yok | FK |  | Oluşturan kullanıcı | security_sensitive |
+| updated_by_user_id | UNIQUEIDENTIFIER | Evet | yok | FK |  | Son güncelleyen | security_sensitive |
+| is_deleted | BIT | Hayır | 0 |  | Geçici silme | Silinmiş işareti | internal |
 
 ## risk.InsurableVehicle
 
-Purpose: vehicle-specific risk attributes.
+Amaç: araç'a özgü risk nitelikleri.
 
-| Column | Type | Null | Default | Key | Notes | Meaning | Classification |
+| Sütun | Tür | Null | Varsayılan | Anahtar | Notlar | Anlam | Sınıflandırma |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| insurable_object_id | UNIQUEIDENTIFIER | No | none | PK/FK | FK_InsurableVehicle_InsurableObject | Root risk | internal |
-| vehicle_type_code | NVARCHAR(60) | No | none | FK |  | Vehicle type | internal |
-| usage_type_code | NVARCHAR(40) | No | none | FK |  | Vehicle usage | internal |
-| plate_type_code | NVARCHAR(40) | No | none | FK |  | Plate type | internal |
-| brand | NVARCHAR(100) | No | none |  |  | Brand | confidential |
-| model | NVARCHAR(100) | No | none |  |  | Model | confidential |
-| chassis_number | NVARCHAR(40) | No | none |  | IX_InsurableVehicle_chassis | VIN/chassis | confidential |
-| build_year | INT | No | none | CK | >= 1886, sane range validation | Build year | internal |
-| first_commissioning_date | DATE | No | none |  | <= registration validation | First use date | internal |
-| registration_date | DATE | No | none |  | >= commissioning validation | Registration date | internal |
-| license_plate | NVARCHAR(20) | No | none |  | IX_InsurableVehicle_plate | Plate number | confidential |
-| fuel_type_code | NVARCHAR(40) | Yes | none | FK |  | Fuel type | internal |
-| drive_type_code | NVARCHAR(20) | Yes | none | FK |  | Drive type | internal |
-| finance_institution_id | UNIQUEIDENTIFIER | Yes | none | FK | Required when financed | Finance institution | financial_data |
-| is_financed | BIT | No | 0 | CK | Financing consistency | Is financed | financial_data |
-| insured_value_ex_vat | DECIMAL(18,2) | Yes | none |  |  | Value excl VAT | financial_data |
-| insured_value_inc_vat | DECIMAL(18,2) | Yes | none |  |  | Value incl VAT | financial_data |
-| catalog_value_ex_vat | DECIMAL(18,2) | Yes | none |  |  | Catalog value excl VAT | financial_data |
-| catalog_value_inc_vat | DECIMAL(18,2) | Yes | none |  |  | Catalog value incl VAT | financial_data |
-| vat_exemption_pct | DECIMAL(5,2) | Yes | none | CK | Percent semantics | VAT exemption | financial_data |
-| accessories_value | DECIMAL(18,2) | Yes | none |  |  | Accessories value | financial_data |
-| pvg_number | NVARCHAR(40) | Yes | none |  |  | PVG number | confidential |
-| eu_pvg_number | NVARCHAR(40) | Yes | none |  |  | EU PVG number | confidential |
-| adr_code | NVARCHAR(40) | Yes | none |  |  | ADR code | internal |
-| engine_cc | INT | Yes | none |  |  | Engine displacement | internal |
-| power_kw | INT | Yes | none |  |  | Power kW | internal |
-| power_hp | INT | Yes | none |  |  | Power HP | internal |
-| plate_cancellation_date | DATE | Yes | none |  |  | Plate cancellation | internal |
+| insurable_object_id | UNIQUEIDENTIFIER | Hayır | yok | PK/FK | FK_InsurableVehicle_InsurableObject | Kök risk | internal |
+| vehicle_type_code | NVARCHAR(60) | Hayır | yok | FK |  | Araç türü | internal |
+| usage_type_code | NVARCHAR(40) | Hayır | yok | FK |  | Araç kullanımı | internal |
+| plate_type_code | NVARCHAR(40) | Hayır | yok | FK |  | Plaka türü | internal |
+| brand | NVARCHAR(100) | Hayır | yok |  |  | Marka | confidential |
+| model | NVARCHAR(100) | Hayır | yok |  |  | Model | confidential |
+| chassis_number | NVARCHAR(40) | Hayır | yok |  | IX_InsurableVehicle_chassis | VIN/şase | confidential |
+| build_year | INT | Hayır | yok | CK | >= 1886, makul aralık doğrulaması | Üretim yılı | internal |
+| first_commissioning_date | DATE | Hayır | yok |  | <= kayıt doğrulaması | İlk kullanım tarihi | internal |
+| registration_date | DATE | Hayır | yok |  | >= ilk komisyon doğrulaması | Tescil tarihi | internal |
+| license_plate | NVARCHAR(20) | Hayır | yok |  | IX_InsurableVehicle_plate | Plaka numarası | confidential |
+| fuel_type_code | NVARCHAR(40) | Evet | yok | FK |  | Yakıt türü | internal |
+| drive_type_code | NVARCHAR(20) | Evet | yok | FK |  | Tahrik türü | internal |
+| finance_institution_id | UNIQUEIDENTIFIER | Evet | yok | FK | Finansmanlıysa zorunlu | Finans kuruluşu | financial_data |
+| is_financed | BIT | Hayır | 0 | CK | Finansman tutarlılığı | Finansmanlı mı | financial_data |
+| insured_value_ex_vat | DECIMAL(18,2) | Evet | yok |  |  | KDV hariç değer | financial_data |
+| insured_value_inc_vat | DECIMAL(18,2) | Evet | yok |  |  | KDV dahil değer | financial_data |
+| catalog_value_ex_vat | DECIMAL(18,2) | Evet | yok |  |  | KDV hariç katalog değeri | financial_data |
+| catalog_value_inc_vat | DECIMAL(18,2) | Evet | yok |  |  | KDV dahil katalog değeri | financial_data |
+| vat_exemption_pct | DECIMAL(5,2) | Evet | yok | CK | Yüzde semantiği | KDV muafiyeti | financial_data |
+| accessories_value | DECIMAL(18,2) | Evet | yok |  |  | Aksesuar değeri | financial_data |
+| pvg_number | NVARCHAR(40) | Evet | yok |  |  | PVG numarası | confidential |
+| eu_pvg_number | NVARCHAR(40) | Evet | yok |  |  | AB PVG numarası | confidential |
+| adr_code | NVARCHAR(40) | Evet | yok |  |  | ADR kodu | internal |
+| engine_cc | INT | Evet | yok |  |  | Motor hacmi | internal |
+| power_kw | INT | Evet | yok |  |  | Güç kW | internal |
+| power_hp | INT | Evet | yok |  |  | Güç HP | internal |
+| plate_cancellation_date | DATE | Evet | yok |  |  | Plaka iptali | internal |
 
 ## risk.InsurableRealEstate
 
-Purpose: real estate-specific risk attributes.
+Amaç: gayrimenkul'e özgü risk nitelikleri.
 
-| Column | Type | Null | Default | Key | Notes | Meaning | Classification |
+| Sütun | Tür | Null | Varsayılan | Anahtar | Notlar | Anlam | Sınıflandırma |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| insurable_object_id | UNIQUEIDENTIFIER | No | none | PK/FK | Root risk | Real estate id | internal |
-| realestate_type_code | NVARCHAR(80) | No | none | FK |  | Property type | internal |
-| description | NVARCHAR(255) | Yes | none |  |  | Property description | confidential |
-| use_type_code | NVARCHAR(80) | No | none | FK |  | Use type | internal |
-| insured_role_code | NVARCHAR(80) | No | none | FK |  | Owner/tenant role | internal |
-| residence_type_code | NVARCHAR(80) | Yes | none | FK |  | Residence type | internal |
-| destination_type_code | NVARCHAR(80) | Yes | none | FK |  | Destination | internal |
-| street | NVARCHAR(200) | No | none |  | Address | Street | personal_data |
-| number | NVARCHAR(30) | No | none |  | Address | House number | personal_data |
-| box | NVARCHAR(30) | Yes | none |  | Address | Box | personal_data |
-| postal_code | NVARCHAR(20) | No | none |  | Address | Postal code | personal_data |
-| city | NVARCHAR(120) | No | none |  | Address | City | personal_data |
-| country_code | CHAR(2) | No | 'BE' |  | Address | Country | internal |
-| adjacency_type_code | NVARCHAR(80) | Yes | none | FK |  | Adjacency | internal |
-| occupancy_level_code | NVARCHAR(80) | Yes | none | FK |  | Occupancy | internal |
-| construction_type_code | NVARCHAR(80) | Yes | none | FK |  | Construction | internal |
-| roof_type_code | NVARCHAR(80) | Yes | none | FK |  | Roof | internal |
-| build_year | INT | Yes | none | CK | >= 1000 | Build year | internal |
-| flammable_materials_pct | DECIMAL(5,2) | Yes | none | CK | 0-100 | Flammable percentage | internal |
-| capital_building | DECIMAL(18,2) | Yes | none |  |  | Building capital | financial_data |
-| capital_roof | DECIMAL(18,2) | Yes | none |  |  | Roof capital | financial_data |
+| insurable_object_id | UNIQUEIDENTIFIER | Hayır | yok | PK/FK | Kök risk | Gayrimenkul id | internal |
+| realestate_type_code | NVARCHAR(80) | Hayır | yok | FK |  | Mülk türü | internal |
+| description | NVARCHAR(255) | Evet | yok |  |  | Mülk açıklaması | confidential |
+| use_type_code | NVARCHAR(80) | Hayır | yok | FK |  | Kullanım türü | internal |
+| insured_role_code | NVARCHAR(80) | Hayır | yok | FK |  | Sahip/kiracı rolü | internal |
+| residence_type_code | NVARCHAR(80) | Evet | yok | FK |  | Konut türü | internal |
+| destination_type_code | NVARCHAR(80) | Evet | yok | FK |  | Hedef | internal |
+| street | NVARCHAR(200) | Hayır | yok |  | Adres | Sokak | personal_data |
+| number | NVARCHAR(30) | Hayır | yok |  | Adres | Kapı numarası | personal_data |
+| box | NVARCHAR(30) | Evet | yok |  | Adres | Kutu | personal_data |
+| postal_code | NVARCHAR(20) | Hayır | yok |  | Adres | Posta kodu | personal_data |
+| city | NVARCHAR(120) | Hayır | yok |  | Adres | Şehir | personal_data |
+| country_code | CHAR(2) | Hayır | 'BE' |  | Adres | Ülke | internal |
+| adjacency_type_code | NVARCHAR(80) | Evet | yok | FK |  | Bitişiklik | internal |
+| occupancy_level_code | NVARCHAR(80) | Evet | yok | FK |  | Doluluk | internal |
+| construction_type_code | NVARCHAR(80) | Evet | yok | FK |  | Yapı | internal |
+| roof_type_code | NVARCHAR(80) | Evet | yok | FK |  | Çatı | internal |
+| build_year | INT | Evet | yok | CK | >= 1000 | Yapım yılı | internal |
+| flammable_materials_pct | DECIMAL(5,2) | Evet | yok | CK | 0-100 | Yanıcı malzeme yüzdesi | internal |
+| capital_building | DECIMAL(18,2) | Evet | yok |  |  | Bina sermayesi | financial_data |
+| capital_roof | DECIMAL(18,2) | Evet | yok |  |  | Çatı sermayesi | financial_data |
 
 ## policy.Contract
 
-Purpose: tenant-aware policy or contract root.
+Amaç: tenant farkında poliçe veya sözleşme kökü.
 
-| Column | Type | Null | Default | Key | Notes | Meaning | Classification |
+| Sütun | Tür | Null | Varsayılan | Anahtar | Notlar | Anlam | Sınıflandırma |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| contract_id | UNIQUEIDENTIFIER | No | NEWSEQUENTIALID() | PK |  | Contract id | internal |
-| tenant_id | UNIQUEIDENTIFIER | No | none | FK/UQ | Unique with contract_number | Owning tenant | internal |
-| contract_number | NVARCHAR(40) | No | none | UQ | UQ_Contract_tenant_number | Policy number | confidential |
-| contract_domain_code | NVARCHAR(40) | No | none | FK | Domain/type composite | Domain | internal |
-| contract_type_code | NVARCHAR(80) | No | none | FK | Domain/type composite | Contract type | internal |
-| contract_status_code | NVARCHAR(40) | No | none | FK |  | Status | internal |
-| company_id | UNIQUEIDENTIFIER | Yes | none | FK | Institution | Insurer | confidential |
-| handling_company_id | UNIQUEIDENTIFIER | Yes | none | FK | Institution | Handling company | confidential |
-| start_date | DATE | No | none | CK | start <= end | Start date | internal |
-| end_date | DATE | Yes | none | CK | start <= end | End date | internal |
-| created_by_user_id | UNIQUEIDENTIFIER | Yes | none | FK |  | Creator | security_sensitive |
-| updated_by_user_id | UNIQUEIDENTIFIER | Yes | none | FK |  | Updater | security_sensitive |
-| is_deleted | BIT | No | 0 |  | Soft delete | Deleted marker | internal |
+| contract_id | UNIQUEIDENTIFIER | Hayır | NEWSEQUENTIALID() | PK |  | Sözleşme id | internal |
+| tenant_id | UNIQUEIDENTIFIER | Hayır | yok | FK/UQ | contract_number ile benzersiz | Sahip tenant | internal |
+| contract_number | NVARCHAR(40) | Hayır | yok | UQ | UQ_Contract_tenant_number | Poliçe numarası | confidential |
+| contract_domain_code | NVARCHAR(40) | Hayır | yok | FK | Domain/tür bileşik | Domain | internal |
+| contract_type_code | NVARCHAR(80) | Hayır | yok | FK | Domain/tür bileşik | Sözleşme türü | internal |
+| contract_status_code | NVARCHAR(40) | Hayır | yok | FK |  | Durum | internal |
+| company_id | UNIQUEIDENTIFIER | Evet | yok | FK | Kuruluş | Sigortacı | confidential |
+| handling_company_id | UNIQUEIDENTIFIER | Evet | yok | FK | Kuruluş | İşlemci şirket | confidential |
+| start_date | DATE | Hayır | yok | CK | başlangıç <= bitiş | Başlangıç tarihi | internal |
+| end_date | DATE | Evet | yok | CK | başlangıç <= bitiş | Bitiş tarihi | internal |
+| created_by_user_id | UNIQUEIDENTIFIER | Evet | yok | FK |  | Oluşturan | security_sensitive |
+| updated_by_user_id | UNIQUEIDENTIFIER | Evet | yok | FK |  | Güncelleyen | security_sensitive |
+| is_deleted | BIT | Hayır | 0 |  | Geçici silme | Silinmiş işareti | internal |
 
 ## policy.ContractVersion
 
-Purpose: versioned policy lifecycle details.
+Amaç: versiyonlanmış poliçe yaşam döngüsü ayrıntıları.
 
-| Column | Type | Null | Default | Key | Notes | Meaning | Classification |
+| Sütun | Tür | Null | Varsayılan | Anahtar | Notlar | Anlam | Sınıflandırma |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| contract_version_id | UNIQUEIDENTIFIER | No | NEWSEQUENTIALID() | PK/UQ | Unique with contract_id | Version id | internal |
-| contract_id | UNIQUEIDENTIFIER | No | none | FK/UQ | FK_ContractVersion_Contract | Parent contract | internal |
-| version_no | INT | No | none | UQ/CK | > 0, unique per contract | Version number | internal |
-| effective_from | DATE | No | none | CK | Date range | Effective from | internal |
-| effective_to | DATE | Yes | none | CK | >= effective_from | Effective to | internal |
-| contract_version_status_code | NVARCHAR(40) | No | none | FK | Duplicate active validated | Version status | internal |
-| duration_type_code | NVARCHAR(20) | No | none | FK |  | Duration type | internal |
-| periodicity_code | NVARCHAR(40) | No | none | FK |  | Periodicity | financial_data |
-| collection_method_code | NVARCHAR(20) | No | none | FK |  | Collection method | financial_data |
-| initial_start_date | DATE | Yes | none |  |  | Original start | internal |
-| parent_contract_id | UNIQUEIDENTIFIER | Yes | none | FK |  | Parent contract | internal |
-| coinsurance_participation_pct | DECIMAL(5,2) | Yes | none | CK | 0-100 | Coinsurance share | financial_data |
-| manager_person_id | UNIQUEIDENTIFIER | Yes | none | FK |  | Manager person | personal_data |
-| is_deleted | BIT | No | 0 |  | Soft delete | Deleted marker | internal |
+| contract_version_id | UNIQUEIDENTIFIER | Hayır | NEWSEQUENTIALID() | PK/UQ | contract_id ile benzersiz | Versiyon id | internal |
+| contract_id | UNIQUEIDENTIFIER | Hayır | yok | FK/UQ | FK_ContractVersion_Contract | Üst sözleşme | internal |
+| version_no | INT | Hayır | yok | UQ/CK | > 0, sözleşme başına benzersiz | Versiyon numarası | internal |
+| effective_from | DATE | Hayır | yok | CK | Tarih aralığı | Geçerlilik başlangıcı | internal |
+| effective_to | DATE | Evet | yok | CK | >= effective_from | Geçerlilik sonu | internal |
+| contract_version_status_code | NVARCHAR(40) | Hayır | yok | FK | Aktif durum tekrarı doğrulandı | Versiyon durumu | internal |
+| duration_type_code | NVARCHAR(20) | Hayır | yok | FK |  | Süre türü | internal |
+| periodicity_code | NVARCHAR(40) | Hayır | yok | FK |  | Periyodiklik | financial_data |
+| collection_method_code | NVARCHAR(20) | Hayır | yok | FK |  | Tahsilat yöntemi | financial_data |
+| initial_start_date | DATE | Evet | yok |  |  | Özgün başlangıç | internal |
+| parent_contract_id | UNIQUEIDENTIFIER | Evet | yok | FK |  | Üst sözleşme | internal |
+| coinsurance_participation_pct | DECIMAL(5,2) | Evet | yok | CK | 0-100 | Ko-sigorta payı | financial_data |
+| manager_person_id | UNIQUEIDENTIFIER | Evet | yok | FK |  | Yönetici kişi | personal_data |
+| is_deleted | BIT | Hayır | 0 |  | Geçici silme | Silinmiş işareti | internal |
 
 ## policy.ContractParty
 
-Purpose: maps people to contracts.
+Amaç: kişileri sözleşmelere eşler.
 
-| Column | Type | Null | Default | Key | Notes | Meaning | Classification |
+| Sütun | Tür | Null | Varsayılan | Anahtar | Notlar | Anlam | Sınıflandırma |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| contract_id | UNIQUEIDENTIFIER | No | none | PK/FK |  | Contract | internal |
-| person_id | UNIQUEIDENTIFIER | No | none | PK/FK |  | Party person | personal_data |
-| contract_party_role_code | NVARCHAR(40) | No | none | PK/FK |  | Role | internal |
-| is_primary | BIT | No | 0 |  |  | Primary party flag | internal |
-| created_at_utc | DATETIME2(0) | No | SYSUTCDATETIME() |  |  | Link creation time | internal |
+| contract_id | UNIQUEIDENTIFIER | Hayır | yok | PK/FK |  | Sözleşme | internal |
+| person_id | UNIQUEIDENTIFIER | Hayır | yok | PK/FK |  | Taraf kişi | personal_data |
+| contract_party_role_code | NVARCHAR(40) | Hayır | yok | PK/FK |  | Rol | internal |
+| is_primary | BIT | Hayır | 0 |  |  | Birincil taraf bayrağı | internal |
+| created_at_utc | DATETIME2(0) | Hayır | SYSUTCDATETIME() |  |  | Bağlantı oluşturma zamanı | internal |
 
 ## policy.ContractObject
 
-Purpose: maps contracts to insurable risks.
+Amaç: sözleşmeleri sigortalanabilir risklere eşler.
 
-| Column | Type | Null | Default | Key | Notes | Meaning | Classification |
+| Sütun | Tür | Null | Varsayılan | Anahtar | Notlar | Anlam | Sınıflandırma |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| contract_id | UNIQUEIDENTIFIER | No | none | PK/FK |  | Contract | internal |
-| insurable_object_id | UNIQUEIDENTIFIER | No | none | PK/FK | Tenant match validated | Risk object | confidential |
-| contract_object_status_code | NVARCHAR(20) | No | none | FK |  | Link status | internal |
-| is_primary | BIT | No | 0 |  |  | Primary object flag | internal |
-| to_date | DATE | Yes | none |  |  | End date for link | internal |
-| created_at_utc | DATETIME2(0) | No | SYSUTCDATETIME() |  |  | Link creation time | internal |
+| contract_id | UNIQUEIDENTIFIER | Hayır | yok | PK/FK |  | Sözleşme | internal |
+| insurable_object_id | UNIQUEIDENTIFIER | Hayır | yok | PK/FK | Tenant eşleşmesi doğrulandı | Risk nesnesi | confidential |
+| contract_object_status_code | NVARCHAR(20) | Hayır | yok | FK |  | Bağlantı durumu | internal |
+| is_primary | BIT | Hayır | 0 |  |  | Birincil nesne bayrağı | internal |
+| to_date | DATE | Evet | yok |  |  | Bağlantı bitiş tarihi | internal |
+| created_at_utc | DATETIME2(0) | Hayır | SYSUTCDATETIME() |  |  | Bağlantı oluşturma zamanı | internal |
 
 ## coverage.Coverage
 
-Purpose: coverage catalog.
+Amaç: teminat kataloğu.
 
-| Column | Type | Null | Default | Key | Notes | Meaning | Classification |
+| Sütun | Tür | Null | Varsayılan | Anahtar | Notlar | Anlam | Sınıflandırma |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| coverage_code | NVARCHAR(80) | No | none | PK |  | Coverage code | public |
-| label_nl | NVARCHAR(160) | No | none |  |  | Dutch label | public |
-| label_fr | NVARCHAR(160) | Yes | none |  |  | French label | public |
-| label_en | NVARCHAR(160) | Yes | none |  |  | English label | public |
-| label_tr | NVARCHAR(160) | Yes | none |  |  | Turkish label | public |
-| description | NVARCHAR(500) | Yes | none |  |  | Coverage description | internal |
-| is_active | BIT | No | 1 |  |  | Active flag | internal |
-| sort_order | INT | Yes | none |  |  | Display order | internal |
+| coverage_code | NVARCHAR(80) | Hayır | yok | PK |  | Teminat kodu | public |
+| label_nl | NVARCHAR(160) | Hayır | yok |  |  | Hollandaca etiket | public |
+| label_fr | NVARCHAR(160) | Evet | yok |  |  | Fransızca etiket | public |
+| label_en | NVARCHAR(160) | Evet | yok |  |  | İngilizce etiket | public |
+| label_tr | NVARCHAR(160) | Evet | yok |  |  | Türkçe etiket | public |
+| description | NVARCHAR(500) | Evet | yok |  |  | Teminat açıklaması | internal |
+| is_active | BIT | Hayır | 1 |  |  | Aktif bayrağı | internal |
+| sort_order | INT | Evet | yok |  |  | Görüntüleme sırası | internal |
 
 ## coverage.CoverageDomain
 
-Purpose: maps coverages to contract domains.
+Amaç: teminatları sözleşme domain'lerine eşler.
 
-| Column | Type | Null | Default | Key | Notes | Meaning | Classification |
+| Sütun | Tür | Null | Varsayılan | Anahtar | Notlar | Anlam | Sınıflandırma |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| coverage_code | NVARCHAR(80) | No | none | PK/FK | FK_CoverageDomain_Coverage | Coverage | public |
-| contract_domain_code | NVARCHAR(40) | No | none | PK/FK | FK_CoverageDomain_ContractDomain | Domain | public |
-| is_default | BIT | No | 0 |  |  | Default for domain | internal |
-| sort_order | INT | Yes | none |  |  | Display order | internal |
+| coverage_code | NVARCHAR(80) | Hayır | yok | PK/FK | FK_CoverageDomain_Coverage | Teminat | public |
+| contract_domain_code | NVARCHAR(40) | Hayır | yok | PK/FK | FK_CoverageDomain_ContractDomain | Domain | public |
+| is_default | BIT | Hayır | 0 |  |  | Domain için varsayılan | internal |
+| sort_order | INT | Evet | yok |  |  | Görüntüleme sırası | internal |
 
 ## coverage.CoveragePackage
 
-Purpose: reusable coverage bundles by domain.
+Amaç: domain bazında yeniden kullanılabilir teminat paketleri.
 
-| Column | Type | Null | Default | Key | Notes | Meaning | Classification |
+| Sütun | Tür | Null | Varsayılan | Anahtar | Notlar | Anlam | Sınıflandırma |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| coverage_package_id | UNIQUEIDENTIFIER | No | NEWSEQUENTIALID() | PK |  | Package id | internal |
-| package_code | NVARCHAR(80) | No | none | UQ | UQ_CoveragePackage_package_code | Package code | public |
-| contract_domain_code | NVARCHAR(40) | No | none | FK |  | Domain | public |
-| package_name | NVARCHAR(160) | No | none |  |  | Package name | public |
-| description | NVARCHAR(500) | Yes | none |  |  | Package description | internal |
-| is_active | BIT | No | 1 |  |  | Active flag | internal |
-| created_at_utc | DATETIME2(0) | No | SYSUTCDATETIME() |  |  | Creation time | internal |
-| updated_at_utc | DATETIME2(0) | No | SYSUTCDATETIME() |  |  | Last update time | internal |
+| coverage_package_id | UNIQUEIDENTIFIER | Hayır | NEWSEQUENTIALID() | PK |  | Paket id | internal |
+| package_code | NVARCHAR(80) | Hayır | yok | UQ | UQ_CoveragePackage_package_code | Paket kodu | public |
+| contract_domain_code | NVARCHAR(40) | Hayır | yok | FK |  | Domain | public |
+| package_name | NVARCHAR(160) | Hayır | yok |  |  | Paket adı | public |
+| description | NVARCHAR(500) | Evet | yok |  |  | Paket açıklaması | internal |
+| is_active | BIT | Hayır | 1 |  |  | Aktif bayrağı | internal |
+| created_at_utc | DATETIME2(0) | Hayır | SYSUTCDATETIME() |  |  | Oluşturma zamanı | internal |
+| updated_at_utc | DATETIME2(0) | Hayır | SYSUTCDATETIME() |  |  | Son güncelleme zamanı | internal |
 
 ## coverage.CoveragePackageItem
 
-Purpose: coverage items in packages.
+Amaç: paketlerdeki teminat kalemleri.
 
-| Column | Type | Null | Default | Key | Notes | Meaning | Classification |
+| Sütun | Tür | Null | Varsayılan | Anahtar | Notlar | Anlam | Sınıflandırma |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| coverage_package_id | UNIQUEIDENTIFIER | No | none | PK/FK |  | Package | internal |
-| coverage_code | NVARCHAR(80) | No | none | PK/FK | Package/domain validated | Coverage | public |
-| is_mandatory | BIT | No | 0 |  |  | Mandatory item | internal |
-| sort_order | INT | Yes | none |  |  | Display order | internal |
+| coverage_package_id | UNIQUEIDENTIFIER | Hayır | yok | PK/FK |  | Paket | internal |
+| coverage_code | NVARCHAR(80) | Hayır | yok | PK/FK | Paket/domain doğrulandı | Teminat | public |
+| is_mandatory | BIT | Hayır | 0 |  |  | Zorunlu kalem | internal |
+| sort_order | INT | Evet | yok |  |  | Görüntüleme sırası | internal |
 
 ## claim.Claim
 
-Purpose: tenant-aware claim lifecycle root.
+Amaç: tenant farkında hasar yaşam döngüsü kökü.
 
-| Column | Type | Null | Default | Key | Notes | Meaning | Classification |
+| Sütun | Tür | Null | Varsayılan | Anahtar | Notlar | Anlam | Sınıflandırma |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| claim_id | UNIQUEIDENTIFIER | No | NEWSEQUENTIALID() | PK |  | Claim id | internal |
-| tenant_id | UNIQUEIDENTIFIER | No | none | FK/UQ | Tenant-contract match | Owning tenant | internal |
-| claim_number | NVARCHAR(50) | No | none | UQ | Unique per tenant | Claim number | confidential |
-| contract_id | UNIQUEIDENTIFIER | No | none | FK | Composite with tenant | Contract | confidential |
-| coverage_code | NVARCHAR(80) | Yes | none | FK |  | Claimed coverage | internal |
-| claim_status_code | NVARCHAR(40) | No | none | FK | Closed-state validated | Status | internal |
-| claims_handler_id | UNIQUEIDENTIFIER | Yes | none | FK | Person | Handler | personal_data |
-| incident_date | DATE | Yes | none | CK | reported >= incident | Incident date | confidential |
-| reported_date | DATE | No | none | CK | reported >= incident | Report date | confidential |
-| closed_date | DATE | Yes | none | CK | Required for CLOSED | Close date | confidential |
-| description | NVARCHAR(500) | Yes | none |  |  | Claim description | confidential |
-| paid_amount | DECIMAL(18,2) | Yes | none | CK | >= 0 | Paid amount | financial_data |
-| reserved_amount | DECIMAL(18,2) | Yes | none | CK | >= 0 | Reserved amount | financial_data |
-| payment_method_code | NVARCHAR(40) | Yes | none | FK | Required when paid > 0 | Payment method | financial_data |
-| is_deleted | BIT | No | 0 |  | Soft delete | Deleted marker | internal |
+| claim_id | UNIQUEIDENTIFIER | Hayır | NEWSEQUENTIALID() | PK |  | Hasar id | internal |
+| tenant_id | UNIQUEIDENTIFIER | Hayır | yok | FK/UQ | Tenant-sözleşme eşleşmesi | Sahip tenant | internal |
+| claim_number | NVARCHAR(50) | Hayır | yok | UQ | Tenant başına benzersiz | Hasar numarası | confidential |
+| contract_id | UNIQUEIDENTIFIER | Hayır | yok | FK | Tenant ile bileşik | Sözleşme | confidential |
+| coverage_code | NVARCHAR(80) | Evet | yok | FK |  | Talep edilen teminat | internal |
+| claim_status_code | NVARCHAR(40) | Hayır | yok | FK | Kapalı durum doğrulandı | Durum | internal |
+| claims_handler_id | UNIQUEIDENTIFIER | Evet | yok | FK | Kişi | İşlemci | personal_data |
+| incident_date | DATE | Evet | yok | CK | bildirilen >= olay | Olay tarihi | confidential |
+| reported_date | DATE | Hayır | yok | CK | bildirilen >= olay | Bildirim tarihi | confidential |
+| closed_date | DATE | Evet | yok | CK | KAPALI için zorunlu | Kapanış tarihi | confidential |
+| description | NVARCHAR(500) | Evet | yok |  |  | Hasar açıklaması | confidential |
+| paid_amount | DECIMAL(18,2) | Evet | yok | CK | >= 0 | Ödenen tutar | financial_data |
+| reserved_amount | DECIMAL(18,2) | Evet | yok | CK | >= 0 | Rezerv tutarı | financial_data |
+| payment_method_code | NVARCHAR(40) | Evet | yok | FK | ödenen > 0 ise zorunlu | Ödeme yöntemi | financial_data |
+| is_deleted | BIT | Hayır | 0 |  | Geçici silme | Silinmiş işareti | internal |
 
 ## document.Document
 
-Purpose: file metadata only; binary content lives outside SQL Server.
+Amaç: yalnızca dosya meta verisi; ikili içerik SQL Server dışında tutuluyor.
 
-| Column | Type | Null | Default | Key | Notes | Meaning | Classification |
+| Sütun | Tür | Null | Varsayılan | Anahtar | Notlar | Anlam | Sınıflandırma |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| document_id | UNIQUEIDENTIFIER | No | NEWSEQUENTIALID() | PK |  | Document id | internal |
-| tenant_id | UNIQUEIDENTIFIER | No | none | FK |  | Owning tenant | internal |
-| owner_entity_type | NVARCHAR(60) | No | none | CK | PERSON/INSTITUTION/POLICY/CLAIM/RISK_OBJECT | Owner type | internal |
-| owner_entity_id | UNIQUEIDENTIFIER | No | none |  | Polymorphic owner | Owner id | confidential |
-| document_type_code | NVARCHAR(80) | No | none | FK |  | Document type | internal |
-| file_name | NVARCHAR(260) | No | none |  |  | File name | confidential |
-| file_extension | NVARCHAR(20) | No | none |  |  | Extension | internal |
-| mime_type | NVARCHAR(120) | No | none |  |  | MIME type | internal |
-| file_size_bytes | BIGINT | No | none | CK | Positive in validation | File size | internal |
-| storage_provider | NVARCHAR(40) | No | none |  |  | Storage backend | security_sensitive |
-| storage_key | NVARCHAR(500) | No | none |  | Non-empty validation | Storage object key | security_sensitive |
-| checksum_sha256 | NVARCHAR(128) | Yes | none |  |  | File checksum | security_sensitive |
-| language_code | CHAR(2) | Yes | none | FK |  | Document language | internal |
-| uploaded_by_user_id | UNIQUEIDENTIFIER | Yes | none | FK |  | Uploader | security_sensitive |
-| uploaded_at_utc | DATETIME2(0) | No | SYSUTCDATETIME() |  |  | Upload time | internal |
-| is_deleted | BIT | No | 0 | CK | Deleted state | Deleted flag | internal |
-| deleted_at_utc | DATETIME2(0) | Yes | none | CK | Required when deleted | Deleted timestamp | internal |
+| document_id | UNIQUEIDENTIFIER | Hayır | NEWSEQUENTIALID() | PK |  | Belge id | internal |
+| tenant_id | UNIQUEIDENTIFIER | Hayır | yok | FK |  | Sahip tenant | internal |
+| owner_entity_type | NVARCHAR(60) | Hayır | yok | CK | PERSON/INSTITUTION/POLICY/CLAIM/RISK_OBJECT | Sahip türü | internal |
+| owner_entity_id | UNIQUEIDENTIFIER | Hayır | yok |  | Polimorfik sahip | Sahip id | confidential |
+| document_type_code | NVARCHAR(80) | Hayır | yok | FK |  | Belge türü | internal |
+| file_name | NVARCHAR(260) | Hayır | yok |  |  | Dosya adı | confidential |
+| file_extension | NVARCHAR(20) | Hayır | yok |  |  | Uzantı | internal |
+| mime_type | NVARCHAR(120) | Hayır | yok |  |  | MIME türü | internal |
+| file_size_bytes | BIGINT | Hayır | yok | CK | Doğrulamada pozitif | Dosya boyutu | internal |
+| storage_provider | NVARCHAR(40) | Hayır | yok |  |  | Depolama arka ucu | security_sensitive |
+| storage_key | NVARCHAR(500) | Hayır | yok |  | Boş olmayan doğrulama | Depolama nesne anahtarı | security_sensitive |
+| checksum_sha256 | NVARCHAR(128) | Evet | yok |  |  | Dosya sağlama toplamı | security_sensitive |
+| language_code | CHAR(2) | Evet | yok | FK |  | Belge dili | internal |
+| uploaded_by_user_id | UNIQUEIDENTIFIER | Evet | yok | FK |  | Yükleyen | security_sensitive |
+| uploaded_at_utc | DATETIME2(0) | Hayır | SYSUTCDATETIME() |  |  | Yükleme zamanı | internal |
+| is_deleted | BIT | Hayır | 0 | CK | Silinmiş durum | Silinmiş bayrağı | internal |
+| deleted_at_utc | DATETIME2(0) | Evet | yok | CK | Silindiğinde zorunlu | Silinme zaman damgası | internal |
 
 ## tasking.Task
 
-Purpose: operational tasks and reminders.
+Amaç: operasyonel görevler ve hatırlatıcılar.
 
-| Column | Type | Null | Default | Key | Notes | Meaning | Classification |
+| Sütun | Tür | Null | Varsayılan | Anahtar | Notlar | Anlam | Sınıflandırma |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| task_id | UNIQUEIDENTIFIER | No | NEWSEQUENTIALID() | PK |  | Task id | internal |
-| tenant_id | UNIQUEIDENTIFIER | No | none | FK |  | Owning tenant | internal |
-| title | NVARCHAR(200) | No | none |  |  | Task title | confidential |
-| description | NVARCHAR(MAX) | Yes | none |  |  | Task details | confidential |
-| related_entity_type | NVARCHAR(60) | Yes | none | CK | Polymorphic type | Related type | internal |
-| related_entity_id | UNIQUEIDENTIFIER | Yes | none | CK | Required with type | Related id | confidential |
-| assigned_to_user_id | UNIQUEIDENTIFIER | Yes | none | FK | Tenant match validated | Assignee | security_sensitive |
-| created_by_user_id | UNIQUEIDENTIFIER | Yes | none | FK | Tenant match validated | Creator | security_sensitive |
-| task_priority_code | NVARCHAR(20) | No | 'NORMAL' | FK |  | Priority | internal |
-| task_status_code | NVARCHAR(30) | No | 'OPEN' | FK | Completion state validated | Status | internal |
-| due_at_utc | DATETIME2(0) | Yes | none |  |  | Due time | internal |
-| completed_at_utc | DATETIME2(0) | Yes | none | CK | Required for DONE | Completion time | internal |
-| is_deleted | BIT | No | 0 |  | Soft delete | Deleted marker | internal |
+| task_id | UNIQUEIDENTIFIER | Hayır | NEWSEQUENTIALID() | PK |  | Görev id | internal |
+| tenant_id | UNIQUEIDENTIFIER | Hayır | yok | FK |  | Sahip tenant | internal |
+| title | NVARCHAR(200) | Hayır | yok |  |  | Görev başlığı | confidential |
+| description | NVARCHAR(MAX) | Evet | yok |  |  | Görev ayrıntıları | confidential |
+| related_entity_type | NVARCHAR(60) | Evet | yok | CK | Polimorfik tür | İlgili tür | internal |
+| related_entity_id | UNIQUEIDENTIFIER | Evet | yok | CK | Türle birlikte zorunlu | İlgili id | confidential |
+| assigned_to_user_id | UNIQUEIDENTIFIER | Evet | yok | FK | Tenant eşleşmesi doğrulandı | Atanan | security_sensitive |
+| created_by_user_id | UNIQUEIDENTIFIER | Evet | yok | FK | Tenant eşleşmesi doğrulandı | Oluşturan | security_sensitive |
+| task_priority_code | NVARCHAR(20) | Hayır | 'NORMAL' | FK |  | Öncelik | internal |
+| task_status_code | NVARCHAR(30) | Hayır | 'OPEN' | FK | Tamamlanma durumu doğrulandı | Durum | internal |
+| due_at_utc | DATETIME2(0) | Evet | yok |  |  | Son tarih | internal |
+| completed_at_utc | DATETIME2(0) | Evet | yok | CK | TAMAMLANDI için zorunlu | Tamamlanma zamanı | internal |
+| is_deleted | BIT | Hayır | 0 |  | Geçici silme | Silinmiş işareti | internal |
 
 ## audit.AuditLog
 
-Purpose: audit events for core business tables.
+Amaç: temel iş tabloları için denetim olayları.
 
-| Column | Type | Null | Default | Key | Notes | Meaning | Classification |
+| Sütun | Tür | Null | Varsayılan | Anahtar | Notlar | Anlam | Sınıflandırma |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| audit_log_id | BIGINT | No | IDENTITY | PK |  | Audit id | internal |
-| tenant_id | UNIQUEIDENTIFIER | Yes | none |  | Nullable for system scope | Tenant | internal |
-| schema_name | SYSNAME | No | none |  | IX_AuditLog_entity | Source schema | internal |
-| table_name | SYSNAME | No | none |  | IX_AuditLog_entity | Source table | internal |
-| primary_key_value | NVARCHAR(200) | No | none |  | IX_AuditLog_entity | Row key | confidential |
-| action_type | NVARCHAR(20) | No | none | CK | INSERT/UPDATE/DELETE | Action | internal |
-| changed_at_utc | DATETIME2(0) | No | SYSUTCDATETIME() |  |  | Change time | internal |
-| changed_by_user_id | UNIQUEIDENTIFIER | Yes | none |  |  | User id | security_sensitive |
-| changed_by_name | NVARCHAR(200) | Yes | SUSER_SNAME() |  |  | User display | security_sensitive |
-| old_values_json | NVARCHAR(MAX) | Yes | none |  | JSON summary | Previous values | confidential |
-| new_values_json | NVARCHAR(MAX) | Yes | none |  | JSON summary | New values | confidential |
-| source_system | NVARCHAR(80) | Yes | none |  |  | Source system | internal |
-| correlation_id | UNIQUEIDENTIFIER | Yes | none |  |  | Request correlation | security_sensitive |
+| audit_log_id | BIGINT | Hayır | IDENTITY | PK |  | Denetim id | internal |
+| tenant_id | UNIQUEIDENTIFIER | Evet | yok |  | Sistem kapsamı için Null olabilir | Tenant | internal |
+| schema_name | SYSNAME | Hayır | yok |  | IX_AuditLog_entity | Kaynak schema | internal |
+| table_name | SYSNAME | Hayır | yok |  | IX_AuditLog_entity | Kaynak tablo | internal |
+| primary_key_value | NVARCHAR(200) | Hayır | yok |  | IX_AuditLog_entity | Satır anahtarı | confidential |
+| action_type | NVARCHAR(20) | Hayır | yok | CK | INSERT/UPDATE/DELETE | Aksiyon | internal |
+| changed_at_utc | DATETIME2(0) | Hayır | SYSUTCDATETIME() |  |  | Değişim zamanı | internal |
+| changed_by_user_id | UNIQUEIDENTIFIER | Evet | yok |  |  | Kullanıcı id | security_sensitive |
+| changed_by_name | NVARCHAR(200) | Evet | SUSER_SNAME() |  |  | Kullanıcı görüntüsü | security_sensitive |
+| old_values_json | NVARCHAR(MAX) | Evet | yok |  | JSON özeti | Önceki değerler | confidential |
+| new_values_json | NVARCHAR(MAX) | Evet | yok |  | JSON özeti | Yeni değerler | confidential |
+| source_system | NVARCHAR(80) | Evet | yok |  |  | Kaynak sistem | internal |
+| correlation_id | UNIQUEIDENTIFIER | Evet | yok |  |  | İstek korelasyonu | security_sensitive |
 
-## Stored Procedures
+## Stored Procedure'ler
 
-- `tasking.SP_CreateRenewalTasks` creates tenant-aware renewal follow-up tasks
-  for active policies ending within `@days_ahead`. Use `@dry_run = 1` in SSMS
-  to preview candidates before inserting tasks.
+- `tasking.SP_CreateRenewalTasks`, `@days_ahead` gün içinde sona eren aktif poliçeler
+  için tenant farkında yenileme takip görevleri oluşturur. Görev eklemeden önce adayları
+  önizlemek için SSMS'de `@dry_run = 1` kullanın.
 
-Example:
+Örnek:
 
 ```sql
 DECLARE @TenantId UNIQUEIDENTIFIER = '00000000-0000-0000-0000-000000000000';
@@ -431,7 +431,7 @@ EXEC tasking.SP_CreateRenewalTasks
     @dry_run = 1;
 ```
 
-## Reporting Views
+## Raporlama View'ları
 
 - `person.VW_CustomerSummary`
 - `institution.VW_InstitutionSummary`

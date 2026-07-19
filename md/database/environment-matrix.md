@@ -1,34 +1,34 @@
-# Environment Matrix
+# Ortam Matrisi
 
-This matrix keeps DEV, TEST, and PROD behavior explicit for operators.
+Bu matris, DEV, TEST ve PROD davranışını operatörler için açık tutar.
 
-| Area | DEV | TEST | PROD |
+| Alan | DEV | TEST | PROD |
 | --- | --- | --- | --- |
-| Database name | `YafesPars_DEV` | `YafesPars_TEST` | `YafesPars` |
-| SQL Server edition | Developer | Standard/Enterprise or approved test edition | Standard/Enterprise |
-| Data | Demo or synthetic | Sanitized or approved test data | Live business data |
-| Demo seed `018` | Allowed | Optional | Not allowed |
-| Rollback scripts | Allowed after review | Restricted | Separate approval only |
-| Rebuild from migrations | Allowed | Allowed with approval | Not allowed as normal rollback |
-| Backup before migration | Required | Required | Required |
-| Static quality gate | Required | Required | Required |
-| SQL validation | Required | Required | Required |
-| SSMS dashboard | Required | Required | Required |
-| Secrets in repo | Never | Never | Never |
-| Public SQL access | No | No | No |
-| RDP | Restricted | Restricted | Restricted/JIT |
-| Change approval | Lightweight | Release approval | Formal approval |
+| Veri tabanı adı | `YafesPars_DEV` | `YafesPars_TEST` | `YafesPars` |
+| SQL Server sürümü | Developer | Standard/Enterprise veya onaylı test sürümü | Standard/Enterprise |
+| Veri | Demo veya sentetik | Temizlenmiş veya onaylı test verisi | Canlı iş verisi |
+| Demo seed `018` | İzinli | İsteğe bağlı | İzin verilmez |
+| Rollback script'leri | İncelemeden sonra izinli | Kısıtlı | Yalnızca ayrı onay |
+| Migration'lardan yeniden oluşturma | İzinli | Onay ile izinli | Normal rollback olarak izin verilmez |
+| Migration öncesi yedek | Zorunlu | Zorunlu | Zorunlu |
+| Statik kalite kapısı | Zorunlu | Zorunlu | Zorunlu |
+| SQL doğrulama | Zorunlu | Zorunlu | Zorunlu |
+| SSMS dashboard | Zorunlu | Zorunlu | Zorunlu |
+| Depoda secret | Asla | Asla | Asla |
+| Genel SQL erişimi | Hayır | Hayır | Hayır |
+| RDP | Kısıtlı | Kısıtlı | Kısıtlı/JIT |
+| Değişiklik onayı | Basit | Sürüm onayı | Resmi onay |
 
-## Naming Rules
+## Adlandırma Kuralları
 
-- DEV database names must contain `DEV`.
-- TEST database names must contain `TEST` or be clearly tagged as non-production.
-- PROD database names must not include `DEV`, `TEST`, `LOCAL`, or `SANDBOX`.
-- Tools should refuse production-like names unless explicitly designed for PROD
-  runbook execution.
+- DEV veri tabanı adları `DEV` içermelidir.
+- TEST veri tabanı adları `TEST` içermeli veya üretim dışı olarak açıkça etiketlenmelidir.
+- PROD veri tabanı adları `DEV`, `TEST`, `LOCAL` veya `SANDBOX` içermemelidir.
+- Araçlar, PROD runbook yürütmesi için açıkça tasarlanmadıkça üretime benzer adları
+  reddetmelidir.
 
-## Operator Rule
+## Operatör Kuralı
 
-When the environment is unclear, stop. Confirm the SQL Server name, database
-name, backup target, and approval record before running any script that changes
-data or schema.
+Ortam belirsizse durun. Veri değiştiren veya schema değiştiren herhangi bir script
+çalıştırmadan önce SQL Server adını, veri tabanı adını, yedek hedefini ve onay
+kaydını doğrulayın.

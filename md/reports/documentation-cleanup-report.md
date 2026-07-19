@@ -1,62 +1,62 @@
-# Documentation Cleanup Report — 2026-07-19
+# Belgeleme Temizlik Raporu — 2026-07-19
 
-## Scope
+## Kapsam
 
-Periodic classification of Markdown files that had become stale, misleading,
-or needed archival context added.
+Eski, yanıltıcı veya arşiv bağlamı eklenmesi gereken Markdown dosyalarının periyodik
+sınıflandırması.
 
-## Files Reviewed
+## İncelenen Dosyalar
 
 ### `md/reports/final-progress-report.md`
 
-| Field        | Value |
+| Alan | Değer |
 |-------------|-------|
-| Status       | ARCHIVED |
-| Branch ref   | `feature/complete-db-validation-backend-frontend-foundation` (deleted) |
-| Action taken | Added ARCHIVE header with date and context note |
-| Preserved?   | Yes — historical record kept intact |
-| Reason       | References a deleted branch; build results cannot be reproduced from current code |
+| Durum | ARŞİVLENDİ |
+| Dal referansı | `feature/complete-db-validation-backend-frontend-foundation` (silindi) |
+| Alınan aksiyon | Tarih ve bağlam notu ile ARŞİV başlığı eklendi |
+| Korundu mu? | Evet — geçmiş kayıt bozulmadan korundu |
+| Gerekçe | Silinmiş bir dala referans veriyor; derleme sonuçları mevcut koddan yeniden üretilemiyor |
 
 ### `md/trust-plan/README.md`
 
-| Field        | Value |
+| Alan | Değer |
 |-------------|-------|
-| Status       | LEGACY / REFERENCE ONLY |
-| Action taken | Classified in `md/decisions/trust-plan-classification.md` |
-| Preserved?   | Yes |
-| Reason       | Contains useful comparison notes and table-count history; not misleading |
+| Durum | ESKİ / YALNIZCA REFERANS |
+| Alınan aksiyon | `md/decisions/trust-plan-classification.md`'de sınıflandırıldı |
+| Korundu mu? | Evet |
+| Gerekçe | Kullanışlı karşılaştırma notları ve tablo sayısı geçmişi içeriyor; yanıltıcı değil |
 
 ### `md/trust-plan/legacy-reference-summary.md`
 
-| Field        | Value |
+| Alan | Değer |
 |-------------|-------|
-| Status       | LEGACY / REFERENCE ONLY |
-| Action taken | Classified in `md/decisions/trust-plan-classification.md` |
-| Preserved?   | Yes |
-| Reason       | Legacy comparison material; no active instructions |
+| Durum | ESKİ / YALNIZCA REFERANS |
+| Alınan aksiyon | `md/decisions/trust-plan-classification.md`'de sınıflandırıldı |
+| Korundu mu? | Evet |
+| Gerekçe | Eski karşılaştırma materyali; etkinleştirilebilir talimat yok |
 
 ### `md/trust-plan/research/`
 
-| Field        | Value |
+| Alan | Değer |
 |-------------|-------|
-| Status       | LEGACY / READ-ONLY |
-| Action taken | Classified as archive sub-folder |
-| Preserved?   | Yes |
-| Reason       | Research snapshots from early design phase; not actionable |
+| Durum | ESKİ / SALT OKUNUR |
+| Alınan aksiyon | Arşiv alt klasörü olarak sınıflandırıldı |
+| Korundu mu? | Evet |
+| Gerekçe | Erken tasarım aşamasından araştırma anlık görüntüleri; uygulanabilir değil |
 
-## Files Not Reviewed (out of scope)
+## İncelenmeyen Dosyalar (kapsam dışı)
 
-- `md/reports/dev-validation-evidence-*.md` — still valid for DEV environment
-- `md/reports/productization-report-2026-06-22.md` — current
-- `md/database/` files — actively maintained
-- `md/mustafaplan.md` — current project plan
+- `md/reports/dev-validation-evidence-*.md` — DEV ortamı için hâlâ geçerli
+- `md/reports/productization-report-2026-06-22.md` — güncel
+- `md/database/` dosyaları — aktif olarak bakımda
+- `md/mustafaplan.md` — güncel proje planı
 
-## Cleanup Rules Applied
+## Uygulanan Temizlik Kuralları
 
-1. **Stale branch references** → add ARCHIVE header with date and deletion note
-2. **Legacy comparison folders** → add classification decision document; do not delete
-3. **Current build evidence** → no action; verified against git history before marking stale
+1. **Eski dal referansları** → tarih ve silme notu ile ARŞİV başlığı ekle
+2. **Eski karşılaştırma klasörleri** → sınıflandırma karar belgesi ekle; silme
+3. **Mevcut derleme kanıtı** → aksiyon yok; eski olarak işaretlemeden önce git geçmişine karşı doğrulandı
 
-## Next Scheduled Review
+## Sonraki Planlanmış İnceleme
 
-Before each major milestone merge into `main`. Owner: Deuterium12{MCK}.
+`main` dalına her büyük kilometre taşı birleştirmesinden önce. Sahip: Deuterium12{MCK}.
