@@ -1,27 +1,28 @@
-# SSMS Templates
+# SSMS Şablonlar
 
-These templates are copy-friendly starting points for operators and maintainers.
-They are not migrations. Use them inside SSMS tabs after running the dashboard
-and safety checks.
+Bu şablonlar, operatörler ve bakımcılar için kopyalamaya hazır başlangıç
+noktalarıdır. Migration değildir. Dashboard ve güvenlik kontrollerini çalıştırdıktan
+sonra SSMS sekmelerinde kullanın.
 
-## Files
+## Dosyalar
 
-- `operator-query-header.sql`: standard header for new operator queries.
-- `guided-search-template.sql`: safe read-only search pattern.
-- `guarded-update-template.sql`: rollback-by-default update pattern.
-- `report-grid-template.sql`: chart/export-ready report pattern.
+- `operator-query-header.sql`: yeni operatör sorguları için standart başlık.
+- `guided-search-template.sql`: güvenli salt okunur arama kalıbı.
+- `guarded-update-template.sql`: varsayılan rollback güncelleme kalıbı.
+- `report-grid-template.sql`: grafik/dışa aktarmaya hazır rapor kalıbı.
 
-## Rule
+## Kural
 
-Every operator query should include:
+Her operatör sorgusu şunları içermelidir:
 
-- SQLCMD variable block
-- DEV database target
-- `DB_NAME() LIKE '%DEV%'` runtime guard
-- tenant resolution
-- `INFO TIP` comments or result columns
-- preview before mutation
-- rollback default for updates
+- SQLCMD değişken bloğu
+- DEV veri tabanı hedefi
+- `DB_NAME() LIKE '%DEV%'` çalışma zamanı koruması
+- tenant çözümlemesi
+- `INFO TIP` yorumları veya sonuç sütunları
+- mutasyondan önce önizleme
+- güncellemeler için varsayılan rollback
 
-Templates are real SSMS starting points, not demo-only snippets. Keep SQLCMD
-Mode enabled before running or copying them into new operator scripts.
+Şablonlar gerçek SSMS başlangıç noktalarıdır; yalnızca demo amaçlı parçacıklar
+değildir. Şablonları yeni operatör script'lerine kopyalamadan veya çalıştırmadan
+önce SQLCMD Mode etkin tutun.

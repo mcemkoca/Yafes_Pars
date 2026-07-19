@@ -1,39 +1,40 @@
-# Bridge Security Model
+# Bridge Güvenlik Modeli
 
-## Principles
+## İlkeler
 
-1. **DEV-only guard** — the bridge script throws if `DB_NAME()` does not contain
-   `DEV`. Running against TEST or PROD requires a separate approved script.
+1. **Yalnızca DEV koruması** — `DB_NAME()` `DEV` içermiyorsa bridge script hata fırlatır.
+   TEST veya PROD'a karşı çalıştırmak ayrı bir onaylı script gerektirir.
 
-2. **PREVIEW_FIRST** — every action runs in preview mode (`EXECUTE_ACTION = 0`)
-   by default. The operator must review the preview grids and set
-   `EXECUTE_ACTION = 1` explicitly to perform the write.
+2. **PREVIEW_FIRST** — Her aksiyon varsayılan olarak önizleme modunda çalışır (`EXECUTE_ACTION = 0`).
+   Operatör önizleme ızgaralarını incelemeli ve yazmayı gerçekleştirmek için
+   `EXECUTE_ACTION = 1` olarak açıkça ayarlamalıdır.
 
-3. **Tenant isolation** — every action resolves `@TenantId` from `TENANT_CODE`
-   and all reads and writes are scoped to that tenant. Cross-tenant operations
-   are structurally impossible through the bridge.
+3. **Tenant izolasyonu** — Her aksiyon `@TenantId`'yi `TENANT_CODE`'dan çözer ve
+   tüm okumalar/yazmalar o tenant kapsamındadır. Bridge üzerinden
+   tenant'lar arası işlemler yapısal olarak mümkün değildir.
 
-4. **Operator identity** — `CREATED_BY_USER_EMAIL` resolves to an active
-   `core.AppUser` for the tenant. Writes that require `created_by_user_id` use
-   this resolved value. NULL is tolerated only where the SP explicitly allows it.
+4. **Operatör kimliği** — `CREATED_BY_USER_EMAIL`, tenant için aktif bir
+   `core.AppUser`'a çözümlenir. `created_by_user_id` gerektiren yazmalar bu
+   çözümlenmiş değeri kullanır. NULL yalnızca SP'nin açıkça izin verdiği yerlerde
+   tolere edilir.
 
-5. **No raw DML** — bridge actions call stored procedures only. Direct INSERT,
-   UPDATE, or DELETE against operational tables is not permitted in bridge
-   scripts.
+5. **Ham DML yok** — Bridge aksiyonları yalnızca stored procedure'leri çağırır.
+   Bridge script'lerinde operasyonel tablolara doğrudan INSERT, UPDATE veya DELETE
+   izin verilmez.
 
-6. **Audit trail** — all write SPs record the operator's user_id and UTC
-   timestamp in the respective audit columns or audit log tables.
+6. **Denetim izi** — Tüm yazma SP'leri operatörün user_id'sini ve UTC
+   zaman damgasını ilgili denetim sütunlarına veya denetim günlük tablolarına kaydeder.
 
-7. **Validation grids before write** — every action emits at least one
-   validation SELECT (step 03) that operators must review before executing.
+7. **Yazmadan önce doğrulama ızgaraları** — Her aksiyon, operatörlerin
+   yürütmeden önce incelemesi gereken en az bir doğrulama SELECT'i (adım 03) yayar.
 
-## Threat Model
+## Tehdit Modeli
 
-| Threat | Mitigation |
+| Tehdit | Azaltma |
 |--------|-----------|
-| Wrong tenant targeted | TENANT_CODE resolved at runtime; THROW if NULL |
-| Accidental PROD execution | DB_NAME() DEV guard |
-| Blind data entry | PREVIEW_FIRST default; preview grid step 02 |
-| Invalid lookup values | Step 03 validation grid emits OK/MISSING per field |
-| Duplicate entity creation | SPs enforce unique constraints; bridge echoes DUPLICATE status |
-| Missing operator identity | CREATED_BY_USER_EMAIL lookup shown in step 01 preview |
+| Yanlış tenant hedeflendi | TENANT_CODE çalışma zamanında çözümlenir; NULL ise THROW |
+| Yanlışlıkla PROD üzerinde çalıştırma | DB_NAME() DEV koruması |
+| Kör veri girişi | Varsayılan PREVIEW_FIRST; önizleme ızgarası adım 02 |
+| Geçersiz arama değerleri | Adım 03 doğrulama ızgarası her alan için OK/MISSING yayar |
+| Yinelenen varlık oluşturma | SP'ler benzersiz kısıtlamaları uygular; bridge DUPLICATE durumunu yansıtır |
+| Eksik operatör kimliği | CREATED_BY_USER_EMAIL araması adım 01 önizlemesinde gösterilir |

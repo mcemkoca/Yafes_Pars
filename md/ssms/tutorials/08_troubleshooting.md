@@ -1,36 +1,37 @@
-# Troubleshooting
+# Sorun Giderme
 
-## SQLCMD Variables Not Working
+## SQLCMD Değişkenleri Çalışmıyor
 
-Enable `Query > SQLCMD Mode` in SSMS. Scripts with `:setvar` or `:r` require it.
+SSMS'de `Query > SQLCMD Mode` etkinleştirin. `:setvar` veya `:r` içeren script'ler
+bunu gerektirir.
 
-## Target Database Error
+## Hedef Veri Tabanı Hatası
 
-The workbench refuses database names that do not contain `DEV`. Confirm the
-connection and `YAFES_SQL_DATABASE`.
+Çalışma tezgahı, `DEV` içermeyen veri tabanı adlarını reddeder. Bağlantıyı ve
+`YAFES_SQL_DATABASE`'i doğrulayın.
 
-## Tenant Not Found
+## Tenant Bulunamadı
 
-Check `TENANT_CODE` at the top of the script. Run the operations dashboard to
-list available tenants.
+Script'in üstündeki `TENANT_CODE`'u kontrol edin. Mevcut tenant'ları listelemek
+için operasyonlar dashboard'unu çalıştırın.
 
-## Lookup Missing
+## Arama Eksik
 
-Run `06__query_library_shortcuts.sql` and inspect the lookup helper result set.
-Use only active lookup values.
+`06__query_library_shortcuts.sql` çalıştırın ve arama yardımcısı sonuç kümesini
+inceleyin. Yalnızca aktif arama değerlerini kullanın.
 
-## Edit Did Not Commit
+## Düzenleme Commit Edilmedi
 
-Most edit templates roll back by default. Set `COMMIT_CHANGES = 1` only after
-reviewing the preview.
+Çoğu düzenleme şablonu varsayılan olarak geri alınır. Önizlemeyi inceledikten
+sonra yalnızca `COMMIT_CHANGES = 1` ayarlayın.
 
-## Migration Backup Error
+## Migration Yedek Hatası
 
-The SQL Server service account must be able to write to the backup path.
-Use a real timestamped `.bak` path and rerun.
+SQL Server hizmet hesabı, yedek yoluna yazabilmelidir. Gerçek bir zaman damgalı
+`.bak` yolu kullanın ve yeniden çalıştırın.
 
-## Info Tips
+## Bilgi İpuçları
 
-- Read the Messages panel as well as Results Grid.
-- Copy IDs from grids instead of typing them.
-- Keep one tab per task: dashboard, search, edit, audit.
+- Results Grid'in yanı sıra Messages panelini de okuyun.
+- ID'leri elle yazmak yerine ızgaralardan kopyalayın.
+- Görev başına bir sekme açık tutun: dashboard, arama, düzenleme, denetim.

@@ -1,45 +1,45 @@
-# TEST Migration Execution Evidence
+# TEST Migrasyon Yürütme Kanıtı
 
-**Environment:** TEST  
-**Status:** PENDING ENVIRONMENT EXECUTION  
-**Owner:** Deuterium12{MCK}  
-**Template version:** 2026-07-19
+**Ortam:** TEST  
+**Durum:** ORTAM YÜRÜTMESI BEKLENİYOR  
+**Sorumlu:** Deuterium12{MCK}  
+**Şablon sürümü:** 2026-07-19
 
 ---
 
-## Execution Summary
+## Yürütme Özeti
 
-| Field | Value |
+| Alan | Değer |
 |---|---|
-| Environment | TEST |
-| SQL Server instance | |
-| Database name | |
-| Execution date UTC | |
-| Executor | |
+| Ortam | TEST |
+| SQL Server örneği | |
+| Veritabanı adı | |
+| Yürütme tarihi (UTC) | |
+| Yürüten | |
 | Commit SHA | |
-| Runner script | `database/tools/run-dev-migrations.ps1` (adapted for TEST) |
+| Çalıştırıcı script | `database/tools/run-dev-migrations.ps1` (TEST için uyarlandı) |
 
 ---
 
-## Migration Execution Result
+## Migrasyon Yürütme Sonucu
 
-| Check | Expected | Actual | Status |
+| Kontrol | Beklenen | Gerçekleşen | Durum |
 |---|---|---|---|
-| Total migrations executed | 49 | | |
-| All migrations status | SUCCESS | | |
-| Validation scripts executed | 17 | | |
-| All validations status | PASS | | |
-| Table count post-migration | ≥ 144 | | |
-| Schema count | 15 | | |
-| Zero orphan FK violations | 0 | | |
+| Toplam yürütülen migrasyon | 49 | | |
+| Tüm migrasyonların durumu | SUCCESS | | |
+| Yürütülen doğrulama scripti | 17 | | |
+| Tüm doğrulamaların durumu | PASS | | |
+| Migrasyon sonrası tablo sayısı | ≥ 144 | | |
+| Şema sayısı | 15 | | |
+| Yetim FK ihlali | 0 | | |
 
 ---
 
-## SSMS Quality Gate Result
+## SSMS Kalite Kapısı Sonucu
 
-Run `database/tools/test-sql-quality-gate.ps1 -NoReportFile` on TEST and record:
+TEST üzerinde `database/tools/test-sql-quality-gate.ps1 -NoReportFile` çalıştırın:
 
-| Gate | Result |
+| Kapı | Sonuç |
 |---|---|
 | docs | |
 | artifact-policy | |
@@ -54,27 +54,26 @@ Run `database/tools/test-sql-quality-gate.ps1 -NoReportFile` on TEST and record:
 | ssms | |
 | ssms-workbench-manifest | |
 | ssms-workbench-ui | |
-| **Total failures** | |
+| **Toplam hata** | |
 
 ---
 
-## Seed Data Check
+## Başlangıç Verisi Kontrolü
 
-| Table | Expected | Actual | Status |
+| Tablo | Beklenen | Gerçekleşen | Durum |
 |---|---|---|---|
-| `core.Role` | ≥ 4 rows | | |
-| `ref.*` lookup tables | ≥ 50 rows total | | |
-| `coverage.CoverageType` | ≥ 15 rows | | |
-| Demo tenant (DEV only) | excluded from TEST | | |
+| `core.Role` | ≥ 4 satır | | |
+| `ref.*` arama tabloları | Toplam ≥ 50 satır | | |
+| `coverage.CoverageType` | ≥ 15 satır | | |
+| Demo tenant (yalnızca DEV) | TEST'te bulunmamalı | | |
 
 ---
 
-## SSMS Script Smoke Test
+## SSMS Script Duman Testi
 
-Run each SSMS operator script against the TEST database in SQLCMD mode.
-Record any failures:
+Her SSMS operatör scriptini TEST veritabanına karşı SQLCMD modunda çalıştırın:
 
-| Script | Status | Notes |
+| Script | Durum | Notlar |
 |---|---|---|
 | `05__operator_dashboard_home.sql` | | |
 | `14__admin_role_permission_matrix.sql` | | |
@@ -83,13 +82,13 @@ Record any failures:
 
 ---
 
-## Sign-Off
+## İmza
 
-| Field | Value |
+| Alan | Değer |
 |---|---|
-| Evidence accepted | |
-| Issues found | |
-| Resolved before sign-off | |
-| Executor sign-off | |
-| Approver sign-off | |
-| Date | |
+| Kanıt kabul edildi | |
+| Bulunan sorunlar | |
+| İmza öncesi çözüldü | |
+| Yürüten imzası | Deuterium12 <mcemkoca0@gmail.com> |
+| Onaylayan imzası | |
+| Tarih | |

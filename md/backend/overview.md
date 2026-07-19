@@ -1,30 +1,30 @@
 # Yafes Pars Backend
 
-.NET 8 Web API foundation for the validated Yafes Pars SQL Server database.
+Doğrulanmış Yafes Pars SQL Server veri tabanı için .NET 8 Web API temeli.
 
-## Structure
+## Yapı
 
-- `src/YafesPars.Api`: HTTP API, Swagger, auth/authorization wiring, endpoints.
-- `src/YafesPars.Application`: DTOs and application contracts.
-- `src/YafesPars.Domain`: domain constants and shared domain types.
-- `src/YafesPars.Infrastructure`: SQL Server connection and Dapper repositories.
-- `tests/YafesPars.Tests`: API foundation tests.
+- `src/YafesPars.Api`: HTTP API, Swagger, kimlik doğrulama/yetkilendirme bağlantısı, endpoint'ler.
+- `src/YafesPars.Application`: DTO'lar ve uygulama sözleşmeleri.
+- `src/YafesPars.Domain`: domain sabitleri ve paylaşılan domain türleri.
+- `src/YafesPars.Infrastructure`: SQL Server bağlantısı ve Dapper repository'leri.
+- `tests/YafesPars.Tests`: API temel testleri.
 
-## Configuration
+## Yapılandırma
 
-Use either configuration key:
+Aşağıdaki yapılandırma anahtarlarından birini kullanın:
 
 - `ConnectionStrings__YafesPars`
 - `YAFES_SQL_CONNECTION_STRING`
 
-JWT-ready settings:
+JWT'ye hazır ayarlar:
 
 - `Authentication__Authority`
 - `Authentication__Audience`
 
-No secrets are hardcoded in this project.
+Bu projede hard-coded secret bulunmamaktadır.
 
-## Local commands
+## Yerel komutlar
 
 ```powershell
 dotnet restore backend/src/YafesPars.Api/YafesPars.Api.csproj
@@ -32,5 +32,4 @@ dotnet build backend/src/YafesPars.Api/YafesPars.Api.csproj
 dotnet test backend/tests/YafesPars.Tests/YafesPars.Tests.csproj
 ```
 
-The current workstation must have the .NET 8 SDK installed before these commands
-can run.
+Bu komutlar çalıştırılmadan önce mevcut iş istasyonunda .NET 8 SDK kurulu olmalıdır.

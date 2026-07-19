@@ -1,116 +1,116 @@
-# PROD Restore Drill Evidence Report
+# PROD Yedek Geri Yükleme Tatbikatı Kanıt Raporu
 
-**Environment:** PROD  
-**Status:** PENDING — BLOCKED BY PROD ACCESS  
-**Owner:** Deuterium12{MCK}  
+**Ortam:** PROD  
+**Durum:** BEKLENİYOR — PROD ERİŞİMİ ENGELLENMİŞ  
+**Sorumlu:** Deuterium12{MCK}  
 **Plan:** `md/restore/prod-restore-drill-plan.md`  
-**Template version:** 2026-07-19
+**Şablon sürümü:** 2026-07-19
 
-> **RESTRICTIONS:**
-> - Do NOT restore PROD backup to the PROD instance itself.
-> - Do NOT allow the restore-target to be network-accessible after the drill.
-> - Do NOT retain a live copy of PROD data beyond the drill window.
-> - TWO named signatories required.
+> **KISITLAMALAR:**
+> - PROD yedeğini PROD örneğinin kendisine GERİ YÜKLEME.
+> - Tatbikat sonrasında geri yükleme hedefinin ağa erişilebilir olmasına İZİN VERME.
+> - Tatbikat penceresi ötesinde PROD verisinin canlı kopyasını SAKLAMA.
+> - İKİ ADLI İMZACI GEREKLİDİR.
 
 ---
 
-## Drill Summary
+## Tatbikat Özeti
 
-| Field | Value |
+| Alan | Değer |
 |---|---|
-| Environment | PROD |
-| Source backup instance | |
-| Restore target instance (isolated) | |
-| Backup file selected | |
-| Backup timestamp | |
-| Backup file size | |
-| Drill start UTC | |
-| Drill end UTC | |
-| Elapsed time (minutes) | |
-| Target RTO | 120 minutes |
-| RTO met? | |
-| First executor | |
-| Second executor | |
-| Change management ticket | |
+| Ortam | PROD |
+| Kaynak yedek örneği | |
+| Geri yükleme hedef örneği (yalıtılmış) | |
+| Seçilen yedek dosyası | |
+| Yedek zaman damgası | |
+| Yedek dosya boyutu | |
+| Tatbikat başlangıcı (UTC) | |
+| Tatbikat bitişi (UTC) | |
+| Geçen süre (dakika) | |
+| Hedef RTO | 120 dakika |
+| RTO karşılandı mı? | |
+| Birinci yürüten | |
+| İkinci yürüten | |
+| Değişiklik yönetimi bileti | |
 
 ---
 
-## Step 1 — Backup Selection
+## Adım 1 — Yedek Seçimi
 
-| Field | Value |
+| Alan | Değer |
 |---|---|
-| Most recent PROD full backup | |
-| Backup file path (read-only access) | |
-| Backup taken at UTC | |
-| RESTORE VERIFYONLY result | |
-| Data age (hours since backup) | |
+| En güncel PROD tam yedeği | |
+| Yedek dosya yolu (salt okunur erişim) | |
+| Yedekleme tarihi (UTC) | |
+| RESTORE VERIFYONLY sonucu | |
+| Veri yaşı (yedekten bu yana saat) | |
 
 ---
 
-## Step 2 — Restore to Isolated Instance
+## Adım 2 — Yalıtılmış Örneğe Geri Yükleme
 
 ```sql
 RESTORE DATABASE [YafesPars_ProdRestoreDrill]
-FROM DISK = N'<backup_path>'
-WITH MOVE 'YafesPars' TO N'<isolated_data_path>',
-     MOVE 'YafesPars_log' TO N'<isolated_log_path>',
+FROM DISK = N'<yedek_yolu>'
+WITH MOVE 'YafesPars' TO N'<yalitilmis_veri_yolu>',
+     MOVE 'YafesPars_log' TO N'<yalitilmis_log_yolu>',
      REPLACE, STATS = 10;
 ```
 
-| Field | Value |
+| Alan | Değer |
 |---|---|
-| Target instance confirmed isolated from network | |
-| RESTORE result | |
-| Errors encountered | |
-| Duration (seconds) | |
+| Hedef örneğin ağdan yalıtıldığı onaylandı | |
+| RESTORE sonucu | |
+| Karşılaşılan hatalar | |
+| Süre (saniye) | |
 
 ---
 
-## Step 3 — Validation (`database/tools/restore-drill-validation.sql`)
+## Adım 3 — Doğrulama (`database/tools/restore-drill-validation.sql`)
 
-Run against `YafesPars_ProdRestoreDrill` on isolated instance.
+Yalıtılmış örnekteki `YafesPars_ProdRestoreDrill` veritabanına karşı çalıştırın:
 
-| Check | Expected | Actual | Status |
+| Kontrol | Beklenen | Gerçekleşen | Durum |
 |---|---|---|---|
-| Migration count | ≥ 48 | | |
-| All migrations SUCCESS | Yes | | |
-| Table count | ≥ 140 | | |
-| Orphan FK violations | 0 | | |
+| Migrasyon sayısı | ≥ 48 | | |
+| Tüm migrasyonlar SUCCESS | Evet | | |
+| Tablo sayısı | ≥ 140 | | |
+| Yetim FK ihlali | 0 | | |
 
 ---
 
-## Step 4 — Cleanup
+## Adım 4 — Temizlik
 
-| Action | Done |
+| İşlem | Tamamlandı |
 |---|---|
-| `YafesPars_ProdRestoreDrill` database dropped | |
-| Snapshot discarded / isolated instance decommissioned | |
-| Backup file access confirmed revoked | |
-| No live copy of PROD data retained | |
-| Drill logged in change-management system | |
+| `YafesPars_ProdRestoreDrill` veritabanı silindi | |
+| Anlık görüntü atıldı / yalıtılmış örnek devre dışı bırakıldı | |
+| Yedek dosyası erişimi iptal edildi | |
+| PROD verisinin canlı kopyası kalmadı | |
+| Tatbikat değişiklik yönetimi sistemine kaydedildi | |
 
 ---
 
-## Pass Criteria
+## Geçme Kriterleri
 
-- [ ] Restore completed without errors within 120 minutes (RTO)
-- [ ] Migration count ≥ 48, all SUCCESS
-- [ ] Table count ≥ 140
-- [ ] No orphan FK violations
-- [ ] Two signatories recorded below
-- [ ] Restore target dropped or snapshot discarded after evidence recorded
+- [ ] Geri yükleme 120 dakika (RTO) içinde hatasız tamamlandı
+- [ ] Migrasyon sayısı ≥ 48, tamamı SUCCESS
+- [ ] Tablo sayısı ≥ 140
+- [ ] Yetim FK ihlali yok
+- [ ] İki imzacı aşağıda kayıtlı
+- [ ] Kanıt kaydedildikten sonra geri yükleme hedefi silindi veya anlık görüntü atıldı
 
 ---
 
-## Sign-Off (TWO SIGNATORIES REQUIRED)
+## İmza (İKİ İMZACI GEREKLİDİR)
 
-| Field | Value |
+| Alan | Değer |
 |---|---|
-| Drill result | PASS / FAIL |
-| Issues found | |
-| Corrective actions | |
-| First signatory name | |
-| First signatory sign-off | |
-| Second signatory name | |
-| Second signatory sign-off | |
-| Date | |
+| Tatbikat sonucu | GEÇTİ / KALDI |
+| Bulunan sorunlar | |
+| Düzeltici eylemler | |
+| Birinci imzacı adı | |
+| Birinci imzacı imzası | |
+| İkinci imzacı adı | |
+| İkinci imzacı imzası | |
+| Tarih | |

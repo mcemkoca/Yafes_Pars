@@ -1,47 +1,46 @@
-# Decision: Trust-Plan Folder Classification
+# Karar: Trust-Plan Klasörü Sınıflandırması
 
-**Date:** 2026-07-19
-**Owner:** Deuterium12{MCK}
-**Status:** DECIDED
+**Tarih:** 2026-07-19
+**Sahip:** Deuterium12{MCK}
+**Durum:** KARARA BAĞLANDI
 
-## Context
+## Bağlam
 
-The `md/trust-plan/` folder was created during the initial technical-discovery
-phase when the team was evaluating whether to migrate from a legacy web-first
-architecture to the current SSMS-first approach. It contains sanitized comparison
-notes, table-count history, and UX lessons from the old imported package.
+`md/trust-plan/` klasörü, ekip eski web öncelikli bir mimariden mevcut SSMS öncelikli
+yaklaşıma geçişi değerlendirirken ilk teknik keşif aşamasında oluşturuldu. Eski
+içe aktarılan paketten temizlenmiş karşılaştırma notlarını, tablo sayısı geçmişini
+ve UX derslerini içermektedir.
 
-## Decision
+## Karar
 
-Keep `md/trust-plan/` as a **read-only legacy reference folder**.
+`md/trust-plan/` dizinini **salt okunur eski referans klasörü** olarak tutun.
 
-- Do NOT delete: it contains irreplaceable context about table-count evolution
-  and the reasoning behind the SSMS-first pivot.
-- Do NOT copy: old credentials, docker defaults, CORS examples, or web-first
-  architecture must not be introduced into the active product from this folder.
-- Do NOT update: the folder is frozen at the state when the legacy plan was
-  superseded.
+- SİLMEYİN: tablo sayısı evrimine ve SSMS öncelikli pivotun gerekçesine ilişkin
+  telafi edilemez bağlamı içermektedir.
+- KOPYALAMAYIN: eski kimlik bilgileri, docker varsayılanları, CORS örnekleri veya
+  web öncelikli mimari bu klasörden aktif ürüne aktarılmamalıdır.
+- GÜNCELLEMEYİN: klasör, eski planın yerini alındığı andaki durumda dondurulmuştur.
 
-## Active Sources of Truth (supersede trust-plan)
+## Aktif Gerçek Kaynakları (trust-plan'ın yerini alır)
 
-| Concern | Active location |
+| Endişe | Aktif konum |
 |---------|----------------|
-| Database schema | `database/migrations/` |
-| SSMS workbench | `database/ssms/` |
-| Project plan | `md/mustafaplan.md` |
-| Table reconciliation | `md/database/table-reconciliation-89-vs-108.md` |
-| Customer overview | `README.md` |
+| Veri tabanı schema'sı | `database/migrations/` |
+| SSMS çalışma tezgahı | `database/ssms/` |
+| Proje planı | `md/mustafaplan.md` |
+| Tablo mutabakatı | `md/database/table-reconciliation-89-vs-108.md` |
+| Müşteri genel bakışı | `README.md` |
 
-## Contents Classification
+## İçerik Sınıflandırması
 
-| File/Folder | Classification |
+| Dosya/Klasör | Sınıflandırma |
 |------------|----------------|
-| `trust-plan/README.md` | LEGACY — comparison context |
-| `trust-plan/legacy-reference-summary.md` | LEGACY — table-count history |
-| `trust-plan/research/` | LEGACY — early design research snapshots |
+| `trust-plan/README.md` | ESKİ — karşılaştırma bağlamı |
+| `trust-plan/legacy-reference-summary.md` | ESKİ — tablo sayısı geçmişi |
+| `trust-plan/research/` | ESKİ — erken tasarım araştırması anlık görüntüleri |
 
-## Rationale
+## Gerekçe
 
-Deleting legacy notes removes audit trail for architectural decisions. The risk
-of someone acting on stale instructions is mitigated by the classification header
-already present in `trust-plan/README.md`.
+Eski notların silinmesi, mimari kararlar için denetim izini ortadan kaldırır. Birinin
+eski talimatlara göre hareket etme riski, `trust-plan/README.md`'de zaten mevcut
+olan sınıflandırma başlığıyla azaltılmıştır.

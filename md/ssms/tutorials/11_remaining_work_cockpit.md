@@ -1,32 +1,34 @@
-# Remaining Work Cockpit
+# Kalan İş Kokpiti
 
-Use this screen after the delivery gap register. It turns open blockers into
-actionable owner evidence, 019+ decision, bridge ranking, and DBA handoff rows.
+Teslimat boşluk kaydından sonra bu ekranı kullanın. Açık engelleyicileri
+uygulanabilir sahip kanıtı, 019+ kararı, bridge sıralaması ve DBA devir satırlarına
+dönüştürür.
 
-## Open
+## Açma
 
-1. Open `database/ssms/17__remaining_work_cockpit.sql`.
-2. Enable `Query > SQLCMD Mode`.
-3. Confirm `YAFES_SQL_DATABASE` contains `DEV`.
-4. Confirm `TENANT_CODE` is the tenant you are reviewing.
-5. Execute the script.
+1. `database/ssms/17__remaining_work_cockpit.sql` dosyasını açın.
+2. `Query > SQLCMD Mode` etkinleştirin.
+3. `YAFES_SQL_DATABASE`'in `DEV` içerdiğini doğrulayın.
+4. `TENANT_CODE`'un incelediğiniz tenant olduğunu doğrulayın.
+5. Script'i çalıştırın.
 
-## Read The Grids
+## Izgaraları Okuma
 
-1. `02 - Workstream closure board` shows every remaining workstream, owner,
-   evidence needed, and stop condition.
-2. `03 - Environment evidence handoff` lists TEST/PROD migration, access, and
-   restore evidence artifacts.
-3. `04 - Owner decision intake for 019+ candidates` prepares finance, import,
-   product, and note decisions without creating tables.
-4. `05 - Next bridge workflow ranking queue` helps rank the next non-task
-   procedure-backed action.
-5. `06 - SQL Agent promotion board` prepares DBA job approval without creating
-   SQL Agent jobs.
-6. `07 - Closure gates before release` summarizes the release gates.
+1. `02 - İş akışı kapanış board'u`, kalan her iş akışını, sahibini, gereken
+   kanıtı ve durdurma koşulunu gösterir.
+2. `03 - Ortam kanıtı deviri`, TEST/PROD migration, erişim ve geri yükleme kanıt
+   artifakt'larını listeler.
+3. `04 - 019+ adayları için sahip karar girişi`, tablo oluşturmadan finans,
+   içe aktarma, ürün ve not kararlarını hazırlar.
+4. `05 - Sonraki bridge iş akışı sıralama kuyruğu`, bir sonraki prosedür destekli
+   aksiyonu sıralamaya yardımcı olur.
+5. `06 - SQL Agent terfi board'u`, SQL Agent işleri oluşturmadan DBA iş onayını
+   hazırlar.
+6. `07 - Sürüm öncesi kapanış kapıları`, sürüm kapılarını özetler.
 
-## Operator Rule
+## Operatör Kuralı
 
-Do not implement migration `019+`, SQL Agent jobs, or new bridge procedures from
-this screen alone. Use the cockpit to collect owner decisions first, then add a
-forward-only migration or stored procedure in a separate reviewed change.
+Yalnızca bu ekrandan migration `019+`, SQL Agent işleri veya yeni bridge
+prosedürleri uygulamayın. Önce sahip kararlarını toplamak için kokpiti kullanın,
+ardından ayrı bir incelenmiş değişiklikte ileri yönlü bir migration veya stored
+procedure ekleyin.

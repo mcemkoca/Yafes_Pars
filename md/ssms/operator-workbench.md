@@ -1,13 +1,14 @@
-# SSMS Operator Workbench
+# SSMS Operatör Çalışma Tezgahı
 
-This folder is the SSMS-first operational interface for Yafes Pars. It is built
-for users who work inside SQL Server Management Studio and need clear shortcuts,
-safe data entry, guided updates, report grids, tutorials, and info tips.
+Bu klasör, Yafes Pars için SSMS öncelikli operasyonel arayüzdür. SQL Server
+Management Studio içinde çalışan ve net kısayollara, güvenli veri girişine,
+kılavuzlu güncellemelere, rapor ızgaralarına, öğreticilere ve bilgi ipuçlarına
+ihtiyaç duyan kullanıcılar için oluşturulmuştur.
 
-Open these files in SQL Server Management Studio and enable `Query > SQLCMD Mode`
-for scripts that contain `:setvar` or `:r`.
+Bu dosyaları SQL Server Management Studio'da açın ve `:setvar` veya `:r` içeren
+script'ler için `Query > SQLCMD Mode` etkinleştirin.
 
-## Operator Start Here
+## Operatör Başlangıç Noktası
 
 1. `00__open_first_safety_check.sql`
 2. `05__operator_dashboard_home.sql`
@@ -21,54 +22,54 @@ for scripts that contain `:setvar` or `:r`.
 10. `16__delivery_gap_register.sql`
 11. `17__remaining_work_cockpit.sql`
 
-Keep `05__operator_dashboard_home.sql` open as the SSMS home tab. It returns
-shortcut grids, health signals, and recommended next actions.
+`05__operator_dashboard_home.sql` dosyasını SSMS ana sekmesi olarak açık tutun.
+Kısayol ızgaraları, sağlık sinyalleri ve önerilen sonraki aksiyonlar döndürür.
 
-## Script Catalog
+## Script Kataloğu
 
-| File | Mode | Purpose |
+| Dosya | Mod | Amaç |
 | --- | --- | --- |
-| `00__open_first_safety_check.sql` | Read-only | Confirms DEV database and non-production-like server names. |
-| `01__run_all_dev_migrations_sqlcmd.sql` | Read-only handoff | Confirms DEV context and explains how to generate/open the real all-in-one SSMS migration script. |
-| `02__operations_dashboard.sql` | Read-only | Tenant-aware customer, institution, risk, policy, claim, document, task, coverage, and lookup dashboard. |
-| `03__create_renewal_tasks.sql` | Dry-run first | Runs `tasking.SP_CreateRenewalTasks`; default should remain dry-run until approved. |
-| `04__admin_security_audit_queries.sql` | Read-only | RBAC, audit, trigger, and integrity checks. |
-| `05__operator_dashboard_home.sql` | Read-only | SSMS home dashboard with shortcuts, health, context, and next actions. |
-| `06__query_library_shortcuts.sql` | Read-only | Search and inspection library for operators. |
-| `07__data_entry_bridge_templates.sql` | Preview first | Procedure-based create actions for person, vehicle risk object, policy, links, claims, tasks, task comments, and task reminders with preview and output IDs. |
-| `08__data_editing_guardrails.sql` | Rollback default | Guided updates with before/after grids and explicit commit switch. |
-| `09__graph_report_pack.sql` | Read-only | Chart-ready grids, text bars, and export catalog. |
-| `10__daily_operator_checklist.sql` | Read-only | Morning/end-of-day checklist with PASS/REVIEW/ACTION signals. |
-| `11__schema_working_logic_map.sql` | Read-only | Domain groups, subheadings, control points, and planning board cards. |
-| `12__table_catalog_and_relationships.sql` | Read-only | Full SQL Server table catalog, column profile, root tables, and FK map. |
-| `13__visual_workflow_board.sql` | Read-only | SSMS-safe node, edge, subheading, template-route, and readiness grids for the visual board idea. |
-| `14__admin_role_permission_matrix.sql` | Read-only | User-friendly role, permission, tenant user assignment, least-privilege, and admin handoff grids. |
-| `15__monitoring_and_job_readiness.sql` | Read-only | DEV database health, backlog signals, backup visibility, SQL Agent observed jobs, and DBA handoff grids. |
-| `16__delivery_gap_register.sql` | Read-only | Commit review closure, open delivery gaps, owner blockers, and next SSMS actions. |
-| `17__remaining_work_cockpit.sql` | Read-only | Owner evidence handoff, 019+ decision intake, edge bridge ranking, SQL Agent promotion, and release closure gates. |
+| `00__open_first_safety_check.sql` | Salt okunur | DEV veri tabanını ve üretim benzeri olmayan sunucu adlarını doğrular. |
+| `01__run_all_dev_migrations_sqlcmd.sql` | Salt okunur devir | DEV bağlamını doğrular ve gerçek tümünde bir SSMS migration script'inin nasıl oluşturulacağını/açılacağını açıklar. |
+| `02__operations_dashboard.sql` | Salt okunur | Tenant farkında müşteri, kuruluş, risk, poliçe, hasar, belge, görev, teminat ve arama dashboard'u. |
+| `03__create_renewal_tasks.sql` | Önce kuru çalıştırma | `tasking.SP_CreateRenewalTasks` çalıştırır; onaylanana kadar kuru çalıştırma olarak kalmalıdır. |
+| `04__admin_security_audit_queries.sql` | Salt okunur | RBAC, denetim, trigger ve bütünlük kontrolleri. |
+| `05__operator_dashboard_home.sql` | Salt okunur | Kısayollar, sağlık, bağlam ve sonraki aksiyonlarla SSMS ana dashboard. |
+| `06__query_library_shortcuts.sql` | Salt okunur | Operatörler için arama ve inceleme kütüphanesi. |
+| `07__data_entry_bridge_templates.sql` | Önce önizleme | Kişi, araç risk nesnesi, poliçe, bağlantılar, hasarlar, görevler, görev yorumları ve görev hatırlatıcıları için önizleme ve çıktı ID'leriyle prosedür tabanlı oluşturma aksiyonları. |
+| `08__data_editing_guardrails.sql` | Varsayılan rollback | Öncesi/sonrası ızgaralar ve açık commit anahtarıyla kılavuzlu güncellemeler. |
+| `09__graph_report_pack.sql` | Salt okunur | Grafik hazır ızgaralar, metin çubukları ve dışa aktarma kataloğu. |
+| `10__daily_operator_checklist.sql` | Salt okunur | BAŞARILI/GÖZDEN GEÇİR/AKSIYON sinyalleriyle sabah/gün sonu kontrol listesi. |
+| `11__schema_working_logic_map.sql` | Salt okunur | Domain grupları, alt başlıklar, kontrol noktaları ve planlama board kartları. |
+| `12__table_catalog_and_relationships.sql` | Salt okunur | Tam SQL Server tablo kataloğu, sütun profili, kök tablolar ve FK haritası. |
+| `13__visual_workflow_board.sql` | Salt okunur | Görsel board fikri için SSMS güvenli düğüm, kenar, alt başlık, şablon rota ve hazırlık ızgaraları. |
+| `14__admin_role_permission_matrix.sql` | Salt okunur | Kullanıcı dostu rol, izin, tenant kullanıcı ataması, en az ayrıcalık ve admin devir ızgaraları. |
+| `15__monitoring_and_job_readiness.sql` | Salt okunur | DEV veri tabanı sağlığı, biriktirme sinyalleri, yedek görünürlüğü, SQL Agent gözlemlenen işleri ve DBA devir ızgaraları. |
+| `16__delivery_gap_register.sql` | Salt okunur | Commit inceleme kapanması, açık teslimat boşlukları, sahip engelleyicileri ve sonraki SSMS aksiyonları. |
+| `17__remaining_work_cockpit.sql` | Salt okunur | Sahip kanıtı deviri, 019+ karar alımı, kenar bridge sıralaması, SQL Agent terfisi ve sürüm kapanış kapıları. |
 
-## Supporting Assets
+## Destekleyici Varlıklar
 
-| Path | Purpose |
+| Yol | Amaç |
 | --- | --- |
-| `md/ssms/tutorials/` | Step-by-step SSMS user guides for every main workflow. |
-| `md/ssms/templates.md` | Copy-friendly query, search, update, and report patterns. |
-| `database/ssms/demo/` | Local browser preview of the SSMS-style operator workbench. |
-| `md/ssms/dashboard-plan.md` | Corporate dashboard architecture and future roadmap. |
-| `database/ssms/11__schema_working_logic_map.sql` | SSMS result-set map for how the business domains work together. |
-| `database/ssms/12__table_catalog_and_relationships.sql` | Metadata-driven table and relationship catalog for planning. |
-| `database/ssms/13__visual_workflow_board.sql` | Node/edge and template-route grids that mirror the visual planning demo. |
-| `database/ssms/14__admin_role_permission_matrix.sql` | Admin RBAC matrix and access-review checklist for SSMS operators. |
-| `database/ssms/15__monitoring_and_job_readiness.sql` | Monitoring and SQL Agent readiness grids for DBA/operations handoff. |
-| `database/ssms/16__delivery_gap_register.sql` | Read-only register for unfinished commit/PR delivery items and next SSMS actions. |
-| `database/ssms/17__remaining_work_cockpit.sql` | Read-only cockpit for turning remaining blockers into owner evidence, 019+ decisions, bridge ranking, and DBA handoff actions. |
-| `database/ssms/demo/workbench-manifest.json` | Generated bridge between the real SSMS/database source files and the local workbench preview. |
-| `database/tools/update-ssms-workbench-manifest.ps1` | Regenerates the preview manifest from migrations, validations, SSMS scripts, shortcut rows, schemas, tables, and backend API routes. |
+| `md/ssms/tutorials/` | Her ana iş akışı için adım adım SSMS kullanıcı kılavuzları. |
+| `md/ssms/templates.md` | Kopyalamaya hazır sorgu, arama, güncelleme ve rapor kalıpları. |
+| `database/ssms/demo/` | SSMS stili operatör çalışma tezgahının yerel tarayıcı önizlemesi. |
+| `md/ssms/dashboard-plan.md` | Kurumsal dashboard mimarisi ve gelecekteki yol haritası. |
+| `database/ssms/11__schema_working_logic_map.sql` | İş domain'lerinin nasıl birlikte çalıştığına ilişkin SSMS sonuç kümesi haritası. |
+| `database/ssms/12__table_catalog_and_relationships.sql` | Planlama için meta veri odaklı tablo ve ilişki kataloğu. |
+| `database/ssms/13__visual_workflow_board.sql` | Görsel planlama demosunu yansıtan düğüm/kenar ve şablon rota ızgaraları. |
+| `database/ssms/14__admin_role_permission_matrix.sql` | SSMS operatörleri için admin RBAC matrisi ve erişim inceleme kontrol listesi. |
+| `database/ssms/15__monitoring_and_job_readiness.sql` | DBA/operasyon deviri için izleme ve SQL Agent hazırlık ızgaraları. |
+| `database/ssms/16__delivery_gap_register.sql` | Bitmemiş commit/PR teslimat öğeleri ve sonraki SSMS aksiyonları için salt okunur kayıt. |
+| `database/ssms/17__remaining_work_cockpit.sql` | Kalan engelleyicileri sahip kanıtına, 019+ kararlarına, bridge sıralamasına ve DBA devir aksiyonlarına dönüştürmek için salt okunur kokpit. |
+| `database/ssms/demo/workbench-manifest.json` | Gerçek SSMS/veri tabanı kaynak dosyaları ile yerel çalışma tezgahı önizlemesi arasında oluşturulan köprü. |
+| `database/tools/update-ssms-workbench-manifest.ps1` | Migration'lardan, doğrulamalardan, SSMS script'lerinden, kısayol satırlarından, schema/tablo yapısından ve backend API rotalarından önizleme manifestosunu yeniden oluşturur. |
 
-## Production Runbooks
+## Üretim Runbook'ları
 
-The SSMS workbench is supported by production planning documents under
-`md/database/`:
+SSMS çalışma tezgahı, `md/database/` altındaki üretim planlama belgeleriyle
+desteklenmektedir:
 
 - `ssms-deployment-runbook.md`
 - `azure-windows-server-deployment.md`
@@ -78,49 +79,51 @@ The SSMS workbench is supported by production planning documents under
 - `environment-matrix.md`
 - `production-readiness-checklist.md`
 
-## Safety Modes
+## Güvenlik Modları
 
-- `READ_ONLY`: no data changes.
-- `BACKUP_REQUIRED`: only after backup path is configured.
-- `DRY_RUN_FIRST`: preview result first, then execute.
-- `REVIEW_BEFORE_COMMIT`: review preview grids before action.
-- `ROLLBACK_DEFAULT`: rolls back unless a commit variable is explicitly enabled.
+- `READ_ONLY`: veri değişikliği yok.
+- `BACKUP_REQUIRED`: yalnızca yedek yolu yapılandırıldıktan sonra.
+- `DRY_RUN_FIRST`: ekle/güncelle öncesinde sonucu önizle.
+- `REVIEW_BEFORE_COMMIT`: aksiyondan önce önizleme ızgaralarını incele.
+- `ROLLBACK_DEFAULT`: bir commit değişkeni açıkça etkinleştirilmedikçe geri alınır.
 
-## Required SSMS Behavior
+## Gerekli SSMS Davranışı
 
-1. Connect only to a DEV SQL Server instance.
-2. Do not use production or live servers.
-3. Set `YAFES_SQL_DATABASE` at the top of each script.
-4. Ensure the database value contains `DEV`.
-5. Enable `Query > SQLCMD Mode` before running any script with `:setvar` or `:r`.
-6. Run the open-first safety check.
-7. Use query library results to copy IDs into bridge templates.
-8. Keep data editing scripts in rollback/default preview mode until reviewed.
+1. Yalnızca DEV SQL Server örneğine bağlanın.
+2. Üretim veya canlı sunucular kullanmayın.
+3. Her script'in üstünde `YAFES_SQL_DATABASE` ayarlayın.
+4. Veri tabanı değerinin `DEV` içerdiğinden emin olun.
+5. `:setvar` veya `:r` içeren herhangi bir script çalıştırmadan önce
+   `Query > SQLCMD Mode` etkinleştirin.
+6. Açılış güvenlik kontrolünü çalıştırın.
+7. ID'leri bridge şablonlarına kopyalamak için sorgu kütüphanesi sonuçlarını kullanın.
+8. Veri düzenleme script'lerini incelenene kadar rollback/varsayılan önizleme
+   modunda tutun.
 
-## Preview Boundary
+## Önizleme Sınırı
 
-The local workbench preview is non-persistent. Real work must be done in SSMS
-with SQLCMD Mode enabled against a DEV database. Migration execution uses a generated
-`database/execution-logs/<run-id>/ssms-dev-migrations.sql` file created by
-`database/tools/run-dev-migrations.ps1 -GenerateSsmsScriptOnly`; generated
-execution-log files are not committed.
+Yerel çalışma tezgahı önizlemesi kalıcı değildir. Gerçek çalışma, DEV veri tabanına
+karşı SQLCMD Mode etkinleştirilmiş SSMS'de yapılmalıdır. Migration yürütmesi,
+`database/tools/run-dev-migrations.ps1 -GenerateSsmsScriptOnly` tarafından
+oluşturulan `database/execution-logs/<run-id>/ssms-dev-migrations.sql` dosyasını
+kullanır; oluşturulan yürütme günlüğü dosyaları commit edilmez.
 
-The preview reads `database/ssms/demo/workbench-manifest.json` at startup. Run
-`database/tools/update-ssms-workbench-manifest.ps1` after changing migrations,
-validation scripts, SSMS scripts, shortcut rows, schema/table structure, or
-backend read endpoints so the visible workbench stays aligned with the SSMS
-infrastructure.
+Önizleme başlangıçta `database/ssms/demo/workbench-manifest.json` dosyasını okur.
+Migration'ları, doğrulama script'lerini, SSMS script'lerini, kısayol satırlarını,
+schema/tablo yapısını veya backend okuma uç noktalarını değiştirdikten sonra görünür
+çalışma tezgahının SSMS altyapısıyla uyumlu kalması için
+`database/tools/update-ssms-workbench-manifest.ps1` çalıştırın.
 
-## Info Tip Standard
+## Bilgi İpucu Standardı
 
-Every operator script should include:
+Her operatör script'i şunları içermelidir:
 
-- an `INFO TIP` header
-- SQLCMD variables at the top
-- tenant context checks for tenant-scoped scripts
-- clear result-set names
-- `info_tip` columns where helpful
-- rollback/dry-run defaults for any mutation
+- bir `INFO TIP` başlığı
+- üstte SQLCMD değişkenleri
+- tenant kapsamlı script'ler için tenant bağlam kontrolleri
+- net sonuç kümesi adları
+- faydalı olduğunda `info_tip` sütunları
+- herhangi bir mutasyon için rollback/kuru çalıştırma varsayılanları
 
-The working interface is SSMS Query Editor, Results Grid, and Messages, not a
-web application.
+Çalışma arayüzü, bir web uygulaması değil, SSMS Query Editor, Results Grid ve
+Messages'dır.

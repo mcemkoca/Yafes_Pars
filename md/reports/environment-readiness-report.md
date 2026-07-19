@@ -1,118 +1,118 @@
-# Environment Readiness Report — 2026-07-19
+# Ortam Hazırlık Raporu — 2026-07-19
 
-**Owner:** Deuterium12{MCK}  
-**Status:** DEV — READY | TEST — PENDING | PROD — BLOCKED
-
----
-
-## Executive Summary
-
-The Yafes Pars system is feature-complete at the repository level. All database
-migrations, MCP tools, bridge templates, and CI gates are in place. The only
-remaining release gates are environment-side evidence items that require real
-SQL Server access outside this repository.
+**Sahip:** Deuterium12{MCK}
+**Durum:** DEV — HAZIR | TEST — BEKLEMEDE | PROD — ENGELLENDİ
 
 ---
 
-## Environment Status Matrix
+## Yönetici Özeti
 
-| Environment | Migration Execution | Access Review | Restore Drill | SQL Agent | Overall |
+Yafes Pars sistemi depo düzeyinde özellik açısından tamdır. Tüm veri tabanı
+migration'ları, MCP araçları, bridge şablonları ve CI kapıları yerli yerindedir.
+Kalan tek yayın kapıları, bu deponun dışında gerçek SQL Server erişimi gerektiren
+ortam tarafı kanıt öğeleridir.
+
+---
+
+## Ortam Durum Matrisi
+
+| Ortam | Migration Yürütmesi | Erişim İncelemesi | Geri Yükleme Tatbikatı | SQL Agent | Genel |
 |---|---|---|---|---|---|
-| DEV | ✅ VERIFIED | ✅ VERIFIED | ✅ VERIFIED | 🔶 PENDING DBA | READY |
-| TEST | 🔶 PENDING | 🔶 PENDING | 🔶 PENDING | 🔶 PENDING DBA | BLOCKED |
-| PROD | ⛔ NOT YET | ⛔ NOT YET | ⛔ NOT YET | ⛔ NOT YET | NOT STARTED |
+| DEV | ✅ DOĞRULANDI | ✅ DOĞRULANDI | ✅ DOĞRULANDI | 🔶 DBA BEKLİYOR | HAZIR |
+| TEST | 🔶 BEKLEMEDE | 🔶 BEKLEMEDE | 🔶 BEKLEMEDE | 🔶 DBA BEKLİYOR | ENGELLENDİ |
+| PROD | ⛔ HENÜZ DEĞİL | ⛔ HENÜZ DEĞİL | ⛔ HENÜZ DEĞİL | ⛔ HENÜZ DEĞİL | BAŞLAMAДИ |
 
 ---
 
-## DEV Evidence (Completed)
+## DEV Kanıtı (Tamamlandı)
 
-| Evidence Item | Report | Date | Status |
+| Kanıt Öğesi | Rapor | Tarih | Durum |
 |---|---|---|---|
-| Migration execution | `md/reports/dev-validation-evidence-2026-06-04.md` | 2026-06-04 | ✅ VERIFIED |
-| Access review | `md/reports/access-review-evidence-dev-2026-06-04.md` | 2026-06-04 | ✅ VERIFIED |
-| Restore drill | `md/reports/restore-drill-evidence-dev-2026-06-04.md` | 2026-06-04 | ✅ VERIFIED |
-| Backend build / unit tests | CI: `backend-build.yml` | Continuous | ✅ GREEN |
-| SQL quality gate | CI: `ssms-workbench-validation.yml` | Continuous | ✅ GREEN |
-| Write-flow integration | CI: SQL Server container | Continuous | ✅ GREEN |
+| Migration yürütmesi | `md/reports/dev-validation-evidence-2026-06-04.md` | 2026-06-04 | ✅ DOĞRULANDI |
+| Erişim incelemesi | `md/reports/access-review-evidence-dev-2026-06-04.md` | 2026-06-04 | ✅ DOĞRULANDI |
+| Geri yükleme tatbikatı | `md/reports/restore-drill-evidence-dev-2026-06-04.md` | 2026-06-04 | ✅ DOĞRULANDI |
+| Backend derlemesi / birim testleri | CI: `backend-build.yml` | Sürekli | ✅ YEŞİL |
+| SQL kalite kapısı | CI: `ssms-workbench-validation.yml` | Sürekli | ✅ YEŞİL |
+| Yazma akışı entegrasyonu | CI: SQL Server container | Sürekli | ✅ YEŞİL |
 
 ---
 
-## TEST Environment — Pending Items
+## TEST Ortamı — Bekleyen Öğeler
 
-Templates and runbooks are ready. All items require environment access.
+Şablonlar ve runbook'lar hazır. Tüm öğeler ortam erişimi gerektiriyor.
 
-| Item | Template/Script | Blocker | Status |
+| Öğe | Şablon/Script | Engel | Durum |
 |---|---|---|---|
-| Run guarded migrations | `database/tools/run-dev-migrations.ps1` (adapt for TEST) | TEST SQL Server access | PENDING |
-| Access review | `md/database/access-review-evidence-template.md` | Named DBA + TEST access | PENDING |
-| Restore drill | `md/restore/test-restore-drill-plan.md` | TEST backup files + restore target | PENDING |
-| SQL Agent job creation | `database/ssms/18__sql_agent_job_setup.sql` | DBA approval + TEST SQLServerAgent | PENDING DBA |
+| Korumalı migration'ları çalıştır | `database/tools/run-dev-migrations.ps1` (TEST için uyarla) | TEST SQL Server erişimi | BEKLEMEDE |
+| Erişim incelemesi | `md/database/access-review-evidence-template.md` | Adlandırılmış DBA + TEST erişimi | BEKLEMEDE |
+| Geri yükleme tatbikatı | `md/restore/test-restore-drill-plan.md` | TEST yedek dosyaları + geri yükleme hedefi | BEKLEMEDE |
+| SQL Agent işi oluşturma | `database/ssms/18__sql_agent_job_setup.sql` | DBA onayı + TEST SQLServerAgent | DBA BEKLİYOR |
 
 ---
 
-## PROD Environment — Blocked
+## PROD Ortamı — Engellendi
 
-PROD execution is blocked until TEST evidence is complete.
+PROD yürütmesi, TEST kanıtı tamamlanana kadar engellidir.
 
-| Gate | Requirement | Status |
+| Kapı | Gereksinim | Durum |
 |---|---|---|
-| TEST evidence complete | All TEST items signed off | BLOCKED on TEST |
-| Change-management window | CM approval required for PROD migration | NOT STARTED |
-| Named signatories | Two signatories for restore drill | NOT ARRANGED |
-| PROD restore drill | Isolated restore target (not PROD itself) | NOT STARTED |
+| TEST kanıtı tamamlandı | Tüm TEST öğeleri imzalandı | TEST'TE ENGELLENDİ |
+| Değişiklik yönetimi penceresi | PROD migration için CM onayı gerekli | BAŞLAMAДИ |
+| Adlandırılmış imzalılar | Geri yükleme tatbikatı için iki imzalı | DÜZENLENMEDİ |
+| PROD geri yükleme tatbikatı | İzole geri yükleme hedefi (PROD'un kendisi değil) | BAŞLAMAДИ |
 
 ---
 
-## Repository Readiness (All Done)
+## Depo Hazırlığı (Tamamı Bitti)
 
-| Area | Item | PR | Status |
+| Alan | Öğe | PR | Durum |
 |---|---|---|---|
-| Database | Migrations 000–048 (49 total) | Various | ✅ |
-| Database | Validations 001–017 (17 total) | Various | ✅ |
-| Database | 22 SSMS bridge templates | #97, #99, this session | ✅ |
-| Database | SQL Agent setup + security fix | PR #99 | ✅ |
-| MCP | 33 tool classes, all `[McpServerToolType]` | Various | ✅ |
-| MCP | RenewalTools (4 tools) | Pre-existing | ✅ |
-| MCP | PremiumCalculatorTools (4 tools) | Pre-existing | ✅ |
-| MCP | LegacyImportTools (3 tools) | PR #99 | ✅ |
-| MCP | ImportTools / ExportJobTools | Pre-existing | ✅ |
-| CI | Backend build + unit tests | CI | ✅ |
-| CI | SQL Server write-flow integration | CI | ✅ |
-| CI | SSMS workbench validation (manifest, scripts, controls) | CI | ✅ |
-| Manifest | `ssmsScripts` contract fixed (`{ count, items }`) | PR #99 | ✅ |
-| Docs | Access-review templates | Pre-existing | ✅ |
-| Docs | Restore drill plans | Pre-existing | ✅ |
-| Docs | MCP gap analysis | PR #99 | ✅ |
+| Veri Tabanı | Migration'lar 000–048 (toplam 49) | Çeşitli | ✅ |
+| Veri Tabanı | Doğrulamalar 001–017 (toplam 17) | Çeşitli | ✅ |
+| Veri Tabanı | 22 SSMS bridge şablonu | #97, #99, bu oturum | ✅ |
+| Veri Tabanı | SQL Agent kurulumu + güvenlik düzeltmesi | PR #99 | ✅ |
+| MCP | 33 araç sınıfı, hepsi `[McpServerToolType]` | Çeşitli | ✅ |
+| MCP | RenewalTools (4 araç) | Önceden mevcut | ✅ |
+| MCP | PremiumCalculatorTools (4 araç) | Önceden mevcut | ✅ |
+| MCP | LegacyImportTools (3 araç) | PR #99 | ✅ |
+| MCP | ImportTools / ExportJobTools | Önceden mevcut | ✅ |
+| CI | Backend derlemesi + birim testleri | CI | ✅ |
+| CI | SQL Server yazma akışı entegrasyonu | CI | ✅ |
+| CI | SSMS çalışma tezgahı doğrulaması (manifesto, script'ler, kontroller) | CI | ✅ |
+| Manifesto | `ssmsScripts` sözleşmesi düzeltildi (`{ count, items }`) | PR #99 | ✅ |
+| Belgeler | Erişim inceleme şablonları | Önceden mevcut | ✅ |
+| Belgeler | Geri yükleme tatbikatı planları | Önceden mevcut | ✅ |
+| Belgeler | MCP boşluk analizi | PR #99 | ✅ |
 
 ---
 
-## SQL Agent DBA Approval Package
+## SQL Agent DBA Onay Paketi
 
 Script: `database/ssms/18__sql_agent_job_setup.sql`
 
-**Jobs to create:**
+**Oluşturulacak işler:**
 
-| Job | Schedule | SP Called | Tenant |
+| İş | Zamanlama | Çağrılan SP | Tenant |
 |---|---|---|---|
-| `YafesPars_DailyMarkOverdueInvoices` | Daily 06:00 | `finance.SP_MarkOverdueInvoices` | N/A |
-| `YafesPars_DailyRenewalTasks` | Daily 07:00 | `tasking.SP_CreateRenewalTasks` | SQLCMD var |
-| `YafesPars_WeeklyFsmaPortfolioCheck` | Monday 08:00 | Inline SELECT | N/A |
+| `YafesPars_DailyMarkOverdueInvoices` | Günlük 06:00 | `finance.SP_MarkOverdueInvoices` | N/A |
+| `YafesPars_DailyRenewalTasks` | Günlük 07:00 | `tasking.SP_CreateRenewalTasks` | SQLCMD değişkeni |
+| `YafesPars_WeeklyFsmaPortfolioCheck` | Pazartesi 08:00 | Satır içi SELECT | N/A |
 
-**Security notes:**
-- Script aborts if `YAFES_SQL_DATABASE` does not contain DEV, TEST, or ACC (RAISERROR level 16 + LOG).
-- Job 2 uses `sp_executesql` with SQLCMD variable for tenant lookup — no hard-coded database names.
-- All jobs idempotent: skip if already exists.
-- Requires `sysadmin` or `SQLAgentOperatorRole`.
+**Güvenlik notları:**
+- `YAFES_SQL_DATABASE` DEV, TEST veya ACC içermiyorsa script sonlanır (RAISERROR seviye 16 + LOG).
+- İş 2, tenant araması için SQLCMD değişkeniyle `sp_executesql` kullanır — hard-coded veri tabanı adı yok.
+- Tüm işler idempotent: zaten mevcutsa atla.
+- `sysadmin` veya `SQLAgentOperatorRole` gerektirir.
 
-**DBA sign-off required before running on TEST/PROD.**
+**TEST/PROD üzerinde çalıştırmadan önce DBA imzası gereklidir.**
 
 ---
 
-## Next Release Gates (in order)
+## Sonraki Yayın Kapıları (sırasıyla)
 
-1. DBA reviews and approves `18__sql_agent_job_setup.sql` → signs `md/reports/sql-agent-dba-approval.md`
-2. Run migrations on TEST + collect evidence → `md/reports/test-migration-evidence.md`
-3. Run access review on TEST → `md/reports/access-review-evidence-test.md`
-4. Run restore drill on TEST → `md/reports/test-restore-drill-report.md`
-5. Repeat steps 2–4 for PROD with two signatories
-6. Merge PROD evidence into production readiness checklist
+1. DBA `18__sql_agent_job_setup.sql`'i inceler ve onaylar → `md/reports/sql-agent-dba-approval.md`'yi imzalar
+2. TEST'te migration'ları çalıştır + kanıt topla → `md/reports/test-migration-evidence.md`
+3. TEST'te erişim incelemesi çalıştır → `md/reports/access-review-evidence-test.md`
+4. TEST'te geri yükleme tatbikatı çalıştır → `md/reports/test-restore-drill-report.md`
+5. İki imzalıyla PROD için 2–4 adımlarını tekrarla
+6. PROD kanıtını üretim hazırlık kontrol listesiyle birleştir

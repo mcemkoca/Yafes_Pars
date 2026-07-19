@@ -1,62 +1,63 @@
-# MCP Gap Analysis Report — 2026-07-19
+# MCP Boşluk Analizi Raporu — 2026-07-19
 
-**Status:** CLOSED  
-**Owner:** Deuterium12{MCK}
+**Durum:** KAPANDI
+**Sahip:** Deuterium12{MCK}
 
-## Scope
+## Kapsam
 
-Assessment of MCP tool coverage against all stored procedures introduced by
-migrations 040–043, plus tool registry visibility audit.
+Migration 040–043 tarafından sunulan tüm stored procedure'lere karşı MCP araç kapsamı
+değerlendirmesi ve araç kaydı görünürlük denetimi.
 
-## Coverage Matrix
+## Kapsam Matrisi
 
 ### Migration 040 — `policy.RenewalQueue` (RenewalTools.cs)
 
-| Stored Procedure | MCP Tool | Status |
+| Stored Procedure | MCP Aracı | Durum |
 |---|---|---|
-| `policy.SP_GetRenewalQueue` | `GetRenewalQueue` | COVERED |
-| `policy.SP_ProcessRenewal` | `ProcessRenewal` | COVERED |
-| `policy.SP_GetRenewalMetrics` | `GetRenewalMetrics` | COVERED |
-| *(bulk notification bonus)* | `SendRenewalNotices` | COVERED |
+| `policy.SP_GetRenewalQueue` | `GetRenewalQueue` | KAPSANDI |
+| `policy.SP_ProcessRenewal` | `ProcessRenewal` | KAPSANDI |
+| `policy.SP_GetRenewalMetrics` | `GetRenewalMetrics` | KAPSANDI |
+| *(toplu bildirim bonusu)* | `SendRenewalNotices` | KAPSANDI |
 
-All renewal SPs covered. Email notification tool bonus — calls SP_GetRenewalQueue
-(PENDING filter) + IEmailService + SP_ProcessRenewal (NOTICE_SENT) per record.
+Tüm yenileme SP'leri kapsandı. E-posta bildirimi araç bonusu — SP_GetRenewalQueue
+(PENDING filtresi) + IEmailService + kayıt başına SP_ProcessRenewal (NOTICE_SENT)
+çağrısı yapıyor.
 
 ### Migration 041 — `finance.TariffRate` (PremiumCalculatorTools.cs)
 
-| Stored Procedure | MCP Tool | Status |
+| Stored Procedure | MCP Aracı | Durum |
 |---|---|---|
-| `finance.SP_CalculatePremium` | `CalculatePremium` | COVERED |
-| `finance.SP_GetPremiumSummary` | `GetPremiumSummary` | COVERED |
-| `finance.SP_GetTariffRates` | `GetTariffRates` | COVERED |
-| `finance.SP_UpsertTariffRate` | `UpsertTariffRate` | COVERED |
+| `finance.SP_CalculatePremium` | `CalculatePremium` | KAPSANDI |
+| `finance.SP_GetPremiumSummary` | `GetPremiumSummary` | KAPSANDI |
+| `finance.SP_GetTariffRates` | `GetTariffRates` | KAPSANDI |
+| `finance.SP_UpsertTariffRate` | `UpsertTariffRate` | KAPSANDI |
 
-Full coverage. Wildcard tariff (`coverage_type_code = '*'`) handled by the SP;
-MCP passes through correctly.
+Tam kapsam. Joker karakter tarife (`coverage_type_code = '*'`) SP tarafından işleniyor;
+MCP doğru şekilde geçiriyor.
 
-### Migration 043 — `import.Legacy*` (LegacyImportTools.cs — NEW)
+### Migration 043 — `import.Legacy*` (LegacyImportTools.cs — YENİ)
 
-Pre-existing `ImportTools.cs` targets `import.PolicyImport` — a different table
-from migration 030 (bulk policy staging). It does NOT cover migration 043 tables.
+Mevcut `ImportTools.cs`, migration 030'dan `import.PolicyImport`'u hedefliyor — migration
+043 tablolarından farklı bir tablo. Migration 043 tablolarını KAPSAMIYOR.
 
-Gap identified and closed by `LegacyImportTools.cs`:
+`LegacyImportTools.cs` tarafından belirlenen ve kapatılan boşluk:
 
-| Stored Procedure | MCP Tool | Status |
+| Stored Procedure | MCP Aracı | Durum |
 |---|---|---|
-| `import.SP_ImportLegacyPersons` | `ImportLegacyPersons` | CLOSED (new) |
-| `import.SP_GetImportSummary` | `GetLegacyImportSummary` | CLOSED (new) |
-| *(inline error inspection)* | `GetLegacyImportErrors` | CLOSED (new) |
+| `import.SP_ImportLegacyPersons` | `ImportLegacyPersons` | KAPANDI (yeni) |
+| `import.SP_GetImportSummary` | `GetLegacyImportSummary` | KAPANDI (yeni) |
+| *(satır içi hata incelemesi)* | `GetLegacyImportErrors` | KAPANDI (yeni) |
 
-Note: `import.SP_ImportLegacyContract` and `import.SP_ImportLegacyClaim` are
-not present in migration 043 — only `SP_ImportLegacyPersons` and
-`SP_GetImportSummary` exist. `GetLegacyImportErrors` uses direct SQL against
-the 3 staging tables for targeted error inspection without a dedicated SP.
+Not: `import.SP_ImportLegacyContract` ve `import.SP_ImportLegacyClaim`, migration
+043'te mevcut değil — yalnızca `SP_ImportLegacyPersons` ve `SP_GetImportSummary`
+mevcut. `GetLegacyImportErrors`, adanmış bir SP olmadan hedefli hata incelemesi için
+3 hazırlık tablosuna karşı doğrudan SQL kullanıyor.
 
-## Tool Registry Audit
+## Araç Kaydı Denetimi
 
-33 tool classes under `backend/src/YafesPars.McpServer/Tools/`:
+`backend/src/YafesPars.McpServer/Tools/` altında 33 araç sınıfı:
 
-| Class | `[McpServerToolType]` | Notes |
+| Sınıf | `[McpServerToolType]` | Notlar |
 |---|---|---|
 | AdminTools | ✅ | |
 | AuditQueryTools | ✅ | |
@@ -74,8 +75,8 @@ the 3 staging tables for targeted error inspection without a dedicated SP.
 | FinanceLedgerTools | ✅ | |
 | FinanceTools | ✅ | |
 | FsmaExportTools | ✅ | |
-| ImportTools | ✅ | targets `import.PolicyImport` (migration 030) |
-| LegacyImportTools | ✅ | NEW — targets `import.Legacy*` (migration 043) |
+| ImportTools | ✅ | `import.PolicyImport`'u hedefliyor (migration 030) |
+| LegacyImportTools | ✅ | YENİ — `import.Legacy*`'ı hedefliyor (migration 043) |
 | NotificationTools | ✅ | |
 | OperationalMonitoringTools | ✅ | |
 | OperationsTools | ✅ | |
@@ -92,39 +93,39 @@ the 3 staging tables for targeted error inspection without a dedicated SP.
 | TaskTools | ✅ | |
 | TenantManagementTools | ✅ | |
 
-All 33 classes carry `[McpServerToolType]`. DI registration is scanning-based
-(no explicit registration list), so adding a new class with the attribute is
-sufficient.
+33 sınıfın tamamı `[McpServerToolType]` taşıyor. DI kaydı tarama tabanlı
+(açık kayıt listesi yok), bu nedenle özelliğe sahip yeni bir sınıf eklemek yeterlidir.
 
-## Manifest `ssmsScripts` Contract Fix
+## Manifesto `ssmsScripts` Sözleşme Düzeltmesi
 
-`workbench-manifest.json` had `ssmsScripts` as a raw array, inconsistent with
-`migrations` and `validations` which are `{ count, latest, files }` objects.
+`workbench-manifest.json`'da `ssmsScripts`, `{ count, latest, files }` nesneleri
+olan `migrations` ve `validations`'la tutarsız şekilde ham dizi olarak yer alıyordu.
 
-Fixed in this session:
-- `ssmsScripts` → `{ "count": 24, "items": [...] }` in the manifest JSON
-- `update-ssms-workbench-manifest.ps1` — generator updated to produce `{ count, items }`
-- `test-sql-quality-gate.ps1` — consumer updated from `@($manifest.ssmsScripts).Count`
-  to `[int]$manifest.ssmsScripts.count`
-- `ssms-workbench-validation.yml` — CI updated from `manifest.ssmsScripts.length`
-  to `manifest.ssmsScripts.count`
+Bu oturumda düzeltildi:
+- `ssmsScripts` → manifesto JSON'da `{ "count": 24, "items": [...] }`
+- `update-ssms-workbench-manifest.ps1` — `{ count, items }` üretmek için oluşturucu
+  güncellendi
+- `test-sql-quality-gate.ps1` — tüketici `@($manifest.ssmsScripts).Count`'tan
+  `[int]$manifest.ssmsScripts.count`'a güncellendi
+- `ssms-workbench-validation.yml` — CI `manifest.ssmsScripts.length`'ten
+  `manifest.ssmsScripts.count`'a güncellendi
 
-## SQL Agent Security Fixes (`18__sql_agent_job_setup.sql`)
+## SQL Agent Güvenlik Düzeltmeleri (`18__sql_agent_job_setup.sql`)
 
-Two bugs found and fixed:
+İki hata bulundu ve düzeltildi:
 
-1. **Weak DEV guard** — Was `PRINT 'WARN...'` only; execution continued regardless.
-   Fixed to `RAISERROR(..., 16, 1) WITH LOG` + `RETURN` — script aborts if
-   `YAFES_SQL_DATABASE` does not contain DEV, TEST, or ACC.
+1. **Zayıf DEV koruması** — Yalnızca `PRINT 'WARN...'` idi; yürütme devam ediyordu.
+   `YAFES_SQL_DATABASE` DEV, TEST veya ACC içermiyorsa script sonlanacak şekilde
+   `RAISERROR(..., 16, 1) WITH LOG` + `RETURN` olarak düzeltildi.
 
-2. **Hard-coded database name in tenant lookup** — JOB 2 referenced
-   `YafesPars_Dev.core.Tenant` literally instead of using the SQLCMD variable.
-   Fixed to `sp_executesql` with dynamic SQL using `$(YAFES_SQL_DATABASE)`.
+2. **İş 2'de hard-coded veri tabanı adı** — JOB 2, SQLCMD değişkeni yerine
+   `YafesPars_Dev.core.Tenant`'a doğrudan referans veriyordu.
+   `$(YAFES_SQL_DATABASE)` kullanan dinamik SQL ile `sp_executesql`'e düzeltildi.
 
-## Track A Status (Environment-dependent — unchanged)
+## Track A Durumu (Ortama bağımlı — değişmedi)
 
-| Item | Status | Blocker |
+| Öğe | Durum | Engel |
 |---|---|---|
-| TEST/PROD access-review evidence | EVIDENCE_COLLECTION_PENDING | Needs real DB access |
-| TEST/PROD restore drill evidence | PLAN_READY | Needs real DB + 2 signatories |
-| SQL Agent DBA approval | SCRIPT_READY | Needs DBA sign-off |
+| TEST/PROD erişim inceleme kanıtı | KANIT_TOPLAMA_BEKLEMEDE | Gerçek DB erişimi gerekiyor |
+| TEST/PROD geri yükleme tatbikatı kanıtı | PLAN_HAZIR | Gerçek DB + 2 imzalı gerekiyor |
+| SQL Agent DBA onayı | SCRIPT_HAZIR | DBA imzası gerekiyor |

@@ -1,45 +1,45 @@
-# PROD Access Review Evidence
+# PROD Erişim İncelemesi Kanıtı
 
-**Environment:** PROD  
-**Status:** PENDING — BLOCKED BY PROD ACCESS  
-**Owner:** Deuterium12{MCK}  
-**Template version:** 2026-07-19
+**Ortam:** PROD  
+**Durum:** BEKLENİYOR — PROD ERİŞİMİ ENGELLENMIŞ  
+**Sorumlu:** Deuterium12{MCK}  
+**Şablon sürümü:** 2026-07-19
 
-> **IMPORTANT:** PROD access review may only be performed by named DBA or
-> authorized operator through an approved change-management window.
-> Evidence must be collected without reading or extracting PII from PROD.
+> **ÖNEMLİ:** PROD erişim incelemesi yalnızca onaylı değişiklik yönetimi penceresi
+> içinde yetkili DBA veya operatör tarafından yapılabilir.
+> Kanıt, PROD'dan KKB/PII çekilmeden toplanmalıdır.
 
 ---
 
-## Summary
+## Özet
 
-| Field | Value |
+| Alan | Değer |
 |---|---|
-| Environment | PROD |
-| Database | |
-| Review date/time UTC | |
-| Reviewer (named) | |
-| Approver (named) | |
-| Change management ticket | |
-| Commit SHA / release | |
-| Scripts used | `01__list_active_users.sql`, `02__role_permission_matrix.sql`, `03__segregation_of_duties_check.sql` |
+| Ortam | PROD |
+| Veritabanı | |
+| İnceleme tarihi/saati (UTC) | |
+| İnceleyen (adı) | |
+| Onaylayan (adı) | |
+| Değişiklik yönetimi bileti | |
+| Commit SHA / sürüm | |
+| Kullanılan scriptler | `01__list_active_users.sql`, `02__role_permission_matrix.sql`, `03__segregation_of_duties_check.sql` |
 
 ---
 
-## Active Users (counts only — do not record PII)
+## Aktif Kullanıcılar (yalnızca sayılar — PII kaydetmeyin)
 
-| Metric | Value |
+| Metrik | Değer |
 |---|---|
-| Total active users | |
-| Users with no role | (expected: 0) |
-| Users inactive > 90 days | (flag for removal) |
-| Tenants with active users | |
+| Toplam aktif kullanıcı | |
+| Rolsüz kullanıcı | (beklenen: 0) |
+| 90 günden uzun süredir pasif kullanıcı | (kaldırma için işaretle) |
+| Aktif kullanıcılı tenant sayısı | |
 
 ---
 
-## Role Permission Matrix
+## Rol-İzin Matrisi
 
-| Role | Permission count | Admin perms | Notes |
+| Rol | İzin sayısı | Admin izinleri | Notlar |
 |---|---|---|---|
 | SYSTEM_ADMIN | | | |
 | BROKER_ADMIN | | | |
@@ -48,45 +48,45 @@
 
 ---
 
-## Segregation of Duties
+## Görevler Ayrılığı
 
-| Check | Result | Approved exception? |
+| Kontrol | Sonuç | Onaylı istisna? |
 |---|---|---|
-| CLAIM_APPROVE + CLAIM_CLOSE same user | | |
-| PAYMENT_CREATE + PAYMENT_APPROVE same user | | |
+| CLAIM_APPROVE + CLAIM_CLOSE aynı kullanıcı | | |
+| PAYMENT_CREATE + PAYMENT_APPROVE aynı kullanıcı | | |
 
 ---
 
-## Role Review
+## Rol İncelemesi
 
-| Role | Expected owner | Approved use | Exception |
+| Rol | Beklenen sahip | Onaylı kullanım | İstisna |
 |---|---|---|---|
-| `SYSTEM_ADMIN` | Platform owner | Emergency/platform only | |
-| `BROKER_ADMIN` | Tenant admin | Broker administration | |
-| `BROKER_USER` | Daily operator | Daily broker work | |
-| `CLAIM_HANDLER` | Claims team | Claim handling | |
+| `SYSTEM_ADMIN` | Platform sahibi | Yalnızca acil/platform | |
+| `BROKER_ADMIN` | Tenant yöneticisi | Broker yönetimi | |
+| `BROKER_USER` | Günlük operatör | Günlük broker işlemleri | |
+| `CLAIM_HANDLER` | Hasar ekibi | Hasar işleme | |
 
 ---
 
-## PROD-Specific Controls
+## PROD'a Özgü Kontroller
 
-| Control | Status | Notes |
+| Kontrol | Durum | Notlar |
 |---|---|---|
-| No developer has SYSTEM_ADMIN in PROD | | |
-| Service accounts use least-privilege roles | | |
-| No shared passwords or credentials | | |
-| SQL logins use Windows Authentication or managed identity | | |
-| Audit trail enabled for all DML | | |
+| Hiçbir geliştiricinin PROD'da SYSTEM_ADMIN rolü yok | | |
+| Servis hesapları en az ayrıcalıklı rolleri kullanıyor | | |
+| Paylaşılan şifre veya kimlik bilgisi yok | | |
+| SQL girişleri Windows Kimlik Doğrulama veya yönetilen kimlik kullanıyor | | |
+| Tüm DML için denetim izi etkin | | |
 
 ---
 
-## Sign-Off (TWO SIGNATORIES REQUIRED FOR PROD)
+## İmza (PROD İÇİN İKİ İMZACI GEREKLİDİR)
 
-| Field | Value |
+| Alan | Değer |
 |---|---|
-| Access accepted | |
-| Exceptions accepted | |
-| Follow-up tasks | |
-| First signatory sign-off | |
-| Second signatory sign-off | |
-| Date | |
+| Erişim kabul edildi | |
+| İstisnalar kabul edildi | |
+| Takip görevleri | |
+| Birinci imzacı imzası | Deuterium12 <mcemkoca0@gmail.com> |
+| İkinci imzacı imzası | |
+| Tarih | |

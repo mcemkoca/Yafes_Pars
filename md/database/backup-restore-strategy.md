@@ -1,69 +1,67 @@
-# Backup And Restore Strategy
+# Yedek ve Geri Yükleme Stratejisi
 
-Yafes Pars relies on SQL Server native backup and restore practices. Backups
-must be planned before any production deployment.
+Yafes Pars, SQL Server'ın yerel yedek ve geri yükleme uygulamalarına dayanır. Yedekler
+herhangi bir üretim dağıtımından önce planlanmalıdır.
 
-## Objectives
+## Hedefler
 
-| Environment | RPO target | RTO target | Notes |
+| Ortam | RPO hedefi | RTO hedefi | Notlar |
 | --- | --- | --- | --- |
-| DEV | Best effort | Same day | Rebuild from migrations is acceptable. |
-| TEST | 24 hours | Same day | Restore drills should mirror PROD. |
-| PROD | Business-defined | Business-defined | Confirm with stakeholders before launch. |
+| DEV | Mümkün olan en iyi | Aynı gün | Migration'lardan yeniden oluşturma kabul edilebilir. |
+| TEST | 24 saat | Aynı gün | Geri yükleme tatbikatları PROD'u yansıtmalıdır. |
+| PROD | İş tanımlı | İş tanımlı | Başlatmadan önce paydaşlarla onaylayın. |
 
-RPO and RTO values above are placeholders until the business owner approves
-production targets.
+Yukarıdaki RPO ve RTO değerleri, iş sahibi üretim hedeflerini onaylayana kadar yer tutucudur.
 
-## Backup Types
+## Yedek Türleri
 
-- Full backup: baseline recovery point.
-- Differential backup: optional mid-cycle recovery point.
-- Transaction log backup: required when PROD uses full recovery model.
-- Pre-deployment backup: mandatory before production schema changes.
+- Tam yedek: temel kurtarma noktası.
+- Fark yedeği: isteğe bağlı döngü ortası kurtarma noktası.
+- İşlem günlüğü yedeği: PROD tam kurtarma modelini kullandığında zorunlu.
+- Dağıtım öncesi yedek: üretim schema değişikliklerinden önce zorunlu.
 
-## Recommended PROD Schedule
+## Önerilen PROD Zamanlaması
 
-| Backup | Frequency | Retention |
+| Yedek | Sıklık | Saklama |
 | --- | --- | --- |
-| Full | Daily | 14 to 35 days |
-| Differential | Every 4 to 6 hours | 7 to 14 days |
-| Transaction log | Every 15 to 30 minutes | 7 to 14 days |
-| Pre-deployment | Before each release | Keep through warranty period |
+| Tam | Günlük | 14 ila 35 gün |
+| Fark | 4 ila 6 saatte bir | 7 ila 14 gün |
+| İşlem günlüğü | 15 ila 30 dakikada bir | 7 ila 14 gün |
+| Dağıtım öncesi | Her sürümden önce | Garanti süresi boyunca sakla |
 
-Adjust frequency for approved RPO/RTO and database size.
+Sıklığı onaylanan RPO/RTO ve veri tabanı boyutuna göre ayarlayın.
 
-## Backup Storage
+## Yedek Depolama
 
-- Keep backup files outside repository folders.
-- Copy backup files off the SQL Server VM.
-- Protect storage with private access and role-based permissions.
-- Encrypt backups when the edition and policy support it.
-- Monitor backup job failure and backup age.
+- Yedek dosyalarını depo klasörlerinin dışında tutun.
+- Yedek dosyalarını SQL Server VM'inden dışarı kopyalayın.
+- Depolamayı özel erişim ve rol tabanlı izinlerle koruyun.
+- Sürüm ve politika desteklediğinde yedekleri şifreleyin.
+- Yedek işi başarısızlığını ve yedek yaşını izleyin.
 
-## Restore Drill
+## Geri Yükleme Tatbikatı
 
-Run a restore drill before production launch and after major release changes:
+Üretim başlatmadan ve büyük sürüm değişikliklerinden sonra geri yükleme tatbikatı çalıştırın:
 
-1. Restore the latest full backup to TEST or an isolated restore environment.
-2. Apply differential and log backups if used.
-3. Run validation scripts.
-4. Open the SSMS operator dashboard.
-5. Record restore start time, finish time, and validation status.
+1. En son tam yedeği TEST'e veya izole bir geri yükleme ortamına geri yükleyin.
+2. Kullanılıyorsa fark ve günlük yedeklerini uygulayın.
+3. Doğrulama script'lerini çalıştırın.
+4. SSMS operatör dashboard'unu açın.
+5. Geri yükleme başlangıç saatini, bitiş saatini ve doğrulama durumunu kaydedin.
 
-Record the result with `md/database/restore-drill-evidence-template.md`.
+Sonucu `md/database/restore-drill-evidence-template.md` ile kaydedin.
 
-## Pre-Deployment Backup
+## Dağıtım Öncesi Yedek
 
-Before a production migration:
+Üretim migration'ından önce:
 
-1. Confirm no long-running critical business process is active.
-2. Create a full backup.
-3. Verify the backup file exists and has a recent timestamp.
-4. Confirm it can be copied off the VM.
-5. Record the backup name in the execution log.
+1. Uzun süreli kritik iş sürecinin etkin olmadığını doğrulayın.
+2. Tam yedek oluşturun.
+3. Yedek dosyasının var olduğunu ve yakın zaman damgasına sahip olduğunu doğrulayın.
+4. VM'den dışarı kopyalanabildiğini doğrulayın.
+5. Yedek adını yürütme günlüğüne kaydedin.
 
-## Restore Decision Path
+## Geri Yükleme Karar Yolu
 
-Rollback by restore is an operational decision, not an automatic script action.
-The release owner, database owner, and business owner must agree before
-restoring PROD.
+Geri yüklemeyle rollback, otomatik bir script aksiyonu değil operasyonel bir karardır.
+PROD'u geri yüklemeden önce sürüm sahibi, veri tabanı sahibi ve iş sahibi anlaşmalıdır.

@@ -1,87 +1,87 @@
-# Azure Windows Server Deployment
+# Azure Windows Server Dağıtımı
 
-This guide defines the target Azure Windows Server deployment model for Yafes
-Pars while preserving the SSMS-first SQL Server operating model.
+Bu kılavuz, SSMS öncelikli SQL Server işletim modelini korurken Yafes Pars için
+hedef Azure Windows Server dağıtım modelini tanımlar.
 
-## Target Model
+## Hedef Model
 
-Yafes Pars is deployed as a SQL Server database core on a Windows Server virtual
-machine in Azure. SQL Server Management Studio remains the primary operator
-surface for deployment, validation, support, and controlled data operations.
+Yafes Pars, Azure'daki bir Windows Server sanal makinesinde SQL Server veri tabanı
+çekirdeği olarak dağıtılır. SQL Server Management Studio, dağıtım, doğrulama, destek
+ve kontrollü veri işlemleri için birincil operatör yüzeyi olarak kalmaya devam eder.
 
-The recommended production baseline is:
+Önerilen üretim temeli şöyledir:
 
-- Azure Windows Server VM joined to the organization network boundary.
-- SQL Server Developer for DEV, SQL Server Standard or Enterprise for TEST and
-  PROD according to licensing needs.
-- SQL Server Management Studio installed on admin workstations or a hardened
-  management VM.
-- Private network access only for SQL Server.
-- Azure Backup or SQL Server native backups stored outside the VM disk.
-- Windows Event Log, SQL Server Error Log, SQL Agent history, and backup logs
-  collected centrally.
+- Kuruluş ağ sınırına bağlı Azure Windows Server VM'i.
+- DEV için SQL Server Developer, lisans ihtiyaçlarına göre TEST ve PROD için SQL Server
+  Standard veya Enterprise.
+- SQL Server Management Studio, admin iş istasyonlarına veya sertleştirilmiş bir
+  yönetim VM'ine kurulur.
+- SQL Server için yalnızca özel ağ erişimi.
+- VM diskinin dışında depolanan Azure Backup veya SQL Server yerel yedekleri.
+- Windows Olay Günlüğü, SQL Server Hata Günlüğü, SQL Agent geçmişi ve yedek günlükleri
+  merkezi olarak toplanır.
 
-## Environment Layout
+## Ortam Düzeni
 
-| Environment | Purpose | Database name | Demo data | Access |
+| Ortam | Amaç | Veri tabanı adı | Demo veri | Erişim |
 | --- | --- | --- | --- | --- |
-| DEV | Developer validation and SSMS dry runs | `YafesPars_DEV` | Allowed | Engineering only |
-| TEST | Release rehearsal and UAT | `YafesPars_TEST` | Optional sanitized data | Engineering and test users |
-| PROD | Live business data | `YafesPars` | Not allowed | Restricted operations group |
+| DEV | Geliştirici doğrulama ve SSMS prova çalışmaları | `YafesPars_DEV` | İzinli | Yalnızca mühendislik |
+| TEST | Sürüm provası ve UAT | `YafesPars_TEST` | İsteğe bağlı temizlenmiş veri | Mühendislik ve test kullanıcıları |
+| PROD | Canlı iş verisi | `YafesPars` | İzin verilmez | Kısıtlı operasyon grubu |
 
-DEV and TEST can be rebuilt from migrations. PROD must be changed only through
-approved release execution.
+DEV ve TEST, migration'lardan yeniden oluşturulabilir. PROD yalnızca
+onaylı sürüm yürütmesiyle değiştirilebilir.
 
-## Azure Resource Baseline
+## Azure Kaynak Temeli
 
-| Resource | Baseline |
+| Kaynak | Temel |
 | --- | --- |
-| Resource group | One group per environment or clear environment tags. |
-| Virtual network | Private subnet for database VM. |
-| Network security group | Allow SQL only from approved admin/app subnets. |
-| VM disk | Premium SSD for data, log, and tempdb where possible. |
-| Backup storage | Separate storage account or Recovery Services vault. |
-| Monitoring | Azure Monitor plus SQL Server logs. |
-| Secrets | Stored in approved secret manager, never in repository files. |
+| Kaynak grubu | Ortam başına bir grup veya açık ortam etiketleri. |
+| Sanal ağ | Veri tabanı VM'i için özel alt ağ. |
+| Ağ güvenlik grubu | SQL'e yalnızca onaylı admin/uygulama alt ağlarından izin ver. |
+| VM diski | Mümkün olduğunda veri, günlük ve tempdb için Premium SSD. |
+| Yedek depolama | Ayrı depolama hesabı veya Kurtarma Hizmetleri kasası. |
+| İzleme | Azure Monitor artı SQL Server günlükleri. |
+| Secret'lar | Onaylı secret yöneticisinde saklanır, asla depo dosyalarında değil. |
 
-## SQL Server VM Layout
+## SQL Server VM Düzeni
 
-Use separate volumes when possible:
+Mümkün olduğunda ayrı birimler kullanın:
 
-- `C:` operating system and tools.
-- `D:` SQL Server data files.
-- `L:` SQL Server log files.
-- `T:` tempdb files.
-- `B:` local staging area for backups before off-VM copy.
+- `C:` işletim sistemi ve araçlar.
+- `D:` SQL Server veri dosyaları.
+- `L:` SQL Server günlük dosyaları.
+- `T:` tempdb dosyaları.
+- `B:` yedekler için VM dışına kopyalamadan önce yerel hazırlık alanı.
 
-If a smaller DEV VM uses fewer disks, keep the logical folder separation so the
-same runbooks still apply.
+Daha küçük bir DEV VM daha az disk kullanıyorsa, aynı runbook'ların
+hâlâ geçerli olması için mantıksal klasör ayrımını koruyun.
 
-## Network Rules
+## Ağ Kuralları
 
-- Disable public SQL Server exposure.
-- Prefer VPN, Bastion, private endpoint patterns, or a jump host.
-- Restrict TCP 1433 to approved source ranges.
-- Keep RDP restricted to admin sources and just-in-time access where available.
-- Record every temporary exception in the execution log.
+- SQL Server'a genel erişimi devre dışı bırakın.
+- VPN, Bastion, özel endpoint kalıpları veya bir atlama sunucusu tercih edin.
+- TCP 1433'ü onaylı kaynak aralıklarıyla kısıtlayın.
+- RDP'yi admin kaynaklarıyla ve mevcut olduğunda tam zamanında erişimle kısıtlı tutun.
+- Her geçici istisnayı yürütme günlüğüne kaydedin.
 
-## Deployment Flow
+## Dağıtım Akışı
 
-1. Provision the Windows Server VM.
-2. Install and patch SQL Server.
-3. Configure SQL Server service accounts and storage folders.
-4. Create the target database for the environment.
-5. Configure backup location and confirm SQL Server can write to it.
-6. Run `database/ssms/00__open_first_safety_check.sql` in SSMS.
-7. Run static quality gate from the repository.
-8. Run migrations `000` through `018` in order.
-9. Run validations `001` through `017` in order.
-10. Complete the production readiness checklist.
+1. Windows Server VM'ini sağlayın.
+2. SQL Server'ı kurun ve yamalayın.
+3. SQL Server hizmet hesaplarını ve depolama klasörlerini yapılandırın.
+4. Ortam için hedef veri tabanını oluşturun.
+5. Yedek konumunu yapılandırın ve SQL Server'ın yazabildiğini doğrulayın.
+6. SSMS'de `database/ssms/00__open_first_safety_check.sql` çalıştırın.
+7. Depodan statik kalite kapısını çalıştırın.
+8. Migration'ları `000`'dan `018`'e sırasıyla çalıştırın.
+9. Doğrulamaları `001`'den `017`'ye sırasıyla çalıştırın.
+10. Üretim hazırlık kontrol listesini tamamlayın.
 
-## Production Guardrails
+## Üretim Koruyucuları
 
-- Do not run demo seed `018__seed_demo_data.sql` in PROD.
-- Do not run rollback scripts without a separate approval record.
-- Do not store passwords, tokens, connection strings, or backup files in Git.
-- Do not change migration numbers `000` through `018`.
-- New forward migrations must start at `019`.
+- PROD'da demo seed `018__seed_demo_data.sql` çalıştırmayın.
+- Ayrı bir onay kaydı olmadan rollback script'lerini çalıştırmayın.
+- Git'te parola, token, bağlantı dizesi veya yedek dosyaları saklamayın.
+- `000`'dan `018`'e migration numaralarını değiştirmeyin.
+- Yeni ileri migration'lar `019`'dan başlamalıdır.

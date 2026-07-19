@@ -1,34 +1,34 @@
-# Delivery Gap Register
+# Teslimat Boşluk Kaydı
 
-Use this screen after commit, PR, or customer review when the question is:
-what is closed, what is superseded, and what still needs owner or environment
-evidence?
+Commit, PR veya müşteri incelemesinin ardından şu soru gündeme geldiğinde bu
+ekranı kullanın: ne kapandı, ne geçersiz kaldı ve hangileri hâlâ sahip veya
+ortam kanıtı gerektiriyor?
 
-## Open
+## Açma
 
 ```text
 database/ssms/16__delivery_gap_register.sql
 ```
 
-Enable `Query > SQLCMD Mode`, confirm the database name contains `DEV`, then run
-the script.
+`Query > SQLCMD Mode` etkinleştirin, veri tabanı adının `DEV` içerdiğini doğrulayın,
+ardından script'i çalıştırın.
 
-## Read The Grids
+## Izgaraları Okuma
 
-1. `01 - Delivery review context` confirms tenant, database, table count, and
-   migration count.
-2. `02 - Current implementation signals` shows real database readiness:
-   108-table model, migration ledger, procedure bridge coverage, and planned
-   019+ areas.
-3. `03 - Procedure-backed bridge readiness` confirms daily create/link/close
-   workflows are procedure-backed.
-4. `04 - Delivery gap register` is the open work list.
-5. `05 - Listed commit review closure` maps the reviewed commits to current
-   product status.
-6. `06 - Recommended next SSMS actions` tells the operator which SSMS script or
-   evidence template to open next.
+1. `01 - Teslimat inceleme bağlamı`, tenant, veri tabanı, tablo sayısı ve
+   migration sayısını doğrular.
+2. `02 - Mevcut uygulama sinyalleri`, gerçek veri tabanı hazırlığını gösterir:
+   108 tablo modeli, migration deftesi, prosedür bridge kapsamı ve planlanan
+   019+ alanları.
+3. `03 - Prosedür destekli bridge hazırlığı`, günlük oluşturma/bağlantı/kapanış
+   iş akışlarının prosedür destekli olduğunu doğrular.
+4. `04 - Teslimat boşluk kaydı`, açık iş listesidir.
+5. `05 - Listelenen commit inceleme kapanması`, incelenen commit'leri mevcut ürün
+   durumuna eşler.
+6. `06 - Önerilen sonraki SSMS aksiyonları`, operatöre hangi SSMS script'ini veya
+   kanıt şablonunu açacağını söyler.
 
-## Operator Rule
+## Operatör Kuralı
 
-Do not create finance, import/export, product, or entity-note tables from this
-screen. Those require owner-approved forward migration `019+`.
+Bu ekrandan finans, içe/dışa aktarma, ürün veya varlık notu tabloları oluşturmayın.
+Bunlar, sahip onaylı ileri migration `019+` gerektirir.

@@ -1,18 +1,19 @@
-# Data Entry Bridge
+# Veri Girişi Bridge'i
 
-## Purpose
+## Amaç
 
-Create records through stored procedures instead of direct table edits.
+Doğrudan tablo düzenlemeleri yerine stored procedure'ler aracılığıyla kayıt
+oluşturun.
 
-## Main Script
+## Ana Script
 
-Use:
+Kullanın:
 
 ```text
 database/ssms/07__data_entry_bridge_templates.sql
 ```
 
-## Supported Actions
+## Desteklenen Aksiyonlar
 
 - `CREATE_NATURAL_PERSON`
 - `CREATE_POLICY`
@@ -26,23 +27,25 @@ database/ssms/07__data_entry_bridge_templates.sql
 - `ADD_TASK_COMMENT`
 - `ADD_TASK_REMINDER`
 
-## Safe Create Flow
+## Güvenli Oluşturma Akışı
 
-1. Set `ACTION_NAME`.
-2. Keep `EXECUTE_ACTION = 0`.
-3. Fill only the variables for the selected action.
-4. Execute and inspect preview result sets.
-5. Fix missing or invalid lookup values.
-6. Set `EXECUTE_ACTION = 1`.
-7. Execute again.
-8. Copy the returned ID into the next template if needed.
+1. `ACTION_NAME`'i ayarlayın.
+2. `EXECUTE_ACTION = 0` tutun.
+3. Yalnızca seçilen aksiyon için değişkenleri doldurun.
+4. Çalıştırın ve önizleme sonuç kümelerini inceleyin.
+5. Eksik veya geçersiz arama değerlerini düzeltin.
+6. `EXECUTE_ACTION = 1` ayarlayın.
+7. Tekrar çalıştırın.
+8. Gerekirse döndürülen ID'yi bir sonraki şablona kopyalayın.
 
-## Info Tips
+## Bilgi İpuçları
 
-- Procedure-based creates enforce tenant and key rules better than ad hoc inserts.
-- If a lookup validation says `MISSING`, do not execute.
-- Do not run multiple create actions by editing the script body; use `ACTION_NAME`.
-- For vehicle policies, create or search the vehicle first, then copy
-  `created_insurable_object_id` into `ADD_POLICY_OBJECT`.
-- For task follow-up, create the task first, then copy `created_task_id` into
-  `ADD_TASK_COMMENT` or `ADD_TASK_REMINDER`.
+- Prosedür tabanlı oluşturmalar, geçici INSERT'lere göre tenant ve anahtar
+  kurallarını daha iyi uygular.
+- Bir arama doğrulaması `EKSİK` diyorsa yürütmeyin.
+- Script gövdesini düzenleyerek birden fazla oluşturma aksiyonu çalıştırmayın;
+  `ACTION_NAME` kullanın.
+- Araç poliçeleri için önce aracı oluşturun veya arayın, ardından
+  `created_insurable_object_id`'yi `ADD_POLICY_OBJECT`'e kopyalayın.
+- Görev takibi için önce görevi oluşturun, ardından `created_task_id`'yi
+  `ADD_TASK_COMMENT` veya `ADD_TASK_REMINDER`'a kopyalayın.

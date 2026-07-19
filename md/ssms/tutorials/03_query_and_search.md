@@ -1,36 +1,37 @@
-# Query And Search
+# Sorgulama ve Arama
 
-## Purpose
+## Amaç
 
-Find records safely before using create/edit templates.
+Oluşturma/düzenleme şablonlarını kullanmadan önce kayıtları güvenle bulun.
 
-## Main Script
+## Ana Script
 
-Use:
+Kullanın:
 
 ```text
 database/ssms/06__query_library_shortcuts.sql
 ```
 
-## Common Workflow
+## Yaygın İş Akışı
 
-1. Set `TENANT_CODE`.
-2. Set `SEARCH_TEXT` if you are looking for a specific person, institution, or vehicle.
-3. Execute the script.
-4. Copy IDs from Results Grid into data entry or editing bridge scripts.
+1. `TENANT_CODE`'u ayarlayın.
+2. Belirli bir kişi, kuruluş veya araç arıyorsanız `SEARCH_TEXT`'i ayarlayın.
+3. Script'i çalıştırın.
+4. Results Grid'den ID'leri kopyalayarak veri girişi veya düzenleme bridge
+   script'lerine yapıştırın.
 
-## Search Sections
+## Arama Bölümleri
 
-- Customers: `person.SP_SearchPerson`
-- Institutions: `institution.SP_SearchInstitution`
-- Vehicles: `risk.SP_SearchVehicle`
-- Recent policies: `policy.VW_PolicyDashboard`
-- Open claims: `claim.VW_ClaimDashboard`
-- Open tasks: `tasking.VW_OpenTaskDashboard`
-- Lookup helper: status, domain, priority, and workflow values
+- Müşteriler: `person.SP_SearchPerson`
+- Kurumlar: `institution.SP_SearchInstitution`
+- Araçlar: `risk.SP_SearchVehicle`
+- Son poliçeler: `policy.VW_PolicyDashboard`
+- Açık hasarlar: `claim.VW_ClaimDashboard`
+- Açık görevler: `tasking.VW_OpenTaskDashboard`
+- Arama yardımcısı: durum, domain, öncelik ve iş akışı değerleri
 
-## Info Tips
+## Bilgi İpuçları
 
-- Never type GUIDs manually when you can copy from the Results Grid.
-- Use `TOP_ROWS` to limit large result sets.
-- Search first, edit second.
+- Results Grid'den kopyalayabilecekken GUID'leri elle yazmayın.
+- Büyük sonuç kümelerini sınırlamak için `TOP_ROWS` kullanın.
+- Önce arayın, sonra düzenleyin.

@@ -1,94 +1,93 @@
-# SSMS Corporate Dashboard Plan
+# SSMS Kurumsal Dashboard Planı
 
-## Objective
+## Hedef
 
-Create a full corporate operator experience inside SQL Server Management Studio
-without turning the product into a web application. The dashboard must preserve
-SSMS Query Editor, Results Grid, Messages, SQLCMD Mode, and script-based
-operations.
+Ürünü bir web uygulamasına dönüştürmeksizin SQL Server Management Studio içinde
+tam kurumsal operatör deneyimi oluşturun. Dashboard, SSMS Query Editor, Results Grid,
+Messages, SQLCMD Mode ve script tabanlı operasyonları korumalıdır.
 
-## Dashboard Principles
+## Dashboard İlkeleri
 
-- SSMS remains the primary interface.
-- Every workflow starts with DEV context verification.
-- Read-only dashboards are separate from mutation scripts.
-- Data entry goes through stored procedure bridges.
-- Data editing uses rollback-by-default guardrails.
-- Every result set includes clear labels and `info_tip` guidance where useful.
-- Operators copy IDs from Results Grid instead of typing GUIDs.
-- Reports return chart-ready grids for Excel/Power BI export.
+- SSMS birincil arayüz olmaya devam eder.
+- Her iş akışı DEV bağlamı doğrulamasıyla başlar.
+- Salt okunur dashboard'lar, mutasyon script'lerinden ayrıdır.
+- Veri girişi stored procedure bridge'lerinden geçer.
+- Veri düzenleme önce rollback bariyer kalıpları kullanır.
+- Her sonuç kümesi, faydalı olduğunda net etiketler ve `info_tip` rehberliği içerir.
+- Operatörler, GUID yazmaları yerine Results Grid'den ID kopyalar.
+- Raporlar Excel/Power BI dışa aktarımı için grafiğe hazır ızgaralar döndürür.
 
-## Dashboard Areas
+## Dashboard Alanları
 
-| Area | Script | Purpose |
+| Alan | Script | Amaç |
 | --- | --- | --- |
-| Home | `05__operator_dashboard_home.sql` | Shortcuts, context, health, next actions. |
-| Architecture | `11__schema_working_logic_map.sql` | Domain groups, subheadings, control flow, and board cards. |
-| Catalog | `12__table_catalog_and_relationships.sql` | Full table catalog, root tables, and foreign-key relationship map. |
-| Visual Board | `13__visual_workflow_board.sql` | SSMS-safe node, edge, subheading, and template-route grids. |
-| Daily | `10__daily_operator_checklist.sql` | PASS/REVIEW/ACTION checklist. |
-| Operations | `02__operations_dashboard.sql` | Customer, policy, claim, document, task, coverage overview. |
-| Search | `06__query_library_shortcuts.sql` | Find records and copy IDs. |
-| Entry | `07__data_entry_bridge_templates.sql` | Preview-first create actions. |
-| Edit | `08__data_editing_guardrails.sql` | Rollback-by-default updates. |
-| Reports | `09__graph_report_pack.sql` | Chart/export-ready result sets. |
-| Audit | `04__admin_security_audit_queries.sql` | RBAC, audit, trigger, and integrity checks. |
-| Admin | `14__admin_role_permission_matrix.sql` | Role coverage, permission matrix, user assignments, least-privilege checks, and handoff rows. |
-| Monitoring | `15__monitoring_and_job_readiness.sql` | DEV health, backlog, backup visibility, SQL Agent observed jobs, and DBA handoff rows. |
-| Delivery | `16__delivery_gap_register.sql` | Commit review closure, unfinished delivery gaps, owner blockers, and next SSMS actions. |
-| Closure | `17__remaining_work_cockpit.sql` | Owner evidence, 019+ decision intake, bridge ranking, SQL Agent promotion, and release closure gates. |
+| Ana Sayfa | `05__operator_dashboard_home.sql` | Kısayollar, bağlam, sağlık, sonraki aksiyonlar. |
+| Mimari | `11__schema_working_logic_map.sql` | Domain grupları, alt başlıklar, kontrol akışı ve board kartları. |
+| Katalog | `12__table_catalog_and_relationships.sql` | Tam tablo kataloğu, kök tablolar ve yabancı anahtar ilişki haritası. |
+| Görsel Board | `13__visual_workflow_board.sql` | SSMS güvenli düğüm, kenar, alt başlık ve şablon rota ızgaraları. |
+| Günlük | `10__daily_operator_checklist.sql` | BAŞARILI/GÖZDEN GEÇİR/AKSIYON kontrol listesi. |
+| Operasyonlar | `02__operations_dashboard.sql` | Müşteri, poliçe, hasar, belge, görev, teminat genel bakışı. |
+| Arama | `06__query_library_shortcuts.sql` | Kayıt bulma ve ID kopyalama. |
+| Giriş | `07__data_entry_bridge_templates.sql` | Önizleme öncelikli oluşturma aksiyonları. |
+| Düzenleme | `08__data_editing_guardrails.sql` | Önce rollback güncellemeleri. |
+| Raporlar | `09__graph_report_pack.sql` | Grafik/dışa aktarıma hazır sonuç kümeleri. |
+| Denetim | `04__admin_security_audit_queries.sql` | RBAC, denetim, trigger ve bütünlük kontrolleri. |
+| Admin | `14__admin_role_permission_matrix.sql` | Rol kapsamı, izin matrisi, kullanıcı atamaları, en az ayrıcalık kontrolleri ve devir satırları. |
+| İzleme | `15__monitoring_and_job_readiness.sql` | DEV sağlığı, biriktirme, yedek görünürlüğü, SQL Agent gözlemlenen işleri ve DBA devir satırları. |
+| Teslimat | `16__delivery_gap_register.sql` | Commit inceleme kapanması, bitmemiş teslimat boşlukları, sahip engelleyicileri ve sonraki SSMS aksiyonları. |
+| Kapanış | `17__remaining_work_cockpit.sql` | Sahip kanıtı, 019+ karar alımı, bridge sıralaması, SQL Agent terfisi ve sürüm kapanış kapıları. |
 
-## Shortcut Model
+## Kısayol Modeli
 
-SSMS cannot provide native clickable app-style buttons inside Results Grid.
-The dashboard therefore returns a shortcut catalog with:
+SSMS, Results Grid içinde yerel tıklanabilir uygulama stili düğmeler sağlayamaz.
+Dashboard bu nedenle şunları içeren bir kısayol kataloğu döndürür:
 
-- shortcut order
-- group
-- action name
-- script path
-- safety mode
-- info tip
+- kısayol sırası
+- grup
+- aksiyon adı
+- script yolu
+- güvenlik modu
+- bilgi ipucu
 
-Operators open the listed script in a new SSMS tab.
+Operatörler listelenen script'i yeni bir SSMS sekmesinde açar.
 
-## User-Friendly Flow
+## Kullanıcı Dostu Akış
 
-1. Open dashboard home.
-2. Review the working logic map when learning or planning changes.
-3. Open the visual workflow board to review node/edge and template-route grids.
-4. Open the table catalog before creating new tables or bridge flows.
-5. Run daily checklist.
-6. Search record and copy IDs.
-7. Use bridge template for creates.
-8. Use guardrail template for updates.
-9. Review role/permission matrix before access changes.
-10. Run audit checks.
-11. Review monitoring and SQL Agent readiness before DBA handoff.
-12. Review the delivery gap register after PR/commit or customer review.
-13. Open the remaining work cockpit to assign owner evidence, 019+ decisions, edge bridge ranking, and DBA handoff.
-14. Export report pack grids when needed.
+1. Dashboard ana sayfasını açın.
+2. Öğrenirken veya değişiklikler planlarken çalışma mantık haritasını inceleyin.
+3. Düğüm/kenar ve şablon rota ızgaralarını incelemek için görsel iş akışı board'unu açın.
+4. Yeni tablo veya bridge akışları oluşturmadan önce tablo kataloğunu açın.
+5. Günlük kontrol listesini çalıştırın.
+6. Kaydı arayın ve ID kopyalayın.
+7. Oluşturmalar için bridge şablonu kullanın.
+8. Güncellemeler için bariyer şablonu kullanın.
+9. Erişim değişikliklerinden önce rol/izin matrisini inceleyin.
+10. Denetim kontrollerini çalıştırın.
+11. DBA deviri öncesinde izleme ve SQL Agent hazırlığını inceleyin.
+12. PR/commit veya müşteri incelemesinden sonra teslimat boşluk kaydını inceleyin.
+13. Sahip kanıtını, 019+ kararlarını, kenar bridge sıralamasını ve DBA devirini
+    atamak için kalan iş kokpitini açın.
+14. Gerektiğinde rapor paketi ızgaralarını dışa aktarın.
 
-## Future Enhancements
+## Gelecekteki Geliştirmeler
 
-- Add stored procedures for more guided create/edit actions.
-- Extend `13__visual_workflow_board.sql` with owner-approved department routes
-  after real operator usage is observed.
-- Add specialized report packs by department.
-- Add TEST/PROD access-review evidence from `14__admin_role_permission_matrix.sql`.
-- Use `16__delivery_gap_register.sql` as the visible SSMS control point for
-  open P0-P3 delivery items.
-- Use `17__remaining_work_cockpit.sql` to convert open P0-P3 items into
-  evidence, owner decision, bridge ranking, and DBA handoff workstreams.
-- Convert monitoring result sets into approved SQL Agent jobs after DEV/TEST
-  owners and schedules are confirmed.
-- Add standard SSMS registered-server instructions.
-- Add Power BI template consuming report pack exports.
-- Extend the production readiness checklist with real restore drill evidence,
-  monitoring owners, and SQL Agent maintenance jobs after DEV/TEST execution is
-  validated.
+- Daha fazla kılavuzlu oluşturma/düzenleme aksiyonu için stored procedure'ler ekleyin.
+- Gerçek operatör kullanımı gözlemlendikten sonra sahip onaylı departman rotalarıyla
+  `13__visual_workflow_board.sql`'i genişletin.
+- Departman başına özel rapor paketleri ekleyin.
+- `14__admin_role_permission_matrix.sql`'den TEST/PROD erişim inceleme kanıtı ekleyin.
+- Açık P0-P3 teslimat öğeleri için görünür SSMS kontrol noktası olarak
+  `16__delivery_gap_register.sql` kullanın.
+- Açık P0-P3 öğelerini kanıt, sahip kararı, bridge sıralaması ve DBA devir
+  iş akışlarına dönüştürmek için `17__remaining_work_cockpit.sql` kullanın.
+- DEV/TEST sahipleri ve zamanlamaları onaylandıktan sonra izleme sonuç kümelerini
+  onaylı SQL Agent işlerine dönüştürün.
+- Standart SSMS kayıtlı sunucu talimatları ekleyin.
+- Rapor paketi dışa aktarımlarını tüketen Power BI şablonu ekleyin.
+- DEV/TEST yürütmesi doğrulandıktan sonra üretim hazırlık kontrol listesini gerçek
+  geri yükleme tatbikatı kanıtı, izleme sahipleri ve SQL Agent bakım işleriyle genişletin.
 
-## Corporate Readiness Links
+## Kurumsal Hazırlık Bağlantıları
 
 - `../database/ssms-deployment-runbook.md`
 - `../database/environment-matrix.md`

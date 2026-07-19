@@ -1,86 +1,86 @@
-# Production Readiness Checklist
+# Üretim Hazırlık Kontrol Listesi
 
-Use this checklist before declaring Yafes Pars ready for a production SQL Server
-environment. Items marked ✅ are verified in the current repository state.
+Yafes Pars'ı üretim SQL Server ortamı için hazır ilan etmeden önce bu kontrol
+listesini kullanın. ✅ ile işaretlenmiş öğeler mevcut depo durumunda doğrulanmıştır.
 
-## Repository
+## Depo
 
-- ✅ Migration order `000` through `018` is unchanged (49 migrations total, up to `048`)
-- ✅ Any new migrations start at `019`
-- ✅ Static SQL quality gate passes (CI green)
-- ✅ SQL Server validation workflow passes (CI green)
-- ✅ SSMS workbench validation workflow passes (CI green)
-- ✅ Backend build and integration tests pass (CI green)
-- ✅ README links to deployment, security, backup, and runbook documents
-- ✅ Table reconciliation `89 vs 108 vs 144` accepted (`md/database/table-reconciliation-89-vs-108.md`)
-- ✅ No secrets, tokens, connection strings, backups, or production data in the repository
+- ✅ `000`'dan `018`'e migration sırası değişmedi (toplam 49 migration, `048`'e kadar)
+- ✅ Tüm yeni migration'lar `019`'dan başlıyor
+- ✅ Statik SQL kalite kapısı geçiyor (CI yeşil)
+- ✅ SQL Server doğrulama iş akışı geçiyor (CI yeşil)
+- ✅ SSMS çalışma tezgahı doğrulama iş akışı geçiyor (CI yeşil)
+- ✅ Backend derlemesi ve entegrasyon testleri geçiyor (CI yeşil)
+- ✅ README, dağıtım, güvenlik, yedek ve runbook belgelerine bağlantı veriyor
+- ✅ Tablo mutabakatı `89 vs 108 vs 144` kabul edildi (`md/database/table-reconciliation-89-vs-108.md`)
+- ✅ Depoda secret, token, bağlantı dizesi, yedek veya üretim verisi yok
 
-## Database Schema
+## Veri Tabanı Schema'sı
 
-- ✅ 15 domain schemas: core, ref, person, institution, risk, policy, coverage, claim, document, tasking, audit, finance, import, communication, assurance
-- ✅ 144 tables (49 migrations)
-- ✅ Schemas, constraints, indexes, triggers, views, procedures, seed data validated in DEV
-- ✅ Tenant-aware query and mutation paths verified (all SP bridges include tenant_id check)
-- ✅ RBAC seed data reviewed (4 roles, permission matrix in `14__admin_role_permission_matrix.sql`)
-- ✅ Audit triggers verified (`011__create_audit_domain.sql`)
-- [ ] TEST rehearsal completed without manual script edits → `md/reports/test-migration-evidence.md`
-- [ ] `018__seed_demo_data.sql` excluded from PROD run
+- ✅ 15 domain schema'sı: core, ref, person, institution, risk, policy, coverage, claim, document, tasking, audit, finance, import, communication, assurance
+- ✅ 144 tablo (49 migration)
+- ✅ Schema'lar, kısıtlamalar, indeksler, trigger'lar, view'lar, procedure'lar, seed verisi DEV'de doğrulandı
+- ✅ Tenant farkında sorgu ve mutasyon yolları doğrulandı (tüm SP bridge'ler tenant_id kontrolü içeriyor)
+- ✅ RBAC seed verisi incelendi (4 rol, `14__admin_role_permission_matrix.sql`'de izin matrisi)
+- ✅ Denetim trigger'ları doğrulandı (`011__create_audit_domain.sql`)
+- [ ] TEST provası manuel script düzenlemeleri olmadan tamamlandı → `md/reports/test-migration-evidence.md`
+- [ ] `018__seed_demo_data.sql` PROD çalışmasından hariç tutuldu
 
-## MCP Tools (Backend)
+## MCP Araçları (Backend)
 
-- ✅ 33 MCP tool classes, all `[McpServerToolType]` (see `md/reports/mcp-gap-analysis.md`)
-- ✅ Renewal pipeline tools: GetRenewalQueue, ProcessRenewal, SendRenewalNotices, GetRenewalMetrics
-- ✅ Premium calculator tools: CalculatePremium, GetPremiumSummary, GetTariffRates, UpsertTariffRate
-- ✅ Legacy import tools: ImportLegacyPersons, GetLegacyImportSummary, GetLegacyImportErrors
-- ✅ Export job tools: StageImportRows, ValidateImportBatch, GetImportBatchStatus (+ bridge actions)
-- ✅ JWT tenant-scoped reads; production JWT authority/audience required
+- ✅ 33 MCP araç sınıfı, hepsi `[McpServerToolType]` (bkz. `md/reports/mcp-gap-analysis.md`)
+- ✅ Yenileme pipeline araçları: GetRenewalQueue, ProcessRenewal, SendRenewalNotices, GetRenewalMetrics
+- ✅ Prim hesaplama araçları: CalculatePremium, GetPremiumSummary, GetTariffRates, UpsertTariffRate
+- ✅ Eski içe aktarma araçları: ImportLegacyPersons, GetLegacyImportSummary, GetLegacyImportErrors
+- ✅ Dışa aktarma işi araçları: StageImportRows, ValidateImportBatch, GetImportBatchStatus (+ bridge aksiyonları)
+- ✅ JWT tenant kapsamlı okumalar; üretim JWT otorite/kitle zorunlu
 
-## SSMS Bridge Templates
+## SSMS Bridge Şablonları
 
-- ✅ 22 PREVIEW_FIRST bridge actions in `07__data_entry_bridge_templates.sql`
-- ✅ Full write coverage: person, legal person, policy, version, party, object, vehicle, real estate, coverage item, claim, settlement, reserve, task, comment, reminder, document, payment, payment plan, export job
-- ✅ DEV guard (DB_NAME LIKE '%DEV%') on all SSMS scripts
+- ✅ `07__data_entry_bridge_templates.sql`'de 22 PREVIEW_FIRST bridge aksiyonu
+- ✅ Tam yazma kapsamı: kişi, tüzel kişi, poliçe, versiyon, taraf, nesne, araç, gayrimenkul, teminat kalemi, hasar, uzlaşma, rezerv, görev, yorum, hatırlatıcı, belge, ödeme, ödeme planı, dışa aktarma işi
+- ✅ Tüm SSMS script'lerinde DEV koruması (DB_NAME LIKE '%DEV%')
 
-## Operations
+## Operasyonlar
 
-- ✅ Azure Windows Server deployment architecture documented
-- ✅ SQL Server installation checklist documented
-- ✅ Backup and restore strategy documented
-- ✅ DEV restore drill completed (`md/reports/restore-drill-evidence-dev-2026-06-04.md`)
-- ✅ DEV access review completed (`md/reports/access-review-evidence-dev-2026-06-04.md`)
-- ✅ SSMS deployment runbook available (`md/database/ssms-deployment-runbook.md`)
-- ✅ Migration execution log template available
-- ✅ SQL Agent setup script hardened (`18__sql_agent_job_setup.sql`)
-- [ ] SQL Agent DBA approval signed → `md/reports/sql-agent-dba-approval.md`
-- [ ] TEST restore drill completed → `md/reports/test-restore-drill-report.md`
-- [ ] TEST access review signed → `md/reports/access-review-evidence-test.md`
-- [ ] TEST migration evidence collected → `md/reports/test-migration-evidence.md`
-- [ ] Monitoring owner assigned
-- [ ] `15__monitoring_and_job_readiness.sql` reviewed in TEST
+- ✅ Azure Windows Server dağıtım mimarisi belgelendi
+- ✅ SQL Server kurulum kontrol listesi belgelendi
+- ✅ Yedek ve geri yükleme stratejisi belgelendi
+- ✅ DEV geri yükleme tatbikatı tamamlandı (`md/reports/restore-drill-evidence-dev-2026-06-04.md`)
+- ✅ DEV erişim incelemesi tamamlandı (`md/reports/access-review-evidence-dev-2026-06-04.md`)
+- ✅ SSMS dağıtım runbook'u mevcut (`md/database/ssms-deployment-runbook.md`)
+- ✅ Migration yürütme günlüğü şablonu mevcut
+- ✅ SQL Agent kurulum script'i güçlendirildi (`18__sql_agent_job_setup.sql`)
+- [ ] SQL Agent DBA onayı imzalandı → `md/reports/sql-agent-dba-approval.md`
+- [ ] TEST geri yükleme tatbikatı tamamlandı → `md/reports/test-restore-drill-report.md`
+- [ ] TEST erişim incelemesi imzalandı → `md/reports/access-review-evidence-test.md`
+- [ ] TEST migration kanıtı toplandı → `md/reports/test-migration-evidence.md`
+- [ ] İzleme sahibi atandı
+- [ ] `15__monitoring_and_job_readiness.sql` TEST'te incelendi
 
-## Security
+## Güvenlik
 
-- ✅ No environment files, tokens, or secrets in repository (artifact policy CI gate)
-- ✅ Credential rotation process documented (`md/database/security-hardening.md`)
-- [ ] SQL Server network access private and restricted on TEST/PROD
-- [ ] RDP access restricted on TEST/PROD
-- [ ] SQL logins and Windows groups follow least privilege (TEST evidence)
-- [ ] Secrets stored outside Git (verified in target environment)
-- [ ] Production support access auditable (two-signatory drill evidence)
+- ✅ Depoda ortam dosyası, token veya secret yok (eser politikası CI kapısı)
+- ✅ Kimlik bilgisi rotasyon süreci belgelendi (`md/database/security-hardening.md`)
+- [ ] TEST/PROD'da SQL Server ağ erişimi özel ve kısıtlı
+- [ ] TEST/PROD'da RDP erişimi kısıtlı
+- [ ] SQL girişleri ve Windows grupları en az ayrıcalığa uyuyor (TEST kanıtı)
+- [ ] Secret'lar Git dışında saklanıyor (hedef ortamda doğrulandı)
+- [ ] Üretim destek erişimi denetlenebilir (iki imzalı tatbikat kanıtı)
 
-## PROD-Specific Gates (after TEST passes)
+## PROD'a Özgü Kapılar (TEST geçtikten sonra)
 
-- [ ] PROD access review with two signatories → `md/reports/access-review-evidence-prod.md`
-- [ ] PROD restore drill with two signatories → `md/reports/prod-restore-drill-report.md`
-- [ ] Change management approval for PROD migration window
-- [ ] `018__seed_demo_data.sql` explicitly excluded from PROD migration run
-- [ ] PROD SQL Agent jobs created after DBA approval
+- [ ] İki imzalıyla PROD erişim incelemesi → `md/reports/access-review-evidence-prod.md`
+- [ ] İki imzalıyla PROD geri yükleme tatbikatı → `md/reports/prod-restore-drill-report.md`
+- [ ] PROD migration penceresi için değişiklik yönetimi onayı
+- [ ] `018__seed_demo_data.sql` açıkça PROD migration çalışmasından hariç tutuldu
+- [ ] PROD SQL Agent işleri DBA onayından sonra oluşturuldu
 
-## Go-Live Decision
+## Canlıya Geçiş Kararı
 
-Go-live is ready only when:
-1. All repository checks ✅
-2. TEST evidence complete (migration + access review + restore drill)
-3. SQL Agent DBA approval signed
-4. PROD evidence complete (access review + restore drill, two signatories each)
-5. Change management window approved
+Canlıya geçiş ancak şu koşullar sağlandığında hazırdır:
+1. Tüm depo kontrolleri ✅
+2. TEST kanıtı tamamlandı (migration + erişim incelemesi + geri yükleme tatbikatı)
+3. SQL Agent DBA onayı imzalandı
+4. PROD kanıtı tamamlandı (her biri iki imzalı erişim incelemesi + geri yükleme tatbikatı)
+5. Değişiklik yönetimi penceresi onaylandı

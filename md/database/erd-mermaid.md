@@ -1,6 +1,6 @@
 # ERD Mermaid
 
-## Cross-Domain Overview
+## Domain'ler Arası Genel Bakış
 
 ```mermaid
 erDiagram
@@ -68,7 +68,7 @@ erDiagram
     core_Role ||--o{ core_UserRole : assigned
 ```
 
-## Person And Institution
+## Person ve Institution
 
 ```mermaid
 erDiagram
