@@ -40,9 +40,8 @@ public sealed class ExportJobTests
             periodStart: new DateOnly(9997, 1, 1),
             periodEnd:   new DateOnly(9997, 12, 31));
 
-        Assert.DoesNotContain("error", res, StringComparison.OrdinalIgnoreCase);
-
         var doc = JsonDocument.Parse(res).RootElement;
+        Assert.False(doc.TryGetProperty("error", out _), $"Unexpected error: {res}");
         var jobId = doc.GetProperty("JobId").GetString();
         Assert.False(string.IsNullOrEmpty(jobId));
         Assert.Equal("PENDING", doc.GetProperty("StatusCode").GetString());
@@ -69,9 +68,9 @@ public sealed class ExportJobTests
             statusCode: "SUCCESS",
             rowCount:   42);
 
-        Assert.DoesNotContain("error", completeRes, StringComparison.OrdinalIgnoreCase);
-
+        // Parse response — must have StatusCode and RecordCount, not an error object
         var completeDoc = JsonDocument.Parse(completeRes).RootElement;
+        Assert.False(completeDoc.TryGetProperty("error", out _), $"Unexpected error: {completeRes}");
         Assert.Equal("SUCCESS", completeDoc.GetProperty("StatusCode").GetString());
         Assert.Equal(42, completeDoc.GetProperty("RecordCount").GetInt32());
     }
@@ -83,8 +82,8 @@ public sealed class ExportJobTests
 
         var res = await Jobs.GetExportJobQueue(limit: 10);
 
-        Assert.DoesNotContain("error", res, StringComparison.OrdinalIgnoreCase);
         var doc = JsonDocument.Parse(res).RootElement;
+        Assert.False(doc.TryGetProperty("error", out _), $"Unexpected error: {res}");
         Assert.True(doc.TryGetProperty("count", out _));
         Assert.True(doc.TryGetProperty("jobs", out _));
     }
