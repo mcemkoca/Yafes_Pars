@@ -166,7 +166,33 @@ public sealed class FinanceLedgerTools
         });
     }
 
+    [McpServerTool, Description(
+        "Vervallen facturen als OVERDUE markeren. / Vadesi geçmiş faturaları OVERDUE olarak işaretle.\n" +
+        "dryRun=true (standaard) toont hoeveel facturen worden bijgewerkt zonder te schrijven.\n" +
+        "dryRun=false voert de statuswijziging definitief door (ONOMKEERBAAR, audit trail aanwezig).")]
+    public async Task<string> MarkOverdueInvoices(
+        [Description("true = önizleme (yazar yok), false = gerçek işlem")] bool dryRun = true,
+        CancellationToken ct = default)
+    {
+        var rows = await _read.QueryAsync<OverdueResultRow>(
+            "finance.SP_MarkOverdueInvoices",
+            new { dry_run = dryRun ? 1 : 0 },
+            ct);
+
+        var row = rows.FirstOrDefault();
+        return JsonSerializer.Serialize(new
+        {
+            dryRun,
+            affected = row?.Affected ?? 0,
+            message  = dryRun
+                ? $"{row?.Affected ?? 0} facturen zouden OVERDUE worden (dryRun, geen schrijven)."
+                : $"{row?.Affected ?? 0} facturen bijgewerkt naar OVERDUE."
+        });
+    }
+
     // -------------------------------------------------------------------------
+    private sealed record OverdueResultRow(int Affected);
+
     private sealed record LedgerEntryRow(
         Guid     EntryId,
         Guid     JournalId,
