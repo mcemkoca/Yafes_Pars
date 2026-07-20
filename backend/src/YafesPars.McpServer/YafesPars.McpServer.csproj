@@ -13,7 +13,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="ModelContextProtocol" Version="0.1.0-preview.11" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.10" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.29.1" />
   </ItemGroup>
   <ItemGroup>
